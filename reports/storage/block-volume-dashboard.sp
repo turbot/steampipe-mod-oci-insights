@@ -344,7 +344,7 @@ report "oci_core_volume_dashboard" {
       sql = <<-EOQ
         select
           title as "volume",
-          current_timestamp - time_created as "Age in Days",
+          current_date - time_created::date as "Age in Days",
           compartment_id as "Compartment"
         from
           oci_core_volume
@@ -363,7 +363,7 @@ report "oci_core_volume_dashboard" {
       sql = <<-EOQ
         select
           title as "volume",
-          current_timestamp - time_created as "Age in Days",
+          current_date - time_created::date as "Age in Days",
           compartment_id as "Compartment"
         from
           oci_core_volume

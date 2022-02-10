@@ -166,9 +166,9 @@ query "oci_compute_instance_by_creation_month" {
 # Note the CTE uses the dailt table to be efficient when filtering,
 # and the hourly table to show granular line chart
 # Added
-query "ocu_compute_top10_cpu_past_week" {
+query "oci_compute_top10_cpu_past_week" {
   sql = <<-EOQ
-    with top_n as (
+     with top_n as (
     select
       id,
       avg(average)
@@ -258,21 +258,21 @@ report "oci_compute_instance_summary" {
       width = 2
     }
 
-    # counter {
-    #   sql   = query.oci_compute_unencrypted_instances_count.sql
-    #   width = 2
-    # }
+    counter {
+      sql   = query.oci_compute_unencrypted_instances_count.sql
+      width = 2
+    }
 
 
-  #  counter {
-  #     sql   = query.aws_ec2_instance_cost_last_30_counter.sql
-  #     width = 2
-  #   }
+   counter {
+      sql   = query.aws_ec2_instance_cost_last_30_counter.sql
+      width = 2
+    }
 
-  # counter {
-  #     sql   = query.aws_ec2_instance_cost_30_60_counter.sql
-  #     width = 2
-  #   }
+  counter {
+      sql   = query.aws_ec2_instance_cost_30_60_counter.sql
+      width = 2
+    }
 
 
     # chart {
@@ -355,7 +355,7 @@ report "oci_compute_instance_summary" {
 
     chart {
       title = "Top 10 CPU - Last 7 days [ needs to be a crosstab?]"
-      sql   = query.ocu_compute_top10_cpu_past_week.sql
+      sql   = query.oci_compute_top10_cpu_past_week.sql
       type  = "line"
       width = 6
     }
@@ -402,7 +402,7 @@ report "oci_compute_instance_summary" {
         sql   = <<-EOQ
           select
             title as "instance",
-            (current_date - time_created) as "Age in Days",
+            (current_date - time_created::date) as "Age in Days",
             compartment_id as "Compartment"
           from
             oci_core_instance
@@ -421,7 +421,7 @@ report "oci_compute_instance_summary" {
         sql   = <<-EOQ
           select
             title as "instance",
-            current_date - time_created as "Age in Days",
+            current_date - time_created::date as "Age in Days",
             compartment_id as "Compartment"
           from
             oci_core_instance
