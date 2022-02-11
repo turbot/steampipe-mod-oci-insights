@@ -241,22 +241,22 @@ report "oci_core_volume_dashboard" {
   container {
     ## Analysis ...
 
-    counter {
+    card {
       sql = query.oci_block_volume_count.sql
       width = 2
     }
 
-    counter {
+    card {
       sql = query.oci_block_volume_storage_total.sql
       width = 2
     }
 
-    counter {
+    card {
       sql = query.oci_block_volume_customer_managed_encrypted_volumes_count.sql
       width = 2
     }
 
-    counter {
+    card {
       sql = query.oci_block_volume_unattached_volumes_count.sql
       width = 2
     }

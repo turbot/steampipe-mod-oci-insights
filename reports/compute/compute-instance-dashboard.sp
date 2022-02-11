@@ -238,41 +238,41 @@ report "oci_compute_instance_summary" {
 
   container {
 
-    counter {
+    card {
       sql   = query.oci_compute_instance_count.sql
       width = 2
     }
 
-    counter {
+    card {
       sql   = query.oci_compute_instance_total_cores.sql
       width = 2
     }
 
-    counter {
+    card {
       sql   = query.oci_compute_instance_total_memory.sql
       width = 2
     }
 
-    counter {
+    card {
       sql   = query.oci_compute_instance_running_above_90_days.sql
       width = 2
     }
 
-    counter {
-      sql   = query.oci_compute_unencrypted_instances_count.sql
-      width = 2
-    }
+    # card {
+    #   sql   = query.oci_compute_unencrypted_instances_count.sql
+    #   width = 2
+    # }
 
 
-   counter {
-      sql   = query.aws_ec2_instance_cost_last_30_counter.sql
-      width = 2
-    }
+  #  card {
+  #     sql   = query.aws_ec2_instance_cost_last_30_counter.sql
+  #     width = 2
+  #   }
 
-  counter {
-      sql   = query.aws_ec2_instance_cost_30_60_counter.sql
-      width = 2
-    }
+  # card {
+  #     sql   = query.aws_ec2_instance_cost_30_60_counter.sql
+  #     width = 2
+  #   }
 
 
     # chart {
