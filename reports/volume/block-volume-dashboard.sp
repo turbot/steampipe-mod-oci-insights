@@ -34,7 +34,7 @@ query "oci_block_volume_unattached_volumes_count" {
   sql = <<-EOQ
    select
       count(*) as value,
-      'Unencrypted Volumes' as label,
+      'Unattached Volumes' as label,
       case count(*) when 0 then 'ok' else 'alert' end as style
     from 
       oci_core_volume
