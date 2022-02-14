@@ -1,7 +1,7 @@
 # Added to report
 query "oci_mysql_db_system_count" {
   sql = <<-EOQ
-    select count(*) as "MySQL DB Systems" from oci_mysql_db_system
+    select count(*) as "MySQL DB Systems" from oci_mysql_db_system where lifecycle_state <> 'DELETED'
   EOQ
 }
 
@@ -13,7 +13,7 @@ query "oci_mysql_db_system_analytics_cluster_attached_count" {
     from
       oci_mysql_db_system
     where
-      is_analytics_cluster_attached  
+      is_analytics_cluster_attached and lifecycle_state <> 'DELETED'
   EOQ
 }
 
@@ -25,7 +25,7 @@ query "oci_mysql_db_system_heat_wave_cluster_attached_count" {
     from
       oci_mysql_db_system
     where
-      is_heat_wave_cluster_attached  
+      is_heat_wave_cluster_attached and lifecycle_state <> 'DELETED'
   EOQ
 }
 
@@ -37,7 +37,7 @@ query "oci_mysql_db_system_automatic_backup_disabled_count" {
     from
       oci_mysql_db_system
     where
-      backup_policy ->> 'isEnabled' = 'false'
+      backup_policy ->> 'isEnabled' = 'false' and lifecycle_state <> 'DELETED'
   EOQ
 }
 
@@ -46,7 +46,9 @@ query "oci_mysql_db_system_by_region" {
   sql = <<-EOQ
     select region as "Region", count(*) as "MySQL DB Systems" 
     from 
-      oci_mysql_db_system 
+      oci_mysql_db_system
+    where
+      lifecycle_state <> 'DELETED'   
     group by 
       region 
     order by 
@@ -76,7 +78,7 @@ query "oci_mysql_db_system_by_compartment" {
       oci_mysql_db_system as d,
       compartments as c 
     where 
-      c.id = d.compartment_id
+      c.id = d.compartment_id and lifecycle_state <> 'DELETED'
     group by 
       compartment
     order by 
@@ -92,6 +94,8 @@ query "oci_mysql_db_system_by_state" {
       count(lifecycle_state)
     from
       oci_mysql_db_system
+    where
+      lifecycle_state <> 'DELETED'     
     group by
       lifecycle_state
   EOQ
@@ -129,6 +133,8 @@ query "oci_mysql_db_system_by_creation_month" {
           'YYYY-MM') as creation_month
       from
         oci_mysql_db_system
+      where
+      lifecycle_state <> 'DELETED'     
     ),
     months as (
       select
@@ -254,6 +260,8 @@ report "oci_mysql_db_system_dashboard" {
           compartment_id as "Compartment"
         from
           oci_mysql_db_system
+        where
+          lifecycle_state <> 'DELETED'     
         order by
           "Age in Days" desc,
           title
@@ -272,6 +280,8 @@ report "oci_mysql_db_system_dashboard" {
           compartment_id as "Compartment"
         from
           oci_mysql_db_system
+        where  
+          lifecycle_state <> 'DELETED'    
         order by
           "Age in Days" asc,
           title
