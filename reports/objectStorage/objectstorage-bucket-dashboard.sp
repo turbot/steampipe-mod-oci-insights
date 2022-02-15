@@ -73,20 +73,20 @@ query "oci_objectstorage_bucket_by_region" {
 
 query "oci_objectstorage_bucket_by_compartment" {
   sql = <<-EOQ
-  with compartments as ( 
-        select
-          id, title
-        from
-          oci_identity_tenancy
-        union (
-          select 
-            id,title 
-          from 
-            oci_identity_compartment 
-          where 
-            lifecycle_state = 'ACTIVE'
-          )  
-       )
+    with compartments as ( 
+      select
+        id, title
+      from
+        oci_identity_tenancy
+      union (
+      select 
+        id,title 
+      from 
+        oci_identity_compartment 
+      where 
+        lifecycle_state = 'ACTIVE'
+      )  
+    )
    select 
       c.title as "compartment",
       count(b.*) as "buckets" 
@@ -259,12 +259,12 @@ report "oci_objectstorage_bucket_dashboard" {
       width = 4
 
       sql = <<-EOQ
-      with compartments as ( 
-        select
-          id, title
-        from
-          oci_identity_tenancy
-        union (
+        with compartments as ( 
+          select
+            id, title
+          from
+            oci_identity_tenancy
+          union (
           select 
             id,title 
           from 
@@ -292,18 +292,20 @@ report "oci_objectstorage_bucket_dashboard" {
       width = 4
 
       sql = <<-EOQ
-      with compartments as (
-      select
-        id, title
-      from
-        oci_identity_tenancy
-      union (
-      select 
-        id,title 
-      from 
-        oci_identity_compartment 
-      where lifecycle_state = 'ACTIVE')  
-      )
+        with compartments as ( 
+          select
+            id, title
+          from
+            oci_identity_tenancy
+          union (
+          select 
+            id,title 
+          from 
+            oci_identity_compartment 
+          where 
+            lifecycle_state = 'ACTIVE'
+          )  
+       )
         select
           b.title as "bucket",
           current_date - b.time_created::date as "Age in Days",

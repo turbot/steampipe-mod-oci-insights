@@ -59,7 +59,8 @@ query "oci_compute_instance_by_compartment" {
         id,title
       from
         oci_identity_compartment
-      where lifecycle_state = 'ACTIVE')
+      where 
+        lifecycle_state = 'ACTIVE')
     )
    select
       c.title as "compartment",
@@ -365,17 +366,33 @@ report "oci_compute_instance_summary" {
       width = 4
       # Validate the query
       sql = <<-EOQ
+        with compartments as ( 
           select
-            title as "instance",
-            (current_date - time_created::date) as "Age in Days",
-            compartment_id as "Compartment"
+            id, title
           from
-            oci_core_instance
-          where lifecycle_state <> 'DELETED'
-          order by
-            "Age in Days" desc,
-            title
-          limit 5
+            oci_identity_tenancy
+          union (
+          select 
+            id,title 
+          from 
+            oci_identity_compartment 
+          where 
+            lifecycle_state = 'ACTIVE'
+          )  
+       )
+        select
+          i.title as "instance",
+          current_date - i.time_created::date as "Age in Days",
+          c.title as "Compartment"
+        from
+          oci_core_instance as i
+          left join compartments as c on c.id = i.compartment_id
+        where 
+          lifecycle_state <> 'DELETED'  
+        order by
+          "Age in Days" desc,
+          i.title
+        limit 5
         EOQ
     }
 
@@ -384,21 +401,37 @@ report "oci_compute_instance_summary" {
       width = 4
 
       sql = <<-EOQ
+        with compartments as ( 
           select
-            title as "instance",
-            current_date - time_created::date as "Age in Days",
-            compartment_id as "Compartment"
+            id, title
           from
-            oci_core_instance
-          order by
-            "Age in Days" asc,
-            title
-          limit 5
+            oci_identity_tenancy
+          union (
+          select 
+            id,title 
+          from 
+            oci_identity_compartment 
+          where 
+            lifecycle_state = 'ACTIVE'
+          )  
+       )
+        select
+          i.title as "instance",
+          current_date - i.time_created::date as "Age in Days",
+          c.title as "Compartment"
+        from
+          oci_core_instance as i
+          left join compartments as c on c.id = i.compartment_id
+        where 
+          lifecycle_state <> 'DELETED'  
+        order by
+          "Age in Days" asc,
+          i.title
+        limit 5
         EOQ
     }
-
-    #}
 
   }
 
 }
+

@@ -41,13 +41,13 @@ report "oci_objectstorage_bucket_logging_report" {
         from
           oci_identity_tenancy
         union (
-          select 
-            id,title 
-          from 
-            oci_identity_compartment 
-          where 
-            lifecycle_state = 'ACTIVE'
-          )  
+        select 
+          id,title 
+        from 
+          oci_identity_compartment 
+        where 
+          lifecycle_state = 'ACTIVE'
+        )  
        ),
       namewithregion as (
       select

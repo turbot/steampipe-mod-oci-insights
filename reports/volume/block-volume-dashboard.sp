@@ -52,13 +52,13 @@ query "oci_block_volume_by_compartment" {
         from
           oci_identity_tenancy
         union (
-          select 
-            id,title 
-          from 
-            oci_identity_compartment 
-          where 
-            lifecycle_state = 'ACTIVE'
-          )  
+        select 
+          id,title 
+        from 
+          oci_identity_compartment 
+        where 
+          lifecycle_state = 'ACTIVE'
+        )  
        )
    select 
       c.title as "compartment",
@@ -78,19 +78,19 @@ query "oci_block_volume_by_compartment" {
 query "oci_block_volume_storage_by_compartment" {
   sql = <<-EOQ
     with compartments as ( 
-        select
-          id, title
-        from
-          oci_identity_tenancy
-        union (
-          select 
-            id,title 
-          from 
-            oci_identity_compartment 
-          where 
-            lifecycle_state = 'ACTIVE'
-          )  
-       )
+      select
+        id, title
+      from
+        oci_identity_tenancy
+      union (
+      select 
+        id,title 
+      from 
+        oci_identity_compartment 
+      where 
+        lifecycle_state = 'ACTIVE'
+      )  
+    )
    select 
       c.title as "compartment",
       sum(v.size_in_gbs) as "Total Storage in GB" 
@@ -348,12 +348,12 @@ report "oci_block_volume_dashboard" {
       width = 4
 
       sql = <<-EOQ
-      with compartments as ( 
-        select
-          id, title
-        from
-          oci_identity_tenancy
-        union (
+        with compartments as ( 
+          select
+            id, title
+          from
+            oci_identity_tenancy
+          union (
           select 
             id,title 
           from 
@@ -383,12 +383,12 @@ report "oci_block_volume_dashboard" {
       width = 4
 
       sql = <<-EOQ
-      with compartments as ( 
-        select
-          id, title
-        from
-          oci_identity_tenancy
-        union (
+        with compartments as ( 
+          select
+            id, title
+          from
+            oci_identity_tenancy
+          union (
           select 
             id,title 
           from 

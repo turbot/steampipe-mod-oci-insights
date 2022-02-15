@@ -413,14 +413,14 @@ report "oci_database_autonomous_db_summary" {
           from
             oci_identity_tenancy
           union (
-            select 
-              id,title 
-            from 
-              oci_identity_compartment 
-            where 
-              lifecycle_state = 'ACTIVE'
-            )  
-        )
+          select 
+            id,title 
+          from 
+            oci_identity_compartment 
+          where 
+            lifecycle_state = 'ACTIVE'
+          )  
+       )
        select
           d.title as "instance",
           current_date - d.time_created::date as "Age in Days",
@@ -448,14 +448,14 @@ report "oci_database_autonomous_db_summary" {
           from
             oci_identity_tenancy
           union (
-            select 
-              id,title 
-            from 
-              oci_identity_compartment 
-            where 
-              lifecycle_state = 'ACTIVE'
-            )  
-        )
+          select 
+            id,title 
+          from 
+            oci_identity_compartment 
+          where 
+            lifecycle_state = 'ACTIVE'
+          )  
+       )
        select
           d.title as "instance",
           current_date - d.time_created::date as "Age in Days",

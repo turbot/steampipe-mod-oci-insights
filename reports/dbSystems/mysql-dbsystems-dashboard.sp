@@ -60,20 +60,20 @@ query "oci_mysql_db_system_by_region" {
 
 query "oci_mysql_db_system_by_compartment" {
   sql = <<-EOQ
-  with compartments as ( 
-        select
-          id, title
-        from
-          oci_identity_tenancy
-        union (
-          select 
-            id,title 
-          from 
-            oci_identity_compartment 
-          where 
-            lifecycle_state = 'ACTIVE'
-          )  
-       )
+    with compartments as ( 
+      select
+        id, title
+      from
+        oci_identity_tenancy
+      union (
+      select 
+        id,title 
+      from 
+        oci_identity_compartment 
+      where 
+        lifecycle_state = 'ACTIVE'
+      )  
+    )
    select 
       c.title as "compartment",
       count(d.*) as "MySQL DB Systems" 
@@ -333,12 +333,12 @@ report "oci_mysql_db_system_dashboard" {
       width = 4
 
       sql = <<-EOQ
-       with compartments as ( 
-        select
-          id, title
-        from
-          oci_identity_tenancy
-        union (
+        with compartments as ( 
+          select
+            id, title
+          from
+            oci_identity_tenancy
+          union (
           select 
             id,title 
           from 
@@ -368,12 +368,12 @@ report "oci_mysql_db_system_dashboard" {
       width = 4
 
       sql = <<-EOQ
-      with compartments as ( 
-        select
-          id, title
-        from
-          oci_identity_tenancy
-        union (
+        with compartments as ( 
+          select
+            id, title
+          from
+            oci_identity_tenancy
+          union (
           select 
             id,title 
           from 

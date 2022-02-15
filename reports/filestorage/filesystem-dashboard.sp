@@ -229,12 +229,12 @@ report "oci_filestorage_filesystem_dashboard" {
       width = 4
 
       sql = <<-EOQ
-      with compartments as ( 
-        select
-          id, title
-        from
-          oci_identity_tenancy
-        union (
+        with compartments as ( 
+          select
+            id, title
+          from
+            oci_identity_tenancy
+          union (
           select 
             id,title 
           from 
@@ -264,12 +264,12 @@ report "oci_filestorage_filesystem_dashboard" {
       width = 4
 
       sql = <<-EOQ
-      with compartments as ( 
-        select
-          id, title
-        from
-          oci_identity_tenancy
-        union (
+        with compartments as ( 
+          select
+            id, title
+          from
+            oci_identity_tenancy
+          union (
           select 
             id,title 
           from 

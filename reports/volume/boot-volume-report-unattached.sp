@@ -18,13 +18,13 @@ report "oci_boot_volume_Unattached_report" {
         from
           oci_identity_tenancy
         union (
-          select 
-            id,title 
-          from 
-            oci_identity_compartment 
-          where 
-            lifecycle_state = 'ACTIVE'
-          )  
+        select 
+          id,title 
+        from 
+          oci_identity_compartment 
+        where 
+          lifecycle_state = 'ACTIVE'
+        )  
        )
       select
         v.display_name as "Boot Volume",
