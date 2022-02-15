@@ -1,4 +1,3 @@
-# Added to report
 query "oci_objectstorage_bucket_report_versioning_disabled_count" {
   sql = <<-EOQ
     select

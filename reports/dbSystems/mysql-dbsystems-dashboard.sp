@@ -1,11 +1,9 @@
-# Added to report
 query "oci_mysql_db_system_count" {
   sql = <<-EOQ
     select count(*) as "MySQL DB Systems" from oci_mysql_db_system where lifecycle_state <> 'DELETED'
   EOQ
 }
 
-# Added to report
 query "oci_mysql_db_system_analytics_cluster_attached_count" {
   sql = <<-EOQ
    select
@@ -17,7 +15,6 @@ query "oci_mysql_db_system_analytics_cluster_attached_count" {
   EOQ
 }
 
-# Added to report
 query "oci_mysql_db_system_heat_wave_cluster_attached_count" {
   sql = <<-EOQ
    select
@@ -29,7 +26,6 @@ query "oci_mysql_db_system_heat_wave_cluster_attached_count" {
   EOQ
 }
 
-# Added to report
 query "oci_mysql_db_system_automatic_backup_disabled_count" {
   sql = <<-EOQ
    select
@@ -41,7 +37,6 @@ query "oci_mysql_db_system_automatic_backup_disabled_count" {
   EOQ
 }
 
-# Added to report
 query "oci_mysql_db_system_by_region" {
   sql = <<-EOQ
     select region as "Region", count(*) as "MySQL DB Systems" 
@@ -56,7 +51,6 @@ query "oci_mysql_db_system_by_region" {
   EOQ
 }
 
-# Added to report
 query "oci_mysql_db_system_by_compartment" {
   sql = <<-EOQ
   with compartments as (
@@ -86,8 +80,7 @@ query "oci_mysql_db_system_by_compartment" {
   EOQ
 }
 
-#Added to report
-query "oci_mysql_db_system_by_state" {
+query "oci_mysql_db_system_by_lifecycle_state" {
   sql = <<-EOQ
     select
       lifecycle_state,
@@ -101,7 +94,6 @@ query "oci_mysql_db_system_by_state" {
   EOQ
 }
 
-#Added to report
 query "oci_mysql_db_system_with_no_backups" {
   sql = <<-EOQ
     select
@@ -122,7 +114,6 @@ query "oci_mysql_db_system_with_no_backups" {
   EOQ
 }
 
-# Added
 query "oci_mysql_db_system_by_creation_month" {
   sql = <<-EOQ
     with mysql_dbSystems as (
@@ -170,13 +161,76 @@ query "oci_mysql_db_system_by_creation_month" {
   EOQ
 }
 
+query "oci_mysql_db_system_top10_cpu_past_week" {
+  sql = <<-EOQ
+     with top_n as (
+    select
+      id,
+      avg(average)
+    from
+      oci_mysql_db_system_metric_connections_daily
+    where
+      timestamp  >= CURRENT_DATE - INTERVAL '7 day'
+    group by
+      id
+    order by
+      avg desc
+    limit 10
+  )
+  select
+      timestamp,
+      id,
+      average
+    from
+      oci_mysql_db_system_metric_connections
+    where
+      timestamp  >= CURRENT_DATE - INTERVAL '7 day'
+      and id in (select id from top_n)
+    order by
+      timestamp
+  EOQ
+}
+
+# underused if avg CPU < 10% every day for last month
+query "oci_mysql_db_system_by_cpu_utilization_category" {
+  sql = <<-EOQ
+    with cpu_buckets as (
+      select
+    unnest(array ['Unused (<1%)','Underutilized (1-10%)','Right-sized (10-90%)', 'Overutilized (>90%)' ]) as cpu_bucket
+    ),
+    max_averages as (
+      select
+        id,
+        case
+          when max(average) <= 1 then 'Unused (<1%)'
+          when max(average) between 1 and 10 then 'Underutilized (1-10%)'
+          when max(average) between 10 and 90 then 'Right-sized (10-90%)'
+          when max(average) > 90 then 'Overutilized (>90%)'
+        end as cpu_bucket,
+        max(average) as max_avg
+      from
+        oci_mysql_db_system_metric_connections_daily
+      where
+        date_part('day', now() - timestamp) <= 30
+      group by
+        id
+    )
+    select
+      b.cpu_bucket as "CPU Utilization",
+      count(a.*)
+    from
+      cpu_buckets as b
+    left join max_averages as a on b.cpu_bucket = a.cpu_bucket
+    group by
+      b.cpu_bucket
+  EOQ
+}
+
 report "oci_mysql_db_system_dashboard" {
 
   title = "OCI MySQL DB Systems Dashboard"
 
   container {
-    ## Analysis ...
-
     card {
       sql = query.oci_mysql_db_system_count.sql
       width = 2
@@ -195,8 +249,7 @@ report "oci_mysql_db_system_dashboard" {
     card {
       sql = query.oci_mysql_db_system_automatic_backup_disabled_count.sql
       width = 2
-    }
-    
+    } 
   }
 
   container {
@@ -217,13 +270,12 @@ report "oci_mysql_db_system_dashboard" {
     }
   }
 
-    # donut charts in a 2 x 2 layout
-    container {
+  container {
       title = "Assessments"
 
       chart {
-        title = "MySQL DB Systems State"
-        sql = query.oci_mysql_db_system_by_state.sql
+        title = "MySQL DB Systems Lifecycle State"
+        sql = query.oci_mysql_db_system_by_lifecycle_state.sql
         type  = "donut"
         width = 3
 
@@ -236,6 +288,24 @@ report "oci_mysql_db_system_dashboard" {
        }
     }
 
+  container {
+    title  = "Performance & Utilization"
+
+    chart {
+      title = "Top 10 CPU - Last 7 days"
+      sql   = query.oci_mysql_db_system_top10_cpu_past_week.sql
+      type  = "line"
+      width = 6
+    }
+    
+    chart {
+      title = "Average max daily CPU - Last 30 days"
+      sql   = query.oci_mysql_db_system_by_cpu_utilization_category.sql
+      type  = "column"
+      width = 6
+    }
+
+  }
   container {
     title = "Resources by Age" 
 

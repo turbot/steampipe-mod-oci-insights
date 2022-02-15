@@ -1,11 +1,9 @@
-# Added to report
 query "oci_block_volume_count" {
   sql = <<-EOQ
     select count(*) as "Block Volumes" from oci_core_volume where lifecycle_state <> 'DELETED'
   EOQ
 }
 
-# Added to report
 query "oci_block_volume_storage_total" {
   sql = <<-EOQ
     select
@@ -17,13 +15,10 @@ query "oci_block_volume_storage_total" {
   EOQ
 }
 
-# Added to report
-query "oci_block_volume_encrypted_volumes_count" {
+query "oci_block_volume_default_encrypted_volumes_count" {
   sql = <<-EOQ
     select
-      count(*) as value,
-      'Unencrypted Block Volumes' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as style
+      count(*) as "OCI Managed Encryption"
     from 
       oci_core_volume 
     where 
@@ -31,7 +26,6 @@ query "oci_block_volume_encrypted_volumes_count" {
   EOQ
 }
 
-# Added to report
 query "oci_block_volume_unattached_volumes_count" {
   sql = <<-EOQ
    select
@@ -50,7 +44,6 @@ query "oci_block_volume_unattached_volumes_count" {
   EOQ
 }
 
-# Added to report
 query "oci_block_volume_by_compartment" {
   sql = <<-EOQ
   with compartments as (
@@ -80,7 +73,6 @@ query "oci_block_volume_by_compartment" {
   EOQ
 }
 
-# Added to report
 query "oci_block_volume_storage_by_compartment" {
   sql = <<-EOQ
   with compartments as (
@@ -110,7 +102,6 @@ query "oci_block_volume_storage_by_compartment" {
   EOQ
 }
 
-#Added to report
 query "oci_block_volume_by_region" {
   sql = <<-EOQ
     select
@@ -125,7 +116,6 @@ query "oci_block_volume_by_region" {
   EOQ
 }
 
-#Added to report
 query "oci_block_volume_storage_by_region" {
   sql = <<-EOQ
     select
@@ -140,8 +130,8 @@ query "oci_block_volume_storage_by_region" {
   EOQ
 }
 
-#Added to report
-query "oci_block_volume_by_state" {
+
+query "oci_block_volume_by_lifecycle_state" {
   sql = <<-EOQ
     select
       lifecycle_state,
@@ -155,7 +145,7 @@ query "oci_block_volume_by_state" {
   EOQ
 }
 
-#Added to report
+
 query "oci_block_volume_by_encryption_status" {
   sql = <<-EOQ
     select
@@ -165,8 +155,8 @@ query "oci_block_volume_by_encryption_status" {
       select
         id,
         case 
-         when kms_key_id is null then 'Disabled' 
-         else 'Enabled' 
+         when kms_key_id is null then 'OCI Managed Encryption' 
+         else 'Customer Managed Encryption' 
          end as encryption_status
       from
         oci_core_volume
@@ -179,7 +169,7 @@ query "oci_block_volume_by_encryption_status" {
   EOQ
 }
 
-#Added to report
+
 query "oci_block_volumes_with_no_backups" {
   sql = <<-EOQ
     select
@@ -200,7 +190,6 @@ query "oci_block_volumes_with_no_backups" {
   EOQ
 }
 
-# Added
 query "oci_block_volume_by_creation_month" {
   sql = <<-EOQ
     with volumes as (
@@ -248,9 +237,9 @@ query "oci_block_volume_by_creation_month" {
   EOQ
 }
 
-report "oci_core_volume_dashboard" {
+report "oci_block_volume_dashboard" {
 
-  title = "OCI Core Block Volume Dashboard"
+  title = "OCI Block Volume Dashboard"
 
   container {
     ## Analysis ...
@@ -266,7 +255,7 @@ report "oci_core_volume_dashboard" {
     }
 
     card {
-      sql = query.oci_block_volume_encrypted_volumes_count.sql
+      sql = query.oci_block_volume_default_encrypted_volumes_count.sql
       width = 2
     }
 
@@ -294,22 +283,21 @@ report "oci_core_volume_dashboard" {
     }
 
     chart {
-      title = "Block Volume Storage by Compartment (GB)"
+      title = "Block Volumes Storage by Compartment (GB)"
       sql = query.oci_block_volume_storage_by_compartment.sql
       type  = "column"
       width = 3
     }
 
     chart {
-      title = "Block Volume Storage by Region (GB)"
+      title = "Block Volumes Storage by Region (GB)"
       sql = query.oci_block_volume_storage_by_region.sql
       type  = "column"
       width = 3
     }
   }
 
-    # donut charts in a 2 x 2 layout
-    container {
+  container {
       title = "Assessments"
 
       chart {
@@ -324,8 +312,8 @@ report "oci_core_volume_dashboard" {
       }
 
       chart {
-        title = "Block Volume State"
-        sql = query.oci_block_volume_by_state.sql
+        title = "Block Volumes Lifecycle State"
+        sql = query.oci_block_volume_by_lifecycle_state.sql
         type  = "donut"
         width = 3
 

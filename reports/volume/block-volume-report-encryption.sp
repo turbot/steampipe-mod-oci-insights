@@ -1,14 +1,10 @@
-# Added to report
-query "oci_block_volume_unencrypted_count" {
+query "oci_block_volume_customer_managed_encryption_count" {
   sql = <<-EOQ
-    select 
-      count(*) as value,
-      'Unencrypted' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as "type"
-    from 
-      oci_core_volume 
+    select count(*) as "Customer Managed"
+      from 
+    oci_core_volume 
     where 
-    kms_key_id is null and lifecycle_state <> 'DELETED'
+    kms_key_id is not null and lifecycle_state <> 'DELETED'
   EOQ
 }
 
@@ -19,7 +15,12 @@ report "oci_block_volume_encryption_report" {
   container {
 
     card {
-      sql = query.oci_block_volume_unencrypted_count.sql
+      sql = query.oci_block_volume_customer_managed_encryption_count.sql
+      width = 2
+    }
+
+    card {
+      sql = query.oci_block_volume_default_encrypted_volumes_count.sql
       width = 2
     }
   }
@@ -40,12 +41,12 @@ report "oci_block_volume_encryption_report" {
     )
       select
         v.display_name as "Block Volume",
-        case when v.kms_key_id is not null then 'Enabled' else 'Oracle Managed' end as "Encryption Status",
+        case when v.kms_key_id is not null then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
         k.algorithm as "Algorithm",
         v.kms_key_id as "KMS Key ID",
         c.title as "Compartment",
         v.region as "Region",
-        v.id as "Boot Volume ID"
+        v.id as "Block Volume ID"
       from
         oci_core_volume as v
         left join oci_kms_key as k on k.id = v.kms_key_id
