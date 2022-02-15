@@ -182,7 +182,7 @@ query "oci_mysql_db_system_top10_cpu_past_week" {
       id,
       average
     from
-      oci_mysql_db_system_metric_connections
+      oci_mysql_db_system_metric_connections_hourly
     where
       timestamp  >= CURRENT_DATE - INTERVAL '7 day'
       and id in (select id from top_n)
