@@ -1,14 +1,10 @@
-# Added to report
-query "oci_objectstorage_bucket_report_unencrypted_count" {
+query "oci_objectstorage_bucket_report_customer_managed_encryption_count" {
   sql = <<-EOQ
-    select 
-      count(*) as value,
-      'Unencrypted' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as "type"
-    from 
-      oci_objectstorage_bucket 
+    select count(*) as "Customer Managed"
+      from 
+    oci_objectstorage_bucket 
     where 
-    kms_key_id is null
+    kms_key_id is not null
   EOQ
 }
 
@@ -19,7 +15,12 @@ report "oci_objectstorage_bucket_encryption_report" {
   container {
 
     card {
-      sql = query.oci_objectstorage_bucket_report_unencrypted_count.sql
+      sql = query.oci_objectstorage_bucket_report_customer_managed_encryption_count.sql
+      width = 2
+    }
+
+    card {
+      sql = query.oci_objectstorage_bucket_default_encryption_count.sql
       width = 2
     }
   }
@@ -40,7 +41,7 @@ report "oci_objectstorage_bucket_encryption_report" {
     )
       select
         b.name as "Bucket",
-        case when b.kms_key_id is not null then 'Enabled' else 'Oracle Managed' end as "Encryption Status",
+        case when b.kms_key_id is not null then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
         k.algorithm as "Algorithm",
         b.kms_key_id as "KMS Key ID",
         c.title as "Compartment",

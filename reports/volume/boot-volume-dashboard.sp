@@ -1,11 +1,9 @@
-# Added to report
 query "oci_boot_volume_count" {
   sql = <<-EOQ
     select count(*) as "Boot Volumes" from oci_core_boot_volume where lifecycle_state <> 'DELETED'
   EOQ
 }
 
-# Added to report
 query "oci_boot_volume_storage_total" {
   sql = <<-EOQ
     select
@@ -17,13 +15,10 @@ query "oci_boot_volume_storage_total" {
   EOQ
 }
 
-# Added to report
-query "oci_boot_volume_encrypted_volumes_count" {
+query "oci_boot_volume_default_encrypted_volumes_count" {
   sql = <<-EOQ
     select
-      count(*) as value,
-      'Unencrypted Boot Volumes' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as style
+      count(*) as "OCI Managed Encryption"
     from 
       oci_core_boot_volume 
     where 
@@ -31,7 +26,6 @@ query "oci_boot_volume_encrypted_volumes_count" {
   EOQ
 }
 
-# Added to report
 query "oci_boot_volume_unattached_volumes_count" {
   sql = <<-EOQ
    select
@@ -50,7 +44,6 @@ query "oci_boot_volume_unattached_volumes_count" {
   EOQ
 }
 
-# Added to report
 query "oci_boot_volume_by_compartment" {
   sql = <<-EOQ
   with compartments as (
@@ -80,7 +73,6 @@ query "oci_boot_volume_by_compartment" {
   EOQ
 }
 
-# Added to report
 query "oci_boot_volume_storage_by_compartment" {
   sql = <<-EOQ
   with compartments as (
@@ -110,7 +102,6 @@ query "oci_boot_volume_storage_by_compartment" {
   EOQ
 }
 
-#Added to report
 query "oci_boot_volume_by_region" {
   sql = <<-EOQ
     select
@@ -125,7 +116,6 @@ query "oci_boot_volume_by_region" {
   EOQ
 }
 
-#Added to report
 query "oci_boot_volume_storage_by_region" {
   sql = <<-EOQ
     select
@@ -140,8 +130,7 @@ query "oci_boot_volume_storage_by_region" {
   EOQ
 }
 
-#Added to report
-query "oci_boot_volume_by_state" {
+query "oci_boot_volume_by_lifecycle_state" {
   sql = <<-EOQ
     select
       lifecycle_state,
@@ -155,7 +144,6 @@ query "oci_boot_volume_by_state" {
   EOQ
 }
 
-#Added to report
 query "oci_boot_volume_by_encryption_status" {
   sql = <<-EOQ
     select
@@ -165,8 +153,8 @@ query "oci_boot_volume_by_encryption_status" {
       select
         id,
         case 
-         when kms_key_id is null then 'Disabled' 
-         else 'Enabled' 
+         when kms_key_id is null then 'OCI Managed Encryption' 
+         else 'Customer Managed Encryption' 
          end as encryption_status
       from
         oci_core_boot_volume
@@ -179,7 +167,6 @@ query "oci_boot_volume_by_encryption_status" {
   EOQ
 }
 
-#Added to report
 query "oci_boot_volumes_with_no_backups" {
   sql = <<-EOQ
     select
@@ -200,7 +187,6 @@ query "oci_boot_volumes_with_no_backups" {
   EOQ
 }
 
-# Added
 query "oci_boot_volume_by_creation_month" {
   sql = <<-EOQ
     with volumes as (
@@ -248,13 +234,11 @@ query "oci_boot_volume_by_creation_month" {
   EOQ
 }
 
-report "oci_core_boot_volume_dashboard" {
+report "oci_boot_volume_dashboard" {
 
-  title = "OCI Core Boot Volume Dashboard"
+  title = "OCI Boot Volume Dashboard"
 
   container {
-    ## Analysis ...
-
     card {
       sql = query.oci_boot_volume_count.sql
       width = 2
@@ -266,7 +250,7 @@ report "oci_core_boot_volume_dashboard" {
     }
 
     card {
-      sql = query.oci_boot_volume_encrypted_volumes_count.sql
+      sql = query.oci_boot_volume_default_encrypted_volumes_count.sql
       width = 2
     }
 
@@ -308,7 +292,7 @@ report "oci_core_boot_volume_dashboard" {
     }
   }
 
-    container {
+  container {
       title = "Assessments"
 
       chart {
@@ -324,7 +308,7 @@ report "oci_core_boot_volume_dashboard" {
 
       chart {
         title = "Boot Volume State"
-        sql = query.oci_boot_volume_by_state.sql
+        sql = query.oci_boot_volume_by_lifecycle_state.sql
         type  = "donut"
         width = 3
 

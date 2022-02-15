@@ -1,27 +1,13 @@
-# Added to report
 query "oci_objectstorage_bucket_report_public_access_count" {
   sql = <<-EOQ
     select
       count(*) as value,
-      'Has Public Access' as label,
+      'Public Access' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
       oci_objectstorage_bucket
     where
       public_access_type <> 'NoPublicAccess'  
-  EOQ
-}
-
-query "oci_objectstorage_bucket_not_read_only_access_count" {
-  sql = <<-EOQ
-    select
-      count(*) as value,
-      'Buckets Without Read Only Access' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as "type"
-    from
-      oci_objectstorage_bucket
-    where
-      not is_read_only
   EOQ
 }
 
@@ -37,7 +23,7 @@ report "oci_objectstorage_bucket_public_access_report" {
     }
 
     card {
-      sql = query.oci_objectstorage_bucket_not_read_only_access_count.sql
+      sql = query.oci_objectstorage_bucket_read_only_access_count.sql
       width = 2
     }
   }

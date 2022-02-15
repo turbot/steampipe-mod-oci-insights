@@ -1,11 +1,9 @@
-# Added to report
 query "oci_objectstorage_bucket_count" {
   sql = <<-EOQ
     select count(*) as "Buckets" from oci_objectstorage_bucket
   EOQ
 }
 
-# Added to report
 query "oci_objectstorage_bucket_read_only_access_count" {
   sql = <<-EOQ
     select
@@ -17,7 +15,6 @@ query "oci_objectstorage_bucket_read_only_access_count" {
   EOQ
 }
 
-# Added to report
 query "oci_objectstorage_bucket_public_access_blocked_count" {
   sql = <<-EOQ
     select
@@ -29,10 +26,12 @@ query "oci_objectstorage_bucket_public_access_blocked_count" {
   EOQ
 }
 
-# Added to report
 query "oci_objectstorage_bucket_versioning_disabled_count" {
   sql = <<-EOQ
-    select count(*) as "Versioned Disabled"
+    select 
+      count(*) as value,
+      'Versioned Disabled' as label,
+      case count(*) when 0 then 'ok' else 'alert' end as "type"
     from 
       oci_objectstorage_bucket 
     where 
@@ -40,10 +39,9 @@ query "oci_objectstorage_bucket_versioning_disabled_count" {
   EOQ
 }
 
-# Added to report
-query "oci_objectstorage_bucket_unencrypted_count" {
+query "oci_objectstorage_bucket_default_encryption_count" {
   sql = <<-EOQ
-    select count(*) as "Unencrypted"
+    select count(*) as "OCI Managed Encryption"
     from 
       oci_objectstorage_bucket 
     where 
@@ -51,7 +49,6 @@ query "oci_objectstorage_bucket_unencrypted_count" {
   EOQ
 }
 
-# Added to report
 query "oci_objectstorage_bucket_archived_count" {
   sql = <<-EOQ
     select count(*) as "Archive"
@@ -62,7 +59,6 @@ query "oci_objectstorage_bucket_archived_count" {
   EOQ
 }
 
-# Added to report
 query "oci_objectstorage_bucket_by_region" {
   sql = <<-EOQ
     select region as "Region", count(*) as "Buckets" 
@@ -75,7 +71,6 @@ query "oci_objectstorage_bucket_by_region" {
   EOQ
 }
 
-# Added to report
 query "oci_objectstorage_bucket_by_compartment" {
   sql = <<-EOQ
   with compartments as (
@@ -105,7 +100,6 @@ query "oci_objectstorage_bucket_by_compartment" {
   EOQ
 }
 
-#Added to report
 query "oci_objectstorage_bucket_encryption_status" {
   sql = <<-EOQ
     select
@@ -115,8 +109,8 @@ query "oci_objectstorage_bucket_encryption_status" {
       select
         id,
         case 
-         when kms_key_id is null then 'Disabled' 
-         else 'Enabled' 
+         when kms_key_id is null then 'OCI Managed Encryption' 
+         else 'Customer Managed Encryption' 
          end as encryption_status
       from
         oci_objectstorage_bucket) as b
@@ -201,7 +195,7 @@ report "oci_objectstorage_bucket_dashboard" {
     }
 
     card {
-      sql = query.oci_objectstorage_bucket_unencrypted_count.sql
+      sql = query.oci_objectstorage_bucket_default_encryption_count.sql
       width = 2
     }
 

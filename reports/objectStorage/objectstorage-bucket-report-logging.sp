@@ -2,7 +2,7 @@ query "oci_objectstorage_bucket_disabled_count" {
   sql = <<-EOQ
     with namewithregion as (
       select
-        concat(configuration -> 'source' ->> 'resource',region) as namewithregion,
+        concat(configuration -> 'source' ->> 'resource', region) as namewithregion,
         is_enabled
       from
         oci_logging_log
@@ -15,7 +15,7 @@ query "oci_objectstorage_bucket_disabled_count" {
       case count(b.*) when 0 then 'ok' else 'alert' end as "type" 
     from 
       oci_objectstorage_bucket as b
-      left join namewithregion as n on concat(b.name,b.region) = n.namewithregion
+      left join namewithregion as n on concat(b.name, b.region) = n.namewithregion
     where
       not n.is_enabled or n.is_enabled is null
   EOQ
@@ -49,7 +49,7 @@ report "oci_objectstorage_bucket_logging_report" {
     ),
       namewithregion as (
       select
-        concat(configuration -> 'source' ->> 'resource',region) as namewithregion,
+        concat(configuration -> 'source' ->> 'resource', region) as namewithregion,
         is_enabled,
         retention_duration
       from
@@ -66,7 +66,7 @@ report "oci_objectstorage_bucket_logging_report" {
         b.id as "Bucket ID"
       from
         oci_objectstorage_bucket as b
-        left join namewithregion as n on concat(b.name,b.region) = n.namewithregion
+        left join namewithregion as n on concat(b.name, b.region) = n.namewithregion
         left join compartments as c on c.id = b.Compartment_id;
     EOQ
   }
