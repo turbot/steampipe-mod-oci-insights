@@ -1,57 +1,57 @@
 # Added to report
-query "oci_block_volume_count" {
+query "oci_boot_volume_count" {
   sql = <<-EOQ
-    select count(*) as "Block Volumes" from oci_core_volume where lifecycle_state <> 'DELETED'
+    select count(*) as "Boot Volumes" from oci_core_boot_volume where lifecycle_state <> 'DELETED'
   EOQ
 }
 
 # Added to report
-query "oci_block_volume_storage_total" {
+query "oci_boot_volume_storage_total" {
   sql = <<-EOQ
     select
       sum(size_in_gbs) as "Total Storage in GBs"
     from
-      oci_core_volume
+      oci_core_boot_volume
     where
       lifecycle_state <> 'DELETED'  
   EOQ
 }
 
 # Added to report
-query "oci_block_volume_encrypted_volumes_count" {
+query "oci_boot_volume_encrypted_volumes_count" {
   sql = <<-EOQ
     select
       count(*) as value,
-      'Unencrypted Block Volumes' as label,
+      'Unencrypted Boot Volumes' as label,
       case count(*) when 0 then 'ok' else 'alert' end as style
     from 
-      oci_core_volume 
+      oci_core_boot_volume 
     where 
       kms_key_id is null and lifecycle_state <> 'DELETED'
   EOQ
 }
 
 # Added to report
-query "oci_block_volume_unattached_volumes_count" {
+query "oci_boot_volume_unattached_volumes_count" {
   sql = <<-EOQ
    select
       count(*) as value,
-      'Unattached Block Volumes' as label,
+      'Unattached Boot Volumes' as label,
       case count(*) when 0 then 'ok' else 'alert' end as style
     from 
-      oci_core_volume
+      oci_core_boot_volume
     where 
       id not in (
         select 
-          volume_id
+          boot_volume_id
         from
-          oci_core_volume_attachment  
+          oci_core_boot_volume_attachment  
       ) and lifecycle_state <> 'DELETED'
   EOQ
 }
 
 # Added to report
-query "oci_block_volume_by_compartment" {
+query "oci_boot_volume_by_compartment" {
   sql = <<-EOQ
   with compartments as (
       select
@@ -67,9 +67,9 @@ query "oci_block_volume_by_compartment" {
     )
    select 
       c.title as "compartment",
-      count(v.*) as "Block volumes" 
+      count(v.*) as "volumes" 
     from 
-      oci_core_volume as v,
+      oci_core_boot_volume as v,
       compartments as c 
     where 
       c.id = v.compartment_id and v.lifecycle_state <> 'DELETED'
@@ -81,7 +81,7 @@ query "oci_block_volume_by_compartment" {
 }
 
 # Added to report
-query "oci_block_volume_storage_by_compartment" {
+query "oci_boot_volume_storage_by_compartment" {
   sql = <<-EOQ
   with compartments as (
       select
@@ -99,7 +99,7 @@ query "oci_block_volume_storage_by_compartment" {
       c.title as "compartment",
       sum(v.size_in_gbs) as "Total Storage in GB" 
     from 
-      oci_core_volume as v,
+      oci_core_boot_volume as v,
       compartments as c 
     where 
       c.id = v.compartment_id and v.lifecycle_state <> 'DELETED'
@@ -111,13 +111,13 @@ query "oci_block_volume_storage_by_compartment" {
 }
 
 #Added to report
-query "oci_block_volume_by_region" {
+query "oci_boot_volume_by_region" {
   sql = <<-EOQ
     select
       region as "Region",
       count(*) as "Volumes"
     from
-      oci_core_volume
+      oci_core_boot_volume
     where
       lifecycle_state <> 'DELETED'  
     group by
@@ -126,13 +126,13 @@ query "oci_block_volume_by_region" {
 }
 
 #Added to report
-query "oci_block_volume_storage_by_region" {
+query "oci_boot_volume_storage_by_region" {
   sql = <<-EOQ
     select
       region as "Region",
       sum(size_in_gbs) as "Total storage in GB"
     from
-      oci_core_volume
+      oci_core_boot_volume
     where
       lifecycle_state <> 'DELETED'    
     group by
@@ -141,22 +141,22 @@ query "oci_block_volume_storage_by_region" {
 }
 
 #Added to report
-query "oci_block_volume_by_state" {
+query "oci_boot_volume_by_state" {
   sql = <<-EOQ
     select
       lifecycle_state,
       count(lifecycle_state)
     from
-      oci_core_volume
+      oci_core_boot_volume
     where
-      lifecycle_state <> 'DELETED'    
+      lifecycle_state <> 'DELETED'   
     group by
       lifecycle_state
   EOQ
 }
 
 #Added to report
-query "oci_block_volume_by_encryption_status" {
+query "oci_boot_volume_by_encryption_status" {
   sql = <<-EOQ
     select
       encryption_status,
@@ -169,7 +169,7 @@ query "oci_block_volume_by_encryption_status" {
          else 'Enabled' 
          end as encryption_status
       from
-        oci_core_volume
+        oci_core_boot_volume
       where
       lifecycle_state <> 'DELETED') as v
     group by
@@ -180,28 +180,28 @@ query "oci_block_volume_by_encryption_status" {
 }
 
 #Added to report
-query "oci_block_volumes_with_no_backups" {
+query "oci_boot_volumes_with_no_backups" {
   sql = <<-EOQ
     select
       v.id,
       v.compartment_id,
       v.region
     from
-      oci_core_volume as v
-    left join oci_core_volume_backup as b on v.id = b.volume_id
-    where 
-      v.lifecycle_state <> 'DELETED'
+      oci_core_boot_volume as v
+    left join oci_core_boot_volume_backup as b on v.id = b.boot_volume_id
+    where
+      v.lifecycle_state <> 'DELETED' 
     group by
       v.compartment_id,
       v.region,
-      v.id  
+      v.id
     having
       count(b.id) = 0
   EOQ
 }
 
 # Added
-query "oci_block_volume_by_creation_month" {
+query "oci_boot_volume_by_creation_month" {
   sql = <<-EOQ
     with volumes as (
       select
@@ -210,9 +210,9 @@ query "oci_block_volume_by_creation_month" {
         to_char(time_created,
           'YYYY-MM') as creation_month
       from
-        oci_core_volume
+        oci_core_boot_volume
       where
-       lifecycle_state <> 'DELETED'   
+      lifecycle_state <> 'DELETED'     
     ),
     months as (
       select
@@ -248,30 +248,30 @@ query "oci_block_volume_by_creation_month" {
   EOQ
 }
 
-report "oci_core_volume_dashboard" {
+report "oci_core_boot_volume_dashboard" {
 
-  title = "OCI Core Block Volume Dashboard"
+  title = "OCI Core Boot Volume Dashboard"
 
   container {
     ## Analysis ...
 
     card {
-      sql = query.oci_block_volume_count.sql
+      sql = query.oci_boot_volume_count.sql
       width = 2
     }
 
     card {
-      sql = query.oci_block_volume_storage_total.sql
+      sql = query.oci_boot_volume_storage_total.sql
       width = 2
     }
 
     card {
-      sql = query.oci_block_volume_encrypted_volumes_count.sql
+      sql = query.oci_boot_volume_encrypted_volumes_count.sql
       width = 2
     }
 
     card {
-      sql = query.oci_block_volume_unattached_volumes_count.sql
+      sql = query.oci_boot_volume_unattached_volumes_count.sql
       width = 2
     }
   }
@@ -280,41 +280,40 @@ report "oci_core_volume_dashboard" {
       title = "Analysis"      
 
     chart {
-      title = "Block Volumes by Compartment"
-      sql = query.oci_block_volume_by_compartment.sql
+      title = "Boot Volumes by Compartment"
+      sql = query.oci_boot_volume_by_compartment.sql
       type  = "column"
       width = 3
     }
 
     chart {
-      title = "Block Volumes by Region"
-      sql = query.oci_block_volume_by_region.sql
+      title = "Boot Volumes by Region"
+      sql = query.oci_boot_volume_by_region.sql
       type  = "column"
       width = 3
     }
 
     chart {
-      title = "Block Volume Storage by Compartment (GB)"
-      sql = query.oci_block_volume_storage_by_compartment.sql
+      title = "Boot Volume Storage by Compartment (GB)"
+      sql = query.oci_boot_volume_storage_by_compartment.sql
       type  = "column"
       width = 3
     }
 
     chart {
-      title = "Block Volume Storage by Region (GB)"
-      sql = query.oci_block_volume_storage_by_region.sql
+      title = "Boot Volume Storage by Region (GB)"
+      sql = query.oci_boot_volume_storage_by_region.sql
       type  = "column"
       width = 3
     }
   }
 
-    # donut charts in a 2 x 2 layout
     container {
       title = "Assessments"
 
       chart {
         title = "Encryption Status"
-        sql = query.oci_block_volume_by_encryption_status.sql
+        sql = query.oci_boot_volume_by_encryption_status.sql
         type  = "donut"
         width = 3
 
@@ -324,16 +323,16 @@ report "oci_core_volume_dashboard" {
       }
 
       chart {
-        title = "Block Volume State"
-        sql = query.oci_block_volume_by_state.sql
+        title = "Boot Volume State"
+        sql = query.oci_boot_volume_by_state.sql
         type  = "donut"
         width = 3
 
       }
 
        table {
-         title = "Block Volumes with no backups"
-         sql = query.oci_block_volumes_with_no_backups.sql
+         title = "Boot Volumes with no backups"
+         sql = query.oci_boot_volumes_with_no_backups.sql
          width = 3
        }
     }
@@ -342,8 +341,8 @@ report "oci_core_volume_dashboard" {
     title = "Resources by Age" 
 
     chart {
-      title = "Block Volume by Creation Month"
-      sql = query.oci_block_volume_by_creation_month.sql
+      title = "Boot Volume by Creation Month"
+      sql = query.oci_boot_volume_by_creation_month.sql
       type  = "column"
       width = 4
       series "month" {
@@ -352,7 +351,7 @@ report "oci_core_volume_dashboard" {
     }
 
     table {
-      title = "Oldest Block Volumes"
+      title = "Oldest Boot Volumes"
       width = 4
 
       sql = <<-EOQ
@@ -361,7 +360,7 @@ report "oci_core_volume_dashboard" {
           current_date - time_created::date as "Age in Days",
           compartment_id as "Compartment"
         from
-          oci_core_volume
+          oci_core_boot_volume
         where lifecycle_state <> 'DELETED'
         order by
           "Age in Days" desc,
@@ -371,7 +370,7 @@ report "oci_core_volume_dashboard" {
     }
 
     table {
-      title = "Newest Block volumes"
+      title = "Newest Boot Volumes"
       width = 4
 
       sql = <<-EOQ
@@ -380,8 +379,8 @@ report "oci_core_volume_dashboard" {
           current_date - time_created::date as "Age in Days",
           compartment_id as "Compartment"
         from
-          oci_core_volume
-        where lifecycle_state <> 'DELETED'  
+          oci_core_boot_volume
+        where lifecycle_state <> 'DELETED'
         order by
           "Age in Days" asc,
           title
