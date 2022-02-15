@@ -1,52 +1,43 @@
-report vcn_network_security_group_detail {
-  title = "OCI VCN Network Security Group Detail"
+report vcn_subnet_detail {
+  title = "OCI VCN Subnet Detail"
 
   input {
-    title = "Network Security Group"
+    title = "Subnet List"
     type = "select"
-    width = 3
-
     sql = <<-EOQ
       select 
         display_name as label,
         id as value 
       from 
-        oci_core_network_security_group
+        oci_core_subnet
     EOQ
+    width = 3
   }
 
   container {
 
     card {
-      width = 2
+      width = 3
 
       sql = <<-EOQ
-        select 
-          'Ingress Rules' as label,
-          count(*) as value
-        from
-          oci_core_network_security_group g,
-          jsonb_array_elements(g.rules) as r
-        where
-          r is not null and (r ->> 'direction') = 'INGRESS'
+        select count(*) as "Subnets" from oci_core_subnet
       EOQ
     }
 
     card {
-      width = 2
+      width = 3
 
       sql = <<-EOQ
-        select
-          'Egress Rules' as label,
-          count(*) as value     
-        from
-          oci_core_network_security_group g,
-          jsonb_array_elements(g.rules) as r
+        select 
+          count(*) as value,
+          'Subnets with Public IP not prohibited on VNIC' as label,
+          case when count(*) = 0 then 'ok' else 'alert' end as type    
+        from 
+          oci_core_subnet
         where
-          r is not null and (r ->> 'direction') = 'EGRESS'
+          not prohibit_public_ip_on_vnic
       EOQ
     }
-
   }
 
   container {
@@ -55,13 +46,12 @@ report vcn_network_security_group_detail {
     container {
 
       container {
-        width = 12
 
         table {
           title = "Overview"
           width = 12
 
-          sql = <<-EOQ
+          sql   = <<-EOQ
             select
               display_name,
               id,
@@ -70,7 +60,7 @@ report vcn_network_security_group_detail {
               title,
               tenant_id
             from
-              oci_core_network_security_group
+              oci_core_subnet
           EOQ
         }
 
@@ -83,7 +73,7 @@ report vcn_network_security_group_detail {
               tag.key as "Key",
               tag.value as "Value"
             from
-              oci_core_network_security_group,
+              oci_core_subnet,
               jsonb_each_text(tags) as tag
           EOQ
         }

@@ -9,7 +9,7 @@ query "oci_core_vcn_no_subnet_count" {
   sql = <<-EOQ
     select 
       count(*) as value,
-      'VCNs With No Subnets' as label,
+      'VCNs with no Subnets' as label,
       case when count(*) = 0 then 'ok' else 'alert' end as type    
     from 
       oci_core_vcn as vcn
@@ -22,7 +22,7 @@ query "oci_core_vcn_no_internet_gateway" {
   sql = <<-EOQ
     select 
       count(*) as value,
-      'VCNs With No Internet Gateways' as label,
+      'VCNs with no Internet Gateways' as label,
       case when count(*) = 0 then 'ok' else 'alert' end as type    
     from 
       oci_core_vcn as vcn
@@ -35,7 +35,7 @@ query "oci_core_vcn_no_nat_gateway" {
   sql = <<-EOQ
     select 
       count(*) as value,
-      'VCNs With No Nat Gateways' as label,
+      'VCNs with no Nat Gateways' as label,
       case when count(*) = 0 then 'ok' else 'alert' end as type    
     from 
       oci_core_vcn as vcn
@@ -87,7 +87,7 @@ query "oci_core_vcn_by_region" {
 }
 
 
-query "aws_vpc_by_rfc1918_range" {
+query "aws_vcn_by_rfc1918_range" {
   sql = <<-EOQ
     with cidr_buckets as (
       select 
@@ -168,7 +168,7 @@ report "oci_core_vcn_dashboard" {
 
     chart {
       title = "VCNs by RFC1918 Range"
-      sql   = query.aws_vpc_by_rfc1918_range.sql
+      sql   = query.aws_vcn_by_rfc1918_range.sql
       type  = "column"
       width = 4
     }
