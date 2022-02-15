@@ -168,7 +168,7 @@ query "oci_mysql_db_system_top10_cpu_past_week" {
       id,
       avg(average)
     from
-      oci_mysql_db_system_metric_connections_daily
+      oci_mysql_db_system_metric_cpu_utilization_daily
     where
       timestamp  >= CURRENT_DATE - INTERVAL '7 day'
     group by
@@ -182,7 +182,7 @@ query "oci_mysql_db_system_top10_cpu_past_week" {
       id,
       average
     from
-      oci_mysql_db_system_metric_connections_hourly
+      oci_mysql_db_system_metric_cpu_utilization_hourly
     where
       timestamp  >= CURRENT_DATE - INTERVAL '7 day'
       and id in (select id from top_n)
@@ -209,7 +209,7 @@ query "oci_mysql_db_system_by_cpu_utilization_category" {
         end as cpu_bucket,
         max(average) as max_avg
       from
-        oci_mysql_db_system_metric_connections_daily
+        oci_mysql_db_system_metric_cpu_utilization_daily
       where
         date_part('day', now() - timestamp) <= 30
       group by
