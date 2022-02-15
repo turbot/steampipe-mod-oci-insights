@@ -1,4 +1,4 @@
-report "oci_boot_volume_Unattached_report" {
+report "oci_boot_volume_unattached_report" {
 
   title = "OCI Boot Volume Unattached Report"
 

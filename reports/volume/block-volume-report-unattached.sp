@@ -1,4 +1,4 @@
-report "oci_block_volume_Unattached_report" {
+report "oci_block_volume_unattached_report" {
 
   title = "OCI Block Volume Unattached Report"
 
