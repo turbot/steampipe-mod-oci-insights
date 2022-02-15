@@ -1,10 +1,9 @@
-# Added to report
 query "oci_compute_instance_count" {
   sql = <<-EOQ
     select count(*) as "Instances" from oci_core_instance
   EOQ
 }
-# Added to report
+
 query "oci_compute_instance_total_cores" {
   sql = <<-EOQ
     select
@@ -14,7 +13,6 @@ query "oci_compute_instance_total_cores" {
   EOQ
 }
 
-# Added to report
 query "oci_compute_instance_total_memory" {
   sql = <<-EOQ
     select
@@ -24,7 +22,6 @@ query "oci_compute_instance_total_memory" {
   EOQ
 }
 
-# Not added report
 query "oci_compute_instance_shape_by_total_memory" {
   sql = <<-EOQ
     select
@@ -35,7 +32,8 @@ query "oci_compute_instance_shape_by_total_memory" {
   EOQ
 }
 
-// Added to report
+# oci_compute_instance_by_public_ip TBD
+
 query "oci_compute_instance_running_above_90_days" {
   sql = <<-EOQ
     select
@@ -48,25 +46,36 @@ query "oci_compute_instance_running_above_90_days" {
       date_part('day', now() - time_created) > 90
   EOQ
 }
-# Added to report
+
 query "oci_compute_instance_by_compartment" {
   sql = <<-EOQ
-    select
+    with compartments as (
+      select
+        id, title
+      from
+        oci_identity_tenancy
+      union (
+      select
+        id,title
+      from
+        oci_identity_compartment
+      where lifecycle_state = 'ACTIVE')
+    )
+   select
       c.title as "compartment",
-      count(i.*) as "total"
+      count(i.*) as "instances"
     from
       oci_core_instance as i,
-      oci_identity_compartment as c
+      compartments as c
     where
-      c.compartment_id = i.compartment_id and c.lifecycle_state <> 'DELETED'
+      c.id = i.compartment_id and i.lifecycle_state <> 'DELETED'
     group by
       compartment
-    order by count(i.*) desc
-
+    order by
+      compartment
   EOQ
 }
 
-#Added to report
 query "oci_compute_instance_by_region" {
   sql = <<-EOQ
     select
@@ -79,7 +88,6 @@ query "oci_compute_instance_by_region" {
   EOQ
 }
 
-# Added
 query "oci_compute_instance_by_state" {
   sql = <<-EOQ
     select
@@ -92,7 +100,6 @@ query "oci_compute_instance_by_state" {
   EOQ
 }
 
-#Added
 query "oci_compute_instance_by_type" {
   sql = <<-EOQ
     select
@@ -105,7 +112,7 @@ query "oci_compute_instance_by_type" {
   EOQ
 }
 
-# New TBD
+# TBD
 query "oci_compute_instance_by_pv_encryption_intransit_status" {
   sql = <<-EOQ
     select
@@ -116,7 +123,6 @@ query "oci_compute_instance_by_pv_encryption_intransit_status" {
   EOQ
 }
 
-# Added
 query "oci_compute_instance_by_creation_month" {
   sql = <<-EOQ
     with instances as (
@@ -258,100 +264,61 @@ report "oci_compute_instance_summary" {
       width = 2
     }
 
-    # card {
-    #   sql   = query.oci_compute_unencrypted_instances_count.sql
-    #   width = 2
-    # }
-
-
-  #  card {
-  #     sql   = query.aws_ec2_instance_cost_last_30_counter.sql
-  #     width = 2
-  #   }
-
-  # card {
-  #     sql   = query.aws_ec2_instance_cost_30_60_counter.sql
-  #     width = 2
-  #   }
-
-
-    # chart {
-    #   title = "EC2 Monthly Cost"
-    #   type  = "column"
-    #   sql   = query.aws_ec2_instance_cost_per_month.sql
-    #   width = 2
-    #   # axes {
-    #   #   x {
-    #   #     labels {
-    #   #       display = "none"
-    #   #     }
-    #   #   }
-    #   # }
-
-    # }
   }
 
 
-    container {
-      title = "Analysis"
+  container {
+    title = "Analysis"
 
 
-      #title = "Counts"
-      chart {
-        title = "Instances by Compartment"
-        sql   = query.oci_compute_instance_by_compartment.sql
-        type  = "column"
-        width = 3
-      }
-
-
-      chart {
-        title = "Instances by Region"
-        sql   = query.oci_compute_instance_by_region.sql
-        type  = "column"
-        width = 3
-      }
-
-      chart {
-        title = "Instances by State"
-        sql   = query.oci_compute_instance_by_state.sql
-        type  = "column"
-        width = 3
-      }
-
-      chart {
-        title = "Instances by Shape"
-        sql   = query.oci_compute_instance_by_type.sql
-        type  = "column"
-        width = 3
-      }
-
+    #title = "Counts"
+    chart {
+      title = "Instances by Compartment"
+      sql   = query.oci_compute_instance_by_compartment.sql
+      type  = "column"
+      width = 3
     }
 
 
-    container {
-      title = "Assesments"
-      width = 6
-
-      chart {
-        title  = "Encryption Status [To Do]"
-        # sql    = query.oci_compute_instance_by_pv_encryption_intransit_status.sql
-        # type   = "donut"
-        width = 4
-      }
-
-
-    #  chart {
-    #     title = "Public/Private"
-    #     sql   = query.aws_ec2_instances_by_public_ip.sql
-    #     type  = "donut"
-    #     width = 4
-    #   }
-
+    chart {
+      title = "Instances by Region"
+      sql   = query.oci_compute_instance_by_region.sql
+      type  = "column"
+      width = 3
     }
+
+    chart {
+      title = "Instances by State"
+      sql   = query.oci_compute_instance_by_state.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Instances by Shape"
+      sql   = query.oci_compute_instance_by_type.sql
+      type  = "column"
+      width = 3
+    }
+
+  }
+
 
   container {
-    title  = "Performance & Utilization"
+    title = "Assesments"
+    width = 6
+
+    chart {
+      title = "Encryption Status [To Do]"
+      # sql    = query.oci_compute_instance_by_pv_encryption_intransit_status.sql
+      # type   = "donut"
+      width = 4
+    }
+
+  }
+
+  container {
+    title = "Performance & Utilization"
 
     chart {
       title = "Top 10 CPU - Last 7 days [ needs to be a crosstab?]"
@@ -379,7 +346,7 @@ report "oci_compute_instance_summary" {
 
 
   container {
-    title   = "Resources by Age"
+    title = "Resources by Age"
 
     chart {
       title = "Instance by Creation Month"
@@ -393,13 +360,11 @@ report "oci_compute_instance_summary" {
 
     }
 
-    #container {
-    #  width = 4
-      table {
-        title = "Oldest instances"
-        width = 4
-        # Validate the query
-        sql   = <<-EOQ
+    table {
+      title = "Oldest instances"
+      width = 4
+      # Validate the query
+      sql = <<-EOQ
           select
             title as "instance",
             (current_date - time_created::date) as "Age in Days",
@@ -412,13 +377,13 @@ report "oci_compute_instance_summary" {
             title
           limit 5
         EOQ
-      }
+    }
 
-      table {
-        title = "Newest instances"
-        width = 4
+    table {
+      title = "Newest instances"
+      width = 4
 
-        sql   = <<-EOQ
+      sql = <<-EOQ
           select
             title as "instance",
             current_date - time_created::date as "Age in Days",
@@ -430,7 +395,7 @@ report "oci_compute_instance_summary" {
             title
           limit 5
         EOQ
-      }
+    }
 
     #}
 

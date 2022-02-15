@@ -1,6 +1,6 @@
 mod "oci_insights" {
   # hub metadata
-  title         = "OCi Insights"
+  title         = "OCI Insights"
   description   = "Create dashboards and reports for your OCI resources using Steampipe."
   color         = "#FF9900"
   documentation = file("./docs/index.md")
