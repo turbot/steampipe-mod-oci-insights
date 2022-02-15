@@ -1,6 +1,11 @@
 query "oci_mysql_db_system_count" {
   sql = <<-EOQ
-    select count(*) as "MySQL DB Systems" from oci_mysql_db_system where lifecycle_state <> 'DELETED'
+  select 
+    count(*) as "MySQL DB Systems" 
+  from 
+    oci_mysql_db_system 
+  where 
+    lifecycle_state <> 'DELETED'
   EOQ
 }
 
@@ -39,7 +44,9 @@ query "oci_mysql_db_system_automatic_backup_disabled_count" {
 
 query "oci_mysql_db_system_by_region" {
   sql = <<-EOQ
-    select region as "Region", count(*) as "MySQL DB Systems" 
+    select 
+      region as "Region", 
+      count(*) as "MySQL DB Systems" 
     from 
       oci_mysql_db_system
     where
@@ -53,18 +60,20 @@ query "oci_mysql_db_system_by_region" {
 
 query "oci_mysql_db_system_by_compartment" {
   sql = <<-EOQ
-  with compartments as (
-      select
-        id, title
-      from
-        oci_identity_tenancy
-      union (
-      select 
-        id,title 
-      from 
-        oci_identity_compartment 
-      where lifecycle_state = 'ACTIVE')  
-    )
+  with compartments as ( 
+        select
+          id, title
+        from
+          oci_identity_tenancy
+        union (
+          select 
+            id,title 
+          from 
+            oci_identity_compartment 
+          where 
+            lifecycle_state = 'ACTIVE'
+          )  
+       )
    select 
       c.title as "compartment",
       count(d.*) as "MySQL DB Systems" 
@@ -164,20 +173,20 @@ query "oci_mysql_db_system_by_creation_month" {
 query "oci_mysql_db_system_top10_cpu_past_week" {
   sql = <<-EOQ
      with top_n as (
+      select
+        id,
+        avg(average)
+      from
+        oci_mysql_db_system_metric_cpu_utilization_daily
+      where
+        timestamp  >= CURRENT_DATE - INTERVAL '7 day'
+      group by
+        id
+      order by
+        avg desc
+      limit 10
+    )
     select
-      id,
-      avg(average)
-    from
-      oci_mysql_db_system_metric_cpu_utilization_daily
-    where
-      timestamp  >= CURRENT_DATE - INTERVAL '7 day'
-    group by
-      id
-    order by
-      avg desc
-    limit 10
-  )
-  select
       timestamp,
       id,
       average
@@ -324,17 +333,32 @@ report "oci_mysql_db_system_dashboard" {
       width = 4
 
       sql = <<-EOQ
+       with compartments as ( 
         select
-          title as "MySQL DB Systems",
-          current_date - time_created::date as "Age in Days",
-          compartment_id as "Compartment"
+          id, title
         from
-          oci_mysql_db_system
-        where
-          lifecycle_state <> 'DELETED'     
+          oci_identity_tenancy
+        union (
+          select 
+            id,title 
+          from 
+            oci_identity_compartment 
+          where 
+            lifecycle_state = 'ACTIVE'
+          )  
+       )
+        select
+          d.title as "MySQL DB Systems",
+          current_date - d.time_created::date as "Age in Days",
+          c.title as "Compartment"
+        from
+          oci_mysql_db_system as d
+          left join compartments as c on c.id = d.compartment_id
+        where 
+          lifecycle_state <> 'DELETED'    
         order by
           "Age in Days" desc,
-          title
+          d.title
         limit 5
       EOQ
     }
@@ -344,17 +368,32 @@ report "oci_mysql_db_system_dashboard" {
       width = 4
 
       sql = <<-EOQ
+      with compartments as ( 
         select
-          title as "MySQL DB Systems",
-          current_date - time_created::date as "Age in Days",
-          compartment_id as "Compartment"
+          id, title
         from
-          oci_mysql_db_system
-        where  
+          oci_identity_tenancy
+        union (
+          select 
+            id,title 
+          from 
+            oci_identity_compartment 
+          where 
+            lifecycle_state = 'ACTIVE'
+          )  
+       )
+        select
+          d.title as "MySQL DB Systems",
+          current_date - d.time_created::date as "Age in Days",
+          c.title as "Compartment"
+        from
+          oci_mysql_db_system as d
+          left join compartments as c on c.id = d.compartment_id
+        where 
           lifecycle_state <> 'DELETED'    
         order by
           "Age in Days" asc,
-          title
+          d.title
         limit 5
       EOQ
     }

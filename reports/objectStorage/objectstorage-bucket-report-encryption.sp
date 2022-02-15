@@ -27,18 +27,20 @@ report "oci_objectstorage_bucket_encryption_report" {
 
   table {
     sql = <<-EOQ
-      with compartments as (
-      select
-        id, title
-      from
-        oci_identity_tenancy
-      union (
-      select 
-        id,title 
-      from 
-        oci_identity_compartment 
-      where lifecycle_state = 'ACTIVE')  
-    )
+      with compartments as ( 
+        select
+          id, title
+        from
+          oci_identity_tenancy
+        union (
+          select 
+            id,title 
+          from 
+            oci_identity_compartment 
+          where 
+            lifecycle_state = 'ACTIVE'
+          )  
+       )
       select
         b.name as "Bucket",
         case when b.kms_key_id is not null then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",

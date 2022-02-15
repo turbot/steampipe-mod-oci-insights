@@ -229,15 +229,32 @@ report "oci_filestorage_filesystem_dashboard" {
       width = 4
 
       sql = <<-EOQ
+      with compartments as ( 
         select
-          title as "filesystem",
-          current_date - time_created::date as "Age in Days",
-          compartment_id as "Compartment"
+          id, title
         from
-          oci_file_storage_file_system
+          oci_identity_tenancy
+        union (
+          select 
+            id,title 
+          from 
+            oci_identity_compartment 
+          where 
+            lifecycle_state = 'ACTIVE'
+          )  
+       )
+       select
+          s.title as "filesystem",
+          current_date - s.time_created::date as "Age in Days",
+          c.title as "Compartment"
+        from
+          oci_file_storage_file_system as s
+          left join compartments as c on c.id = s.compartment_id
+        where 
+          lifecycle_state <> 'DELETED'  
         order by
           "Age in Days" desc,
-          title
+          s.title
         limit 5
       EOQ
     }
@@ -247,15 +264,32 @@ report "oci_filestorage_filesystem_dashboard" {
       width = 4
 
       sql = <<-EOQ
+      with compartments as ( 
         select
-          title as "filesystem",
-          current_date - time_created::date as "Age in Days",
-          compartment_id as "Compartment"
+          id, title
         from
-          oci_file_storage_file_system
+          oci_identity_tenancy
+        union (
+          select 
+            id,title 
+          from 
+            oci_identity_compartment 
+          where 
+            lifecycle_state = 'ACTIVE'
+          )  
+       )
+       select
+          s.title as "filesystem",
+          current_date - s.time_created::date as "Age in Days",
+          c.title as "Compartment"
+        from
+          oci_file_storage_file_system as s
+          left join compartments as c on c.id = s.compartment_id
+        where 
+          lifecycle_state <> 'DELETED'  
         order by
           "Age in Days" asc,
-          title
+          s.title
         limit 5
       EOQ
     }
@@ -263,3 +297,5 @@ report "oci_filestorage_filesystem_dashboard" {
   }
 
 }
+
+    

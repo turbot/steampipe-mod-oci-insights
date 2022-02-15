@@ -12,18 +12,20 @@ report "oci_boot_volume_Unattached_report" {
 
   table {
     sql = <<-EOQ
-      with compartments as (
-      select
-        id, title
-      from
-        oci_identity_tenancy
-      union (
-      select 
-        id,title 
-      from 
-        oci_identity_compartment 
-      where lifecycle_state = 'ACTIVE')  
-    )
+      with compartments as ( 
+        select
+          id, title
+        from
+          oci_identity_tenancy
+        union (
+          select 
+            id,title 
+          from 
+            oci_identity_compartment 
+          where 
+            lifecycle_state = 'ACTIVE'
+          )  
+       )
       select
         v.display_name as "Boot Volume",
         case when a.id is null then 'Unattached' else 'Attached' end as "Attachment Status",

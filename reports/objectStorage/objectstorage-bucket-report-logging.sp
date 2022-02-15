@@ -35,18 +35,20 @@ report "oci_objectstorage_bucket_logging_report" {
 
   table {
     sql = <<-EOQ
-      with compartments as (
-      select
-        id, title
-      from
-        oci_identity_tenancy
-      union (
-      select 
-        id,title 
-      from 
-        oci_identity_compartment 
-      where lifecycle_state = 'ACTIVE')  
-    ),
+      with compartments as ( 
+        select
+          id, title
+        from
+          oci_identity_tenancy
+        union (
+          select 
+            id,title 
+          from 
+            oci_identity_compartment 
+          where 
+            lifecycle_state = 'ACTIVE'
+          )  
+       ),
       namewithregion as (
       select
         concat(configuration -> 'source' ->> 'resource', region) as namewithregion,

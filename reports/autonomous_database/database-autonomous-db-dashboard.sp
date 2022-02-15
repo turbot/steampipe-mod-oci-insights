@@ -407,18 +407,34 @@ report "oci_database_autonomous_db_summary" {
       width = 4
 
       sql = <<-EOQ
+        with compartments as ( 
           select
-            title as "database",
-            (current_date - time_created::date) as "Age in Days",
-            compartment_id as "Compartment"
+            id, title
           from
-            oci_database_autonomous_database
-          where lifecycle_state <> 'TERMINATED'
-          order by
-            "Age in Days" desc,
-            title
-          limit 5
-        EOQ
+            oci_identity_tenancy
+          union (
+            select 
+              id,title 
+            from 
+              oci_identity_compartment 
+            where 
+              lifecycle_state = 'ACTIVE'
+            )  
+        )
+       select
+          d.title as "instance",
+          current_date - d.time_created::date as "Age in Days",
+          c.title as "Compartment"
+        from
+          oci_database_autonomous_database as d
+          left join compartments as c on c.id = d.compartment_id
+        where 
+          lifecycle_state <> 'TERMINATED'  
+        order by
+          "Age in Days" desc,
+          d.title
+        limit 5
+      EOQ
     }
 
     table {
@@ -426,18 +442,35 @@ report "oci_database_autonomous_db_summary" {
       width = 4
 
       sql = <<-EOQ
+        with compartments as ( 
           select
-            title as "instance",
-            current_date - time_created::date as "Age in Days",
-            compartment_id as "Compartment"
+            id, title
           from
-            oci_database_autonomous_database
-          where lifecycle_state <> 'TERMINATED'
-          order by
-            "Age in Days" asc,
-            title
-          limit 5
-        EOQ
+            oci_identity_tenancy
+          union (
+            select 
+              id,title 
+            from 
+              oci_identity_compartment 
+            where 
+              lifecycle_state = 'ACTIVE'
+            )  
+        )
+       select
+          d.title as "instance",
+          current_date - d.time_created::date as "Age in Days",
+          c.title as "Compartment"
+        from
+          oci_database_autonomous_database as d
+          left join compartments as c on c.id = d.compartment_id
+        where 
+          lifecycle_state <> 'TERMINATED'  
+        order by
+          "Age in Days" asc,
+          d.title
+        limit 5
+      EOQ
     }
   }
 }
+
