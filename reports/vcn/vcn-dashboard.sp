@@ -87,7 +87,7 @@ query "oci_core_vcn_by_region" {
 }
 
 
-query "aws_vcn_by_rfc1918_range" {
+query "oci_vcn_by_rfc1918_range" {
   sql = <<-EOQ
     with cidr_buckets as (
       select 
@@ -168,7 +168,7 @@ report "oci_core_vcn_dashboard" {
 
     chart {
       title = "VCNs by RFC1918 Range"
-      sql   = query.aws_vcn_by_rfc1918_range.sql
+      sql   = query.oci_vcn_by_rfc1918_range.sql
       type  = "column"
       width = 4
     }
