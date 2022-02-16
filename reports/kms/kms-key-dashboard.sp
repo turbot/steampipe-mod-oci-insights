@@ -4,6 +4,18 @@ query "oci_kms_key_count" {
   EOQ
 }
 
+# query "oci_kms_key_pending_deletion_count" {
+#   sql = <<-EOQ
+#     select count(*) as "Pending Deletion Keys" from oci_kms_key where lifecycle_state = 'PENDING_DELETION'
+#   EOQ
+# }
+
+query "oci_kms_key_disabled_count" {
+  sql = <<-EOQ
+    select count(*) as "Disabled Keys" from oci_kms_key where lifecycle_state = 'DISABLED'
+  EOQ
+}
+
 # key count by protection_mode i.e. HSM or Software
 query "oci_kms_hsm_key_count" {
   sql = <<-EOQ
@@ -151,6 +163,16 @@ report "oci_kms_key_summary" {
       width = 2
     }
 
+    # card {
+    #   sql   = query.oci_kms_key_pending_deletion_count.sql
+    #   width = 2
+    # }
+
+    card {
+      sql   = query.oci_kms_key_disabled_count.sql
+      width = 2
+    }
+
     card {
       sql   = query.oci_kms_hsm_key_count.sql
       width = 2
@@ -158,11 +180,6 @@ report "oci_kms_key_summary" {
 
     card {
       sql   = query.oci_kms_software_key_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_kms_key_pending_deletion.sql
       width = 2
     }
 
