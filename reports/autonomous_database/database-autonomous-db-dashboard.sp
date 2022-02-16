@@ -1,6 +1,46 @@
 query "oci_database_autonomous_database_count" {
   sql = <<-EOQ
-    select count(*) as "Autonomous Database" from oci_database_autonomous_database
+    select count(*) as "Autonomous Database" from oci_database_autonomous_database where lifecycle_state <> 'TERMINATED'
+  EOQ
+}
+
+# AVAILABLE, AVAILABLE_NEEDS_ATTENTION, BACKUP_IN_PROGRESS, MAINTENANCE_IN_PROGRESS, PROVISIONING, RESTORE_FAILED, RESTORE_IN_PROGRESS, SCALE_IN_PROGRESS, STARTING, STOPPED, STOPPING, TERMINATED, TERMINATING, UNAVAILABLE, UPDATING
+query "oci_database_autonomous_database_need_attention_count" {
+  sql = <<-EOQ
+    select
+      count(*) as  value,
+      'DB Needs Attention State' as label,
+      case count(*) when 0 then 'ok' else 'alert' end as type
+    from
+      oci_database_autonomous_database
+    where
+      lifecycle_state = 'AVAILABLE_NEEDS_ATTENTION'
+  EOQ
+}
+
+query "oci_database_autonomous_database_restore_failed_count" {
+  sql = <<-EOQ
+    select
+      count(*) as  value,
+      'DB Failed Restore State' as label,
+      case count(*) when 0 then 'ok' else 'alert' end as type
+    from
+      oci_database_autonomous_database
+    where
+      lifecycle_state = 'RESTORE_FAILED'
+  EOQ
+}
+
+query "oci_database_autonomous_database_unavailable_count" {
+  sql = <<-EOQ
+    select
+      count(*) as  value,
+      'DB Not Available State' as label,
+      case count(*) when 0 then 'ok' else 'alert' end as type
+    from
+      oci_database_autonomous_database
+    where
+      lifecycle_state = 'UNAVAILABLE'
   EOQ
 }
 
@@ -14,9 +54,19 @@ query "oci_database_autonomous_db_total_cores" {
   EOQ
 }
 
+# cpu_core_count
+query "oci_database_autonomous_db_total_size" {
+  sql = <<-EOQ
+    select
+      sum(data_storage_size_in_gbs)  as "Total Size"
+    from
+      oci_database_autonomous_database
+  EOQ
+}
+
 query "oci_database_autonomous_db_with_data_guard" {
   sql = <<-EOQ
-    select count(*) as "Data Guard Enabled" from oci_database_autonomous_database where is_data_guard_enabled
+    select count(*) as "DB With Data Guard Enabled" from oci_database_autonomous_database where is_data_guard_enabled
   EOQ
 }
 
@@ -59,7 +109,6 @@ query "oci_database_autonomous_db_by_workload_type" {
   EOQ
 }
 
-# Data Guard enabled ?
 # oci_database_autonomous_db_with_data_guard
 query "oci_database_autonomous_db_data_guard_status" {
   sql = <<-EOQ
@@ -285,6 +334,25 @@ report "oci_database_autonomous_db_summary" {
     }
 
     card {
+      sql   = query.oci_database_autonomous_db_total_size.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_database_autonomous_database_need_attention_count.sql
+      width = 2
+    }
+    card {
+      sql   = query.oci_database_autonomous_database_restore_failed_count.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_database_autonomous_database_unavailable_count.sql
+      width = 2
+    }
+
+    card {
       sql   = query.oci_database_autonomous_db_with_data_guard.sql
       width = 2
     }
@@ -407,19 +475,19 @@ report "oci_database_autonomous_db_summary" {
       width = 4
 
       sql = <<-EOQ
-        with compartments as ( 
+        with compartments as (
           select
             id, title
           from
             oci_identity_tenancy
           union (
-          select 
-            id,title 
-          from 
-            oci_identity_compartment 
-          where 
+          select
+            id,title
+          from
+            oci_identity_compartment
+          where
             lifecycle_state = 'ACTIVE'
-          )  
+          )
        )
        select
           d.title as "instance",
@@ -428,8 +496,8 @@ report "oci_database_autonomous_db_summary" {
         from
           oci_database_autonomous_database as d
           left join compartments as c on c.id = d.compartment_id
-        where 
-          lifecycle_state <> 'TERMINATED'  
+        where
+          lifecycle_state <> 'TERMINATED'
         order by
           "Age in Days" desc,
           d.title
@@ -442,19 +510,19 @@ report "oci_database_autonomous_db_summary" {
       width = 4
 
       sql = <<-EOQ
-        with compartments as ( 
+        with compartments as (
           select
             id, title
           from
             oci_identity_tenancy
           union (
-          select 
-            id,title 
-          from 
-            oci_identity_compartment 
-          where 
+          select
+            id,title
+          from
+            oci_identity_compartment
+          where
             lifecycle_state = 'ACTIVE'
-          )  
+          )
        )
        select
           d.title as "instance",
@@ -463,8 +531,8 @@ report "oci_database_autonomous_db_summary" {
         from
           oci_database_autonomous_database as d
           left join compartments as c on c.id = d.compartment_id
-        where 
-          lifecycle_state <> 'TERMINATED'  
+        where
+          lifecycle_state <> 'TERMINATED'
         order by
           "Age in Days" asc,
           d.title
