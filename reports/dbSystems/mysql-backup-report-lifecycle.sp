@@ -1,13 +1,26 @@
-query "oci_mysql_backup_not_active_lifecycle_count" {
+query "oci_mysql_backup_inactive_lifecycle_count" {
   sql = <<-EOQ
     select
       count(*) as value,
-      'Lifecycle State Not Active' as label,
+      'Inactive Lifecycle State Not Active' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
       oci_mysql_backup
     where
-      lifecycle_state not in ('ACTIVE','DELETED')
+      lifecycle_state = 'INACTIVE'
+  EOQ
+}
+
+query "oci_mysql_backup_failed_lifecycle_count" {
+  sql = <<-EOQ
+    select
+      count(*) as value,
+      'Failed Lifecycle State Not Active' as label,
+      case count(*) when 0 then 'ok' else 'alert' end as "type"
+    from
+      oci_mysql_backup
+    where
+      lifecycle_state = 'FAILED'
   EOQ
 }
 
@@ -18,7 +31,12 @@ report "oci_mysql_backup_lifecycle_report" {
   container {
 
     card {
-      sql = query.oci_mysql_backup_not_active_lifecycle_count.sql
+      sql = query.oci_mysql_backup_inactive_lifecycle_count.sql
+      width = 2
+    }
+
+    card {
+      sql = query.oci_mysql_backup_failed_lifecycle_count.sql
       width = 2
     }
   }
@@ -49,7 +67,7 @@ report "oci_mysql_backup_lifecycle_report" {
         oci_mysql_backup as b
         left join compartments as c on c.id = b.Compartment_id
       where 
-        t.lifecycle_state <> 'DELETED'  
+        b.lifecycle_state <> 'DELETED'  
     EOQ
   }
 

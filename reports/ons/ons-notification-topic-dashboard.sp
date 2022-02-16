@@ -1,6 +1,6 @@
 query "oci_ons_notification_topic_count" {
   sql = <<-EOQ
-    select count(*) as "Topics" from oci_ons_notification_topic where lifecycle_state <> 'DELETED'
+    select count(*) as "Topics" from oci_ons_notification_topic
   EOQ
 }
 
@@ -10,9 +10,7 @@ query "oci_ons_notification_topic_by_region" {
     region as "Region", 
     count(*) as "Topics" 
     from 
-      oci_ons_notification_topic
-    where
-      lifecycle_state <> 'DELETED'   
+      oci_ons_notification_topic 
     group by 
       region 
     order by 
@@ -43,7 +41,7 @@ query "oci_ons_notification_topic_by_compartment" {
       oci_ons_notification_topic as t,
       compartments as c 
     where 
-      c.id = t.compartment_id and lifecycle_state <> 'DELETED'
+      c.id = t.compartment_id
     group by 
       compartment
     order by 
@@ -57,9 +55,7 @@ query "oci_ons_notification_topic_by_lifecycle_state" {
       lifecycle_state,
       count(lifecycle_state)
     from
-      oci_ons_notification_topic
-    where
-      lifecycle_state <> 'DELETED'     
+      oci_ons_notification_topic     
     group by
       lifecycle_state
   EOQ
@@ -74,9 +70,7 @@ query "oci_ons_notification_topic_by_creation_month" {
         to_char(time_created,
           'YYYY-MM') as creation_month
       from
-        oci_ons_notification_topic
-      where
-      lifecycle_state <> 'DELETED'     
+        oci_ons_notification_topic    
     ),
     months as (
       select
@@ -191,9 +185,7 @@ report "oci_ons_notification_topic_dashboard" {
           c.title as "Compartment"
         from
           oci_ons_notification_topic as t
-          left join compartments as c on c.id = t.compartment_id
-        where 
-          lifecycle_state <> 'DELETED'    
+          left join compartments as c on c.id = t.compartment_id   
         order by
           "Age in Days" desc,
           t.title
@@ -226,9 +218,7 @@ report "oci_ons_notification_topic_dashboard" {
           c.title as "Compartment"
         from
           oci_ons_notification_topic as t
-          left join compartments as c on c.id = t.compartment_id
-        where 
-          lifecycle_state <> 'DELETED'    
+          left join compartments as c on c.id = t.compartment_id  
         order by
           "Age in Days" asc,
           t.title
