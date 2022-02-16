@@ -38,6 +38,21 @@ report vcn_subnet_detail {
           not prohibit_public_ip_on_vnic
       EOQ
     }
+
+    card {
+      width = 3
+
+      sql = <<-EOQ
+        select 
+          count(*) as value,
+          'Flow Logs not Configured' as label,
+          case when count(*) = 0 then 'ok' else 'alert' end as type    
+        from 
+          oci_logging_log
+        where
+          (configuration -> 'source' ->> 'resource') not like 'ocid1.subnet.oc1%'
+      EOQ
+    }
   }
 
   container {
