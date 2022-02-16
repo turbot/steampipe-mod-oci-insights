@@ -73,7 +73,7 @@ query "oci_objectstorage_bucket_by_region" {
 
 query "oci_objectstorage_bucket_by_compartment" {
   sql = <<-EOQ
-  with compartments as (
+    with compartments as ( 
       select
         id, title
       from
@@ -83,7 +83,9 @@ query "oci_objectstorage_bucket_by_compartment" {
         id,title 
       from 
         oci_identity_compartment 
-      where lifecycle_state = 'ACTIVE')  
+      where 
+        lifecycle_state = 'ACTIVE'
+      )  
     )
    select 
       c.title as "compartment",
@@ -257,15 +259,30 @@ report "oci_objectstorage_bucket_dashboard" {
       width = 4
 
       sql = <<-EOQ
+        with compartments as ( 
+          select
+            id, title
+          from
+            oci_identity_tenancy
+          union (
+          select 
+            id,title 
+          from 
+            oci_identity_compartment 
+          where 
+            lifecycle_state = 'ACTIVE'
+          )  
+       )
         select
-          title as "bucket",
-          current_date - time_created::date as "Age in Days",
-          compartment_id as "Compartment"
+          b.title as "bucket",
+          current_date - b.time_created::date as "Age in Days",
+          c.title as "Compartment"
         from
-          oci_objectstorage_bucket
+          oci_objectstorage_bucket as b
+          left join compartments as c on c.id = b.compartment_id
         order by
           "Age in Days" desc,
-          title
+          b.title
         limit 5
       EOQ
     }
@@ -275,15 +292,30 @@ report "oci_objectstorage_bucket_dashboard" {
       width = 4
 
       sql = <<-EOQ
+        with compartments as ( 
+          select
+            id, title
+          from
+            oci_identity_tenancy
+          union (
+          select 
+            id,title 
+          from 
+            oci_identity_compartment 
+          where 
+            lifecycle_state = 'ACTIVE'
+          )  
+       )
         select
-          title as "bucket",
-          current_date - time_created::date as "Age in Days",
-          compartment_id as "Compartment"
+          b.title as "bucket",
+          current_date - b.time_created::date as "Age in Days",
+          c.title as "Compartment"
         from
-          oci_objectstorage_bucket
+          oci_objectstorage_bucket as b
+          left join compartments as c on c.id = b.compartment_id
         order by
           "Age in Days" asc,
-          title
+          b.title
         limit 5
       EOQ
     }

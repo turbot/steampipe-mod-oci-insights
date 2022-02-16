@@ -30,18 +30,20 @@ report "oci_objectstorage_bucket_public_access_report" {
 
   table {
     sql = <<-EOQ
-      with compartments as (
-      select
-        id, title
-      from
-        oci_identity_tenancy
-      union (
-      select 
-        id,title 
-      from 
-        oci_identity_compartment 
-      where lifecycle_state = 'ACTIVE')  
-    )
+      with compartments as ( 
+        select
+          id, title
+        from
+          oci_identity_tenancy
+        union (
+        select 
+          id,title 
+        from 
+          oci_identity_compartment 
+        where 
+          lifecycle_state = 'ACTIVE'
+        )  
+       )
       select
         b.name as "Bucket",
         case when b.public_access_type = 'NoPublicAccess' then 'Not Public' else 'Public' end as "Bucket Access",

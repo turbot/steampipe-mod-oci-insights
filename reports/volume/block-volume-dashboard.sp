@@ -46,18 +46,20 @@ query "oci_block_volume_unattached_volumes_count" {
 
 query "oci_block_volume_by_compartment" {
   sql = <<-EOQ
-  with compartments as (
-      select
-        id, title
-      from
-        oci_identity_tenancy
-      union (
-      select 
-        id,title 
-      from 
-        oci_identity_compartment 
-      where lifecycle_state = 'ACTIVE')  
-    )
+  with compartments as ( 
+        select
+          id, title
+        from
+          oci_identity_tenancy
+        union (
+        select 
+          id,title 
+        from 
+          oci_identity_compartment 
+        where 
+          lifecycle_state = 'ACTIVE'
+        )  
+       )
    select 
       c.title as "compartment",
       count(v.*) as "Block volumes" 
@@ -75,7 +77,7 @@ query "oci_block_volume_by_compartment" {
 
 query "oci_block_volume_storage_by_compartment" {
   sql = <<-EOQ
-  with compartments as (
+    with compartments as ( 
       select
         id, title
       from
@@ -85,7 +87,9 @@ query "oci_block_volume_storage_by_compartment" {
         id,title 
       from 
         oci_identity_compartment 
-      where lifecycle_state = 'ACTIVE')  
+      where 
+        lifecycle_state = 'ACTIVE'
+      )  
     )
    select 
       c.title as "compartment",
@@ -344,16 +348,32 @@ report "oci_block_volume_dashboard" {
       width = 4
 
       sql = <<-EOQ
-        select
-          title as "volume",
-          current_date - time_created::date as "Age in Days",
-          compartment_id as "Compartment"
+        with compartments as ( 
+          select
+            id, title
+          from
+            oci_identity_tenancy
+          union (
+          select 
+            id,title 
+          from 
+            oci_identity_compartment 
+          where 
+            lifecycle_state = 'ACTIVE'
+          )  
+       )
+       select
+          v.title as "Volume",
+          current_date - v.time_created::date as "Age in Days",
+          c.title as "Compartment"
         from
-          oci_core_volume
-        where lifecycle_state <> 'DELETED'
+          oci_core_volume as v
+          left join compartments as c on c.id = v.compartment_id
+        where 
+          lifecycle_state <> 'DELETED'   
         order by
           "Age in Days" desc,
-          title
+          v.title
         limit 5
       EOQ
     }
@@ -363,16 +383,32 @@ report "oci_block_volume_dashboard" {
       width = 4
 
       sql = <<-EOQ
-        select
-          title as "volume",
-          current_date - time_created::date as "Age in Days",
-          compartment_id as "Compartment"
+        with compartments as ( 
+          select
+            id, title
+          from
+            oci_identity_tenancy
+          union (
+          select 
+            id,title 
+          from 
+            oci_identity_compartment 
+          where 
+            lifecycle_state = 'ACTIVE'
+          )  
+       )
+       select
+          v.title as "Volume",
+          current_date - v.time_created::date as "Age in Days",
+          c.title as "Compartment"
         from
-          oci_core_volume
-        where lifecycle_state <> 'DELETED'  
+          oci_core_volume as v
+          left join compartments as c on c.id = v.compartment_id
+        where 
+          lifecycle_state <> 'DELETED'   
         order by
           "Age in Days" asc,
-          title
+          v.title
         limit 5
       EOQ
     }
@@ -380,3 +416,5 @@ report "oci_block_volume_dashboard" {
   }
 
 }
+
+      

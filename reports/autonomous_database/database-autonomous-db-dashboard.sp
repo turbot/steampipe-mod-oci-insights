@@ -14,54 +14,11 @@ query "oci_database_autonomous_db_total_cores" {
   EOQ
 }
 
-# data_safe_status
-
-# query "aws_rds_public_db_instances_count" {
-#   sql = <<-EOQ
-#     select
-#       count(*) as value,
-#       'Public Instances' as label,
-#       case count(*) when 0 then 'ok' else 'alert' end as style
-#     from
-#       aws_rds_db_instance
-#     where
-#       publicly_accessible
-#   EOQ
-# }
-
 query "oci_database_autonomous_db_with_data_guard" {
   sql = <<-EOQ
     select count(*) as "Data Guard Enabled" from oci_database_autonomous_database where is_data_guard_enabled
   EOQ
 }
-
-// TBD
-# query "aws_rds_unencrypted_db_instances_count" {
-#   sql = <<-EOQ
-#     select
-#       count(*) as value,
-#       'Unencrypted Instances' as label,
-#       case count(*) when 0 then 'ok' else 'alert' end as style
-#     from
-#       aws_rds_db_instance
-#     where
-#       not storage_encrypted
-#   EOQ
-# }
-
-// TBD
-# query "aws_rds_db_instance_not_in_vpc_count" {
-#   sql = <<-EOQ
-#     select
-#       count(*) as value,
-#       'Instances Not In VPC' as label,
-#       case count(*) when 0 then 'ok' else 'alert' end as style
-#     from
-#       aws_rds_db_instance
-#     where
-#       vpc_id is null
-#   EOQ
-# }
 
 query "oci_database_autonomous_db_by_compartment" {
   sql = <<-EOQ
@@ -102,32 +59,31 @@ query "oci_database_autonomous_db_by_workload_type" {
   EOQ
 }
 
-# Data Guard check ?
-# query "aws_rds_db_instance_multiple_az_status" {
-#   sql = <<-EOQ
-#     with multiaz_stat as (
-#     select
-#       distinct db_instance_identifier as name
-#     from
-#       aws_rds_db_instance
-#     where
-#       multi_az
-#       and not (engine ilike any (array ['%aurora-mysql%', '%aurora-postgres%']))
-#     group by name
-#  )
-#   select
-#     'Enabled' as "Multi-AZ Status",
-#     count(name) as "Total"
-#   from
-#     multiaz_stat
-# union
-#   select
-#     'Disabled' as "Multi-AZ Status",
-#     count( db_instance_identifier) as "Total"
-#   from
-#     aws_rds_db_instance as s where s.db_instance_identifier not in (select name from multiaz_stat);
-#   EOQ
-# }
+# Data Guard enabled ?
+# oci_database_autonomous_db_with_data_guard
+query "oci_database_autonomous_db_data_guard_status" {
+  sql = <<-EOQ
+    with dataguard_stat as (
+      select
+        db_name as name
+      from
+        oci_database_autonomous_database
+      where
+        is_data_guard_enabled
+      )
+      select
+        'Enabled' as "Data Guard Status",
+        count(name) as "Total"
+      from
+        dataguard_stat
+    union
+    select
+      'Disabled' as "Data Guard Status",
+      count( db_name) as "Total"
+    from
+      oci_database_autonomous_database as s where s.db_name not in (select name from dataguard_stat);
+  EOQ
+}
 
 # operations_insights_status
 query "oci_database_autonomous_db_by_operations_insights_status_1" {
@@ -186,10 +142,6 @@ query "oci_database_autonomous_db_by_permission_level" {
       permission_status desc
   EOQ
 }
-
-# license_model BRING_YOUR_OWN_LICENSE, LICENSE_INCLUDED
-# is_free_tier / is_dedicated
-# is_auto_scaling_enabled / Disabled
 
 query "oci_database_autonomous_db_by_state" {
   sql = <<-EOQ
@@ -250,36 +202,36 @@ query "oci_database_autonomous_db_by_creation_month" {
 
 # Note the CTE uses the dailt table to be efficient when filtering,
 # and the hourly table to show granular line chart
-# hourly table required
-# query "oci_database_autonomous_db_top10_cpu_past_week" {
-#   sql = <<-EOQ
-#     with top_n as (
-#     select
-#       id,
-#       avg(average)
-#     from
-#       oci_database_autonomous_database_metric_cpu_utilization_daily
-#     where
-#       timestamp  >= CURRENT_DATE - INTERVAL '7 day'
-#     group by
-#       id
-#     order by
-#       avg desc
-#     limit 10
-#   )
-#   select
-#       timestamp,
-#       id,
-#       average
-#     from
-#       oci_database_autonomous_database_metric_cpu_utilization
-#     where
-#       timestamp  >= CURRENT_DATE - INTERVAL '7 day'
-#       and id in (select id from top_n)
-#     order by
-#       timestamp
-#   EOQ
-# }
+
+query "oci_database_autonomous_db_top10_cpu_past_week" {
+  sql = <<-EOQ
+    with top_n as (
+      select
+        id,
+        avg(average)
+      from
+        oci_database_autonomous_database_metric_cpu_utilization_daily
+      where
+        timestamp  >= CURRENT_DATE - INTERVAL '7 day'
+      group by
+        id
+      order by
+        avg desc
+      limit 10
+  )
+  select
+    timestamp,
+    id,
+    average
+    from
+      oci_database_autonomous_database_metric_cpu_utilization_hourly
+    where
+      timestamp  >= CURRENT_DATE - INTERVAL '7 day'
+      and id in (select id from top_n)
+    order by
+      timestamp
+  EOQ
+}
 
 # underused if avg CPU < 10% every day for last month
 query "oci_database_autonomous_db_by_cpu_utilization_category" {
@@ -349,7 +301,6 @@ report "oci_database_autonomous_db_summary" {
       width = 3
     }
 
-
     chart {
       title = "Autonomous Databases by Region"
       sql   = query.oci_database_autonomous_db_by_region.sql
@@ -376,6 +327,13 @@ report "oci_database_autonomous_db_summary" {
   container {
     title = "Assessments"
 
+    chart {
+      title = "Data Guard Status"
+      sql   = query.oci_database_autonomous_db_data_guard_status.sql
+      type  = "donut"
+      width = 3
+
+    }
     chart {
       title = "Operations Insight Status1"
       sql   = query.oci_database_autonomous_db_by_operations_insights_status_1.sql
@@ -409,12 +367,12 @@ report "oci_database_autonomous_db_summary" {
   container {
     title = "Performance & Utilization"
 
-    # chart {
-    #   title = "Top 10 CPU - Last 7 days [ needs to be a crosstab?]"
-    #   sql   = query.oci_database_autonomous_db_top10_cpu_past_week.sql
-    #   type  = "line"
-    #   width = 6
-    # }
+    chart {
+      title = "Top 10 CPU - Last 7 days [ needs to be a crosstab?]"
+      sql   = query.oci_database_autonomous_db_top10_cpu_past_week.sql
+      type  = "line"
+      width = 6
+    }
 
     chart {
       title = "Average max daily CPU - Last 30 days"
@@ -442,7 +400,6 @@ report "oci_database_autonomous_db_summary" {
       series "month" {
         color = "green"
       }
-
     }
 
     table {
@@ -450,18 +407,34 @@ report "oci_database_autonomous_db_summary" {
       width = 4
 
       sql = <<-EOQ
+        with compartments as ( 
           select
-            title as "database",
-            (current_date - time_created::date) as "Age in Days",
-            compartment_id as "Compartment"
+            id, title
           from
-            oci_database_autonomous_database
-          where lifecycle_state <> 'TERMINATED'
-          order by
-            "Age in Days" desc,
-            title
-          limit 5
-        EOQ
+            oci_identity_tenancy
+          union (
+          select 
+            id,title 
+          from 
+            oci_identity_compartment 
+          where 
+            lifecycle_state = 'ACTIVE'
+          )  
+       )
+       select
+          d.title as "instance",
+          current_date - d.time_created::date as "Age in Days",
+          c.title as "Compartment"
+        from
+          oci_database_autonomous_database as d
+          left join compartments as c on c.id = d.compartment_id
+        where 
+          lifecycle_state <> 'TERMINATED'  
+        order by
+          "Age in Days" desc,
+          d.title
+        limit 5
+      EOQ
     }
 
     table {
@@ -469,18 +442,35 @@ report "oci_database_autonomous_db_summary" {
       width = 4
 
       sql = <<-EOQ
+        with compartments as ( 
           select
-            title as "instance",
-            current_date - time_created::date as "Age in Days",
-            compartment_id as "Compartment"
+            id, title
           from
-            oci_database_autonomous_database
-          where lifecycle_state <> 'TERMINATED'
-          order by
-            "Age in Days" asc,
-            title
-          limit 5
-        EOQ
+            oci_identity_tenancy
+          union (
+          select 
+            id,title 
+          from 
+            oci_identity_compartment 
+          where 
+            lifecycle_state = 'ACTIVE'
+          )  
+       )
+       select
+          d.title as "instance",
+          current_date - d.time_created::date as "Age in Days",
+          c.title as "Compartment"
+        from
+          oci_database_autonomous_database as d
+          left join compartments as c on c.id = d.compartment_id
+        where 
+          lifecycle_state <> 'TERMINATED'  
+        order by
+          "Age in Days" asc,
+          d.title
+        limit 5
+      EOQ
     }
   }
 }
+

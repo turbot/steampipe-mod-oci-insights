@@ -25,18 +25,20 @@ report "oci_objectstorage_bucket_lifecycle_report" {
 
   table {
     sql = <<-EOQ
-      with compartments as (
-      select
-        id, title
-      from
-        oci_identity_tenancy
-      union (
-      select 
-        id,title 
-      from 
-        oci_identity_compartment 
-      where lifecycle_state = 'ACTIVE')  
-    )
+      with compartments as ( 
+        select
+          id, title
+        from
+          oci_identity_tenancy
+        union (
+        select 
+          id,title 
+        from 
+          oci_identity_compartment 
+        where 
+          lifecycle_state = 'ACTIVE'
+        )  
+       )
       select
         b.name as "Bucket",
         b.versioning as "Versioning",

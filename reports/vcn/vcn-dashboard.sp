@@ -46,18 +46,20 @@ query "oci_core_vcn_no_nat_gateway" {
 
 query "oci_core_vcn_by_account" {
   sql = <<-EOQ
-    with compartments as (
-      select
-        id, title
-      from
-        oci_identity_tenancy
-      union (
-      select 
-        id,title 
-      from 
-        oci_identity_compartment 
-      where lifecycle_state = 'ACTIVE')  
-    )
+    with compartments as ( 
+        select
+          id, title
+        from
+          oci_identity_tenancy
+        union (
+        select 
+          id,title 
+        from 
+          oci_identity_compartment 
+        where 
+          lifecycle_state = 'ACTIVE'
+        )  
+       )
     select
       c.title as "compartment",
       count(v.*) as "VCNs"
