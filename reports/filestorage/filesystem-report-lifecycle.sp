@@ -1,6 +1,6 @@
-report "oci_database_autonomous_db_lifecycle_report" {
+report "oci_filestorage_file_system_lifecycle_report" {
 
-  title = "OCI Autonomous DB Lifecycle Report"
+  title = "OCI File Storage File System Report"
 
   # container {
 
@@ -31,18 +31,13 @@ report "oci_database_autonomous_db_lifecycle_report" {
         )
       select
         a.display_name as "Name",
-        a.lifecycle_state as "DB State",
-        a.data_safe_status as "Data Safe",
-        a.data_storage_size_in_gbs as "DB Storage",
-        a.db_version as "DB Version",
-        a.db_workload as "Workload Type",
+        a.lifecycle_state as "File Sytem State",
         a.time_created as "Time Created",
         b.title as "Compartment",
         a.region as "Region"
       from
-          oci_database_autonomous_database as a
+          oci_file_storage_file_system as a
           left join compartments as b on b.id = a.Compartment_id
-      where a.lifecycle_state in ('AVAILABLE_NEEDS_ATTENTION', 'RESTORE_FAILED', 'UNAVAILABLE', 'AVAILABLE')
     EOQ
   }
 

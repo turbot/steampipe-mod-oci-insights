@@ -1,6 +1,6 @@
 query "oci_database_autonomous_database_count" {
   sql = <<-EOQ
-    select count(*) as "Autonomous Database" from oci_database_autonomous_database where lifecycle_state <> 'TERMINATED'
+    select count(*) as "Autonomous DBs" from oci_database_autonomous_database where lifecycle_state <> 'TERMINATED'
   EOQ
 }
 
@@ -9,7 +9,7 @@ query "oci_database_autonomous_database_need_attention_count" {
   sql = <<-EOQ
     select
       count(*) as  value,
-      'DB Needs Attention State' as label,
+      'DBs Need Attention State' as label,
       case count(*) when 0 then 'ok' else 'alert' end as type
     from
       oci_database_autonomous_database
@@ -22,7 +22,7 @@ query "oci_database_autonomous_database_restore_failed_count" {
   sql = <<-EOQ
     select
       count(*) as  value,
-      'DB Failed Restore State' as label,
+      'DBs Failed Restore State' as label,
       case count(*) when 0 then 'ok' else 'alert' end as type
     from
       oci_database_autonomous_database
@@ -35,7 +35,7 @@ query "oci_database_autonomous_database_unavailable_count" {
   sql = <<-EOQ
     select
       count(*) as  value,
-      'DB Not Available State' as label,
+      'DBs Not Available State' as label,
       case count(*) when 0 then 'ok' else 'alert' end as type
     from
       oci_database_autonomous_database
@@ -54,7 +54,6 @@ query "oci_database_autonomous_db_total_cores" {
   EOQ
 }
 
-# cpu_core_count
 query "oci_database_autonomous_db_total_size" {
   sql = <<-EOQ
     select
@@ -66,7 +65,14 @@ query "oci_database_autonomous_db_total_size" {
 
 query "oci_database_autonomous_db_with_data_guard" {
   sql = <<-EOQ
-    select count(*) as "DB With Data Guard Enabled" from oci_database_autonomous_database where is_data_guard_enabled
+    select count(*) as "DBs With Data Guard Enabled" from oci_database_autonomous_database where is_data_guard_enabled
+  EOQ
+}
+
+# if auto scaling is enabled for the Autonomous Database OCPU core count. The default value is FALSE.
+query "oci_database_autonomous_db_autoscaling_count" {
+  sql = <<-EOQ
+    select count(*) as "DBs With Auto Scaling" from oci_database_autonomous_database where is_auto_scaling_enabled
   EOQ
 }
 
@@ -102,7 +108,18 @@ query "oci_database_autonomous_db_by_workload_type" {
   sql = <<-EOQ
     select
       db_workload as "Workload Type",
-      count(*) as "instances"
+      count(*) as "databases"
+    from
+      oci_database_autonomous_database
+      group by db_workload order by db_workload
+  EOQ
+}
+
+query "oci_database_autonomous_db_by_license_model" {
+  sql = <<-EOQ
+    select
+      license_model as "License Model",
+      count(*) as "databases"
     from
       oci_database_autonomous_database
       group by db_workload order by db_workload
@@ -206,7 +223,7 @@ query "oci_database_autonomous_db_by_state" {
 
 query "oci_database_autonomous_db_by_creation_month" {
   sql = <<-EOQ
-    with instances as (
+    with databases as (
       select
         title,
         time_created,
@@ -224,26 +241,26 @@ query "oci_database_autonomous_db_by_creation_month" {
             (
               select
                 min(time_created)
-                from instances)),
+                from databases)),
             date_trunc('month',
               current_date),
             interval '1 month') as d
     ),
-    instances_by_month as (
+    databases_by_month as (
       select
         creation_month,
         count(*)
       from
-        instances
+        databases
       group by
         creation_month
     )
     select
       months.month,
-      instances_by_month.count
+      databases_by_month.count
     from
       months
-      left join instances_by_month on months.month = instances_by_month.creation_month
+      left join databases_by_month on months.month = databases_by_month.creation_month
     order by
       months.month desc;
   EOQ
@@ -251,7 +268,6 @@ query "oci_database_autonomous_db_by_creation_month" {
 
 # Note the CTE uses the dailt table to be efficient when filtering,
 # and the hourly table to show granular line chart
-
 query "oci_database_autonomous_db_top10_cpu_past_week" {
   sql = <<-EOQ
     with top_n as (
@@ -282,7 +298,7 @@ query "oci_database_autonomous_db_top10_cpu_past_week" {
   EOQ
 }
 
-# underused if avg CPU < 10% every day for last month
+# Underused if avg CPU < 10% every day for last month
 query "oci_database_autonomous_db_by_cpu_utilization_category" {
   sql = <<-EOQ
     with cpu_buckets as (
@@ -356,8 +372,13 @@ report "oci_database_autonomous_db_summary" {
       sql   = query.oci_database_autonomous_db_with_data_guard.sql
       width = 2
     }
-  }
 
+    card {
+      sql   = query.oci_database_autonomous_db_autoscaling_count.sql
+      width = 2
+    }
+
+  }
 
   container {
     title = "Analysis"
