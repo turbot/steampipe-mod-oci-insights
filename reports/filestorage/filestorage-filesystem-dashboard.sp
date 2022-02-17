@@ -156,7 +156,7 @@ query "oci_filestorage_filesystem_by_creation_month" {
 
 dashboard "oci_filestorage_filesystem_dashboard" {
 
-  title = "OCI File Storage FileSystem Dashboard"
+  title = "OCI File Storage File System Dashboard"
 
   container {
 
