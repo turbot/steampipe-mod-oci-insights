@@ -1,19 +1,19 @@
 dashboard "vcn_network_security_group_detail" {
   title = "OCI VCN Network Security Group Detail"
 
-  input {
-    title = "Network Security Group"
-    type = "select"
-    width = 3
+  # input {
+  #   title = "Network Security Group"
+  #   type = "select"
+  #   width = 3
 
-    sql = <<-EOQ
-      select 
-        display_name as label,
-        id as value 
-      from 
-        oci_core_network_security_group
-    EOQ
-  }
+  #   sql = <<-EOQ
+  #     select
+  #       display_name as label,
+  #       id as value 
+  #     from
+  #       oci_core_network_security_group
+  #   EOQ
+  # }
 
   container {
 
@@ -21,7 +21,7 @@ dashboard "vcn_network_security_group_detail" {
       width = 2
 
       sql = <<-EOQ
-        select 
+        select
           'Ingress Rules' as label,
           count(*) as value
         from
@@ -38,7 +38,7 @@ dashboard "vcn_network_security_group_detail" {
       sql = <<-EOQ
         select
           'Egress Rules' as label,
-          count(*) as value     
+          count(*) as value
         from
           oci_core_network_security_group g,
           jsonb_array_elements(g.rules) as r

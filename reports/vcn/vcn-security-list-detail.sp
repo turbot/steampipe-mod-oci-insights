@@ -1,19 +1,19 @@
 dashboard "vcn_security_list_detail" {
   title = "OCI VCN Security List Detail"
 
-  input {
-    title = "Security List"
-    type = "select"
-    width = 3
+  # input {
+  #   title = "Security List"
+  #   type = "select"
+  #   width = 3
 
-    sql = <<-EOQ
-      select 
-        display_name as label,
-        id as value 
-      from 
-        oci_core_security_list
-    EOQ
-  }
+  #   sql = <<-EOQ
+  #     select
+  #       display_name as label,
+  #       id as value
+  #     from
+  #       oci_core_security_list
+  #   EOQ
+  # }
 
   container {
 
@@ -21,7 +21,7 @@ dashboard "vcn_security_list_detail" {
       width = 3
 
       sql = <<-EOQ
-        select 
+        select
           'Ingress Security Rules' as label,
           count(*) as value
         from
@@ -38,7 +38,7 @@ dashboard "vcn_security_list_detail" {
       sql = <<-EOQ
         select
           'Egress Security Rules' as label,
-          count(*) as value     
+          count(*) as value
         from
           oci_core_security_list s
         where
@@ -51,7 +51,7 @@ dashboard "vcn_security_list_detail" {
       width = 3
 
       sql = <<-EOQ
-        select 
+        select
           'Ingress Security Rules Unspecified' as label,
           count(*) as value
         from
@@ -68,7 +68,7 @@ dashboard "vcn_security_list_detail" {
       sql = <<-EOQ
         select
           'Egress Security Rules Unspecified' as label,
-          count(*) as value     
+          count(*) as value
         from
           oci_core_security_list s
         where
