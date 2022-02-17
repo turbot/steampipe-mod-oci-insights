@@ -8,7 +8,7 @@ query "oci_objectstorage_bucket_report_customer_managed_encryption_count" {
   EOQ
 }
 
-report "oci_objectstorage_bucket_encryption_report" {
+dashboard "oci_objectstorage_bucket_encryption_report" {
 
   title = "OCI Object Storage Bucket Encryption Report"
 

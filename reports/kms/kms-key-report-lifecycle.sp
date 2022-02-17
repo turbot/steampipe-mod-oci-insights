@@ -12,7 +12,7 @@ query "oci_kms_key_pending_deletion_count" {
 }
 
 
-report "oci_kms_key_lifecycle_report" {
+dashboard "oci_kms_key_lifecycle_report" {
 
   title = "OCI KMS Key Lifecycle Report"
 

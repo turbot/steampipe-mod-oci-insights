@@ -221,7 +221,7 @@ query "oci_nosql_table_by_storage_utilization_category" {
   EOQ
 }
 
-report "oci_nosql_table_dashboard" {
+dashboard "oci_nosql_table_dashboard" {
 
   title = "OCI NoSQL Table Dashboard"
 

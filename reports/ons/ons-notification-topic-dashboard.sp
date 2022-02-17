@@ -106,7 +106,7 @@ query "oci_ons_notification_topic_by_creation_month" {
   EOQ
 }
 
-report "oci_ons_notification_topic_dashboard" {
+dashboard "oci_ons_notification_topic_dashboard" {
 
   title = "OCI ONS Notification Topic Dashboard"
 

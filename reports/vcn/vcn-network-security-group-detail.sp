@@ -1,4 +1,4 @@
-report vcn_network_security_group_detail {
+dashboard "vcn_network_security_group_detail" {
   title = "OCI VCN Network Security Group Detail"
 
   input {

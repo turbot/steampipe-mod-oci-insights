@@ -235,7 +235,7 @@ query "oci_mysql_db_system_by_cpu_utilization_category" {
   EOQ
 }
 
-report "oci_mysql_db_system_dashboard" {
+dashboard "oci_mysql_db_system_dashboard" {
 
   title = "OCI MySQL DB Systems Dashboard"
 

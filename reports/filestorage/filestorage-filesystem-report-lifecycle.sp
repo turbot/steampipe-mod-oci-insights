@@ -1,4 +1,4 @@
-report "oci_filestorage_file_system_lifecycle_report" {
+dashboard "oci_filestorage_file_system_lifecycle_report" {
 
   title = "OCI File Storage File System Report"
 

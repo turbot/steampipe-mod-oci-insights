@@ -11,7 +11,7 @@ query "oci_ons_notification_topic_not_active_lifecycle_count" {
   EOQ
 }
 
-report "oci_ons_notification_topic_lifecycle_report" {
+dashboard "oci_ons_notification_topic_lifecycle_report" {
 
   title = "OCI ONS Notification Topic Lifecycle Report"
 

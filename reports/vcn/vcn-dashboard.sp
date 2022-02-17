@@ -119,7 +119,7 @@ query "oci_vcn_by_rfc1918_range" {
 }
 
 
-report "oci_core_vcn_dashboard" {
+dashboard "oci_core_vcn_dashboard" {
 
   title = "OCI Core VCN Dashboard"
 

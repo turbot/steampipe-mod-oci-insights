@@ -11,7 +11,7 @@ query "oci_objectstorage_bucket_report_versioning_disabled_count" {
   EOQ
 }
 
-report "oci_objectstorage_bucket_lifecycle_report" {
+dashboard "oci_objectstorage_bucket_lifecycle_report" {
 
   title = "OCI Object Storage Bucket Lifecycle Report"
 

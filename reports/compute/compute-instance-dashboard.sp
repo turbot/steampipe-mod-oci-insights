@@ -239,9 +239,9 @@ query "oci_compute_instances_by_cpu_utilization_category" {
 }
 
 
-report "oci_compute_instance_summary" {
+dashboard "oci_compute_instance_summary" {
 
-  title = "OCI Compute Dashboard"
+  title = "OCI Compute Instance Dashboard"
 
   container {
 

@@ -1,6 +1,6 @@
-report "oci_database_autonomous_db_lifecycle_report" {
+dashboard "oci_database_autonomous_db_lifecycle_report" {
 
-  title = "OCI Autonomous DB Lifecycle Report"
+  title = "OCI Database Autonomous Database Lifecycle Report"
 
   # container {
 

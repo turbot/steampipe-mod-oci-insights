@@ -21,7 +21,7 @@ query "oci_objectstorage_bucket_disabled_count" {
   EOQ
 }
 
-report "oci_objectstorage_bucket_logging_report" {
+dashboard "oci_objectstorage_bucket_logging_report" {
 
   title = "OCI Object Storage Bucket Logging Report"
 

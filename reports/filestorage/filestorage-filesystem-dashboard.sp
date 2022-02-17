@@ -154,9 +154,9 @@ query "oci_filestorage_filesystem_by_creation_month" {
   EOQ
 }
 
-report "oci_filestorage_filesystem_dashboard" {
+dashboard "oci_filestorage_filesystem_dashboard" {
 
-  title = "OCI FileStorage FileSystem Dashboard"
+  title = "OCI File Storage FileSystem Dashboard"
 
   container {
 

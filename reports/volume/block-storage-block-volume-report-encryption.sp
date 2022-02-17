@@ -1,4 +1,4 @@
-query "oci_block_volume_customer_managed_encryption_count" {
+query "oci_block_storage_block_volume_customer_managed_encryption_count" {
   sql = <<-EOQ
     select count(*) as "Customer Managed"
       from 
@@ -8,19 +8,19 @@ query "oci_block_volume_customer_managed_encryption_count" {
   EOQ
 }
 
-report "oci_block_volume_encryption_report" {
+dashboard "oci_block_storage_block_volume_encryption_report" {
 
-  title = "OCI Block Volume Encryption Report"
+  title = "OCI Block Storage Block Volume Encryption Report"
 
   container {
 
     card {
-      sql = query.oci_block_volume_customer_managed_encryption_count.sql
+      sql = query.oci_block_storage_block_volume_customer_managed_encryption_count.sql
       width = 2
     }
 
     card {
-      sql = query.oci_block_volume_default_encrypted_volumes_count.sql
+      sql = query.oci_block_storage_block_volume_default_encrypted_volumes_count.sql
       width = 2
     }
   }

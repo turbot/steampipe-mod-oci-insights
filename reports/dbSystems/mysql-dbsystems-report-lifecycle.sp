@@ -24,7 +24,7 @@ query "oci_mysql_db_system_failed_lifecycle_count" {
   EOQ
 }
 
-report "oci_mysql_db_system_lifecycle_report" {
+dashboard "oci_mysql_db_system_lifecycle_report" {
 
   title = "OCI MySQL DB Systems Lifecycle Report"
 

@@ -24,7 +24,7 @@ query "oci_mysql_backup_failed_lifecycle_count" {
   EOQ
 }
 
-report "oci_mysql_backup_lifecycle_report" {
+dashboard "oci_mysql_backup_lifecycle_report" {
 
   title = "OCI MySQL Backup Lifecycle Report"
 

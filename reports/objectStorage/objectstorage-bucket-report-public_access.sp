@@ -11,7 +11,7 @@ query "oci_objectstorage_bucket_report_public_access_count" {
   EOQ
 }
 
-report "oci_objectstorage_bucket_public_access_report" {
+dashboard "oci_objectstorage_bucket_public_access_report" {
 
   title = "OCI Object Storage Bucket Public Access Report"
 

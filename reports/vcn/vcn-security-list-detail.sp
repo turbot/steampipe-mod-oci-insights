@@ -1,4 +1,4 @@
-report vcn_security_list_detail {
+dashboard "vcn_security_list_detail" {
   title = "OCI VCN Security List Detail"
 
   input {

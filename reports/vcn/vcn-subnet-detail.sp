@@ -1,4 +1,4 @@
-report vcn_subnet_detail {
+dashboard "vcn_subnet_detail" {
   title = "OCI VCN Subnet Detail"
 
   input {

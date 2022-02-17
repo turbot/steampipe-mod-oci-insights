@@ -1,10 +1,10 @@
-query "oci_block_volume_count" {
+query "oci_block_storage_block_volume_count" {
   sql = <<-EOQ
     select count(*) as "Block Volumes" from oci_core_volume where lifecycle_state <> 'DELETED'
   EOQ
 }
 
-query "oci_block_volume_storage_total" {
+query "oci_block_storage_block_volume_storage_total" {
   sql = <<-EOQ
     select
       sum(size_in_gbs) as "Total Storage in GBs"
@@ -15,7 +15,7 @@ query "oci_block_volume_storage_total" {
   EOQ
 }
 
-query "oci_block_volume_default_encrypted_volumes_count" {
+query "oci_block_storage_block_volume_default_encrypted_volumes_count" {
   sql = <<-EOQ
     select
       count(*) as "OCI Managed Encryption"
@@ -26,7 +26,7 @@ query "oci_block_volume_default_encrypted_volumes_count" {
   EOQ
 }
 
-query "oci_block_volume_unattached_volumes_count" {
+query "oci_block_storage_block_volume_unattached_volumes_count" {
   sql = <<-EOQ
    select
       count(*) as value,
@@ -44,7 +44,7 @@ query "oci_block_volume_unattached_volumes_count" {
   EOQ
 }
 
-query "oci_block_volume_by_compartment" {
+query "oci_block_storage_block_volume_by_compartment" {
   sql = <<-EOQ
   with compartments as ( 
         select
@@ -75,7 +75,7 @@ query "oci_block_volume_by_compartment" {
   EOQ
 }
 
-query "oci_block_volume_storage_by_compartment" {
+query "oci_block_storage_block_volume_storage_by_compartment" {
   sql = <<-EOQ
     with compartments as ( 
       select
@@ -106,7 +106,7 @@ query "oci_block_volume_storage_by_compartment" {
   EOQ
 }
 
-query "oci_block_volume_by_region" {
+query "oci_block_storage_block_volume_by_region" {
   sql = <<-EOQ
     select
       region as "Region",
@@ -120,7 +120,7 @@ query "oci_block_volume_by_region" {
   EOQ
 }
 
-query "oci_block_volume_storage_by_region" {
+query "oci_block_storage_block_volume_storage_by_region" {
   sql = <<-EOQ
     select
       region as "Region",
@@ -135,7 +135,7 @@ query "oci_block_volume_storage_by_region" {
 }
 
 
-query "oci_block_volume_by_lifecycle_state" {
+query "oci_block_storage_block_volume_by_lifecycle_state" {
   sql = <<-EOQ
     select
       lifecycle_state,
@@ -150,7 +150,7 @@ query "oci_block_volume_by_lifecycle_state" {
 }
 
 
-query "oci_block_volume_by_encryption_status" {
+query "oci_block_storage_block_volume_by_encryption_status" {
   sql = <<-EOQ
     select
       encryption_status,
@@ -174,7 +174,7 @@ query "oci_block_volume_by_encryption_status" {
 }
 
 
-query "oci_block_volumes_with_no_backups" {
+query "oci_block_storage_block_volume_with_no_backups" {
   sql = <<-EOQ
     select
       v.id,
@@ -194,7 +194,7 @@ query "oci_block_volumes_with_no_backups" {
   EOQ
 }
 
-query "oci_block_volume_by_creation_month" {
+query "oci_block_storage_block_volume_by_creation_month" {
   sql = <<-EOQ
     with volumes as (
       select
@@ -241,30 +241,30 @@ query "oci_block_volume_by_creation_month" {
   EOQ
 }
 
-report "oci_block_volume_dashboard" {
+dashboard "oci_block_storage_block_volume_dashboard" {
 
-  title = "OCI Block Volume Dashboard"
+  title = "OCI Block Storage Block Volume Dashboard"
 
   container {
     ## Analysis ...
 
     card {
-      sql = query.oci_block_volume_count.sql
+      sql = query.oci_block_storage_block_volume_count.sql
       width = 2
     }
 
     card {
-      sql = query.oci_block_volume_storage_total.sql
+      sql = query.oci_block_storage_block_volume_storage_total.sql
       width = 2
     }
 
     card {
-      sql = query.oci_block_volume_default_encrypted_volumes_count.sql
+      sql = query.oci_block_storage_block_volume_default_encrypted_volumes_count.sql
       width = 2
     }
 
     card {
-      sql = query.oci_block_volume_unattached_volumes_count.sql
+      sql = query.oci_block_storage_block_volume_unattached_volumes_count.sql
       width = 2
     }
   }
@@ -274,28 +274,28 @@ report "oci_block_volume_dashboard" {
 
     chart {
       title = "Block Volumes by Compartment"
-      sql = query.oci_block_volume_by_compartment.sql
+      sql = query.oci_block_storage_block_volume_by_compartment.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Block Volumes by Region"
-      sql = query.oci_block_volume_by_region.sql
+      sql = query.oci_block_storage_block_volume_by_region.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Block Volumes Storage by Compartment (GB)"
-      sql = query.oci_block_volume_storage_by_compartment.sql
+      sql = query.oci_block_storage_block_volume_storage_by_compartment.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Block Volumes Storage by Region (GB)"
-      sql = query.oci_block_volume_storage_by_region.sql
+      sql = query.oci_block_storage_block_volume_storage_by_region.sql
       type  = "column"
       width = 3
     }
@@ -306,7 +306,7 @@ report "oci_block_volume_dashboard" {
 
       chart {
         title = "Encryption Status"
-        sql = query.oci_block_volume_by_encryption_status.sql
+        sql = query.oci_block_storage_block_volume_by_encryption_status.sql
         type  = "donut"
         width = 3
 
@@ -317,7 +317,7 @@ report "oci_block_volume_dashboard" {
 
       chart {
         title = "Block Volumes Lifecycle State"
-        sql = query.oci_block_volume_by_lifecycle_state.sql
+        sql = query.oci_block_storage_block_volume_by_lifecycle_state.sql
         type  = "donut"
         width = 3
 
@@ -325,7 +325,7 @@ report "oci_block_volume_dashboard" {
 
        table {
          title = "Block Volumes with no backups"
-         sql = query.oci_block_volumes_with_no_backups.sql
+         sql = query.oci_block_storage_block_volume_with_no_backups.sql
          width = 3
        }
     }
@@ -335,7 +335,7 @@ report "oci_block_volume_dashboard" {
 
     chart {
       title = "Block Volume by Creation Month"
-      sql = query.oci_block_volume_by_creation_month.sql
+      sql = query.oci_block_storage_block_volume_by_creation_month.sql
       type  = "column"
       width = 4
       series "month" {

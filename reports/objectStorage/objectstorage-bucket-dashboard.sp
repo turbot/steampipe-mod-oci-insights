@@ -169,9 +169,9 @@ query "oci_objectstorage_bucket_by_creation_month" {
   EOQ
 }
 
-report "oci_objectstorage_bucket_dashboard" {
+dashboard "oci_objectstorage_bucket_dashboard" {
 
-  title = "OCI ObjectStorage Bucket Dashboard"
+  title = "OCI Object Storage Bucket Dashboard"
 
   container {
     ## Analysis ...

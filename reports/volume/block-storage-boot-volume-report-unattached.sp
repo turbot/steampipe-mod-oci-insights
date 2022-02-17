@@ -1,11 +1,11 @@
-report "oci_block_volume_unattached_report" {
+dashboard "oci_block_storage_boot_volume_unattached_report" {
 
-  title = "OCI Block Volume Unattached Report"
+  title = "OCI Block Storage Boot Volume Unattached Report"
 
   container {
 
     card {
-      sql = query.oci_block_volume_unattached_volumes_count.sql
+      sql = query.oci_block_storage_boot_volume_unattached_volumes_count.sql
       width = 2
     }
   }
@@ -27,14 +27,14 @@ report "oci_block_volume_unattached_report" {
         )  
        )
       select
-        v.display_name as "Block Volume",
+        v.display_name as "Boot Volume",
         case when a.id is null then 'Unattached' else 'Attached' end as "Attachment Status",
         c.title as "Compartment",
         v.region as "Region",
-        v.id as "Block Volume ID"
+        v.id as "Boot Volume ID"
       from
-        oci_core_volume as v
-        left join oci_core_volume_attachment as a on a.volume_id = v.id
+        oci_core_boot_volume as v
+        left join oci_core_boot_volume_attachment as a on a.boot_volume_id = v.id
         left join compartments as c on c.id = v.Compartment_id
       where 
         v.lifecycle_state <> 'DELETED';

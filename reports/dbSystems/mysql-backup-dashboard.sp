@@ -182,7 +182,7 @@ query "oci_mysql_backup_by_creation_month" {
   EOQ
 }
 
-report "oci_mysql_backup_dashboard" {
+dashboard "oci_mysql_backup_dashboard" {
 
   title = "OCI MySQL Backup Dashboard"
 

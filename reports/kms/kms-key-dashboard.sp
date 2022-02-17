@@ -152,7 +152,7 @@ query "oci_kms_key_by_creation_month" {
   EOQ
 }
 
-report "oci_kms_key_summary" {
+dashboard "oci_kms_key_summary" {
 
   title = "OCI KMS Key Dashboard"
 

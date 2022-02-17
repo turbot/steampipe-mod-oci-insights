@@ -333,9 +333,9 @@ query "oci_database_autonomous_db_by_cpu_utilization_category" {
   EOQ
 }
 
-report "oci_database_autonomous_db_summary" {
+dashboard "oci_database_autonomous_db_summary" {
 
-  title = "OCI Autonomous Database Dashboard"
+  title = "OCI Database Autonomous Database Dashboard"
 
   container {
 
