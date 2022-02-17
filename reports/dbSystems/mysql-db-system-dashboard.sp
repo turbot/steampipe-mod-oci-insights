@@ -237,7 +237,7 @@ query "oci_mysql_db_system_by_cpu_utilization_category" {
 
 dashboard "oci_mysql_db_system_dashboard" {
 
-  title = "OCI MySQL DB Systems Dashboard"
+  title = "OCI MySQL DB System Dashboard"
 
   container {
     card {
