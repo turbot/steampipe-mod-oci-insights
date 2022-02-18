@@ -4,46 +4,6 @@ query "oci_database_autonomous_database_count" {
   EOQ
 }
 
-# AVAILABLE, AVAILABLE_NEEDS_ATTENTION, BACKUP_IN_PROGRESS, MAINTENANCE_IN_PROGRESS, PROVISIONING, RESTORE_FAILED, RESTORE_IN_PROGRESS, SCALE_IN_PROGRESS, STARTING, STOPPED, STOPPING, TERMINATED, TERMINATING, UNAVAILABLE, UPDATING
-query "oci_database_autonomous_database_need_attention_count" {
-  sql = <<-EOQ
-    select
-      count(*) as  value,
-      'DBs Need Attention State' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as type
-    from
-      oci_database_autonomous_database
-    where
-      lifecycle_state = 'AVAILABLE_NEEDS_ATTENTION'
-  EOQ
-}
-
-query "oci_database_autonomous_database_restore_failed_count" {
-  sql = <<-EOQ
-    select
-      count(*) as  value,
-      'DBs Failed Restore State' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as type
-    from
-      oci_database_autonomous_database
-    where
-      lifecycle_state = 'RESTORE_FAILED'
-  EOQ
-}
-
-query "oci_database_autonomous_database_unavailable_count" {
-  sql = <<-EOQ
-    select
-      count(*) as  value,
-      'DBs Not Available State' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as type
-    from
-      oci_database_autonomous_database
-    where
-      lifecycle_state = 'UNAVAILABLE'
-  EOQ
-}
-
 # cpu_core_count
 query "oci_database_autonomous_db_total_cores" {
   sql = <<-EOQ
@@ -63,16 +23,61 @@ query "oci_database_autonomous_db_total_size" {
   EOQ
 }
 
+
+# AVAILABLE, AVAILABLE_NEEDS_ATTENTION, BACKUP_IN_PROGRESS, MAINTENANCE_IN_PROGRESS, PROVISIONING, RESTORE_FAILED, RESTORE_IN_PROGRESS, SCALE_IN_PROGRESS, STARTING, STOPPED, STOPPING, TERMINATED, TERMINATING, UNAVAILABLE, UPDATING
+query "oci_database_autonomous_database_need_attention_count" {
+  sql = <<-EOQ
+    select
+      count(*) as  value,
+      'Need Attention State' as label,
+      case count(*) when 0 then 'ok' else 'alert' end as type
+    from
+      oci_database_autonomous_database
+    where
+      lifecycle_state = 'AVAILABLE_NEEDS_ATTENTION'
+  EOQ
+}
+
+# query "oci_database_autonomous_database_restore_failed_count" {
+#   sql = <<-EOQ
+#     select
+#       count(*) as  value,
+#       'DBs Failed Restore State' as label,
+#       case count(*) when 0 then 'ok' else 'alert' end as type
+#     from
+#       oci_database_autonomous_database
+#     where
+#       lifecycle_state = 'RESTORE_FAILED'
+#   EOQ
+# }
+
+# query "oci_database_autonomous_database_unavailable_count" {
+#   sql = <<-EOQ
+#     select
+#       count(*) as  value,
+#       'DBs Not Available State' as label,
+#       case count(*) when 0 then 'ok' else 'alert' end as type
+#     from
+#       oci_database_autonomous_database
+#     where
+#       lifecycle_state = 'UNAVAILABLE'
+#   EOQ
+# }
+
 query "oci_database_autonomous_db_with_data_guard" {
   sql = <<-EOQ
-    select count(*) as "DBs With Data Guard Enabled" from oci_database_autonomous_database where is_data_guard_enabled
+    select count(*) as "Data Guard Enabled" from oci_database_autonomous_database where is_data_guard_enabled
   EOQ
 }
 
 # if auto scaling is enabled for the Autonomous Database OCPU core count. The default value is FALSE.
 query "oci_database_autonomous_db_autoscaling_count" {
   sql = <<-EOQ
-    select count(*) as "DBs With Auto Scaling" from oci_database_autonomous_database where is_auto_scaling_enabled
+    select count(*) as "Auto Scaling Enabled"
+      from
+        oci_database_autonomous_database
+      where
+        is_auto_scaling_enabled
   EOQ
 }
 
@@ -85,10 +90,10 @@ query "oci_database_autonomous_db_by_compartment" {
       oci_database_autonomous_database as a,
       oci_identity_compartment as c
     where
-      c.compartment_id = a.compartment_id and a.lifecycle_state <> 'DELETED'
+      c.id = a.compartment_id and a.lifecycle_state <> 'DELETED'
     group by
       compartment
-    order by count(a.*) desc
+    order by compartment
   EOQ
 }
 
@@ -152,20 +157,7 @@ query "oci_database_autonomous_db_data_guard_status" {
 }
 
 # operations_insights_status
-query "oci_database_autonomous_db_by_operations_insights_status_1" {
-  sql = <<-EOQ
-    select
-      operations_insights_status,
-      count(operations_insights_status)
-    from
-      oci_database_autonomous_database
-    group by
-      operations_insights_status
-  EOQ
-}
-
-# Alternative operations_insights_status
-query "oci_database_autonomous_db_by_operations_insights_status_2" {
+query "oci_database_autonomous_db_by_operations_insights_status" {
   sql = <<-EOQ
     select
       insight_status,
@@ -218,6 +210,23 @@ query "oci_database_autonomous_db_by_state" {
       oci_database_autonomous_database
     group by
       lifecycle_state
+  EOQ
+}
+
+query "oci_database_autonomous_db_by_tenancy" {
+  sql = <<-EOQ
+    select
+       t.name as "tenancy",
+       count(a.id)::numeric as "Autonomous DBs"
+    from
+      oci_database_autonomous_database as a,
+      oci_identity_tenancy as t
+    where
+      t.id = a.tenant_id
+    group by
+      tenancy
+    order by
+      tenancy
   EOQ
 }
 
@@ -347,41 +356,55 @@ dashboard "oci_database_autonomous_db_summary" {
     card {
       sql   = query.oci_database_autonomous_db_total_cores.sql
       width = 2
+      type  = "info"
     }
 
     card {
       sql   = query.oci_database_autonomous_db_total_size.sql
       width = 2
-    }
-
-    card {
-      sql   = query.oci_database_autonomous_database_need_attention_count.sql
-      width = 2
-    }
-    card {
-      sql   = query.oci_database_autonomous_database_restore_failed_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_database_autonomous_database_unavailable_count.sql
-      width = 2
+      type  = "info"
     }
 
     card {
       sql   = query.oci_database_autonomous_db_with_data_guard.sql
       width = 2
+      type  = "info"
     }
 
     card {
       sql   = query.oci_database_autonomous_db_autoscaling_count.sql
       width = 2
+      type  = "info"
     }
+
+
+    card {
+      sql   = query.oci_database_autonomous_database_need_attention_count.sql
+      width = 2
+    }
+
+    # card {
+    #   sql   = query.oci_database_autonomous_database_restore_failed_count.sql
+    #   width = 2
+    # }
+
+    # card {
+    #   sql   = query.oci_database_autonomous_database_unavailable_count.sql
+    #   width = 2
+    # }
+
 
   }
 
   container {
     title = "Analysis"
+
+    chart {
+      title = "Autonomous Databases by Tenancy"
+      sql   = query.oci_database_autonomous_db_by_tenancy.sql
+      type  = "column"
+      width = 3
+    }
 
     chart {
       title = "Autonomous Databases by Compartment"
@@ -393,13 +416,6 @@ dashboard "oci_database_autonomous_db_summary" {
     chart {
       title = "Autonomous Databases by Region"
       sql   = query.oci_database_autonomous_db_by_region.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Autonomous Database by Lifecycle State"
-      sql   = query.oci_database_autonomous_db_by_state.sql
       type  = "column"
       width = 3
     }
@@ -420,21 +436,21 @@ dashboard "oci_database_autonomous_db_summary" {
       title = "Data Guard Status"
       sql   = query.oci_database_autonomous_db_data_guard_status.sql
       type  = "donut"
-      width = 3
-
-    }
-    chart {
-      title = "Operations Insight Status1"
-      sql   = query.oci_database_autonomous_db_by_operations_insights_status_1.sql
-      type  = "donut"
-      width = 3
+      width = 2
     }
 
     chart {
-      title = "Operations Insight Status2"
-      sql   = query.oci_database_autonomous_db_by_operations_insights_status_2.sql
+      title = "Autonomous Database State"
+      sql   = query.oci_database_autonomous_db_by_state.sql
       type  = "donut"
-      width = 3
+      width = 2
+    }
+
+    chart {
+      title = "Operations Insight Status"
+      sql   = query.oci_database_autonomous_db_by_operations_insights_status.sql
+      type  = "donut"
+      width = 2
 
       series "Enabled" {
         color = "green"
@@ -454,10 +470,96 @@ dashboard "oci_database_autonomous_db_summary" {
   }
 
   container {
-    title = "Performance & Utilization"
+    title = "Resources by Age"
+    width = 3
 
     chart {
-      title = "Top 10 CPU - Last 7 days [ needs to be a crosstab?]"
+      title = "Autonomous Database by Creation Month"
+      sql   = query.oci_database_autonomous_db_by_creation_month.sql
+      type  = "column"
+      # width = 4
+
+      series "month" {
+        color = "green"
+      }
+    }
+
+    # table {
+    #   title = "Oldest Autonomous Databases"
+    #   width = 4
+
+    #   sql = <<-EOQ
+    #     with compartments as (
+    #       select
+    #         id, title
+    #       from
+    #         oci_identity_tenancy
+    #       union (
+    #       select
+    #         id,title
+    #       from
+    #         oci_identity_compartment
+    #       where
+    #         lifecycle_state = 'ACTIVE'
+    #       )
+    #    )
+    #    select
+    #       d.title as "instance",
+    #       current_date - d.time_created::date as "Age in Days",
+    #       c.title as "Compartment"
+    #     from
+    #       oci_database_autonomous_database as d
+    #       left join compartments as c on c.id = d.compartment_id
+    #     where
+    #       lifecycle_state <> 'TERMINATED'
+    #     order by
+    #       "Age in Days" desc,
+    #       d.title
+    #     limit 5
+    #   EOQ
+    # }
+
+    # table {
+    #   title = "Newest Autonomous Databases"
+    #   width = 4
+
+    #   sql = <<-EOQ
+    #     with compartments as (
+    #       select
+    #         id, title
+    #       from
+    #         oci_identity_tenancy
+    #       union (
+    #       select
+    #         id,title
+    #       from
+    #         oci_identity_compartment
+    #       where
+    #         lifecycle_state = 'ACTIVE'
+    #       )
+    #    )
+    #    select
+    #       d.title as "instance",
+    #       current_date - d.time_created::date as "Age in Days",
+    #       c.title as "Compartment"
+    #     from
+    #       oci_database_autonomous_database as d
+    #       left join compartments as c on c.id = d.compartment_id
+    #     where
+    #       lifecycle_state <> 'TERMINATED'
+    #     order by
+    #       "Age in Days" asc,
+    #       d.title
+    #     limit 5
+    #   EOQ
+    # }
+  }
+  container {
+    title = "Performance & Utilization"
+    width = 6
+
+    chart {
+      title = "Top 10 CPU - Last 7 days"
       sql   = query.oci_database_autonomous_db_top10_cpu_past_week.sql
       type  = "line"
       width = 6
@@ -466,100 +568,10 @@ dashboard "oci_database_autonomous_db_summary" {
     chart {
       title = "Average max daily CPU - Last 30 days"
       sql   = query.oci_database_autonomous_db_by_cpu_utilization_category.sql
-      type  = "column"
+      type  = "line"
       width = 6
-
-      # 'Unused (<1%)','Underutilized (1-10%)','Right-sized (10-90%)', 'Overutilized (>90%)'
-      # series {
-      #   color = "yellow"
-      # }
-    }
-
-  }
-
-  container {
-    title = "Resources by Age"
-
-    chart {
-      title = "Autonomous Database by Creation Month"
-      sql   = query.oci_database_autonomous_db_by_creation_month.sql
-      type  = "column"
-      width = 4
-
-      series "month" {
-        color = "green"
-      }
-    }
-
-    table {
-      title = "Oldest Autonomous Databases"
-      width = 4
-
-      sql = <<-EOQ
-        with compartments as (
-          select
-            id, title
-          from
-            oci_identity_tenancy
-          union (
-          select
-            id,title
-          from
-            oci_identity_compartment
-          where
-            lifecycle_state = 'ACTIVE'
-          )
-       )
-       select
-          d.title as "instance",
-          current_date - d.time_created::date as "Age in Days",
-          c.title as "Compartment"
-        from
-          oci_database_autonomous_database as d
-          left join compartments as c on c.id = d.compartment_id
-        where
-          lifecycle_state <> 'TERMINATED'
-        order by
-          "Age in Days" desc,
-          d.title
-        limit 5
-      EOQ
-    }
-
-    table {
-      title = "Newest Autonomous Databases"
-      width = 4
-
-      sql = <<-EOQ
-        with compartments as (
-          select
-            id, title
-          from
-            oci_identity_tenancy
-          union (
-          select
-            id,title
-          from
-            oci_identity_compartment
-          where
-            lifecycle_state = 'ACTIVE'
-          )
-       )
-       select
-          d.title as "instance",
-          current_date - d.time_created::date as "Age in Days",
-          c.title as "Compartment"
-        from
-          oci_database_autonomous_database as d
-          left join compartments as c on c.id = d.compartment_id
-        where
-          lifecycle_state <> 'TERMINATED'
-        order by
-          "Age in Days" asc,
-          d.title
-        limit 5
-      EOQ
     }
   }
+
 }
 
