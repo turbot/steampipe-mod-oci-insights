@@ -17,20 +17,11 @@ dashboard "vcn_subnet_detail" {
   container {
 
     card {
-      width = 3
-
-      sql = <<-EOQ
-        select count(*) as "Subnets" from oci_core_subnet
-      EOQ
-    }
-
-    card {
-      width = 3
-
+      width = 2
       sql = <<-EOQ
         select
           count(*) as value,
-          'Subnets with Public IP not prohibited on VNIC' as label,
+          'Public IP not prohibited on VNIC' as label,
           case when count(*) = 0 then 'ok' else 'alert' end as type
         from
           oci_core_subnet
@@ -40,8 +31,7 @@ dashboard "vcn_subnet_detail" {
     }
 
     card {
-      width = 3
-
+      width = 2
       sql = <<-EOQ
         select
           count(*) as value,
@@ -56,6 +46,7 @@ dashboard "vcn_subnet_detail" {
   }
 
   container {
+
     title  = "Analysis"
 
     container {
@@ -65,7 +56,6 @@ dashboard "vcn_subnet_detail" {
         table {
           title = "Overview"
           width = 12
-
           sql   = <<-EOQ
             select
               display_name,
@@ -82,7 +72,6 @@ dashboard "vcn_subnet_detail" {
         table {
           title = "Tags"
           width = 4
-
           sql = <<-EOQ
             select
               tag.key as "Key",
@@ -94,7 +83,6 @@ dashboard "vcn_subnet_detail" {
         }
       }
     }
-
   }
 
 }
