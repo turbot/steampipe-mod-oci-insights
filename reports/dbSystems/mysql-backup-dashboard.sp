@@ -1,7 +1,7 @@
 query "oci_mysql_backup_count" {
   sql = <<-EOQ
   select
-    count(*) as "MySQL Backup"
+    count(*) as "MySQL Backups"
   from
     oci_mysql_backup
   where
@@ -13,7 +13,7 @@ query "oci_mysql_backup_count" {
 query "oci_mysql_automatic_backup_count" {
   sql = <<-EOQ
    select
-      count(*) as "Automatic Backup"
+      count(*) as "Automatic Backups"
     from
       oci_mysql_backup
     where
@@ -35,7 +35,7 @@ query "oci_mysql_backup_storage_total" {
 query "oci_mysql_full_backup_count" {
   sql = <<-EOQ
    select
-      count(*) as "Full Backup"
+      count(*) as "Full Backups"
     from
       oci_mysql_backup
     where
@@ -47,7 +47,7 @@ query "oci_mysql_backup_by_region" {
   sql = <<-EOQ
     select
       region as "Region",
-      count(*) as "MySQL Backup"
+      count(*) as "MySQL Backups"
     from
       oci_mysql_backup
     where
@@ -63,7 +63,7 @@ query "oci_mysql_backup_by_creation_type" {
   sql = <<-EOQ
     select
       creation_type as "Creation Type",
-      count(*) as "MySQL Backup"
+      count(*) as "MySQL Backups"
     from
       oci_mysql_backup
     where
@@ -79,7 +79,7 @@ query "oci_mysql_backup_by_backup_type" {
   sql = <<-EOQ
     select
       backup_type as "Backup Type",
-      count(*) as "MySQL Backup"
+      count(*) as "MySQL Backups"
     from
       oci_mysql_backup
     where
@@ -109,7 +109,7 @@ query "oci_mysql_backup_by_compartment" {
     )
    select
       c.title as "compartment",
-      count(b.*) as "MySQL Backup"
+      count(b.*) as "MySQL Backups"
     from
       oci_mysql_backup as b,
       compartments as c
@@ -213,28 +213,28 @@ dashboard "oci_mysql_backup_dashboard" {
       title = "Analysis"
 
     chart {
-      title = "MySQL Backup by Compartment"
+      title = "MySQL Backups by Compartment"
       sql = query.oci_mysql_backup_by_compartment.sql
       type  = "column"
       width = 3
     }
 
     chart {
-      title = "MySQL Backup by Region"
+      title = "MySQL Backups by Region"
       sql = query.oci_mysql_backup_by_region.sql
       type  = "column"
       width = 3
     }
 
     chart {
-      title = "MySQL Backup by Creation Type"
+      title = "MySQL Backups by Creation Type"
       sql = query.oci_mysql_backup_by_creation_type.sql
       type  = "column"
       width = 3
     }
 
     chart {
-      title = "MySQL Backup by Backup Type"
+      title = "MySQL Backups by Backup Type"
       sql = query.oci_mysql_backup_by_backup_type.sql
       type  = "column"
       width = 3
@@ -245,7 +245,7 @@ dashboard "oci_mysql_backup_dashboard" {
       title = "Assessments"
 
       chart {
-        title = "MySQL Backup Lifecycle State"
+        title = "MySQL Backups Lifecycle State"
         sql = query.oci_mysql_backup_by_lifecycle_state.sql
         type  = "donut"
         width = 3
@@ -257,7 +257,7 @@ dashboard "oci_mysql_backup_dashboard" {
     title = "Resources by Age"
 
     chart {
-      title = "MySQL Backup by Creation Month"
+      title = "MySQL Backups by Creation Month"
       sql = query.oci_mysql_backup_by_creation_month.sql
       type  = "column"
       width = 4
@@ -267,7 +267,7 @@ dashboard "oci_mysql_backup_dashboard" {
     }
 
     table {
-      title = "Oldest MySQL Backup"
+      title = "Oldest MySQL Backups"
       width = 4
 
       sql = <<-EOQ
@@ -286,7 +286,7 @@ dashboard "oci_mysql_backup_dashboard" {
           )
        )
         select
-          b.title as "MySQL Backup",
+          b.title as "MySQL Backups",
           current_date - b.time_created::date as "Age in Days",
           c.title as "Compartment"
         from
@@ -302,7 +302,7 @@ dashboard "oci_mysql_backup_dashboard" {
     }
 
     table {
-      title = "Newest MySQL Backup"
+      title = "Newest MySQL Backups"
       width = 4
 
       sql = <<-EOQ
@@ -321,7 +321,7 @@ dashboard "oci_mysql_backup_dashboard" {
           )
        )
         select
-          b.title as "MySQL Backup",
+          b.title as "MySQL Backups",
           current_date - b.time_created::date as "Age in Days",
           c.title as "Compartment"
         from

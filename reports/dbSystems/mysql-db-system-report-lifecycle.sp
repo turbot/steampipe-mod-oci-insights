@@ -26,7 +26,7 @@ query "oci_mysql_db_system_failed_lifecycle_count" {
 
 dashboard "oci_mysql_db_system_lifecycle_report" {
 
-  title = "OCI MySQL DB Systems Lifecycle Report"
+  title = "OCI MySQL DB System Lifecycle Report"
 
   container {
 
