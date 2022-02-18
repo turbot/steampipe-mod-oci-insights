@@ -19,67 +19,75 @@ dashboard "vcn_security_list_detail" {
 
     card {
       width = 3
-
       sql = <<-EOQ
-        select
-          'Ingress Security Rules' as label,
-          count(*) as value
-        from
-          oci_core_security_list s
-        where
-          s.ingress_security_rules is not null and
-          jsonb_array_length(s.ingress_security_rules) > 0
+        with non_compliant_rules as (
+          select
+            id,
+            count(*) as num_noncompliant_rules
+          from
+            oci_core_security_list,
+            jsonb_array_elements(ingress_security_rules) as p
+          where
+            p ->> 'source' = '0.0.0.0/0'
+            and (
+              (
+                p ->> 'protocol' = 'all'
+                and (p -> 'tcpOptions' -> 'destinationPortRange' -> 'min') is null
+              )
+              or (
+                p ->> 'protocol' = '6' and
+                (p -> 'tcpOptions' -> 'destinationPortRange' ->> 'min')::integer <= 22
+                and (p -> 'tcpOptions' -> 'destinationPortRange' ->> 'max')::integer >= 22
+              )
+            )
+          group by id
+        )
+        select 
+          count(*) as value,
+          'Unrestricted SSH ingress access' as label,
+          case when count(*) = 0 then 'ok' else 'alert' end as type    
+        from 
+          non_compliant_rules
       EOQ
     }
 
     card {
       width = 3
-
       sql = <<-EOQ
-        select
-          'Egress Security Rules' as label,
-          count(*) as value
-        from
-          oci_core_security_list s
-        where
-          s.egress_security_rules is not null and
-          jsonb_array_length(s.egress_security_rules) > 0
+        with non_compliant_rules as (
+          select
+            id,
+            count(*) as num_noncompliant_rules
+          from
+            oci_core_security_list,
+            jsonb_array_elements(ingress_security_rules) as p
+          where
+            p ->> 'source' = '0.0.0.0/0'
+            and (
+              (
+                p ->> 'protocol' = 'all'
+                and (p -> 'tcpOptions' -> 'destinationPortRange' -> 'min') is null
+              )
+              or (
+                p ->> 'protocol' = '6' and
+                (p -> 'tcpOptions' -> 'destinationPortRange' ->> 'min')::integer <= 3389
+                and (p -> 'tcpOptions' -> 'destinationPortRange' ->> 'max')::integer >= 3389
+              )
+            )
+          group by id
+        )
+        select 
+          count(*) as value,
+          'Unrestricted RDP ingress access' as label,
+          case when count(*) = 0 then 'ok' else 'alert' end as type    
+        from 
+          non_compliant_rules
       EOQ
     }
-
-    card {
-      width = 3
-
-      sql = <<-EOQ
-        select
-          'Ingress Security Rules Unspecified' as label,
-          count(*) as value
-        from
-          oci_core_security_list s
-        where
-          s.ingress_security_rules is not null and
-          jsonb_array_length(s.ingress_security_rules) = 0
-      EOQ
-    }
-
-    card {
-      width = 3
-
-      sql = <<-EOQ
-        select
-          'Egress Security Rules Unspecified' as label,
-          count(*) as value
-        from
-          oci_core_security_list s
-        where
-          s.egress_security_rules is not null and
-          jsonb_array_length(s.egress_security_rules) = 0
-      EOQ
-    }
-
   }
 
   container {
+
     title  = "Analysis"
 
     container {
@@ -89,7 +97,6 @@ dashboard "vcn_security_list_detail" {
         table {
           title = "Overview"
           width  = 12
-
           sql = <<-EOQ
             select
               display_name,
@@ -106,7 +113,6 @@ dashboard "vcn_security_list_detail" {
         table {
           title = "Tags"
           width = 4
-
           sql = <<-EOQ
             select
               tag.key as "Key",
@@ -118,7 +124,6 @@ dashboard "vcn_security_list_detail" {
         }
       }
     }
-
   }
 
 }

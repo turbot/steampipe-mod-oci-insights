@@ -174,7 +174,6 @@ dashboard "oci_core_vcn_dashboard" {
       type  = "column"
       width = 4
     }
-
   }
 
 }
