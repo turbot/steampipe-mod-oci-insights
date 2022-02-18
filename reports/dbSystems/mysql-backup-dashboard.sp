@@ -1,13 +1,14 @@
 query "oci_mysql_backup_count" {
   sql = <<-EOQ
-  select 
-    count(*) as "MySQL Backup" 
-  from 
-    oci_mysql_backup 
-  where 
+  select
+    count(*) as "MySQL Backup"
+  from
+    oci_mysql_backup
+  where
     lifecycle_state <> 'DELETED'
   EOQ
 }
+
 
 query "oci_mysql_automatic_backup_count" {
   sql = <<-EOQ
@@ -27,7 +28,7 @@ query "oci_mysql_backup_storage_total" {
     from
       oci_mysql_backup
     where
-      lifecycle_state <> 'DELETED'  
+      lifecycle_state <> 'DELETED'
   EOQ
 }
 
@@ -44,79 +45,79 @@ query "oci_mysql_full_backup_count" {
 
 query "oci_mysql_backup_by_region" {
   sql = <<-EOQ
-    select 
-      region as "Region", 
-      count(*) as "MySQL Backup" 
-    from 
+    select
+      region as "Region",
+      count(*) as "MySQL Backup"
+    from
       oci_mysql_backup
     where
-      lifecycle_state <> 'DELETED'   
-    group by 
-      region 
-    order by 
+      lifecycle_state <> 'DELETED'
+    group by
+      region
+    order by
       region
   EOQ
 }
 
 query "oci_mysql_backup_by_creation_type" {
   sql = <<-EOQ
-    select 
-      creation_type as "Creation Type", 
-      count(*) as "MySQL Backup" 
-    from 
+    select
+      creation_type as "Creation Type",
+      count(*) as "MySQL Backup"
+    from
       oci_mysql_backup
     where
-      lifecycle_state <> 'DELETED'   
-    group by 
-      creation_type 
-    order by 
+      lifecycle_state <> 'DELETED'
+    group by
+      creation_type
+    order by
       creation_type
   EOQ
 }
 
 query "oci_mysql_backup_by_backup_type" {
   sql = <<-EOQ
-    select 
-      backup_type as "Backup Type", 
-      count(*) as "MySQL Backup" 
-    from 
+    select
+      backup_type as "Backup Type",
+      count(*) as "MySQL Backup"
+    from
       oci_mysql_backup
     where
-      lifecycle_state <> 'DELETED'   
-    group by 
-      backup_type 
-    order by 
+      lifecycle_state <> 'DELETED'
+    group by
+      backup_type
+    order by
       backup_type
   EOQ
 }
 
 query "oci_mysql_backup_by_compartment" {
   sql = <<-EOQ
-    with compartments as ( 
+    with compartments as (
       select
         id, title
       from
         oci_identity_tenancy
       union (
-      select 
-        id,title 
-      from 
-        oci_identity_compartment 
-      where 
+      select
+        id,title
+      from
+        oci_identity_compartment
+      where
         lifecycle_state = 'ACTIVE'
-      )  
+      )
     )
-   select 
+   select
       c.title as "compartment",
-      count(b.*) as "MySQL Backup" 
-    from 
+      count(b.*) as "MySQL Backup"
+    from
       oci_mysql_backup as b,
-      compartments as c 
-    where 
+      compartments as c
+    where
       c.id = b.compartment_id and lifecycle_state <> 'DELETED'
-    group by 
+    group by
       compartment
-    order by 
+    order by
       compartment
   EOQ
 }
@@ -129,7 +130,7 @@ query "oci_mysql_backup_by_lifecycle_state" {
     from
       oci_mysql_backup
     where
-      lifecycle_state <> 'DELETED'     
+      lifecycle_state <> 'DELETED'
     group by
       lifecycle_state
   EOQ
@@ -146,7 +147,7 @@ query "oci_mysql_backup_by_creation_month" {
       from
         oci_mysql_backup
       where
-      lifecycle_state <> 'DELETED'     
+      lifecycle_state <> 'DELETED'
     ),
     months as (
       select
@@ -205,11 +206,11 @@ dashboard "oci_mysql_backup_dashboard" {
     card {
       sql = query.oci_mysql_full_backup_count.sql
       width = 2
-    } 
+    }
   }
 
   container {
-      title = "Analysis"      
+      title = "Analysis"
 
     chart {
       title = "MySQL Backup by Compartment"
@@ -253,7 +254,7 @@ dashboard "oci_mysql_backup_dashboard" {
     }
 
   container {
-    title = "Resources by Age" 
+    title = "Resources by Age"
 
     chart {
       title = "MySQL Backup by Creation Month"
@@ -270,19 +271,19 @@ dashboard "oci_mysql_backup_dashboard" {
       width = 4
 
       sql = <<-EOQ
-        with compartments as ( 
+        with compartments as (
           select
             id, title
           from
             oci_identity_tenancy
           union (
-          select 
-            id,title 
-          from 
-            oci_identity_compartment 
-          where 
+          select
+            id,title
+          from
+            oci_identity_compartment
+          where
             lifecycle_state = 'ACTIVE'
-          )  
+          )
        )
         select
           b.title as "MySQL Backup",
@@ -291,8 +292,8 @@ dashboard "oci_mysql_backup_dashboard" {
         from
           oci_mysql_backup as b
           left join compartments as c on c.id = b.compartment_id
-        where 
-          lifecycle_state <> 'DELETED'    
+        where
+          lifecycle_state <> 'DELETED'
         order by
           "Age in Days" desc,
           b.title
@@ -305,19 +306,19 @@ dashboard "oci_mysql_backup_dashboard" {
       width = 4
 
       sql = <<-EOQ
-        with compartments as ( 
+        with compartments as (
           select
             id, title
           from
             oci_identity_tenancy
           union (
-          select 
-            id,title 
-          from 
-            oci_identity_compartment 
-          where 
+          select
+            id,title
+          from
+            oci_identity_compartment
+          where
             lifecycle_state = 'ACTIVE'
-          )  
+          )
        )
         select
           b.title as "MySQL Backup",
@@ -326,8 +327,8 @@ dashboard "oci_mysql_backup_dashboard" {
         from
           oci_mysql_backup as b
           left join compartments as c on c.id = b.compartment_id
-        where 
-          lifecycle_state <> 'DELETED'    
+        where
+          lifecycle_state <> 'DELETED'
         order by
           "Age in Days" asc,
           b.title
