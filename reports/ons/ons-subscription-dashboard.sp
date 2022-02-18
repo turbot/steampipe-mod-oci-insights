@@ -157,7 +157,7 @@ dashboard "oci_ons_subscription_dashboard" {
       title = "Assessments"
 
       chart {
-        title = "Subscriptions Lifecycle State"
+        title = "Lifecycle State"
         sql = query.oci_ons_subscription_by_lifecycle_state.sql
         type  = "donut"
         width = 3

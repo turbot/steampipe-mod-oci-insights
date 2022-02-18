@@ -139,7 +139,7 @@ dashboard "oci_ons_notification_topic_dashboard" {
       title = "Assessments"
 
       chart {
-        title = "Notification Topic Lifecycle State"
+        title = "Lifecycle State"
         sql = query.oci_ons_notification_topic_by_lifecycle_state.sql
         type  = "donut"
         width = 3

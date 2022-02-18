@@ -281,7 +281,7 @@ dashboard "oci_mysql_backup_dashboard" {
       title = "Assessments"
 
       chart {
-        title = "MySQL Backups Lifecycle State"
+        title = "Lifecycle State"
         sql = query.oci_mysql_backup_by_lifecycle_state.sql
         type  = "donut"
         width = 3

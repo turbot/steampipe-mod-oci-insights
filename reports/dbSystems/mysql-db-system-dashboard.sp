@@ -328,7 +328,7 @@ dashboard "oci_mysql_db_system_dashboard" {
       title = "Assessments"
       
       chart {
-        title = "MySQL DB Systems Lifecycle State"
+        title = "Lifecycle State"
         sql = query.oci_mysql_db_system_by_lifecycle_state.sql
         type  = "donut"
         width = 3
@@ -336,7 +336,7 @@ dashboard "oci_mysql_db_system_dashboard" {
       }
 
        table {
-         title = "MySQL DB Systems With No Backups"
+         title = "No Backups"
          sql = query.oci_mysql_db_system_with_no_backups.sql
          width = 3
        }

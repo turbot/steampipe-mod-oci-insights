@@ -266,7 +266,7 @@ dashboard "oci_nosql_table_dashboard" {
       title = "Assessments"
 
       chart {
-        title = "NoSQL Table Lifecycle State"
+        title = "Lifecycle State"
         sql = query.oci_nosql_table_by_lifecycle_state.sql
         type  = "donut"
         width = 3
@@ -274,7 +274,7 @@ dashboard "oci_nosql_table_dashboard" {
       }
 
        table {
-         title = "NoSQL Table Stalled More Than 90 Days"
+         title = "Stalled More Than 90 Days"
          sql = query.oci_nosql_table_stalled_more_than_90_days.sql
          width = 3
        }

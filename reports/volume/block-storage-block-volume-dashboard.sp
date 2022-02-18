@@ -337,7 +337,7 @@ dashboard "oci_block_storage_block_volume_dashboard" {
       }
 
       chart {
-        title = "Block Volumes Lifecycle State"
+        title = "Lifecycle State"
         sql = query.oci_block_storage_block_volume_by_lifecycle_state.sql
         type  = "donut"
         width = 3
@@ -345,7 +345,7 @@ dashboard "oci_block_storage_block_volume_dashboard" {
       }
 
        table {
-         title = "Block Volumes With No Backups"
+         title = "No Backups"
          sql = query.oci_block_storage_block_volume_with_no_backups.sql
          width = 3
        }
