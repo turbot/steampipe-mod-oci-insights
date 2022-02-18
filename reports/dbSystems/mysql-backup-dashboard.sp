@@ -1,7 +1,7 @@
 query "oci_mysql_backup_count" {
   sql = <<-EOQ
   select 
-    count(*) as "MySQL Backups" 
+    count(*) as "Total Backups" 
   from 
     oci_mysql_backup 
   where 
@@ -39,6 +39,32 @@ query "oci_mysql_full_backup_count" {
       oci_mysql_backup
     where
       backup_type = 'FULL' and lifecycle_state <> 'DELETED'
+  EOQ
+}
+
+query "oci_mysql_backup_inactive_lifecycle_count" {
+  sql = <<-EOQ
+    select
+      count(*) as value,
+      'Inactive' as label,
+      case count(*) when 0 then 'ok' else 'alert' end as "type"
+    from
+      oci_mysql_backup
+    where
+      lifecycle_state = 'INACTIVE'
+  EOQ
+}
+
+query "oci_mysql_backup_failed_lifecycle_count" {
+  sql = <<-EOQ
+    select
+      count(*) as value,
+      'Failed' as label,
+      case count(*) when 0 then 'ok' else 'alert' end as "type"
+    from
+      oci_mysql_backup
+    where
+      lifecycle_state = 'FAILED'
   EOQ
 }
 
@@ -206,6 +232,16 @@ dashboard "oci_mysql_backup_dashboard" {
       sql = query.oci_mysql_full_backup_count.sql
       width = 2
     } 
+
+    card {
+      sql = query.oci_mysql_backup_inactive_lifecycle_count.sql
+      width = 2
+    }
+
+    card {
+      sql = query.oci_mysql_backup_failed_lifecycle_count.sql
+      width = 2
+    }
   }
 
   container {

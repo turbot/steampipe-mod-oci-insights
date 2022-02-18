@@ -1,3 +1,21 @@
+query "oci_block_storage_block_volume_unattached_volumes_count" {
+  sql = <<-EOQ
+   select
+      count(*) as value,
+      'Unattached' as label,
+      case count(*) when 0 then 'ok' else 'alert' end as type
+    from 
+      oci_core_volume
+    where 
+      id not in (
+        select 
+          volume_id
+        from
+          oci_core_volume_attachment  
+      ) and lifecycle_state <> 'DELETED'
+  EOQ
+}
+
 dashboard "oci_block_storage_block_volume_unattached_report" {
 
   title = "OCI Block Storage Block Volume Unattached Report"

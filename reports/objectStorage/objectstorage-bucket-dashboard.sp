@@ -30,7 +30,7 @@ query "oci_objectstorage_bucket_versioning_disabled_count" {
   sql = <<-EOQ
     select 
       count(*) as value,
-      'Versioned Disabled' as label,
+      'Versioning Disabled' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from 
       oci_objectstorage_bucket 
@@ -120,6 +120,20 @@ query "oci_objectstorage_bucket_encryption_status" {
       encryption_status
     order by
       encryption_status desc
+  EOQ
+}
+
+query "oci_objectstorage_bucket_versioning_status" {
+  sql = <<-EOQ
+    select
+      versioning,
+      count(*)
+    from 
+      oci_objectstorage_bucket
+    group by
+      versioning
+    order by
+      versioning desc
   EOQ
 }
 
@@ -225,13 +239,23 @@ dashboard "oci_objectstorage_bucket_dashboard" {
     }
   }
 
-    # donut charts in a 2 x 2 layout
     container {
       title = "Assessments"
 
       chart {
         title = "Encryption Status"
         sql = query.oci_objectstorage_bucket_encryption_status.sql
+        type  = "donut"
+        width = 3
+
+        series "Enabled" {
+           color = "green"
+        }
+      }
+
+       chart {
+        title = "Versioning Status"
+        sql = query.oci_objectstorage_bucket_versioning_status.sql
         type  = "donut"
         width = 3
 

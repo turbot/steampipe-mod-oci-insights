@@ -1,29 +1,3 @@
-query "oci_mysql_db_system_inactive_lifecycle_count" {
-  sql = <<-EOQ
-    select
-      count(*) as value,
-      'Inactive Lifecycle State' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as "type"
-    from
-      oci_mysql_db_system
-    where
-      lifecycle_state = 'INACTIVE'
-  EOQ
-}
-
-query "oci_mysql_db_system_failed_lifecycle_count" {
-  sql = <<-EOQ
-    select
-      count(*) as value,
-      'Failed Lifecycle State Not Active' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as "type"
-    from
-      oci_mysql_db_system
-    where
-      lifecycle_state = 'FAILED'
-  EOQ
-}
-
 dashboard "oci_mysql_db_system_lifecycle_report" {
 
   title = "OCI MySQL DB System Lifecycle Report"

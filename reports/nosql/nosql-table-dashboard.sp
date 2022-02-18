@@ -23,7 +23,9 @@ query "oci_nosql_table_auto_reclaimable_count" {
 query "oci_nosql_table_stalled_more_than_90_days_count" {
   sql = <<-EOQ
    select
-      count(*) as "Stalled More than 90 Days"
+      count(*) as value,
+      'Stalled More Than 90 Days' as label,
+      case count(*) when 0 then 'ok' else 'alert' end as "type" 
     from
       oci_nosql_table
     where
@@ -272,14 +274,100 @@ dashboard "oci_nosql_table_dashboard" {
       }
 
        table {
-         title = "NoSQL Table Stalled More than 90 Days"
+         title = "NoSQL Table Stalled More Than 90 Days"
          sql = query.oci_nosql_table_stalled_more_than_90_days.sql
          width = 3
        }
     }
+  
+   container {
+    title = "Resources by Age" 
+    width = 4
+
+    chart {
+      title = "NoSQL Table by Creation Month"
+      sql = query.oci_nosql_table_by_creation_month.sql
+      type  = "column"
+      series "month" {
+        color = "green"
+      }
+    }
+
+    # table {
+    #   title = "Oldest NoSQL Table"
+    #   width = 4
+
+    #   sql = <<-EOQ
+    #     with compartments as ( 
+    #       select
+    #         id, title
+    #       from
+    #         oci_identity_tenancy
+    #       union (
+    #       select 
+    #         id,title 
+    #       from 
+    #         oci_identity_compartment 
+    #       where 
+    #         lifecycle_state = 'ACTIVE'
+    #       )  
+    #    )
+    #     select
+    #       t.title as "NoSQL Table",
+    #       current_date - t.time_created::date as "Age in Days",
+    #       c.title as "Compartment"
+    #     from
+    #       oci_nosql_table as t
+    #       left join compartments as c on c.id = t.compartment_id
+    #     where 
+    #       lifecycle_state <> 'DELETED'    
+    #     order by
+    #       "Age in Days" desc,
+    #       t.title
+    #     limit 5
+    #   EOQ
+    # }
+
+    # table {
+    #   title = "Newest NoSQL Table"
+    #   width = 4
+
+    #   sql = <<-EOQ
+    #     with compartments as ( 
+    #       select
+    #         id, title
+    #       from
+    #         oci_identity_tenancy
+    #       union (
+    #       select 
+    #         id,title 
+    #       from 
+    #         oci_identity_compartment 
+    #       where 
+    #         lifecycle_state = 'ACTIVE'
+    #       )  
+    #    )
+    #     select
+    #       t.title as "NoSQL Table",
+    #       current_date - t.time_created::date as "Age in Days",
+    #       c.title as "Compartment"
+    #     from
+    #       oci_nosql_table as t
+    #       left join compartments as c on c.id = t.compartment_id
+    #     where 
+    #       lifecycle_state <> 'DELETED'    
+    #     order by
+    #       "Age in Days" asc,
+    #       t.title
+    #     limit 5
+    #   EOQ
+    # }
+
+  }
 
   container {
     title  = "Performance & Utilization"
+    width = 8
 
     chart {
       title = "Top 10 Storage - Last 7 days"
@@ -293,90 +381,6 @@ dashboard "oci_nosql_table_dashboard" {
       sql   = query.oci_nosql_table_by_storage_utilization_category.sql
       type  = "column"
       width = 6
-    }
-
-  }
-  container {
-    title = "Resources by Age" 
-
-    chart {
-      title = "NoSQL Table by Creation Month"
-      sql = query.oci_nosql_table_by_creation_month.sql
-      type  = "column"
-      width = 4
-      series "month" {
-        color = "green"
-      }
-    }
-
-    table {
-      title = "Oldest NoSQL Table"
-      width = 4
-
-      sql = <<-EOQ
-        with compartments as ( 
-          select
-            id, title
-          from
-            oci_identity_tenancy
-          union (
-          select 
-            id,title 
-          from 
-            oci_identity_compartment 
-          where 
-            lifecycle_state = 'ACTIVE'
-          )  
-       )
-        select
-          t.title as "NoSQL Table",
-          current_date - t.time_created::date as "Age in Days",
-          c.title as "Compartment"
-        from
-          oci_nosql_table as t
-          left join compartments as c on c.id = t.compartment_id
-        where 
-          lifecycle_state <> 'DELETED'    
-        order by
-          "Age in Days" desc,
-          t.title
-        limit 5
-      EOQ
-    }
-
-    table {
-      title = "Newest NoSQL Table"
-      width = 4
-
-      sql = <<-EOQ
-        with compartments as ( 
-          select
-            id, title
-          from
-            oci_identity_tenancy
-          union (
-          select 
-            id,title 
-          from 
-            oci_identity_compartment 
-          where 
-            lifecycle_state = 'ACTIVE'
-          )  
-       )
-        select
-          t.title as "NoSQL Table",
-          current_date - t.time_created::date as "Age in Days",
-          c.title as "Compartment"
-        from
-          oci_nosql_table as t
-          left join compartments as c on c.id = t.compartment_id
-        where 
-          lifecycle_state <> 'DELETED'    
-        order by
-          "Age in Days" asc,
-          t.title
-        limit 5
-      EOQ
     }
 
   }

@@ -26,21 +26,23 @@ query "oci_block_storage_boot_volume_default_encrypted_volumes_count" {
   EOQ
 }
 
-query "oci_block_storage_boot_volume_unattached_volumes_count" {
+query "oci_block_storage_boot_volume_with_no_backups_count" {
   sql = <<-EOQ
-   select
-      count(*) as value,
-      'Unattached Boot Volumes' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as style
-    from 
-      oci_core_boot_volume
-    where 
-      id not in (
-        select 
-          boot_volume_id
-        from
-          oci_core_boot_volume_attachment  
-      ) and lifecycle_state <> 'DELETED'
+    select
+      count(v.*) as value,
+      'Volume With No Backup' as label,
+      case count(v.*) when 0 then 'ok' else 'alert' end as type
+    from
+      oci_core_boot_volume as v
+    left join oci_core_boot_volume_backup as b on v.id = b.boot_volume_id
+    where
+      v.lifecycle_state <> 'DELETED' 
+    group by
+      v.compartment_id,
+      v.region,
+      v.id
+    having
+      count(b.id) = 0
   EOQ
 }
 
@@ -259,9 +261,10 @@ dashboard "oci_block_storage_boot_volume_dashboard" {
     }
 
     card {
-      sql = query.oci_block_storage_boot_volume_unattached_volumes_count.sql
+      sql = query.oci_block_storage_boot_volume_with_no_backups_count.sql
       width = 2
     }
+
   }
 
   container {
@@ -319,7 +322,7 @@ dashboard "oci_block_storage_boot_volume_dashboard" {
       }
 
        table {
-         title = "Boot Volumes with no backups"
+         title = "Boot Volumes With No Backups"
          sql = query.oci_block_storage_boot_volume_with_no_backups.sql
          width = 3
        }

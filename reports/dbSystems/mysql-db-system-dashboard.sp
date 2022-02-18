@@ -31,14 +31,49 @@ query "oci_mysql_db_system_heat_wave_cluster_attached_count" {
   EOQ
 }
 
-query "oci_mysql_db_system_automatic_backup_disabled_count" {
+query "oci_mysql_db_system_backup_disabled_count" {
   sql = <<-EOQ
    select
-      count(*) as "Automatic Backup Disabled"
+      count(v.*) as value,
+      'Backups Disabled' as label,
+      case count(*) when 0 then 'ok' else 'alert' end as "type"
+    from
+      oci_mysql_db_system as v
+    left join oci_mysql_backup as b on v.id = b.db_system_id
+    where
+      v.lifecycle_state <> 'DELETED'
+    group by
+      v.compartment_id,
+      v.region,
+      v.id
+    having
+      count(b.id) = 0
+  EOQ
+}
+
+query "oci_mysql_db_system_inactive_lifecycle_count" {
+  sql = <<-EOQ
+    select
+      count(*) as value,
+      'Inactive' as label,
+      case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
       oci_mysql_db_system
     where
-      backup_policy ->> 'isEnabled' = 'false' and lifecycle_state <> 'DELETED'
+      lifecycle_state = 'INACTIVE'
+  EOQ
+}
+
+query "oci_mysql_db_system_failed_lifecycle_count" {
+  sql = <<-EOQ
+    select
+      count(*) as value,
+      'Failed' as label,
+      case count(*) when 0 then 'ok' else 'alert' end as "type"
+    from
+      oci_mysql_db_system
+    where
+      lifecycle_state = 'FAILED'
   EOQ
 }
 
@@ -106,7 +141,7 @@ query "oci_mysql_db_system_by_lifecycle_state" {
 query "oci_mysql_db_system_with_no_backups" {
   sql = <<-EOQ
     select
-      v.id,
+      v.display_name,
       v.compartment_id,
       v.region
     from
@@ -117,7 +152,7 @@ query "oci_mysql_db_system_with_no_backups" {
     group by
       v.compartment_id,
       v.region,
-      v.id
+      v.display_name
     having
       count(b.id) = 0
   EOQ
@@ -256,7 +291,17 @@ dashboard "oci_mysql_db_system_dashboard" {
     }
 
     card {
-      sql = query.oci_mysql_db_system_automatic_backup_disabled_count.sql
+      sql = query.oci_mysql_db_system_backup_disabled_count.sql
+      width = 2
+    } 
+
+    card {
+      sql = query.oci_mysql_db_system_inactive_lifecycle_count.sql
+      width = 2
+    }
+
+    card {
+      sql = query.oci_mysql_db_system_failed_lifecycle_count.sql
       width = 2
     } 
   }
@@ -281,7 +326,7 @@ dashboard "oci_mysql_db_system_dashboard" {
 
   container {
       title = "Assessments"
-
+      
       chart {
         title = "MySQL DB Systems Lifecycle State"
         sql = query.oci_mysql_db_system_by_lifecycle_state.sql
@@ -291,14 +336,99 @@ dashboard "oci_mysql_db_system_dashboard" {
       }
 
        table {
-         title = "MySQL DB Systems with no backups"
+         title = "MySQL DB Systems With No Backups"
          sql = query.oci_mysql_db_system_with_no_backups.sql
          width = 3
        }
     }
 
+   container {
+    title = "Resources by Age" 
+    width = 4
+    chart {
+      title = "MySQL DB Systems by Creation Month"
+      sql = query.oci_mysql_db_system_by_creation_month.sql
+      type  = "column"
+      series "month" {
+        color = "green"
+      }
+    }
+
+    # table {
+    #   title = "Oldest MySQL DB Systems"
+    #   width = 4
+
+    #   sql = <<-EOQ
+    #     with compartments as ( 
+    #       select
+    #         id, title
+    #       from
+    #         oci_identity_tenancy
+    #       union (
+    #       select 
+    #         id,title 
+    #       from 
+    #         oci_identity_compartment 
+    #       where 
+    #         lifecycle_state = 'ACTIVE'
+    #       )  
+    #    )
+    #     select
+    #       d.title as "MySQL DB Systems",
+    #       current_date - d.time_created::date as "Age in Days",
+    #       c.title as "Compartment"
+    #     from
+    #       oci_mysql_db_system as d
+    #       left join compartments as c on c.id = d.compartment_id
+    #     where 
+    #       lifecycle_state <> 'DELETED'    
+    #     order by
+    #       "Age in Days" desc,
+    #       d.title
+    #     limit 5
+    #   EOQ
+    # }
+
+    # table {
+    #   title = "Newest MySQL DB Systems"
+    #   width = 4
+
+    #   sql = <<-EOQ
+    #     with compartments as ( 
+    #       select
+    #         id, title
+    #       from
+    #         oci_identity_tenancy
+    #       union (
+    #       select 
+    #         id,title 
+    #       from 
+    #         oci_identity_compartment 
+    #       where 
+    #         lifecycle_state = 'ACTIVE'
+    #       )  
+    #    )
+    #     select
+    #       d.title as "MySQL DB Systems",
+    #       current_date - d.time_created::date as "Age in Days",
+    #       c.title as "Compartment"
+    #     from
+    #       oci_mysql_db_system as d
+    #       left join compartments as c on c.id = d.compartment_id
+    #     where 
+    #       lifecycle_state <> 'DELETED'    
+    #     order by
+    #       "Age in Days" asc,
+    #       d.title
+    #     limit 5
+    #   EOQ
+    # }
+
+  }
+
   container {
     title  = "Performance & Utilization"
+    width = 8
 
     chart {
       title = "Top 10 CPU - Last 7 days"
@@ -312,90 +442,6 @@ dashboard "oci_mysql_db_system_dashboard" {
       sql   = query.oci_mysql_db_system_by_cpu_utilization_category.sql
       type  = "column"
       width = 6
-    }
-
-  }
-  container {
-    title = "Resources by Age" 
-
-    chart {
-      title = "MySQL DB Systems by Creation Month"
-      sql = query.oci_mysql_db_system_by_creation_month.sql
-      type  = "column"
-      width = 4
-      series "month" {
-        color = "green"
-      }
-    }
-
-    table {
-      title = "Oldest MySQL DB Systems"
-      width = 4
-
-      sql = <<-EOQ
-        with compartments as ( 
-          select
-            id, title
-          from
-            oci_identity_tenancy
-          union (
-          select 
-            id,title 
-          from 
-            oci_identity_compartment 
-          where 
-            lifecycle_state = 'ACTIVE'
-          )  
-       )
-        select
-          d.title as "MySQL DB Systems",
-          current_date - d.time_created::date as "Age in Days",
-          c.title as "Compartment"
-        from
-          oci_mysql_db_system as d
-          left join compartments as c on c.id = d.compartment_id
-        where 
-          lifecycle_state <> 'DELETED'    
-        order by
-          "Age in Days" desc,
-          d.title
-        limit 5
-      EOQ
-    }
-
-    table {
-      title = "Newest MySQL DB Systems"
-      width = 4
-
-      sql = <<-EOQ
-        with compartments as ( 
-          select
-            id, title
-          from
-            oci_identity_tenancy
-          union (
-          select 
-            id,title 
-          from 
-            oci_identity_compartment 
-          where 
-            lifecycle_state = 'ACTIVE'
-          )  
-       )
-        select
-          d.title as "MySQL DB Systems",
-          current_date - d.time_created::date as "Age in Days",
-          c.title as "Compartment"
-        from
-          oci_mysql_db_system as d
-          left join compartments as c on c.id = d.compartment_id
-        where 
-          lifecycle_state <> 'DELETED'    
-        order by
-          "Age in Days" asc,
-          d.title
-        limit 5
-      EOQ
     }
 
   }

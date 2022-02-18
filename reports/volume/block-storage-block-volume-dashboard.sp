@@ -26,21 +26,36 @@ query "oci_block_storage_block_volume_default_encrypted_volumes_count" {
   EOQ
 }
 
-query "oci_block_storage_block_volume_unattached_volumes_count" {
+query "oci_block_storage_block_volume_faulty_volumes_count" {
   sql = <<-EOQ
    select
       count(*) as value,
-      'Unattached Block Volumes' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as style
+      'Faulty' as label,
+      case count(*) when 0 then 'ok' else 'alert' end as type
     from 
       oci_core_volume
     where 
-      id not in (
-        select 
-          volume_id
-        from
-          oci_core_volume_attachment  
-      ) and lifecycle_state <> 'DELETED'
+      lifecycle_state = 'FAULTY'
+  EOQ
+}
+
+query "oci_block_storage_block_volume_with_no_backups_count" {
+  sql = <<-EOQ
+    select
+      count(v.*) as value,
+      'Volume With No Backup' as label,
+      case count(v.*) when 0 then 'ok' else 'alert' end as type
+    from
+      oci_core_volume as v
+    left join oci_core_volume_backup as b on v.id = b.volume_id
+    where 
+      v.lifecycle_state <> 'DELETED'
+    group by
+      v.compartment_id,
+      v.region,
+      v.id  
+    having
+      count(b.id) = 0
   EOQ
 }
 
@@ -264,9 +279,15 @@ dashboard "oci_block_storage_block_volume_dashboard" {
     }
 
     card {
-      sql = query.oci_block_storage_block_volume_unattached_volumes_count.sql
+      sql = query.oci_block_storage_block_volume_faulty_volumes_count.sql
       width = 2
     }
+
+    card {
+      sql = query.oci_block_storage_block_volume_with_no_backups_count.sql
+      width = 2
+    }
+    
   }
 
   container {
@@ -324,7 +345,7 @@ dashboard "oci_block_storage_block_volume_dashboard" {
       }
 
        table {
-         title = "Block Volumes with no backups"
+         title = "Block Volumes With No Backups"
          sql = query.oci_block_storage_block_volume_with_no_backups.sql
          width = 3
        }
