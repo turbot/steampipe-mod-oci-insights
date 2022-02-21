@@ -8,7 +8,7 @@ query "oci_database_autonomous_database_count" {
 query "oci_database_autonomous_db_total_cores" {
   sql = <<-EOQ
     select
-      sum(cpu_core_count)  as "Total CPU Cores"
+      sum(cpu_core_count)  as "Total OCPUs"
     from
       oci_database_autonomous_database
   EOQ
@@ -17,14 +17,13 @@ query "oci_database_autonomous_db_total_cores" {
 query "oci_database_autonomous_db_total_size" {
   sql = <<-EOQ
     select
-      sum(data_storage_size_in_gbs)  as "Total Size"
+      sum(data_storage_size_in_gbs)  as "Total Size (GB)"
     from
       oci_database_autonomous_database
   EOQ
 }
 
 
-# AVAILABLE, AVAILABLE_NEEDS_ATTENTION, BACKUP_IN_PROGRESS, MAINTENANCE_IN_PROGRESS, PROVISIONING, RESTORE_FAILED, RESTORE_IN_PROGRESS, SCALE_IN_PROGRESS, STARTING, STOPPED, STOPPING, TERMINATED, TERMINATING, UNAVAILABLE, UPDATING
 query "oci_database_autonomous_database_need_attention_count" {
   sql = <<-EOQ
     select
@@ -275,72 +274,41 @@ query "oci_database_autonomous_db_by_creation_month" {
   EOQ
 }
 
-# Note the CTE uses the dailt table to be efficient when filtering,
-# and the hourly table to show granular line chart
-query "oci_database_autonomous_db_top10_cpu_past_week" {
-  sql = <<-EOQ
-    with top_n as (
-      select
-        id,
-        avg(average)
-      from
-        oci_database_autonomous_database_metric_cpu_utilization_daily
-      where
-        timestamp  >= CURRENT_DATE - INTERVAL '7 day'
-      group by
-        id
-      order by
-        avg desc
-      limit 10
-  )
-  select
-    timestamp,
-    id,
-    average
-    from
-      oci_database_autonomous_database_metric_cpu_utilization_hourly
-    where
-      timestamp  >= CURRENT_DATE - INTERVAL '7 day'
-      and id in (select id from top_n)
-    order by
-      timestamp
-  EOQ
-}
-
 # Underused if avg CPU < 10% every day for last month
-query "oci_database_autonomous_db_by_cpu_utilization_category" {
-  sql = <<-EOQ
-    with cpu_buckets as (
-      select
-    unnest(array ['Unused (<1%)','Underutilized (1-10%)','Right-sized (10-90%)', 'Overutilized (>90%)' ]) as cpu_bucket
-    ),
-    max_averages as (
-      select
-        id,
-        case
-          when max(average) <= 1 then 'Unused (<1%)'
-          when max(average) between 1 and 10 then 'Underutilized (1-10%)'
-          when max(average) between 10 and 90 then 'Right-sized (10-90%)'
-          when max(average) > 90 then 'Overutilized (>90%)'
-        end as cpu_bucket,
-        max(average) as max_avg
-      from
-        oci_database_autonomous_database_metric_cpu_utilization_daily
-      where
-        date_part('day', now() - timestamp) <= 30
-      group by
-        id
-    )
-    select
-      b.cpu_bucket as "CPU Utilization",
-      count(a.*)
-    from
-      cpu_buckets as b
-    left join max_averages as a on b.cpu_bucket = a.cpu_bucket
-    group by
-      b.cpu_bucket
-  EOQ
-}
+# query "oci_database_autonomous_db_by_cpu_utilization_category" {
+#   sql = <<-EOQ
+#     with cpu_buckets as (
+#       select
+#     unnest(array ['Unused (<1%)','Underutilized (1-10%)','Right-sized (10-90%)', 'Overutilized (>90%)' ]) as cpu_bucket
+#     ),
+#     max_averages as (
+#       select
+#         id,
+#         case
+#           when max(average) <= 1 then 'Unused (<1%)'
+#           when max(average) between 1 and 10 then 'Underutilized (1-10%)'
+#           when max(average) between 10 and 90 then 'Right-sized (10-90%)'
+#           when max(average) > 90 then 'Overutilized (>90%)'
+#         end as cpu_bucket,
+#         max(average) as max_avg
+#       from
+#         oci_database_autonomous_database_metric_cpu_utilization_daily
+#       where
+#         date_part('day', now() - timestamp) <= 30
+#       group by
+#         id
+#     )
+#     select
+#       b.cpu_bucket as "CPU Utilization",
+#       count(a.*)
+#     from
+#       cpu_buckets as b
+#     left join max_averages as a on b.cpu_bucket = a.cpu_bucket
+#     group by
+#       b.cpu_bucket
+#   EOQ
+# }
+
 
 dashboard "oci_database_autonomous_db_summary" {
 
@@ -356,13 +324,11 @@ dashboard "oci_database_autonomous_db_summary" {
     card {
       sql   = query.oci_database_autonomous_db_total_cores.sql
       width = 2
-      type  = "info"
     }
 
     card {
       sql   = query.oci_database_autonomous_db_total_size.sql
       width = 2
-      type  = "info"
     }
 
     card {
@@ -377,54 +343,10 @@ dashboard "oci_database_autonomous_db_summary" {
       type  = "info"
     }
 
-
+    # Assessments
     card {
       sql   = query.oci_database_autonomous_database_need_attention_count.sql
       width = 2
-    }
-
-    # card {
-    #   sql   = query.oci_database_autonomous_database_restore_failed_count.sql
-    #   width = 2
-    # }
-
-    # card {
-    #   sql   = query.oci_database_autonomous_database_unavailable_count.sql
-    #   width = 2
-    # }
-
-
-  }
-
-  container {
-    title = "Analysis"
-
-    chart {
-      title = "Autonomous Databases by Tenancy"
-      sql   = query.oci_database_autonomous_db_by_tenancy.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Autonomous Databases by Compartment"
-      sql   = query.oci_database_autonomous_db_by_compartment.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Autonomous Databases by Region"
-      sql   = query.oci_database_autonomous_db_by_region.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Autonomous Database by Workload Type"
-      sql   = query.oci_database_autonomous_db_by_workload_type.sql
-      type  = "column"
-      width = 3
     }
 
   }
@@ -440,7 +362,7 @@ dashboard "oci_database_autonomous_db_summary" {
     }
 
     chart {
-      title = "Autonomous Database State"
+      title = "Lifecycle State"
       sql   = query.oci_database_autonomous_db_by_state.sql
       type  = "donut"
       width = 2
@@ -470,106 +392,107 @@ dashboard "oci_database_autonomous_db_summary" {
   }
 
   container {
-    title = "Resources by Age"
-    width = 3
+    title = "Analysis"
 
     chart {
-      title = "Autonomous Database by Creation Month"
+      title = "Autonomous Databases by Tenancy"
+      sql   = query.oci_database_autonomous_db_by_tenancy.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Autonomous Databases by Compartment"
+      sql   = query.oci_database_autonomous_db_by_compartment.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Autonomous Databases by Region"
+      sql   = query.oci_database_autonomous_db_by_region.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Autonomous Databases by Workload Type"
+      sql   = query.oci_database_autonomous_db_by_workload_type.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Autonomous Databases by Age"
       sql   = query.oci_database_autonomous_db_by_creation_month.sql
       type  = "column"
-      # width = 4
-
-      series "month" {
-        color = "green"
-      }
+      width = 3
     }
-
-    # table {
-    #   title = "Oldest Autonomous Databases"
-    #   width = 4
-
-    #   sql = <<-EOQ
-    #     with compartments as (
-    #       select
-    #         id, title
-    #       from
-    #         oci_identity_tenancy
-    #       union (
-    #       select
-    #         id,title
-    #       from
-    #         oci_identity_compartment
-    #       where
-    #         lifecycle_state = 'ACTIVE'
-    #       )
-    #    )
-    #    select
-    #       d.title as "instance",
-    #       current_date - d.time_created::date as "Age in Days",
-    #       c.title as "Compartment"
-    #     from
-    #       oci_database_autonomous_database as d
-    #       left join compartments as c on c.id = d.compartment_id
-    #     where
-    #       lifecycle_state <> 'TERMINATED'
-    #     order by
-    #       "Age in Days" desc,
-    #       d.title
-    #     limit 5
-    #   EOQ
-    # }
-
-    # table {
-    #   title = "Newest Autonomous Databases"
-    #   width = 4
-
-    #   sql = <<-EOQ
-    #     with compartments as (
-    #       select
-    #         id, title
-    #       from
-    #         oci_identity_tenancy
-    #       union (
-    #       select
-    #         id,title
-    #       from
-    #         oci_identity_compartment
-    #       where
-    #         lifecycle_state = 'ACTIVE'
-    #       )
-    #    )
-    #    select
-    #       d.title as "instance",
-    #       current_date - d.time_created::date as "Age in Days",
-    #       c.title as "Compartment"
-    #     from
-    #       oci_database_autonomous_database as d
-    #       left join compartments as c on c.id = d.compartment_id
-    #     where
-    #       lifecycle_state <> 'TERMINATED'
-    #     order by
-    #       "Age in Days" asc,
-    #       d.title
-    #     limit 5
-    #   EOQ
-    # }
   }
+
   container {
     title = "Performance & Utilization"
-    width = 6
 
     chart {
-      title = "Top 10 CPU - Last 7 days"
-      sql   = query.oci_database_autonomous_db_top10_cpu_past_week.sql
+      title = "Top 10 Average CPU - Last 7 days"
       type  = "line"
       width = 6
+      sql = <<-EOQ
+        with top_n as (
+          select
+            id,
+            avg(average)
+        from
+          oci_database_autonomous_database_metric_cpu_utilization_daily
+        where
+          timestamp  >= CURRENT_DATE - INTERVAL '7 day'
+        group by
+          id
+        order by
+          avg desc
+        limit 10
+        )
+        select
+          timestamp,
+          id,
+          average
+        from
+          oci_database_autonomous_database_metric_cpu_utilization_hourly
+        where
+          timestamp  >= CURRENT_DATE - INTERVAL '7 day'
+          and id in (select id from top_n)
+      EOQ
     }
 
     chart {
-      title = "Average max daily CPU - Last 30 days"
-      sql   = query.oci_database_autonomous_db_by_cpu_utilization_category.sql
+      title = "Top 10 Average Storage - Last 7 days"
       type  = "line"
       width = 6
+      sql = <<-EOQ
+        with top_n as (
+          select
+            id,
+            avg(average)
+        from
+          oci_database_autonomous_database_metric_storage_utilization_daily
+        where
+          timestamp  >= CURRENT_DATE - INTERVAL '7 day'
+        group by
+          id
+        order by
+          avg desc
+        limit 10
+        )
+        select
+          timestamp,
+          id,
+          average
+        from
+          oci_database_autonomous_database_metric_storage_utilization_hourly
+        where
+          timestamp  >= CURRENT_DATE - INTERVAL '7 day'
+          and id in (select id from top_n)
+      EOQ
     }
   }
 

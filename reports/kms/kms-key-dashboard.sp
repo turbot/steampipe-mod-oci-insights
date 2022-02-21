@@ -1,31 +1,38 @@
 query "oci_kms_key_count" {
   sql = <<-EOQ
-    select count(*) as "KMS Keys" from oci_kms_key
+    select count(*) as "Keys" from oci_kms_key
   EOQ
 }
 
-# query "oci_kms_key_pending_deletion_count" {
-#   sql = <<-EOQ
-#     select count(*) as "Pending Deletion Keys" from oci_kms_key where lifecycle_state = 'PENDING_DELETION'
-#   EOQ
-# }
+query "oci_kms_key_pending_deletion_count" {
+  sql = <<-EOQ
+    select count(*) as "Pending Deletion Keys" from oci_kms_key where lifecycle_state = 'PENDING_DELETION'
+  EOQ
+}
 
 query "oci_kms_key_disabled_count" {
   sql = <<-EOQ
-    select count(*) as "Disabled Keys" from oci_kms_key where lifecycle_state = 'DISABLED'
+    select
+      count(*) as value,
+      'Disabled Keys' as label,
+      case count(*) when 0 then 'ok' else 'alert' end as "type"
+    from
+      oci_kms_key
+    where
+      lifecycle_state = 'DISABLED'
   EOQ
 }
 
 # key count by protection_mode i.e. HSM or Software
 query "oci_kms_hsm_key_count" {
   sql = <<-EOQ
-    select count(*) as "KMS HSM Based Keys" from oci_kms_key where protection_mode = 'HSM' and lifecycle_state <> 'DELETED'
+    select count(*) as "HSM Based Keys" from oci_kms_key where protection_mode = 'HSM' and lifecycle_state <> 'DELETED'
   EOQ
 }
 
 query "oci_kms_software_key_count" {
   sql = <<-EOQ
-    select count(*) as "KMS Software Based Keys" from oci_kms_key where protection_mode = 'SOFTWARE' and lifecycle_state <> 'DELETED'
+    select count(*) as "Software Based Keys" from oci_kms_key where protection_mode = 'SOFTWARE' and lifecycle_state <> 'DELETED'
   EOQ
 }
 
@@ -38,6 +45,23 @@ query "oci_kms_key_by_type" {
       oci_kms_key
     group by
       protection_mode
+  EOQ
+}
+
+query "oci_kms_key_by_tenancy" {
+  sql = <<-EOQ
+    select
+       t.name as "tenancy",
+       count(a.id)::numeric as "Keys"
+    from
+      oci_kms_key as a,
+      oci_identity_tenancy as t
+    where
+      t.id = a.tenant_id
+    group by
+      tenancy
+    order by
+      tenancy
   EOQ
 }
 
@@ -94,18 +118,37 @@ query "oci_kms_key_by_state" {
   EOQ
 }
 
-query "oci_kms_key_pending_deletion" {
+query "oci_kms_key_lifecycle_state" {
   sql = <<-EOQ
-    select
-      count(*) as value,
-      'Pending Deletion' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as style
-    from
-      oci_kms_key
-    where
-      lifecycle_state = 'PENDING_DELETION'
+      with lifecycles as (
+        select
+          lifecycle_state
+        from
+          oci_kms_key
+        where lifecycle_state IN ('PENDING_DELETION','DISABLED','ENABLED')
+        )
+        select
+          lifecycle_state,
+          count(lifecycle_state)
+        from
+          lifecycles
+        group by
+          lifecycle_state;
   EOQ
 }
+
+query "oci_database_autonomous_db_by_protection_mode" {
+  sql = <<-EOQ
+    select
+      protection_mode,
+      count(protection_mode)
+    from
+      oci_kms_key
+    group by
+      protection_mode
+  EOQ
+}
+
 
 query "oci_kms_key_by_creation_month" {
   sql = <<-EOQ
@@ -163,24 +206,41 @@ dashboard "oci_kms_key_summary" {
       width = 2
     }
 
-    # card {
-    #   sql   = query.oci_kms_key_pending_deletion_count.sql
-    #   width = 2
-    # }
-
-    card {
-      sql   = query.oci_kms_key_disabled_count.sql
-      width = 2
-    }
-
     card {
       sql   = query.oci_kms_hsm_key_count.sql
       width = 2
+      type  = "info"
     }
 
     card {
       sql   = query.oci_kms_software_key_count.sql
       width = 2
+      type  = "info"
+    }
+
+    card {
+      sql   = query.oci_kms_key_disabled_count.sql
+      width = 2
+      type  = "info"
+    }
+
+  }
+
+  container {
+    title = "Assessments"
+
+    chart {
+      title = "Lifecycle State"
+      sql = query.oci_kms_key_lifecycle_state.sql
+      type  = "donut"
+      width = 3
+    }
+
+    chart {
+      title = "Protection Mode"
+      sql = query.oci_database_autonomous_db_by_protection_mode.sql
+      type  = "donut"
+      width = 3
     }
 
   }
@@ -190,7 +250,14 @@ dashboard "oci_kms_key_summary" {
 
 
     chart {
-      title = "KMS Keys by Account"
+      title = "Keys by Tenancy"
+      sql   = query.oci_kms_key_by_tenancy.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Keys by Compartment"
       sql   = query.oci_kms_key_by_compartment.sql
       type  = "column"
       width = 3
@@ -198,75 +265,19 @@ dashboard "oci_kms_key_summary" {
 
 
     chart {
-      title = "KMS Keys by Region"
+      title = "Keys by Region"
       sql   = query.oci_kms_key_by_region.sql
       type  = "column"
       width = 3
     }
 
     chart {
-      title = "KMS Keys by State"
-      sql   = query.oci_kms_key_by_state.sql
+      title = "Keys by Age"
+      sql   = query.oci_kms_key_by_creation_month.sql
       type  = "column"
       width = 3
     }
 
-    # chart {
-    #   title = "KMS Keys Pending Deletion"
-    #   sql   = query.oci_kms_key_pending_deletion.sql
-    #   type  = "column"
-    #   width = 3
-    # }
-
-  }
-
-  container {
-    title = "Resources by Age"
-
-    chart {
-      title = "KMS Keys by Creation Month"
-      sql   = query.oci_kms_key_by_creation_month.sql
-      type  = "column"
-      width = 4
-
-      series "month" {
-        color = "green"
-      }
-    }
-
-    table {
-      title = "KMS Keys To Be Deleted within 7 days"
-      width = 4
-      sql = <<-EOQ
-        with compartments as (
-          select
-            id,
-            title
-          from
-            oci_identity_tenancy
-          union (
-          select
-            id,
-            title
-          from
-            oci_identity_compartment
-          where lifecycle_state = 'ACTIVE')
-        )
-        select
-          b.title as "key",
-          (time_of_deletion - current_date) as "Age in Days",
-          c.title as "Compartment"
-        from
-          oci_kms_key as b
-          left join compartments as c on c.id = b.Compartment_id
-        where
-          extract(day from time_of_deletion - current_date) <= 7
-        order by
-          "Age in Days" desc,
-          b.title
-        limit 5
-      EOQ
-    }
   }
 
 }

@@ -91,42 +91,27 @@ dashboard "oci_kms_key_age_report" {
     table {
 
       sql = <<-EOQ
-        with compartments as (
-          select
-            id,
-            title
-          from
-            oci_identity_tenancy
-          union (
-            select
-              id,
-              title
-            from
-              oci_identity_compartment
-            where lifecycle_state = 'ACTIVE')
-        )
         select
-          v.title as "Key",
-          'some other value' as "Key",
-
-
-
-          date_trunc('day',age(now(),v.time_created))::text as "Age",
-          v.time_created as "Create Time",
-          a.title as "Compartment",
-          v.id as "Key OCID",
-          v.lifecycle_state as "State"
+          k.name as "Name",
+          now()::date - k.time_created::date as "Age in Days",
+          k.time_created as "Create Time",
+          k.lifecycle_state as "Lifecycle State",
+          k.protection_mode as "Protection Mode",
+          coalesce(c.title,'root') as "Compartment",
+          t.title as "Tenancy",
+          k.region as "Region",
+          k.id as "OCID"
         from
-          oci_kms_key as v,
-          compartments as a
+          oci_kms_key as k
+          left join oci_identity_compartment as c on k.compartment_id = c.id
+          left join oci_identity_tenancy as t on k.tenant_id = t.id
         where
-          v.tenant_id = a.id
+          k.lifecycle_state <> 'DELETED'
         order by
-          v.time_created,
-          v.title
+          k.time_created,
+          k.title
       EOQ
     }
-
 
   }
 
