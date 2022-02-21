@@ -1,11 +1,22 @@
 query "oci_mysql_db_system_count" {
   sql = <<-EOQ
   select 
-    count(*) as "MySQL DB Systems" 
+    count(*) as "DB Systems" 
   from 
     oci_mysql_db_system 
   where 
     lifecycle_state <> 'DELETED'
+  EOQ
+}
+
+query "oci_mysql_db_system_storage_total" {
+  sql = <<-EOQ
+    select
+      sum(data_storage_size_in_gbs) as "Total Storage (GB)"
+    from
+      oci_mysql_db_system
+    where
+      lifecycle_state <> 'DELETED'  
   EOQ
 }
 
@@ -51,19 +62,6 @@ query "oci_mysql_db_system_backup_disabled_count" {
   EOQ
 }
 
-query "oci_mysql_db_system_inactive_lifecycle_count" {
-  sql = <<-EOQ
-    select
-      count(*) as value,
-      'Inactive' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as "type"
-    from
-      oci_mysql_db_system
-    where
-      lifecycle_state = 'INACTIVE'
-  EOQ
-}
-
 query "oci_mysql_db_system_failed_lifecycle_count" {
   sql = <<-EOQ
     select
@@ -93,34 +91,87 @@ query "oci_mysql_db_system_by_region" {
   EOQ
 }
 
+query "oci_mysql_db_system_storage_by_region" {
+  sql = <<-EOQ
+    select 
+      region as "Region", 
+      sum(data_storage_size_in_gbs) as "GB" 
+    from 
+      oci_mysql_db_system
+    where
+      lifecycle_state <> 'DELETED'   
+    group by 
+      region 
+    order by 
+      region
+  EOQ
+}
+
 query "oci_mysql_db_system_by_compartment" {
   sql = <<-EOQ
-    with compartments as ( 
-      select
-        id, title
-      from
-        oci_identity_tenancy
-      union (
-      select 
-        id,title 
-      from 
-        oci_identity_compartment 
-      where 
-        lifecycle_state = 'ACTIVE'
-      )  
-    )
-   select 
-      c.title as "compartment",
-      count(d.*) as "MySQL DB Systems" 
+    select 
+      c.title as "Compartment",
+      count(d.*) as "DB Systems" 
     from 
       oci_mysql_db_system as d,
-      compartments as c 
+      oci_identity_compartment as c 
     where 
-      c.id = d.compartment_id and lifecycle_state <> 'DELETED'
+      c.id = d.compartment_id and d.lifecycle_state <> 'DELETED'
     group by 
-      compartment
+      c.title
     order by 
-      compartment
+      c.title
+  EOQ
+}
+
+query "oci_mysql_db_system_storage_by_compartment" {
+  sql = <<-EOQ
+    select 
+      c.title as "Compartment",
+      sum(data_storage_size_in_gbs) as "GB" 
+    from 
+      oci_mysql_db_system as d,
+      oci_identity_compartment as c 
+    where 
+      c.id = d.compartment_id and d.lifecycle_state <> 'DELETED'
+    group by 
+      c.title
+    order by 
+      c.title
+  EOQ
+}
+
+query "oci_mysql_db_system_by_tenancy" {
+  sql = <<-EOQ
+    select 
+      t.title as "Tenancy",
+      count(d.*) as "DB Systems" 
+    from 
+      oci_mysql_db_system as d,
+      oci_identity_tenancy as t 
+    where 
+      t.id = d.compartment_id and lifecycle_state <> 'DELETED'
+    group by 
+      t.title
+    order by 
+      t.title
+  EOQ
+}
+
+query "oci_mysql_db_system_storage_by_tenancy" {
+  sql = <<-EOQ
+    select 
+      t.title as "Tenancy",
+      sum(data_storage_size_in_gbs) as "GB" 
+    from 
+      oci_mysql_db_system as d,
+      oci_identity_tenancy as t 
+    where 
+      t.id = d.compartment_id and lifecycle_state <> 'DELETED'
+    group by 
+      t.title
+    order by 
+      t.title
   EOQ
 }
 
@@ -141,9 +192,9 @@ query "oci_mysql_db_system_by_lifecycle_state" {
 query "oci_mysql_db_system_with_no_backups" {
   sql = <<-EOQ
     select
-      v.display_name,
-      v.compartment_id,
-      v.region
+      v.display_name as "Name",
+      v.compartment_id as "Compartment Id",
+      v.region as "Region"
     from
       oci_mysql_db_system as v
     left join oci_mysql_backup as b on v.id = b.db_system_id
@@ -162,7 +213,7 @@ query "oci_mysql_db_system_by_creation_month" {
   sql = <<-EOQ
     with mysql_dbSystems as (
       select
-        display_name as name,
+        title,
         time_created,
         to_char(time_created,
           'YYYY-MM') as creation_month
@@ -197,6 +248,54 @@ query "oci_mysql_db_system_by_creation_month" {
     select
       months.month,
       mysql_dbSystems_by_month.count
+    from
+      months
+      left join mysql_dbSystems_by_month on months.month = mysql_dbSystems_by_month.creation_month
+    order by
+      months.month;
+  EOQ
+}
+
+query "oci_mysql_db_system_storage_by_creation_month" {
+  sql = <<-EOQ
+    with mysql_dbSystems as (
+      select
+        title,
+        data_storage_size_in_gbs,
+        time_created,
+        to_char(time_created,
+          'YYYY-MM') as creation_month
+      from
+        oci_mysql_db_system
+      where
+      lifecycle_state <> 'DELETED'  
+    ),
+    months as (
+      select
+        to_char(d,
+          'YYYY-MM') as month
+      from
+        generate_series(date_trunc('month',
+            (
+              select
+                min(time_created)
+                from mysql_dbSystems)),
+            date_trunc('month',
+              current_date),
+            interval '1 month') as d
+    ),
+    mysql_dbSystems_by_month as (
+      select
+        creation_month,
+        sum(data_storage_size_in_gbs) as size
+      from
+        mysql_dbSystems
+      group by
+        creation_month
+    )
+    select
+      months.month,
+      mysql_dbSystems_by_month.size as "GB"
     from
       months
       left join mysql_dbSystems_by_month on months.month = mysql_dbSystems_by_month.creation_month
@@ -291,39 +390,21 @@ dashboard "oci_mysql_db_system_dashboard" {
     }
 
     card {
+      sql = query.oci_mysql_db_system_storage_total.sql
+      width = 2
+    }
+
+    card {
       sql = query.oci_mysql_db_system_backup_disabled_count.sql
       width = 2
     } 
-
-    card {
-      sql = query.oci_mysql_db_system_inactive_lifecycle_count.sql
-      width = 2
-    }
 
     card {
       sql = query.oci_mysql_db_system_failed_lifecycle_count.sql
       width = 2
     } 
   }
-
-  container {
-      title = "Analysis"      
-
-    chart {
-      title = "MySQL DB Systems by Compartment"
-      sql = query.oci_mysql_db_system_by_compartment.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "MySQL DB Systems by Region"
-      sql = query.oci_mysql_db_system_by_region.sql
-      type  = "column"
-      width = 3
-    }
-  }
-
+  
   container {
       title = "Assessments"
       
@@ -340,95 +421,87 @@ dashboard "oci_mysql_db_system_dashboard" {
          sql = query.oci_mysql_db_system_with_no_backups.sql
          width = 3
        }
-    }
-
-   container {
-    title = "Resources by Age" 
-    width = 4
-    chart {
-      title = "MySQL DB Systems by Creation Month"
-      sql = query.oci_mysql_db_system_by_creation_month.sql
-      type  = "column"
-      series "month" {
-        color = "green"
-      }
-    }
-
-    # table {
-    #   title = "Oldest MySQL DB Systems"
-    #   width = 4
-
-    #   sql = <<-EOQ
-    #     with compartments as ( 
-    #       select
-    #         id, title
-    #       from
-    #         oci_identity_tenancy
-    #       union (
-    #       select 
-    #         id,title 
-    #       from 
-    #         oci_identity_compartment 
-    #       where 
-    #         lifecycle_state = 'ACTIVE'
-    #       )  
-    #    )
-    #     select
-    #       d.title as "MySQL DB Systems",
-    #       current_date - d.time_created::date as "Age in Days",
-    #       c.title as "Compartment"
-    #     from
-    #       oci_mysql_db_system as d
-    #       left join compartments as c on c.id = d.compartment_id
-    #     where 
-    #       lifecycle_state <> 'DELETED'    
-    #     order by
-    #       "Age in Days" desc,
-    #       d.title
-    #     limit 5
-    #   EOQ
-    # }
-
-    # table {
-    #   title = "Newest MySQL DB Systems"
-    #   width = 4
-
-    #   sql = <<-EOQ
-    #     with compartments as ( 
-    #       select
-    #         id, title
-    #       from
-    #         oci_identity_tenancy
-    #       union (
-    #       select 
-    #         id,title 
-    #       from 
-    #         oci_identity_compartment 
-    #       where 
-    #         lifecycle_state = 'ACTIVE'
-    #       )  
-    #    )
-    #     select
-    #       d.title as "MySQL DB Systems",
-    #       current_date - d.time_created::date as "Age in Days",
-    #       c.title as "Compartment"
-    #     from
-    #       oci_mysql_db_system as d
-    #       left join compartments as c on c.id = d.compartment_id
-    #     where 
-    #       lifecycle_state <> 'DELETED'    
-    #     order by
-    #       "Age in Days" asc,
-    #       d.title
-    #     limit 5
-    #   EOQ
-    # }
-
   }
 
   container {
+      title = "Analysis"    
+
+    chart {
+      title = "DB Systems by Tenancy"
+      sql = query.oci_mysql_db_system_by_tenancy.sql
+      type  = "column"
+      width = 3
+    }  
+
+    chart {
+      title = "DB Systems by Compartment"
+      sql = query.oci_mysql_db_system_by_compartment.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "DB Systems by Region"
+      sql = query.oci_mysql_db_system_by_region.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "DB Systems by Age"
+      sql   = query.oci_mysql_db_system_by_creation_month.sql
+      type  = "column"
+      width = 3
+    }
+  }
+
+  container {
+    chart {
+      title = "Storage by Tenancy (GB)"
+      sql   = query.oci_mysql_db_system_storage_by_tenancy.sql
+      type  = "column"
+      width = 3
+
+      series "GB" {
+        color = "tan"
+      }
+    }
+    
+    chart {
+      title = "Storage by Compartment (GB)"
+      sql   = query.oci_mysql_db_system_storage_by_compartment.sql
+      type  = "column"
+      width = 3
+
+      series "GB" {
+        color = "tan"
+      }
+    }
+
+    chart {
+      title = "Storage by Region (GB)"
+      sql   = query.oci_mysql_db_system_storage_by_region.sql
+      type  = "column"
+      width = 3
+
+      series "GB" {
+        color = "tan"
+      }
+    }
+
+    chart {
+      title = "Storage by Age (GB)"
+      sql   = query.oci_mysql_db_system_storage_by_creation_month.sql
+      type  = "column"
+      width = 3
+
+      series "GB" {
+        color = "tan"
+      }
+    }
+  }
+  container {
     title  = "Performance & Utilization"
-    width = 8
 
     chart {
       title = "Top 10 CPU - Last 7 days"

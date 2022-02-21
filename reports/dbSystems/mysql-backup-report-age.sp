@@ -89,33 +89,21 @@ dashboard "oci_mysql_backup_age_report" {
     table {
 
       sql = <<-EOQ
-        with compartments as (
-          select
-            id,
-            title
-          from
-            oci_identity_tenancy
-          union (
-            select
-              id,
-              title
-            from
-              oci_identity_compartment
-            where lifecycle_state = 'ACTIVE')
-        )
         select
-          v.title as "Backup",
-          date_trunc('day',age(now(),v.time_created))::text as "Age",
+          v.display_name as "Name",
+          now()::date - v.time_created::date as "Age in Days",
           v.time_created as "Create Time",
-          a.title as "Compartment",
-          v.id as "OCID",
-          v.lifecycle_state as "State",
-          v.region as "Region"
+          v.lifecycle_state as "Lifecycle State",
+          coalesce(c.title, 'root') as "Compartment",
+          t.title as "Tenancy",
+          v.region as "Region",
+          v.id as "OCID"  
         from
-          oci_mysql_backup as v,
-          compartments as a
+          oci_mysql_backup as v
+          left join oci_identity_compartment as c on v.compartment_id = c.id
+          left join oci_identity_tenancy as t on v.tenant_id = t.id
         where
-          v.tenant_id = a.id
+          v.lifecycle_state <> 'DELETED'
         order by
           v.time_created,
           v.title

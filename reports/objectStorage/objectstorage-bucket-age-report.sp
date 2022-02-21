@@ -89,33 +89,18 @@ dashboard "oci_objectstorage_bucket_age_report" {
     table {
 
       sql = <<-EOQ
-        with compartments as (
-          select
-            id,
-            title
-          from
-            oci_identity_tenancy
-          union (
-            select
-              id,
-              title
-            from
-              oci_identity_compartment
-            where lifecycle_state = 'ACTIVE')
-        )
         select
-          v.title as "Bucket",
-          date_trunc('day',age(now(),v.time_created))::text as "Age",
+          v.name as "Name",
+          now()::date - v.time_created::date as "Age in Days",
           v.time_created as "Create Time",
-          a.title as "Compartment",
-          v.id as "Database OCID",
-          v.public_access_type as "Access Type",
-          v.region as "Region"
+          coalesce(c.title, 'root') as "Compartment",
+          t.title as "Tenancy",
+          v.region as "Region",
+          v.id as "OCID"
         from
-          oci_objectstorage_bucket as v,
-          compartments as a
-        where
-          v.tenant_id = a.id
+          oci_objectstorage_bucket as v
+          left join oci_identity_compartment as c on v.compartment_id = c.id
+          left join oci_identity_tenancy as t on v.tenant_id = t.id
         order by
           v.time_created,
           v.title

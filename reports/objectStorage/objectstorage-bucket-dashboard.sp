@@ -15,14 +15,16 @@ query "oci_objectstorage_bucket_read_only_access_count" {
   EOQ
 }
 
-query "oci_objectstorage_bucket_public_access_blocked_count" {
+query "oci_objectstorage_bucket_public_access_count" {
   sql = <<-EOQ
     select
-      count(*) as "Public Access Blocked"
+      count(*) as value,
+      'Public Access' as label,
+      case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
       oci_objectstorage_bucket
     where
-      public_access_type = 'NoPublicAccess'  
+      public_access_type <> 'NoPublicAccess'  
   EOQ
 }
 
@@ -73,32 +75,35 @@ query "oci_objectstorage_bucket_by_region" {
 
 query "oci_objectstorage_bucket_by_compartment" {
   sql = <<-EOQ
-    with compartments as ( 
-      select
-        id, title
-      from
-        oci_identity_tenancy
-      union (
-      select 
-        id,title 
-      from 
-        oci_identity_compartment 
-      where 
-        lifecycle_state = 'ACTIVE'
-      )  
-    )
    select 
-      c.title as "compartment",
-      count(b.*) as "buckets" 
+      c.title as "Compartment",
+      count(b.*) as "Buckets" 
     from 
       oci_objectstorage_bucket as b,
-      compartments as c 
+      oci_identity_compartment as c 
     where 
       c.id = b.compartment_id
     group by 
-      compartment
+      c.title
     order by 
-      compartment
+      c.title
+  EOQ
+}
+
+query "oci_objectstorage_bucket_by_tenancy" {
+  sql = <<-EOQ
+   select 
+      c.title as "Tenancy",
+      count(b.*) as "Buckets" 
+    from 
+      oci_objectstorage_bucket as b,
+      oci_identity_tenancy as c 
+    where 
+      c.id = b.compartment_id
+    group by 
+      c.title
+    order by 
+      c.title
   EOQ
 }
 
@@ -111,8 +116,8 @@ query "oci_objectstorage_bucket_encryption_status" {
       select
         id,
         case 
-         when kms_key_id is null then 'OCI Managed Encryption' 
-         else 'Customer Managed Encryption' 
+         when kms_key_id is null then 'OCI Managed' 
+         else 'Customer Managed' 
          end as encryption_status
       from
         oci_objectstorage_bucket) as b
@@ -201,16 +206,6 @@ dashboard "oci_objectstorage_bucket_dashboard" {
     }
 
     card {
-      sql = query.oci_objectstorage_bucket_public_access_blocked_count.sql
-      width = 2
-    }
-
-    card {
-      sql = query.oci_objectstorage_bucket_versioning_disabled_count.sql
-      width = 2
-    }
-
-    card {
       sql = query.oci_objectstorage_bucket_default_encryption_count.sql
       width = 2
     }
@@ -219,27 +214,20 @@ dashboard "oci_objectstorage_bucket_dashboard" {
       sql = query.oci_objectstorage_bucket_archived_count.sql
       width = 2
     }
+
+    card {
+      sql = query.oci_objectstorage_bucket_public_access_count.sql
+      width = 2
+    }
+
+    card {
+      sql = query.oci_objectstorage_bucket_versioning_disabled_count.sql
+      width = 2
+    }
+
   }
 
   container {
-      title = "Analysis"      
-
-    chart {
-      title = "Buckets by Compartment"
-      sql = query.oci_objectstorage_bucket_by_compartment.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Buckets by Region"
-      sql = query.oci_objectstorage_bucket_by_region.sql
-      type  = "column"
-      width = 3
-    }
-  }
-
-    container {
       title = "Assessments"
 
       chart {
@@ -266,84 +254,35 @@ dashboard "oci_objectstorage_bucket_dashboard" {
     }
 
   container {
-    title = "Resources by Age" 
+      title = "Analysis" 
 
     chart {
-      title = "Bucket by Creation Month"
+      title = "Buckets by Tenancy"
+      sql = query.oci_objectstorage_bucket_by_tenancy.sql
+      type  = "column"
+      width = 3
+    }     
+
+    chart {
+      title = "Buckets by Compartment"
+      sql = query.oci_objectstorage_bucket_by_compartment.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Buckets by Region"
+      sql = query.oci_objectstorage_bucket_by_region.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Buckets by Age"
       sql = query.oci_objectstorage_bucket_by_creation_month.sql
       type  = "column"
-      width = 4
-      series "month" {
-        color = "green"
-      }
+      width = 3
     }
-
-    table {
-      title = "Oldest buckets"
-      width = 4
-
-      sql = <<-EOQ
-        with compartments as ( 
-          select
-            id, title
-          from
-            oci_identity_tenancy
-          union (
-          select 
-            id,title 
-          from 
-            oci_identity_compartment 
-          where 
-            lifecycle_state = 'ACTIVE'
-          )  
-       )
-        select
-          b.title as "bucket",
-          current_date - b.time_created::date as "Age in Days",
-          c.title as "Compartment"
-        from
-          oci_objectstorage_bucket as b
-          left join compartments as c on c.id = b.compartment_id
-        order by
-          "Age in Days" desc,
-          b.title
-        limit 5
-      EOQ
-    }
-
-    table {
-      title = "Newest buckets"
-      width = 4
-
-      sql = <<-EOQ
-        with compartments as ( 
-          select
-            id, title
-          from
-            oci_identity_tenancy
-          union (
-          select 
-            id,title 
-          from 
-            oci_identity_compartment 
-          where 
-            lifecycle_state = 'ACTIVE'
-          )  
-       )
-        select
-          b.title as "bucket",
-          current_date - b.time_created::date as "Age in Days",
-          c.title as "Compartment"
-        from
-          oci_objectstorage_bucket as b
-          left join compartments as c on c.id = b.compartment_id
-        order by
-          "Age in Days" asc,
-          b.title
-        limit 5
-      EOQ
-    }
-
   }
 
 }
