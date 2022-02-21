@@ -12,33 +12,21 @@ dashboard "oci_ons_subscription_unused_report" {
 
   table {
     sql = <<-EOQ
-      with compartments as ( 
-        select
-          id, title
-        from
-          oci_identity_tenancy
-        union (
-        select 
-          id,title 
-        from 
-          oci_identity_compartment 
-        where 
-          lifecycle_state = 'ACTIVE'
-        )  
-       )
       select
-        s.id as "Id",
-        s.created_time as "Time Created",
-        s.endpoint as "Subscription Endpoint",
-        s.lifecycle_state as "Subscription State",
-        s.protocol as "Subscription Protocol",
-        c.title as "Compartment",
-        s.region as "Region"
+        v.id as "Subscription Id",
+        now()::date - v.created_time::date as "Age in Days",
+        v.created_time as "Create Time",
+        v.lifecycle_state as "Lifecycle State",
+        coalesce(c.title, 'root') as "Compartment",
+        t.title as "Tenancy",
+        v.region as "Region" 
       from
-        oci_ons_subscription as s
-        left join compartments as c on c.id = s.Compartment_id
-      where
-        s.lifecycle_state <> 'DELETED'
+        oci_ons_subscription as v
+        left join oci_identity_compartment as c on v.compartment_id = c.id
+        left join oci_identity_tenancy as t on v.tenant_id = t.id
+      order by
+        v.created_time,
+        v.title
     EOQ
   }
 

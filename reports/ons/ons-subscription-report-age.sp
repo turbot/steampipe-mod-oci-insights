@@ -89,33 +89,18 @@ dashboard "oci_ons_subscription_age_report" {
     table {
 
       sql = <<-EOQ
-        with compartments as (
-          select
-            id,
-            title
-          from
-            oci_identity_tenancy
-          union (
-            select
-              id,
-              title
-            from
-              oci_identity_compartment
-            where lifecycle_state = 'ACTIVE')
-        )
         select
-          v.title as "Subscription",
-          date_trunc('day',age(now(),v.created_time))::text as "Age",
+          v.id as "Subscription Id",
+          now()::date - v.created_time::date as "Age in Days",
           v.created_time as "Create Time",
-          a.title as "Compartment",
-          v.id as "Database OCID",
-          v.lifecycle_state as "State",
-          v.region as "Region"
+          v.lifecycle_state as "Lifecycle State",
+          coalesce(c.title, 'root') as "Compartment",
+          t.title as "Tenancy",
+          v.region as "Region" 
         from
-          oci_ons_subscription as v,
-          compartments as a
-        where
-          v.tenant_id = a.id
+          oci_ons_subscription as v
+          left join oci_identity_compartment as c on v.compartment_id = c.id
+          left join oci_identity_tenancy as t on v.tenant_id = t.id
         order by
           v.created_time,
           v.title
