@@ -1,6 +1,6 @@
 query "oci_block_storage_block_volume_count" {
   sql = <<-EOQ
-    select count(*) as "Block Volumes" from oci_core_volume where lifecycle_state <> 'DELETED'
+    select count(*) as "Block Volumes" from oci_core_volume where lifecycle_state <> 'TERMINATED'
   EOQ
 }
 
@@ -11,7 +11,7 @@ query "oci_block_storage_block_volume_storage_total" {
     from
       oci_core_volume
     where
-      lifecycle_state <> 'DELETED'  
+      lifecycle_state <> 'TERMINATED'  
   EOQ
 }
 
@@ -22,7 +22,7 @@ query "oci_block_storage_block_volume_default_encrypted_volumes_count" {
     from 
       oci_core_volume 
     where 
-      kms_key_id is null and lifecycle_state <> 'DELETED'
+      kms_key_id is null and lifecycle_state <> 'TERMINATED'
   EOQ
 }
 
@@ -43,13 +43,13 @@ query "oci_block_storage_block_volume_with_no_backups_count" {
   sql = <<-EOQ
     select
       count(v.*) as value,
-      'Volume With No Backup' as label,
+      'Volume With No Backups' as label,
       case count(v.*) when 0 then 'ok' else 'alert' end as type
     from
       oci_core_volume as v
     left join oci_core_volume_backup as b on v.id = b.volume_id
     where 
-      v.lifecycle_state <> 'DELETED'
+      v.lifecycle_state <> 'TERMINATED'
     group by
       v.compartment_id,
       v.region,
@@ -68,7 +68,7 @@ query "oci_block_storage_block_volume_by_compartment" {
       oci_core_volume as v,
       oci_identity_compartment as c 
     where 
-      c.id = v.compartment_id and v.lifecycle_state <> 'DELETED'
+      c.id = v.compartment_id and v.lifecycle_state <> 'TERMINATED'
     group by 
       c.title
     order by 
@@ -85,7 +85,7 @@ query "oci_block_storage_block_volume_by_tenancy" {
       oci_core_volume as v,
       oci_identity_tenancy as c 
     where 
-      c.id = v.compartment_id and v.lifecycle_state <> 'DELETED'
+      c.id = v.compartment_id and v.lifecycle_state <> 'TERMINATED'
     group by 
       c.title
     order by 
@@ -102,7 +102,7 @@ query "oci_block_storage_block_volume_storage_by_compartment" {
       oci_core_volume as v,
       oci_identity_compartment as c 
     where 
-      c.id = v.compartment_id and v.lifecycle_state <> 'DELETED'
+      c.id = v.compartment_id and v.lifecycle_state <> 'TERMINATED'
     group by 
       c.title
     order by 
@@ -119,7 +119,7 @@ query "oci_block_storage_block_volume_storage_by_tenancy" {
       oci_core_volume as v,
       oci_identity_tenancy as c 
     where 
-      c.id = v.compartment_id and v.lifecycle_state <> 'DELETED'
+      c.id = v.compartment_id and v.lifecycle_state <> 'TERMINATED'
     group by 
       c.title
     order by 
@@ -135,7 +135,7 @@ query "oci_block_storage_block_volume_by_region" {
     from
       oci_core_volume
     where
-      lifecycle_state <> 'DELETED'  
+      lifecycle_state <> 'TERMINATED'  
     group by
       region
   EOQ
@@ -149,7 +149,7 @@ query "oci_block_storage_block_volume_storage_by_region" {
     from
       oci_core_volume
     where
-      lifecycle_state <> 'DELETED'    
+      lifecycle_state <> 'TERMINATED'    
     group by
       region
   EOQ
@@ -164,7 +164,7 @@ query "oci_block_storage_block_volume_by_lifecycle_state" {
     from
       oci_core_volume
     where
-      lifecycle_state <> 'DELETED'    
+      lifecycle_state <> 'TERMINATED'    
     group by
       lifecycle_state
   EOQ
@@ -186,7 +186,7 @@ query "oci_block_storage_block_volume_by_encryption_status" {
       from
         oci_core_volume
       where
-      lifecycle_state <> 'DELETED') as v
+      lifecycle_state <> 'TERMINATED') as v
     group by
       encryption_status
     order by
@@ -205,7 +205,7 @@ query "oci_block_storage_block_volume_with_no_backups" {
       oci_core_volume as v
     left join oci_core_volume_backup as b on v.id = b.volume_id
     where 
-      v.lifecycle_state <> 'DELETED'
+      v.lifecycle_state <> 'TERMINATED'
     group by
       v.compartment_id,
       v.region,
@@ -226,7 +226,7 @@ query "oci_block_storage_block_volume_by_creation_month" {
       from
         oci_core_volume
       where
-       lifecycle_state <> 'DELETED'   
+       lifecycle_state <> 'TERMINATED'   
     ),
     months as (
       select
@@ -274,7 +274,7 @@ query "oci_block_storage_block_volume_storage_by_creation_month" {
       from
         oci_core_volume
       where
-      lifecycle_state <> 'DELETED'  
+      lifecycle_state <> 'TERMINATED'  
     ),
     months as (
       select

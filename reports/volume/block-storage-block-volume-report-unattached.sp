@@ -12,7 +12,7 @@ query "oci_block_storage_block_volume_unattached_volumes_count" {
           volume_id
         from
           oci_core_volume_attachment  
-      ) and lifecycle_state <> 'DELETED'
+      ) and lifecycle_state <> 'TERMINATED'
   EOQ
 }
 
@@ -32,7 +32,7 @@ dashboard "oci_block_storage_block_volume_unattached_report" {
     sql = <<-EOQ
       select
         v.display_name as "Name",
-        case when a.id is null then 'Unattached' else 'Attached' end as "Attachment Status",
+        a.lifecycle_state as "Attachment Status",
         now()::date - v.time_created::date as "Age in Days",
         v.time_created as "Create Time",
         v.lifecycle_state as "Lifecycle State",
@@ -46,7 +46,7 @@ dashboard "oci_block_storage_block_volume_unattached_report" {
         left join oci_identity_compartment as c on v.compartment_id = c.id
         left join oci_identity_tenancy as t on v.tenant_id = t.id
         where
-          v.lifecycle_state <> 'DELETED'
+          v.lifecycle_state <> 'TERMINATED'
         order by
           v.time_created,
           v.title

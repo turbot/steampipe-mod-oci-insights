@@ -4,7 +4,7 @@ query "oci_block_storage_boot_volume_customer_managed_encryption_count" {
       from 
     oci_core_boot_volume 
     where 
-    kms_key_id is not null and lifecycle_state <> 'DELETED'
+    kms_key_id is not null and lifecycle_state <> 'TERMINATED'
   EOQ
 }
 
@@ -27,20 +27,6 @@ dashboard "oci_block_storage_boot_volume_encryption_report" {
 
   table {
     sql = <<-EOQ
-      with compartments as ( 
-        select
-          id, title
-        from
-          oci_identity_tenancy
-        union (
-        select 
-          id,title 
-        from 
-          oci_identity_compartment 
-        where 
-          lifecycle_state = 'ACTIVE'
-        )  
-       )
       select
         v.display_name as "Name",
         case when v.kms_key_id is not null then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
@@ -56,7 +42,7 @@ dashboard "oci_block_storage_boot_volume_encryption_report" {
         left join oci_identity_compartment as c on v.compartment_id = c.id
         left join oci_identity_tenancy as t on v.tenant_id = t.id
         where
-          v.lifecycle_state <> 'DELETED'
+          v.lifecycle_state <> 'TERMINATED'
         order by
           v.time_created,
           v.title

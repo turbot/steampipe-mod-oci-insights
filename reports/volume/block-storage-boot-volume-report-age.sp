@@ -117,7 +117,7 @@ dashboard "oci_block_storage_boot_volume_age_report" {
           left join oci_identity_compartment as c on v.compartment_id = c.id
           left join oci_identity_tenancy as t on v.tenant_id = t.id
         where
-          v.lifecycle_state <> 'DELETED'
+          v.lifecycle_state <> 'TERMINATED'
         order by
           v.time_created,
           v.title

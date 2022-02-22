@@ -4,6 +4,26 @@ query "oci_ons_notification_topic_count" {
   EOQ
 }
 
+query "oci_ons_notification_topic_unused_count" {
+  sql = <<-EOQ
+    select 
+      count(*) as value,
+      'Unused' as label,
+      case count(*) when 0 then 'ok' else 'alert' end as "type"
+    from 
+      oci_ons_notification_topic
+    where
+      topic_id in (
+    select 
+      topic_id
+    from
+      oci_ons_subscription 
+    where
+      lifecycle_state <> 'ACTIVE'          
+      )         
+  EOQ
+}
+
 query "oci_ons_notification_topic_by_region" {
   sql = <<-EOQ
     select 
@@ -64,6 +84,27 @@ query "oci_ons_notification_topic_by_lifecycle_state" {
   EOQ
 }
 
+query "oci_ons_notification_topic_by_subscription" {
+  sql = <<-EOQ
+    select
+      name, 
+      count(name)
+    from 
+      oci_ons_notification_topic
+    where
+      topic_id in (
+    select 
+      topic_id
+    from
+      oci_ons_subscription 
+    where
+      lifecycle_state <> 'ACTIVE'          
+      )
+    group by
+      name           
+  EOQ
+}
+
 query "oci_ons_notification_topic_by_creation_month" {
   sql = <<-EOQ
     with topics as (
@@ -114,8 +155,14 @@ dashboard "oci_ons_notification_topic_dashboard" {
   title = "OCI ONS Notification Topic Dashboard"
 
   container {
+
     card {
       sql = query.oci_ons_notification_topic_count.sql
+      width = 2
+    }
+
+    card {
+      sql = query.oci_ons_notification_topic_unused_count.sql
       width = 2
     }
   }
@@ -126,6 +173,13 @@ dashboard "oci_ons_notification_topic_dashboard" {
       chart {
         title = "Lifecycle State"
         sql = query.oci_ons_notification_topic_by_lifecycle_state.sql
+        type  = "donut"
+        width = 3
+      }
+
+      chart {
+        title = "No Active Subscription"
+        sql = query.oci_ons_notification_topic_by_subscription.sql
         type  = "donut"
         width = 3
       }

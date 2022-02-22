@@ -1,6 +1,6 @@
 query "oci_objectstorage_bucket_report_customer_managed_encryption_count" {
   sql = <<-EOQ
-    select count(*) as "Customer Managed"
+    select count(*) as "Customer Managed Encryption"
       from 
     oci_objectstorage_bucket 
     where 

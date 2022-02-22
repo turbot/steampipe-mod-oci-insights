@@ -142,7 +142,20 @@ query "oci_objectstorage_bucket_versioning_status" {
   EOQ
 }
 
-# Added
+query "oci_objectstorage_bucket_public_access_status" {
+  sql = <<-EOQ
+    select
+      public_access_type,
+      count(*)
+    from
+      oci_objectstorage_bucket
+    group by  
+      public_access_type
+    order by
+      public_access_type desc
+  EOQ
+}
+
 query "oci_objectstorage_bucket_by_creation_month" {
   sql = <<-EOQ
     with buckets as (
@@ -235,10 +248,6 @@ dashboard "oci_objectstorage_bucket_dashboard" {
         sql = query.oci_objectstorage_bucket_encryption_status.sql
         type  = "donut"
         width = 3
-
-        series "Enabled" {
-           color = "green"
-        }
       }
 
        chart {
@@ -246,11 +255,15 @@ dashboard "oci_objectstorage_bucket_dashboard" {
         sql = query.oci_objectstorage_bucket_versioning_status.sql
         type  = "donut"
         width = 3
-
-        series "Enabled" {
-           color = "green"
-        }
       }
+      
+      chart {
+        title = "Access Type"
+        sql = query.oci_objectstorage_bucket_public_access_status.sql
+        type  = "donut"
+        width = 3
+      }
+
     }
 
   container {
