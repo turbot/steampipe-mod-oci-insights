@@ -24,8 +24,8 @@ query "oci_nosql_table_stalled_more_than_90_days_count" {
   sql = <<-EOQ
    select
       count(*) as value,
-      'Stalled More Than 90 Days' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as "type" 
+      'Stalled > 90 Days' as label,
+      case count(*) when 0 then 'ok' else 'alert' end as type 
     from
       oci_nosql_table
     where
@@ -100,17 +100,14 @@ query "oci_nosql_table_by_lifecycle_state" {
 query "oci_nosql_table_stalled_more_than_90_days" {
   sql = <<-EOQ
     select
-      name as "Name",
-      compartment_id as "Compartment",
-      region as "Region"
+      name,
+      count(name)
     from
       oci_nosql_table
     where
       date_part('day', now()-(time_updated::timestamptz)) > 90
       and lifecycle_state <> 'DELETED'
     group by
-      compartment_id,
-      region,
       name
   EOQ
 }
@@ -258,9 +255,10 @@ dashboard "oci_nosql_table_dashboard" {
 
       }
 
-       table {
+       chart {
          title = "Stalled More Than 90 Days"
          sql = query.oci_nosql_table_stalled_more_than_90_days.sql
+         type  = "donut"
          width = 3
        }
     }
@@ -269,28 +267,28 @@ dashboard "oci_nosql_table_dashboard" {
       title = "Analysis"   
 
     chart {
-      title = "Table by Tenancy"
+      title = "Tables by Tenancy"
       sql = query.oci_nosql_table_by_tenancy.sql
       type  = "column"
       width = 3
     }
 
     chart {
-      title = "Table by Compartment"
+      title = "Tables by Compartment"
       sql = query.oci_nosql_table_by_compartment.sql
       type  = "column"
       width = 3
     }
 
     chart {
-      title = "Table by Region"
+      title = "Tables by Region"
       sql = query.oci_nosql_table_by_region.sql
       type  = "column"
       width = 3
     }
 
     chart {
-      title = "Table by Age"
+      title = "Tables by Age"
       sql = query.oci_nosql_table_by_creation_month.sql
       type  = "column"
       width = 3

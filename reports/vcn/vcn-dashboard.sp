@@ -18,63 +18,53 @@ query "oci_core_vcn_no_subnet_count" {
   EOQ
 }
 
-query "oci_core_vcn_no_internet_gateway" {
+query "oci_core_vcn_no_subnet" {
   sql = <<-EOQ
     select 
-      count(*) as value,
-      'VCNs With No Internet Gateways' as label,
-      case when count(*) = 0 then 'ok' else 'alert' end as type    
+      display_name,
+      count(display_name)    
     from 
       oci_core_vcn as vcn
     where
-      vcn.id not in (select oci_core_internet_gateway.vcn_id from oci_core_internet_gateway)
+      vcn.id not in (select vcn_id from oci_core_subnet)
+    group by
+      display_name  
   EOQ
 }
 
-query "oci_core_vcn_no_nat_gateway" {
+query "oci_core_vcn_by_tenancy" {
   sql = <<-EOQ
-    select 
-      count(*) as value,
-      'VCNs With No Nat Gateways' as label,
-      case when count(*) = 0 then 'ok' else 'alert' end as type    
-    from 
-      oci_core_vcn as vcn
-    where
-      vcn.id not in (select oci_core_nat_gateway.vcn_id from oci_core_nat_gateway)
-  EOQ
-}
-
-query "oci_core_vcn_by_account" {
-  sql = <<-EOQ
-    with compartments as ( 
-        select
-          id, title
-        from
-          oci_identity_tenancy
-        union (
-        select 
-          id,title 
-        from 
-          oci_identity_compartment 
-        where 
-          lifecycle_state = 'ACTIVE'
-        )  
-       )
     select
-      c.title as "compartment",
+      c.title as "Compartment",
       count(v.*) as "VCNs"
     from
       oci_core_vcn as v,
-      compartments as c
+      oci_identity_tenancy as c
     where
       c.id = v.compartment_id
     group by
-      compartment
+      c.title
     order by
-      compartment
+      c.title
   EOQ
 }
 
+query "oci_core_vcn_by_compartment" {
+  sql = <<-EOQ
+    select
+      c.title as "Compartment",
+      count(v.*) as "VCNs"
+    from
+      oci_core_vcn as v,
+      oci_identity_compartment as c
+    where
+      c.id = v.compartment_id
+    group by
+      c.title
+    order by
+      c.title
+  EOQ
+}
 
 query "oci_core_vcn_by_region" {
   sql = <<-EOQ
@@ -131,23 +121,23 @@ dashboard "oci_core_vcn_dashboard" {
       sql   = query.oci_core_vcn_count.sql
       width = 2
     }
-  
-  # Assessments
 
     card {
       sql = query.oci_core_vcn_no_subnet_count.sql
       width = 2
     }
 
-    card {
-      sql = query.oci_core_vcn_no_internet_gateway.sql
-      width = 2
-    }
+  }
+  container {
+      title = "Assessments"
 
-    card {
-      sql = query.oci_core_vcn_no_nat_gateway.sql
-      width = 2
-    }
+    chart {
+        title = "Empty VCN (No Subnets)"
+        sql = query.oci_core_vcn_no_subnet.sql
+        type  = "donut"
+        width = 3
+
+      }
 
   }
 
@@ -155,8 +145,16 @@ dashboard "oci_core_vcn_dashboard" {
     title = "Analysis"
 
     chart {
+      title = "VCNs by Tenancy"
+      sql   = query.oci_core_vcn_by_tenancy.sql
+      type  = "column"
+      width = 3
+    }
+
+
+    chart {
       title = "VCNs by Compartment"
-      sql   = query.oci_core_vcn_by_account.sql
+      sql   = query.oci_core_vcn_by_compartment.sql
       type  = "column"
       width = 3
     }

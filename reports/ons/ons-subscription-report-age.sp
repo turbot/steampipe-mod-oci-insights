@@ -90,7 +90,7 @@ dashboard "oci_ons_subscription_age_report" {
 
       sql = <<-EOQ
         select
-          v.id as "Subscription Id",
+          v.id as "OCID",
           now()::date - v.created_time::date as "Age in Days",
           v.created_time as "Create Time",
           v.lifecycle_state as "Lifecycle State",

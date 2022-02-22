@@ -3,7 +3,7 @@ query "oci_objectstorage_bucket_report_versioning_disabled_count" {
     select
       count(*) as value,
       'Versioning Disabled' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as "type"
+      case count(*) when 0 then 'ok' else 'alert' end as type
     from
       oci_objectstorage_bucket
     where

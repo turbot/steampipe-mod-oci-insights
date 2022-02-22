@@ -48,7 +48,7 @@ query "oci_mysql_backup_failed_lifecycle_count" {
     select
       count(*) as value,
       'Failed' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as "type"
+      case count(*) when 0 then 'ok' else 'alert' end as type
     from
       oci_mysql_backup
     where

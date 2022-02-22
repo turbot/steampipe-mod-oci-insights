@@ -47,7 +47,7 @@ query "oci_mysql_db_system_backup_disabled_count" {
    select
       count(v.*) as value,
       'Backups Disabled' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as "type"
+      case count(*) when 0 then 'ok' else 'alert' end as type
     from
       oci_mysql_db_system as v
     left join oci_mysql_backup as b on v.id = b.db_system_id
@@ -67,7 +67,7 @@ query "oci_mysql_db_system_failed_lifecycle_count" {
     select
       count(*) as value,
       'Failed' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as "type"
+      case count(*) when 0 then 'ok' else 'alert' end as type
     from
       oci_mysql_db_system
     where
@@ -192,17 +192,14 @@ query "oci_mysql_db_system_by_lifecycle_state" {
 query "oci_mysql_db_system_with_no_backups" {
   sql = <<-EOQ
     select
-      v.display_name as "Name",
-      v.compartment_id as "Compartment Id",
-      v.region as "Region"
+      v.display_name,
+      count(v.display_name)
     from
       oci_mysql_db_system as v
     left join oci_mysql_backup as b on v.id = b.db_system_id
     where
       v.lifecycle_state <> 'DELETED'
     group by
-      v.compartment_id,
-      v.region,
       v.display_name
     having
       count(b.id) = 0
@@ -395,12 +392,12 @@ dashboard "oci_mysql_db_system_dashboard" {
     }
 
     card {
-      sql = query.oci_mysql_db_system_backup_disabled_count.sql
+      sql = query.oci_mysql_db_system_failed_lifecycle_count.sql
       width = 2
     } 
 
     card {
-      sql = query.oci_mysql_db_system_failed_lifecycle_count.sql
+      sql = query.oci_mysql_db_system_backup_disabled_count.sql
       width = 2
     } 
   }
@@ -416,9 +413,10 @@ dashboard "oci_mysql_db_system_dashboard" {
 
       }
 
-       table {
-         title = "No Backups"
+       chart {
+         title = "DB Systems With Backups Disabled"
          sql = query.oci_mysql_db_system_with_no_backups.sql
+         type  = "donut"
          width = 3
        }
   }
