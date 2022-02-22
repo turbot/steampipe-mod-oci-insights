@@ -8,7 +8,7 @@ query "oci_ons_subscription_unused_count" {
   sql = <<-EOQ
     select 
       count(*) as value,
-      'Unused Subscriptions' as label,
+      'Unused' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from 
       oci_ons_subscription
@@ -33,32 +33,35 @@ query "oci_ons_subscription_by_region" {
 
 query "oci_ons_subscription_by_compartment" {
   sql = <<-EOQ
-    with compartments as ( 
-      select
-        id, title
-      from
-        oci_identity_tenancy
-      union (
-      select 
-        id,title 
-      from 
-        oci_identity_compartment 
-      where 
-        lifecycle_state = 'ACTIVE'
-      )  
-    )
-   select 
-      c.title as "compartment",
-      count(t.*) as "Subscriptions" 
+    select 
+      c.title as "Compartment",
+      count(t.*) as "Topics" 
     from 
       oci_ons_subscription as t,
-      compartments as c 
+      oci_identity_compartment as c 
     where 
       c.id = t.compartment_id
     group by 
-      compartment
+      c.title
     order by 
-      compartment
+      c.title
+  EOQ
+}
+
+query "oci_ons_subscription_by_tenancy" {
+  sql = <<-EOQ
+    select 
+      c.title as "Tenancy",
+      count(t.*) as "Topics" 
+    from 
+      oci_ons_subscription as t,
+      oci_identity_tenancy as c 
+    where 
+      c.id = t.compartment_id
+    group by 
+      c.title
+    order by 
+      c.title
   EOQ
 }
 
@@ -136,7 +139,26 @@ dashboard "oci_ons_subscription_dashboard" {
   }
 
   container {
-      title = "Analysis"      
+      title = "Assessments"
+
+      chart {
+        title = "Lifecycle State"
+        sql = query.oci_ons_subscription_by_lifecycle_state.sql
+        type  = "donut"
+        width = 3
+      }
+
+    }
+
+  container {
+      title = "Analysis"  
+
+    chart {
+      title = "Subscriptions by Tenancy"
+      sql = query.oci_ons_subscription_by_tenancy.sql
+      type  = "column"
+      width = 3
+    }    
 
     chart {
       title = "Subscriptions by Compartment"
@@ -151,97 +173,12 @@ dashboard "oci_ons_subscription_dashboard" {
       type  = "column"
       width = 3
     }
-  }
-
-  container {
-      title = "Assessments"
-
-      chart {
-        title = "Subscriptions Lifecycle State"
-        sql = query.oci_ons_subscription_by_lifecycle_state.sql
-        type  = "donut"
-        width = 3
-      }
-
-    }
-
-  container {
-    title = "Resources by Age" 
 
     chart {
-      title = "Subscriptions by Creation Month"
+      title = "Subscriptions by Age"
       sql = query.oci_ons_subscription_by_creation_month.sql
       type  = "column"
-      width = 4
-      series "month" {
-        color = "green"
-      }
-    }
-
-    table {
-      title = "Oldest Subscriptions"
-      width = 4
-
-      sql = <<-EOQ
-        with compartments as ( 
-          select
-            id, title
-          from
-            oci_identity_tenancy
-          union (
-          select 
-            id,title 
-          from 
-            oci_identity_compartment 
-          where 
-            lifecycle_state = 'ACTIVE'
-          )  
-       )
-        select
-          t.title as "Subscriptions",
-          current_date - t.created_time::date as "Age in Days",
-          c.title as "Compartment"
-        from
-          oci_ons_subscription as t
-          left join compartments as c on c.id = t.compartment_id   
-        order by
-          "Age in Days" desc,
-          t.title
-        limit 5
-      EOQ
-    }
-
-    table {
-      title = "Newest Subscriptions"
-      width = 4
-
-      sql = <<-EOQ
-        with compartments as ( 
-          select
-            id, title
-          from
-            oci_identity_tenancy
-          union (
-          select 
-            id,title 
-          from 
-            oci_identity_compartment 
-          where 
-            lifecycle_state = 'ACTIVE'
-          )  
-       )
-        select
-          t.title as "Subscriptions",
-          current_date - t.created_time::date as "Age in Days",
-          c.title as "Compartment"
-        from
-          oci_ons_subscription as t
-          left join compartments as c on c.id = t.compartment_id  
-        order by
-          "Age in Days" asc,
-          t.title
-        limit 5
-      EOQ
+      width = 3
     }
 
   }

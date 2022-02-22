@@ -105,7 +105,7 @@ dashboard "vcn_security_list_dashboard" {
       width = 2
       sql = <<-EOQ
         select
-          'Ingress Security Rules' as label,
+          'Ingress Rules' as label,
           count(*) as value
         from
           oci_core_security_list s
@@ -119,7 +119,7 @@ dashboard "vcn_security_list_dashboard" {
       width = 2
       sql = <<-EOQ
         select
-          'Egress Security Rules' as label,
+          'Egress Rules' as label,
           count(*) as value
         from
           oci_core_security_list s
@@ -133,7 +133,7 @@ dashboard "vcn_security_list_dashboard" {
       width = 2
       sql = <<-EOQ
         select
-          'Ingress Security Rules Unspecified' as label,
+          'Ingress Rules Unspecified' as label,
           count(*) as value
         from
           oci_core_security_list s
@@ -147,7 +147,7 @@ dashboard "vcn_security_list_dashboard" {
       width = 2
       sql = <<-EOQ
         select
-          'Egress Security Rules Unspecified' as label,
+          'Egress Rules Unspecified' as label,
           count(*) as value
         from
           oci_core_security_list s
@@ -190,7 +190,7 @@ dashboard "vcn_security_list_dashboard" {
         order by v.display_name;
       EOQ
       type  = "column"
-      width = 5
+      width = 3
     }
   }
 
@@ -199,7 +199,7 @@ dashboard "vcn_security_list_dashboard" {
     title = "Assessments"
 
     chart {
-      title = "Security List with unrestricted ingress SSH"
+      title = "Ingress SSH Status"
       type  = "donut"
       width = 3
       sql   = <<-EOQ
@@ -250,7 +250,7 @@ dashboard "vcn_security_list_dashboard" {
     }
 
     chart {
-      title = "Security Group with unrestricted ingress RDP"
+      title = "Ingress RDP Status"
       type  = "donut"
       width = 3
       sql   = <<-EOQ

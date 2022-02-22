@@ -147,7 +147,7 @@ dashboard "vcn_subnet_dashboard" {
         order by v.display_name;
       EOQ
       type  = "column"
-      width = 5
+      width = 3
     }
   }
 

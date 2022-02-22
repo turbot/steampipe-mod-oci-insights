@@ -108,7 +108,7 @@ dashboard "vcn_network_security_group_dashboard" {
   container {
 
     card {
-      width = 4
+      width = 2
 
       sql = <<-EOQ
         select count(*) as "Security Groups" from oci_core_network_security_group
@@ -116,7 +116,7 @@ dashboard "vcn_network_security_group_dashboard" {
     }
 
     card {
-      width = 4
+      width = 2
 
       sql = <<-EOQ
         select
@@ -131,7 +131,7 @@ dashboard "vcn_network_security_group_dashboard" {
     }
 
     card {
-      width = 4
+      width = 2
 
       sql = <<-EOQ
         select
@@ -178,7 +178,7 @@ dashboard "vcn_network_security_group_dashboard" {
         order by v.display_name;
       EOQ
       type  = "column"
-      width = 5
+      width = 3
     }
   }
 
@@ -187,7 +187,7 @@ dashboard "vcn_network_security_group_dashboard" {
     title = "Assessments"
 
     chart {
-      title = "Security Group with unrestricted ingress SSH"
+      title = "Ingress SSH Status"
       type  = "donut"
       width = 3
       sql   = <<-EOQ
@@ -236,7 +236,7 @@ dashboard "vcn_network_security_group_dashboard" {
     }
 
     chart {
-      title = "Security Group with unrestricted ingress RDP"
+      title = "Ingress RDP Status"
       type  = "donut"
       width = 3
       sql   = <<-EOQ

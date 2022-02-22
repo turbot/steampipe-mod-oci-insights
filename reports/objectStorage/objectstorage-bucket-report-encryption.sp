@@ -1,6 +1,6 @@
 query "oci_objectstorage_bucket_report_customer_managed_encryption_count" {
   sql = <<-EOQ
-    select count(*) as "Customer Managed"
+    select count(*) as "Customer Managed Encryption"
       from 
     oci_objectstorage_bucket 
     where 
@@ -27,33 +27,24 @@ dashboard "oci_objectstorage_bucket_encryption_report" {
 
   table {
     sql = <<-EOQ
-      with compartments as ( 
-        select
-          id, title
-        from
-          oci_identity_tenancy
-        union (
-        select 
-          id,title 
-        from 
-          oci_identity_compartment 
-        where 
-          lifecycle_state = 'ACTIVE'
-        )  
-       )
       select
-        b.name as "Bucket",
-        case when b.kms_key_id is not null then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
-        k.algorithm as "Algorithm",
-        b.kms_key_id as "KMS Key ID",
-        c.title as "Compartment",
-        b.region as "Region",
-        b.id as "Bucket ID"
+        v.name as "Name",
+        case when v.kms_key_id is not null then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
+        now()::date - v.time_created::date as "Age in Days",
+        v.time_created as "Create Time",
+        coalesce(c.title, 'root') as "Compartment",
+        t.title as "Tenancy",
+        v.region as "Region",
+        v.id as "OCID"
       from
-        oci_objectstorage_bucket as b
-        left join oci_kms_key as k on k.id = b.kms_key_id
-        left join compartments as c on c.id = b.Compartment_id;
+        oci_objectstorage_bucket as v
+        left join oci_identity_compartment as c on v.compartment_id = c.id
+        left join oci_identity_tenancy as t on v.tenant_id = t.id
+      order by
+        v.time_created,
+        v.title  
     EOQ
   }
 
 }
+
