@@ -12,7 +12,7 @@ query "oci_objectstorage_bucket_disabled_count" {
    select 
       count(b.*) as value,
       'Logging Disabled' as label,
-      case count(b.*) when 0 then 'ok' else 'alert' end as "type" 
+      case count(b.*) when 0 then 'ok' else 'alert' end as type 
     from 
       oci_objectstorage_bucket as b
       left join namewithregion as n on concat(b.name, b.region) = n.namewithregion

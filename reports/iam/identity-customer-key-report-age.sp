@@ -96,9 +96,7 @@ dashboard "oci_identity_customer_key_age_report" {
         select
           k.title as "Customer Secret Key",
           k.user_name as "User",
-          -- date_trunc('day',age(now(),k.time_created))::text as "Age",
           now()::date - k.time_created::date as "Age in Days",
-          k.user_type,
           k.time_created as "Create Time",
           k.time_expires as "Expiry Time",
           k.lifecycle_state as "State",

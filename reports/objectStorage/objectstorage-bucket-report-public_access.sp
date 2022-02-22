@@ -19,7 +19,7 @@ dashboard "oci_objectstorage_bucket_public_access_report" {
     sql = <<-EOQ
       select
         v.name as "Name",
-        case when v.public_access_type = 'NoPublicAccess' then 'Not Public' else 'Public' end as "Bucket Access",
+        public_access_type as "Bucket Access Type",
         v.is_read_only as "Read Only",
         now()::date - v.time_created::date as "Age in Days",
         v.time_created as "Create Time",

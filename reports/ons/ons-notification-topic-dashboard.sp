@@ -9,7 +9,7 @@ query "oci_ons_notification_topic_unused_count" {
     select 
       count(*) as value,
       'Unused' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as "type"
+      case count(*) when 0 then 'ok' else 'alert' end as type
     from 
       oci_ons_notification_topic
     where
