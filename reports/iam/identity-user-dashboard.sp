@@ -25,6 +25,19 @@ query "oci_identity_user_inactive_customer_key_count" {
   EOQ
 }
 
+query "oci_identity_user_inactive_api_key_count" {
+  sql = <<-EOQ
+    select
+      count(*) as  value,
+      'Inactive API Key' as label,
+      case count(*) when 0 then 'ok' else 'alert' end as type
+    from
+      oci_identity_api_key
+    where
+      lifecycle_state = 'INACTIVE';
+  EOQ
+}
+
 query "oci_identity_mfa_not_enabled_users_count" {
   sql = <<-EOQ
     select
@@ -170,6 +183,30 @@ query "oci_identity_user_by_type" {
   EOQ
 }
 
+query "oci_identity_user_by_groups" {
+  sql = <<-EOQ
+    with users_and_grp as (
+      select
+        oci_identity_user.name as user_name,
+        oci_identity_group.name as group_name,
+        user_group ->> 'groupId' as group_id
+      from
+        oci_identity_user,
+        jsonb_array_elements(user_groups) as user_group
+        inner join oci_identity_group ON (oci_identity_group.id = user_group ->> 'groupId' )
+    )
+    select
+      group_name as "Group Name",
+      count(user_name) as "Users"
+    from
+      users_and_grp
+    group by
+      group_name
+    order by
+      group_name
+  EOQ
+}
+
 query "oci_identity_user_by_verified_email" {
   sql = <<-EOQ
     with verified_email_stat as (
@@ -217,7 +254,7 @@ dashboard "oci_identity_user_dashboard" {
     }
 
     card {
-      sql   = query.oci_identity_user_unverified_email_count.sql
+      sql   = query.oci_identity_user_inactive_api_key_count.sql
       width = 2
     }
 
@@ -239,29 +276,11 @@ dashboard "oci_identity_user_dashboard" {
   }
 
   container {
-    title = "Analysis"
-
-    chart {
-      title = "Users by Tenancy"
-      sql   = query.oci_identity_users_by_tenancy.sql
-      type  = "column"
-      width = 4
-    }
-
-    chart {
-      title = "Users by Type"
-      sql   = query.oci_identity_user_by_type.sql
-      type  = "column"
-      width = 4
-    }
-
-  }
-
-  container {
     title = "Assesments"
+    width = 6
 
     chart {
-      title = "MFA Enabled Users by Tenancy"
+      title = "MFA Enabled Users"
       sql   = query.oci_identity_user_mfa_enabled_by_tenancy.sql
       type  = "donut"
       width = 4
@@ -277,59 +296,36 @@ dashboard "oci_identity_user_dashboard" {
   }
 
   container {
-    title = "Resources by Age"
+    title = "Analysis"
 
     chart {
-      title = "Users by Creation Month"
+      title = "Users by Tenancy"
+      sql   = query.oci_identity_users_by_tenancy.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Users by Type"
+      sql   = query.oci_identity_user_by_type.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Users by Group"
+      sql   = query.oci_identity_user_by_groups.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Users by Age"
       sql   = query.oci_identity_users_by_creation_month.sql
       type  = "column"
-      width = 4
-
-      series "month" {
-        color = "green"
-      }
+      width = 3
     }
 
-    table {
-      title = "Oldest Users"
-      width = 4
-
-      sql = <<-EOQ
-        select
-          u.name as "user",
-          -- now() - time_created as "Age in Days",
-          -- date_trunc('day',age(now(),time_created))::text as "Age in Days",
-          current_date - time_created::date as "Age in Days",
-          t.name as "tenancy"
-        from
-          oci_identity_user as u
-          left join oci_identity_tenancy as t on u.tenant_id = t.id
-        order by
-          "Age in Days" desc,
-          u.name
-        limit 5
-      EOQ
-    }
-
-    table {
-      title = "Newest Users"
-      width = 4
-
-      sql = <<-EOQ
-        select
-          u.name as "user",
-          -- now() - time_created as "Age in Days",
-          -- date_trunc('day',age(now(),time_created))::text as "Age in Days",
-          current_date - time_created::date as "Age in Days",
-          t.name as "tenancy"
-        from
-          oci_identity_user as u
-          left join oci_identity_tenancy as t on u.tenant_id = t.id
-        order by
-          "Age in Days" asc,
-          u.name
-        limit 5
-      EOQ
-    }
   }
+
 }

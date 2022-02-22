@@ -91,42 +91,28 @@ dashboard "oci_database_autonomous_database_age_report" {
     table {
 
       sql = <<-EOQ
-        with compartments as (
-          select
-            id,
-            title
-          from
-            oci_identity_tenancy
-          union (
-            select
-              id,
-              title
-            from
-              oci_identity_compartment
-            where lifecycle_state = 'ACTIVE')
-        )
         select
-          v.title as "Database",
-          'some other value' as "Database",
-
-
-
-          date_trunc('day',age(now(),v.time_created))::text as "Age",
+          v.display_name as "Name",
+          -- date_trunc('day',age(now(),v.time_created))::text as "Age",
+          now()::date - v.time_created::date as "Age in Days",
           v.time_created as "Create Time",
-          a.title as "Compartment",
-          v.id as "Database OCID",
-          v.lifecycle_state as "State"
+          v.lifecycle_state as "Lifecycle State",
+          coalesce(a.title,'root') as "Compartment",
+          t.title as "Tenancy",
+          v.region as "Region",
+          v.id as "OCID"
         from
-          oci_database_autonomous_database as v,
-          compartments as a
+          oci_database_autonomous_database as v
+          left join oci_identity_compartment as a on v.compartment_id = a.id
+          left join oci_identity_tenancy as t on v.tenant_id = t.id
+          -- compartments as a
         where
-          v.tenant_id = a.id
+          v.lifecycle_state <> 'DELETED'
         order by
           v.time_created,
           v.title
       EOQ
     }
-
 
   }
 

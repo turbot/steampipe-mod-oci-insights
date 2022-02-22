@@ -94,13 +94,10 @@ dashboard "oci_identity_api_key_age_report" {
 
       sql = <<-EOQ
         select
-          k.title as "API Key",
-          'some other value' as "API Key",
-
-
-
+          -- k.title as "API Key",
           k.user_name as "User",
-          date_trunc('day',age(now(),k.time_created))::text as "Age",
+          -- date_trunc('day',age(now(),k.time_created))::text as "Age",
+          now()::date - k.time_created::date as "Age in Days",
           k.time_created as "Create Time",
           k.lifecycle_state as "State",
           t.name as "Tenancy",
