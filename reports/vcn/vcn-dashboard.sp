@@ -9,7 +9,7 @@ query "oci_core_vcn_no_subnet_count" {
   sql = <<-EOQ
     select 
       count(*) as value,
-      'VCNs with no Subnets' as label,
+      'VCNs With No Subnets' as label,
       case when count(*) = 0 then 'ok' else 'alert' end as type    
     from 
       oci_core_vcn as vcn
@@ -22,7 +22,7 @@ query "oci_core_vcn_no_internet_gateway" {
   sql = <<-EOQ
     select 
       count(*) as value,
-      'VCNs with no Internet Gateways' as label,
+      'VCNs With No Internet Gateways' as label,
       case when count(*) = 0 then 'ok' else 'alert' end as type    
     from 
       oci_core_vcn as vcn
@@ -35,7 +35,7 @@ query "oci_core_vcn_no_nat_gateway" {
   sql = <<-EOQ
     select 
       count(*) as value,
-      'VCNs with no Nat Gateways' as label,
+      'VCNs With No Nat Gateways' as label,
       case when count(*) = 0 then 'ok' else 'alert' end as type    
     from 
       oci_core_vcn as vcn
@@ -129,24 +129,24 @@ dashboard "oci_core_vcn_dashboard" {
 
     card {
       sql   = query.oci_core_vcn_count.sql
-      width = 3
+      width = 2
     }
   
   # Assessments
 
     card {
       sql = query.oci_core_vcn_no_subnet_count.sql
-      width = 3
+      width = 2
     }
 
     card {
       sql = query.oci_core_vcn_no_internet_gateway.sql
-      width = 3
+      width = 2
     }
 
     card {
       sql = query.oci_core_vcn_no_nat_gateway.sql
-      width = 3
+      width = 2
     }
 
   }
@@ -158,21 +158,21 @@ dashboard "oci_core_vcn_dashboard" {
       title = "VCNs by Compartment"
       sql   = query.oci_core_vcn_by_account.sql
       type  = "column"
-      width = 4
+      width = 3
     }
 
     chart {
       title = "VCNs by Region"
       sql   = query.oci_core_vcn_by_region.sql
       type  = "column"
-      width = 4
+      width = 3
     }
 
     chart {
       title = "VCNs by RFC1918 Range"
       sql   = query.oci_vcn_by_rfc1918_range.sql
       type  = "column"
-      width = 4
+      width = 3
     }
   }
 

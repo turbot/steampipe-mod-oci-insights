@@ -1,11 +1,11 @@
-dashboard "oci_ons_subscription_unused_report" {
+dashboard "oci_ons_notification_topic_unused_report" {
 
-  title = "OCI ONS Subscription Unused Report"
+  title = "OCI ONS Notification Topic Unused Report"
 
   container {
 
     card {
-      sql = query.oci_ons_subscription_unused_count.sql
+      sql = query.oci_ons_notification_topic_unused_count.sql
       width = 2
     }
   }
@@ -21,7 +21,7 @@ dashboard "oci_ons_subscription_unused_report" {
         t.title as "Tenancy",
         v.region as "Region" 
       from
-        oci_ons_subscription as v
+        oci_ons_notification_topic as v
         left join oci_identity_compartment as c on v.compartment_id = c.id
         left join oci_identity_tenancy as t on v.tenant_id = t.id
       order by

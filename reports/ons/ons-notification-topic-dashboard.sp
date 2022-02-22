@@ -4,6 +4,26 @@ query "oci_ons_notification_topic_count" {
   EOQ
 }
 
+query "oci_ons_notification_topic_unused_count" {
+  sql = <<-EOQ
+    select 
+      count(*) as value,
+      'Unused' as label,
+      case count(*) when 0 then 'ok' else 'alert' end as "type"
+    from 
+      oci_ons_notification_topic
+    where
+      topic_id in (
+    select 
+      topic_id
+    from
+      oci_ons_subscription 
+    where
+      lifecycle_state <> 'ACTIVE'          
+      )         
+  EOQ
+}
+
 query "oci_ons_notification_topic_by_region" {
   sql = <<-EOQ
     select 
@@ -20,32 +40,35 @@ query "oci_ons_notification_topic_by_region" {
 
 query "oci_ons_notification_topic_by_compartment" {
   sql = <<-EOQ
-    with compartments as ( 
-      select
-        id, title
-      from
-        oci_identity_tenancy
-      union (
-      select 
-        id,title 
-      from 
-        oci_identity_compartment 
-      where 
-        lifecycle_state = 'ACTIVE'
-      )  
-    )
-   select 
-      c.title as "compartment",
+    select 
+      c.title as "Compartment",
       count(t.*) as "Topics" 
     from 
       oci_ons_notification_topic as t,
-      compartments as c 
+      oci_identity_compartment as c 
     where 
       c.id = t.compartment_id
     group by 
-      compartment
+      c.title
     order by 
-      compartment
+      c.title
+  EOQ
+}
+
+query "oci_ons_notification_topic_by_tenancy" {
+  sql = <<-EOQ
+    select 
+      c.title as "Tenancy",
+      count(t.*) as "Topics" 
+    from 
+      oci_ons_notification_topic as t,
+      oci_identity_tenancy as c 
+    where 
+      c.id = t.compartment_id
+    group by 
+      c.title
+    order by 
+      c.title
   EOQ
 }
 
@@ -58,6 +81,27 @@ query "oci_ons_notification_topic_by_lifecycle_state" {
       oci_ons_notification_topic     
     group by
       lifecycle_state
+  EOQ
+}
+
+query "oci_ons_notification_topic_by_subscription" {
+  sql = <<-EOQ
+    select
+      name, 
+      count(name)
+    from 
+      oci_ons_notification_topic
+    where
+      topic_id in (
+    select 
+      topic_id
+    from
+      oci_ons_subscription 
+    where
+      lifecycle_state <> 'ACTIVE'          
+      )
+    group by
+      name           
   EOQ
 }
 
@@ -111,14 +155,46 @@ dashboard "oci_ons_notification_topic_dashboard" {
   title = "OCI ONS Notification Topic Dashboard"
 
   container {
+
     card {
       sql = query.oci_ons_notification_topic_count.sql
+      width = 2
+    }
+
+    card {
+      sql = query.oci_ons_notification_topic_unused_count.sql
       width = 2
     }
   }
 
   container {
-      title = "Analysis"      
+      title = "Assessments"
+
+      chart {
+        title = "Lifecycle State"
+        sql = query.oci_ons_notification_topic_by_lifecycle_state.sql
+        type  = "donut"
+        width = 3
+      }
+
+      chart {
+        title = "No Active Subscription"
+        sql = query.oci_ons_notification_topic_by_subscription.sql
+        type  = "donut"
+        width = 3
+      }
+
+    }
+
+  container {
+      title = "Analysis"  
+
+    chart {
+      title = "Notification Topics by Tenancy"
+      sql = query.oci_ons_notification_topic_by_tenancy.sql
+      type  = "column"
+      width = 3
+    }      
 
     chart {
       title = "Notification Topics by Compartment"
@@ -133,99 +209,13 @@ dashboard "oci_ons_notification_topic_dashboard" {
       type  = "column"
       width = 3
     }
-  }
-
-  container {
-      title = "Assessments"
-
-      chart {
-        title = "Notification Topic Lifecycle State"
-        sql = query.oci_ons_notification_topic_by_lifecycle_state.sql
-        type  = "donut"
-        width = 3
-      }
-
-    }
-
-  container {
-    title = "Resources by Age" 
 
     chart {
-      title = "Notification Topics by Creation Month"
+      title = "Notification Topics by Age"
       sql = query.oci_ons_notification_topic_by_creation_month.sql
       type  = "column"
-      width = 4
-      series "month" {
-        color = "green"
-      }
+      width = 3
     }
-
-    table {
-      title = "Oldest Notification Topic"
-      width = 4
-
-      sql = <<-EOQ
-        with compartments as ( 
-          select
-            id, title
-          from
-            oci_identity_tenancy
-          union (
-          select 
-            id,title 
-          from 
-            oci_identity_compartment 
-          where 
-            lifecycle_state = 'ACTIVE'
-          )  
-       )
-        select
-          t.title as "Topics",
-          current_date - t.time_created::date as "Age in Days",
-          c.title as "Compartment"
-        from
-          oci_ons_notification_topic as t
-          left join compartments as c on c.id = t.compartment_id   
-        order by
-          "Age in Days" desc,
-          t.title
-        limit 5
-      EOQ
-    }
-
-    table {
-      title = "Newest Notification Topic"
-      width = 4
-
-      sql = <<-EOQ
-        with compartments as ( 
-          select
-            id, title
-          from
-            oci_identity_tenancy
-          union (
-          select 
-            id,title 
-          from 
-            oci_identity_compartment 
-          where 
-            lifecycle_state = 'ACTIVE'
-          )  
-       )
-        select
-          t.title as "Topics",
-          current_date - t.time_created::date as "Age in Days",
-          c.title as "Compartment"
-        from
-          oci_ons_notification_topic as t
-          left join compartments as c on c.id = t.compartment_id  
-        order by
-          "Age in Days" asc,
-          t.title
-        limit 5
-      EOQ
-    }
-
   }
 
 }

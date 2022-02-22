@@ -1,26 +1,11 @@
-query "oci_block_storage_block_volume_customer_managed_encryption_count" {
-  sql = <<-EOQ
-    select count(*) as "Customer Managed Encryption"
-      from 
-    oci_core_volume 
-    where 
-    kms_key_id is not null and lifecycle_state <> 'TERMINATED'
-  EOQ
-}
+dashboard "oci_block_storage_block_volume_faulty_report" {
 
-dashboard "oci_block_storage_block_volume_encryption_report" {
-
-  title = "OCI Block Storage Block Volume Encryption Report"
+  title = "OCI Block Storage Block Volume Faulty Report"
 
   container {
 
     card {
-      sql = query.oci_block_storage_block_volume_customer_managed_encryption_count.sql
-      width = 2
-    }
-
-    card {
-      sql = query.oci_block_storage_block_volume_default_encrypted_volumes_count.sql
+      sql = query.oci_block_storage_block_volume_faulty_volumes_count.sql
       width = 2
     }
   }
@@ -29,7 +14,6 @@ dashboard "oci_block_storage_block_volume_encryption_report" {
     sql = <<-EOQ
       select
         v.display_name as "Name",
-        case when v.kms_key_id is not null then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
         now()::date - v.time_created::date as "Age in Days",
         v.time_created as "Create Time",
         v.lifecycle_state as "Lifecycle State",
