@@ -1,7 +1,7 @@
 
 query "oci_core_vcn_count" {
   sql = <<-EOQ
-    select count(*) as "VCNs" from oci_core_vcn
+    select count(*) as "VCNs" from oci_core_vcn where lifecycle_state <> 'TERMINATED'
   EOQ
 }
 
@@ -14,7 +14,7 @@ query "oci_core_vcn_no_subnet_count" {
     from 
       oci_core_vcn as vcn
     where
-      vcn.id not in (select oci_core_subnet.vcn_id from oci_core_subnet)
+      vcn.id not in (select oci_core_subnet.vcn_id from oci_core_subnet) and lifecycle_state <> 'TERMINATED'
   EOQ
 }
 
@@ -26,7 +26,7 @@ query "oci_core_vcn_no_subnet" {
     from 
       oci_core_vcn as vcn
     where
-      vcn.id not in (select vcn_id from oci_core_subnet)
+      vcn.id not in (select vcn_id from oci_core_subnet) and lifecycle_state <> 'TERMINATED'
     group by
       display_name  
   EOQ
@@ -41,7 +41,7 @@ query "oci_core_vcn_by_tenancy" {
       oci_core_vcn as v,
       oci_identity_tenancy as c
     where
-      c.id = v.compartment_id
+      c.id = v.compartment_id and lifecycle_state <> 'TERMINATED'
     group by
       c.title
     order by
@@ -58,7 +58,7 @@ query "oci_core_vcn_by_compartment" {
       oci_core_vcn as v,
       oci_identity_compartment as c
     where
-      c.id = v.compartment_id
+      c.id = v.compartment_id and v.lifecycle_state <> 'TERMINATED'
     group by
       c.title
     order by
@@ -73,6 +73,8 @@ query "oci_core_vcn_by_region" {
       count(*) as "VCNs"
     from
       oci_core_vcn
+    where
+      lifecycle_state <> 'TERMINATED'  
     group by
       region
   EOQ
@@ -95,6 +97,8 @@ query "oci_vcn_by_rfc1918_range" {
       from
         oci_core_vcn,
         jsonb_array_elements_text(cidr_blocks) as b
+      where
+        lifecycle_state <> 'TERMINATED'  
     )
     select 
       rfc1918_bucket,
