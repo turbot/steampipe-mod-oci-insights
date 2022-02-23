@@ -96,7 +96,6 @@ dashboard "oci_kms_key_age_report" {
           now()::date - k.time_created::date as "Age in Days",
           k.time_created as "Create Time",
           k.lifecycle_state as "Lifecycle State",
-          k.protection_mode as "Protection Mode",
           coalesce(c.title,'root') as "Compartment",
           t.title as "Tenancy",
           k.region as "Region",

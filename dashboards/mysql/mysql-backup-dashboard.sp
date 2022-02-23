@@ -346,7 +346,14 @@ dashboard "oci_mysql_backup_dashboard" {
       type  = "column"
       width = 3
     }
-
+    
+    chart {
+      title = "Backups by Age"
+      sql = query.oci_mysql_backup_by_creation_month.sql
+      type  = "column"
+      width = 3
+    }
+    
     chart {
       title = "Backups by Creation Type"
       sql = query.oci_mysql_backup_by_creation_type.sql
@@ -357,13 +364,6 @@ dashboard "oci_mysql_backup_dashboard" {
     chart {
       title = "Backups by Backup Type"
       sql = query.oci_mysql_backup_by_backup_type.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Backups by Age"
-      sql = query.oci_mysql_backup_by_creation_month.sql
       type  = "column"
       width = 3
     }

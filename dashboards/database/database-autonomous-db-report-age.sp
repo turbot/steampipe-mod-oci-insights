@@ -2,7 +2,7 @@
 
 dashboard "oci_database_autonomous_database_age_report" {
 
-  title = "OCI Database Autonomous Database Age Report"
+  title = "OCI Autonomous Database Age Report"
 
 
   container {

@@ -7,7 +7,7 @@ query "vcn_security_groups_by_compartment" {
       oci_core_network_security_group as sg,
       oci_identity_compartment as c 
     where 
-      c.id = sg.compartment_id
+      c.id = sg.compartment_id and sg.lifecycle_state <> 'TERMINATED'
     group by 
       c.title
     order by 
@@ -24,7 +24,7 @@ query "vcn_security_groups_by_tenancy" {
       oci_core_network_security_group as sg,
       oci_identity_tenancy as c 
     where 
-      c.id = sg.compartment_id
+      c.id = sg.compartment_id and lifecycle_state <> 'TERMINATED'
     group by 
       c.title
     order by 
@@ -38,7 +38,9 @@ query "vcn_security_groups_by_region" {
       region as "Region",
       count(*) as "Security Groups" 
     from 
-      oci_core_network_security_group 
+      oci_core_network_security_group
+    where
+      lifecycle_state <> 'TERMINATED'   
     group by 
       region 
     order by 
@@ -55,7 +57,7 @@ dashboard "vcn_network_security_group_dashboard" {
       width = 2
 
       sql = <<-EOQ
-        select count(*) as "Security Groups" from oci_core_network_security_group
+        select count(*) as "Security Groups" from oci_core_network_security_group where lifecycle_state <> 'TERMINATED'
       EOQ
     }
 
@@ -81,6 +83,7 @@ dashboard "vcn_network_security_group_dashboard" {
           and (r -> 'tcpOptions' -> 'destinationPortRange' ->> 'max')::integer >= 22
           )
         )
+        and lifecycle_state <> 'TERMINATED'
         group by id
         ),
         sg_list as (
@@ -94,6 +97,8 @@ dashboard "vcn_network_security_group_dashboard" {
             oci_core_network_security_group as nsg
             left join non_compliant_rules on non_compliant_rules.id = nsg.id
             left join oci_identity_compartment c on c.id = nsg.compartment_id
+          where
+            nsg.lifecycle_state <> 'TERMINATED'  
         )
         select
           count(*) as value,
@@ -127,6 +132,7 @@ dashboard "vcn_network_security_group_dashboard" {
                 and (r -> 'tcpOptions' -> 'destinationPortRange' ->> 'max')::integer >= 3389
               )
             )
+            and lifecycle_state <> 'TERMINATED'
             group by id
         ),
         sg_list as (
@@ -140,6 +146,8 @@ dashboard "vcn_network_security_group_dashboard" {
             oci_core_network_security_group as nsg
             left join non_compliant_rules on non_compliant_rules.id = nsg.id
             left join oci_identity_compartment c on c.id = nsg.compartment_id
+          where
+            nsg.lifecycle_state <> 'TERMINATED'  
         )
         select
           count(*) as value,
@@ -181,6 +189,7 @@ dashboard "vcn_network_security_group_dashboard" {
                 and (r -> 'tcpOptions' -> 'destinationPortRange' ->> 'max')::integer >= 22
               )
             )
+          and lifecycle_state <> 'TERMINATED'  
           group by id
         ),
         sg_list as (
@@ -194,6 +203,8 @@ dashboard "vcn_network_security_group_dashboard" {
             oci_core_network_security_group as nsg
             left join non_compliant_rules on non_compliant_rules.id = nsg.id
             left join oci_identity_compartment c on c.id = nsg.compartment_id
+          where
+            nsg.lifecycle_state <> 'TERMINATED'
         )
         select
           case
@@ -230,6 +241,7 @@ dashboard "vcn_network_security_group_dashboard" {
                 and (r -> 'tcpOptions' -> 'destinationPortRange' ->> 'max')::integer >= 3389
               )
             )
+            and lifecycle_state <> 'TERMINATED'
             group by id
         ),
         sg_list as (
@@ -243,6 +255,8 @@ dashboard "vcn_network_security_group_dashboard" {
             oci_core_network_security_group as nsg
             left join non_compliant_rules on non_compliant_rules.id = nsg.id
             left join oci_identity_compartment c on c.id = nsg.compartment_id
+          where
+            nsg.lifecycle_state <> 'TERMINATED'  
         )
         select
           case
@@ -291,6 +305,8 @@ dashboard "vcn_network_security_group_dashboard" {
         from
           oci_core_network_security_group sg
           left join oci_core_vcn v on sg.vcn_id = v.id
+        where
+          sg.lifecycle_state <> 'TERMINATED'  
         group by v.display_name
         order by v.display_name;
       EOQ

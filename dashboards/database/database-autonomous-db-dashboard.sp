@@ -312,7 +312,7 @@ query "oci_database_autonomous_db_by_creation_month" {
 
 dashboard "oci_database_autonomous_db_summary" {
 
-  title = "OCI Database Autonomous Database Dashboard"
+  title = "OCI Autonomous Database Dashboard"
 
   container {
 
