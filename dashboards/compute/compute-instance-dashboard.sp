@@ -22,17 +22,25 @@ query "oci_compute_instance_total_memory" {
   EOQ
 }
 
-query "oci_compute_instance_shape_by_total_memory" {
+query "oci_compute_instance_public_instance_count" {
   sql = <<-EOQ
+    with public_ips as (
+      select 
+        i.title as "title"
+      from 
+        oci_core_instance as i,
+        oci_core_vnic_attachment as a 
+      where 
+        i.id = a.instance_id and a.public_ip is not null
+    )
     select
-      sum(shape_config_memory_in_gbs)  as "Total Memory",
-      shape as "Shape"
+      count(*) as value,
+      'Public Instances' as label,
+      case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
-      oci_core_instance group by shape
+      public_ips
   EOQ
 }
-
-# oci_compute_instance_by_public_ip TBD
 
 query "oci_compute_instance_running_above_90_days" {
   sql = <<-EOQ
@@ -47,33 +55,61 @@ query "oci_compute_instance_running_above_90_days" {
   EOQ
 }
 
+query "oci_compute_instance_by_public_ip" {
+  sql = <<-EOQ
+    with instances as (
+      select
+        case
+          when a.public_ip is null then 'private'
+          else 'public'
+        end as visibility
+      from
+        oci_core_instance as i,
+        oci_core_vnic_attachment as a
+      where
+        i.id = a.instance_id
+    )
+    select
+      visibility,
+      count(*)
+    from
+      instances
+    group by
+      visibility
+  EOQ
+}
+
 query "oci_compute_instance_by_compartment" {
   sql = <<-EOQ
-    with compartments as (
-      select
-        id, title
-      from
-        oci_identity_tenancy
-      union (
-      select
-        id,title
-      from
-        oci_identity_compartment
-      where 
-        lifecycle_state = 'ACTIVE')
-    )
-   select
-      c.title as "compartment",
-      count(i.*) as "instances"
-    from
-      oci_core_instance as i,
-      compartments as c
-    where
-      c.id = i.compartment_id and i.lifecycle_state <> 'DELETED'
-    group by
-      compartment
-    order by
-      compartment
+    select 
+      c.title as "Compartment",
+      count(b.*) as "instances" 
+    from 
+      oci_core_instance as b,
+      oci_identity_compartment as c 
+    where 
+      c.id = b.compartment_id
+    group by 
+      c.title
+    order by 
+      c.title
+  EOQ
+}
+
+query "oci_compute_instance_by_tenancy" {
+  sql = <<-EOQ
+    select 
+      c.title as "Tenancy",
+      count(v.*) as "instances" 
+    from 
+      oci_core_instance as v,
+      oci_identity_tenancy as c 
+    where 
+      c.id = v.compartment_id and v.lifecycle_state <> 'TERMINATED'
+    group by 
+      c.title
+    order by 
+      c.title
   EOQ
 }
 
@@ -113,7 +149,6 @@ query "oci_compute_instance_by_type" {
   EOQ
 }
 
-# TBD
 query "oci_compute_instance_by_pv_encryption_intransit_status" {
   sql = <<-EOQ
     select
@@ -170,9 +205,6 @@ query "oci_compute_instance_by_creation_month" {
   EOQ
 }
 
-# Note the CTE uses the dailt table to be efficient when filtering,
-# and the hourly table to show granular line chart
-# Added
 query "oci_compute_top10_cpu_past_week" {
   sql = <<-EOQ
      with top_n as (
@@ -203,7 +235,6 @@ query "oci_compute_top10_cpu_past_week" {
   EOQ
 }
 
-# underused if avg CPU < 10% every day for last month
 query "oci_compute_instances_by_cpu_utilization_category" {
   sql = <<-EOQ
     with cpu_buckets as (
@@ -261,18 +292,50 @@ dashboard "oci_compute_instance_summary" {
     }
 
     card {
+      sql   = query.oci_compute_instance_public_instance_count.sql
+      width = 2
+    }
+
+    card {
       sql   = query.oci_compute_instance_running_above_90_days.sql
       width = 2
     }
 
   }
 
+  container {
+
+    title = "Assesments"
+    width = 12
+
+    chart {
+      title = "Volume State"
+      sql   = query.oci_compute_instance_by_state.sql
+      type  = "donut"
+      width = 3
+    }
+
+    chart {
+      title = "Public/Private"
+      sql   = query.oci_compute_instance_by_public_ip.sql
+      type  = "donut"
+      width = 3
+    }
+
+  }
+
 
   container {
+
     title = "Analysis"
 
+    chart {
+      title = "Instances by Tenancy"
+      sql = query.oci_compute_instance_by_tenancy.sql
+      type  = "column"
+      width = 3
+    }   
 
-    #title = "Counts"
     chart {
       title = "Instances by Compartment"
       sql   = query.oci_compute_instance_by_compartment.sql
@@ -280,17 +343,9 @@ dashboard "oci_compute_instance_summary" {
       width = 3
     }
 
-
     chart {
       title = "Instances by Region"
       sql   = query.oci_compute_instance_by_region.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Instances by State"
-      sql   = query.oci_compute_instance_by_state.sql
       type  = "column"
       width = 3
     }
@@ -302,23 +357,17 @@ dashboard "oci_compute_instance_summary" {
       width = 3
     }
 
-  }
-
-
-  container {
-    title = "Assesments"
-    width = 6
-
     chart {
-      title = "Encryption Status [To Do]"
-      # sql    = query.oci_compute_instance_by_pv_encryption_intransit_status.sql
-      # type   = "donut"
-      width = 4
+      title = "Instances by Age"
+      sql   = query.oci_compute_instance_by_creation_month.sql
+      type  = "column"
+      width = 3
     }
 
   }
 
   container {
+
     title = "Performance & Utilization"
 
     chart {
@@ -334,103 +383,7 @@ dashboard "oci_compute_instance_summary" {
       sql   = query.oci_compute_instances_by_cpu_utilization_category.sql
       type  = "column"
       width = 6
-
-      # 'Unused (<1%)','Underutilized (1-10%)','Right-sized (10-90%)', 'Overutilized (>90%)'
-      # series "Underutilized (1-10%)" {
-      #   color = "yellow"
-      # }
-
     }
-
-  }
-
-
-
-  container {
-    title = "Resources by Age"
-
-    chart {
-      title = "Instance by Creation Month"
-      sql   = query.oci_compute_instance_by_creation_month.sql
-      type  = "column"
-      width = 4
-
-      series "month" {
-        color = "green"
-      }
-
-    }
-
-    table {
-      title = "Oldest instances"
-      width = 4
-      # Validate the query
-      sql = <<-EOQ
-        with compartments as ( 
-          select
-            id, title
-          from
-            oci_identity_tenancy
-          union (
-          select 
-            id,title 
-          from 
-            oci_identity_compartment 
-          where 
-            lifecycle_state = 'ACTIVE'
-          )  
-       )
-        select
-          i.title as "instance",
-          current_date - i.time_created::date as "Age in Days",
-          c.title as "Compartment"
-        from
-          oci_core_instance as i
-          left join compartments as c on c.id = i.compartment_id
-        where 
-          lifecycle_state <> 'DELETED'  
-        order by
-          "Age in Days" desc,
-          i.title
-        limit 5
-        EOQ
-    }
-
-    table {
-      title = "Newest instances"
-      width = 4
-
-      sql = <<-EOQ
-        with compartments as ( 
-          select
-            id, title
-          from
-            oci_identity_tenancy
-          union (
-          select 
-            id,title 
-          from 
-            oci_identity_compartment 
-          where 
-            lifecycle_state = 'ACTIVE'
-          )  
-       )
-        select
-          i.title as "instance",
-          current_date - i.time_created::date as "Age in Days",
-          c.title as "Compartment"
-        from
-          oci_core_instance as i
-          left join compartments as c on c.id = i.compartment_id
-        where 
-          lifecycle_state <> 'DELETED'  
-        order by
-          "Age in Days" asc,
-          i.title
-        limit 5
-        EOQ
-    }
-
   }
 
 }
