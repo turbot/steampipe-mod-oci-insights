@@ -86,11 +86,6 @@ dashboard "oci_compute_instance_age_report" {
   container {
 
     table {
-
-      column "Account ID" {
-        display = "none"
-      }
-
       sql = <<-EOQ
         select
           i.display_name as "Name",
