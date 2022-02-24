@@ -40,21 +40,73 @@ query "oci_ons_notification_topic_by_region" {
 
 query "oci_ons_notification_topic_by_compartment" {
   sql = <<-EOQ
+    with compartments as ( 
+        select
+          id, title
+        from
+          oci_identity_tenancy
+        union (
+        select 
+          id,title 
+        from 
+          oci_identity_compartment 
+        where 
+          lifecycle_state = 'ACTIVE'
+        )  
+       )
     select 
-      c.title as "Compartment",
+      y.title as "Tenancy",
+      case when y.title = c.title then 'root' else c.title end as "Compartment",
       count(t.*) as "Topics" 
     from 
       oci_ons_notification_topic as t,
-      oci_identity_compartment as c 
+      oci_identity_tenancy as y, 
+      compartments as c 
     where 
-      c.id = t.compartment_id
+      c.id = t.compartment_id and t.tenant_id = y.id
     group by 
+      y.title,
       c.title
     order by 
+      y.title,
       c.title
   EOQ
 }
 
+query "oci_ons_notification_topic_by_compartment_1"{
+  sql =<<-EOQ
+  with compartments as ( 
+        select
+          id, 
+          title || ':root' as "title"
+        from
+          oci_identity_tenancy
+        union (
+        select 
+          c.id,
+          y.title || ':'  || c.title as "title" 
+        from 
+          oci_identity_compartment c,
+          oci_identity_tenancy as y 
+        where 
+          y.id = c.compartment_id and lifecycle_state = 'ACTIVE'
+        )  
+       )
+    select 
+      c.title,
+      count(t.*) as "Topics" 
+    from 
+      oci_ons_notification_topic as t,
+      oci_identity_tenancy as y, 
+      compartments as c 
+    where 
+      c.id = t.compartment_id and t.tenant_id = y.id
+    group by 
+      c.title
+    order by 
+      c.title
+   EOQ   
+}
 query "oci_ons_notification_topic_by_tenancy" {
   sql = <<-EOQ
     select 
@@ -64,7 +116,7 @@ query "oci_ons_notification_topic_by_tenancy" {
       oci_ons_notification_topic as t,
       oci_identity_tenancy as c 
     where 
-      c.id = t.compartment_id
+      c.id = t.tenant_id
     group by 
       c.title
     order by 
@@ -190,28 +242,35 @@ dashboard "oci_ons_notification_topic_dashboard" {
       title = "Analysis"  
 
     chart {
-      title = "Notification Topics by Tenancy"
+      title = "Topics by Tenancy"
       sql = query.oci_ons_notification_topic_by_tenancy.sql
       type  = "column"
       width = 3
     }      
 
     chart {
-      title = "Notification Topics by Compartment"
+      title = "Topics by Compartment"
       sql = query.oci_ons_notification_topic_by_compartment.sql
       type  = "column"
       width = 3
     }
 
     chart {
-      title = "Notification Topics by Region"
+      title = "Topics by Compartment Other"
+      sql = query.oci_ons_notification_topic_by_compartment_1.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Topics by Region"
       sql = query.oci_ons_notification_topic_by_region.sql
       type  = "column"
       width = 3
     }
 
     chart {
-      title = "Notification Topics by Age"
+      title = "Topics by Age"
       sql = query.oci_ons_notification_topic_by_creation_month.sql
       type  = "column"
       width = 3
