@@ -1,6 +1,6 @@
 query "oci_compute_instance_count" {
   sql = <<-EOQ
-    select count(*) as "Instances" from oci_core_instance
+    select count(*) as "Instances" from oci_core_instance where lifecycle_state <> 'TERMINATED'
   EOQ
 }
 
@@ -10,15 +10,8 @@ query "oci_compute_instance_total_cores" {
       sum(shape_config_ocpus)  as "Total Cores"
     from
       oci_core_instance
-  EOQ
-}
-
-query "oci_compute_instance_total_memory" {
-  sql = <<-EOQ
-    select
-      sum(shape_config_memory_in_gbs)  as "Total Memory"
-    from
-      oci_core_instance
+    where
+      lifecycle_state <> 'TERMINATED'  
   EOQ
 }
 
@@ -31,7 +24,7 @@ query "oci_compute_instance_public_instance_count" {
         oci_core_instance as i,
         oci_core_vnic_attachment as a 
       where 
-        i.id = a.instance_id and a.public_ip is not null
+        i.id = a.instance_id and a.public_ip is not null and i.lifecycle_state <> 'TERMINATED'
     )
     select
       count(*) as value,
@@ -42,16 +35,18 @@ query "oci_compute_instance_public_instance_count" {
   EOQ
 }
 
-query "oci_compute_instance_running_above_90_days" {
+# Assesments
+query "oci_compute_instance_by_state" {
   sql = <<-EOQ
     select
-      count(*) as value,
-      ' Running > 90 Days' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as style
+      lifecycle_state,
+      count(lifecycle_state)
     from
       oci_core_instance
     where
-      date_part('day', now() - time_created) > 90
+      lifecycle_state <> 'TERMINATED'  
+    group by
+      lifecycle_state
   EOQ
 }
 
@@ -67,7 +62,7 @@ query "oci_compute_instance_by_public_ip" {
         oci_core_instance as i,
         oci_core_vnic_attachment as a
       where
-        i.id = a.instance_id
+        i.id = a.instance_id and i.lifecycle_state <> 'TERMINATED'
     )
     select
       visibility,
@@ -79,16 +74,17 @@ query "oci_compute_instance_by_public_ip" {
   EOQ
 }
 
-query "oci_compute_instance_by_compartment" {
+# Analysis
+query "oci_compute_instance_by_tenancy" {
   sql = <<-EOQ
     select 
-      c.title as "Compartment",
-      count(b.*) as "instances" 
+      c.title as "Tenancy",
+      count(v.*) as "Instances" 
     from 
-      oci_core_instance as b,
-      oci_identity_compartment as c 
+      oci_core_instance as i,
+      oci_identity_tenancy as c 
     where 
-      c.id = b.compartment_id
+      c.id = i.tenant_id and i.lifecycle_state <> 'TERMINATED'
     group by 
       c.title
     order by 
@@ -96,66 +92,54 @@ query "oci_compute_instance_by_compartment" {
   EOQ
 }
 
-query "oci_compute_instance_by_tenancy" {
+query "oci_compute_instance_by_compartment" {
   sql = <<-EOQ
+    with compartments as ( 
+      select
+        id, title
+      from
+        oci_identity_tenancy
+      union (
+      select 
+        id,title 
+      from 
+        oci_identity_compartment 
+      where 
+        lifecycle_state = 'ACTIVE'
+      )  
+    )
     select 
-      c.title as "Tenancy",
-      count(v.*) as "instances" 
+      t.title as "Tenancy",
+      case when t.title = c.title then 'root' else c.title end as "Compartment",
+      count(i.*) as "Instances" 
     from 
-      oci_core_instance as v,
-      oci_identity_tenancy as c 
+      oci_core_instance as i,
+      oci_identity_tenancy as t, 
+      compartments as c 
     where 
-      c.id = v.compartment_id and v.lifecycle_state <> 'TERMINATED'
+      c.id = i.compartment_id and i.tenant_id = t.id
     group by 
+      t.title,
       c.title
     order by 
+      t.title,
       c.title
   EOQ
 }
+
+
 
 query "oci_compute_instance_by_region" {
   sql = <<-EOQ
     select
       region,
-      count(i.*) as total
+      count(i.*) as "Regions"
     from
       oci_core_instance as i
+    where
+      lifecycle_state <> 'TERMINATED'  
     group by
       region
-  EOQ
-}
-
-query "oci_compute_instance_by_state" {
-  sql = <<-EOQ
-    select
-      lifecycle_state,
-      count(lifecycle_state)
-    from
-      oci_core_instance
-    group by
-      lifecycle_state
-  EOQ
-}
-
-query "oci_compute_instance_by_type" {
-  sql = <<-EOQ
-    select
-      shape as "Shape",
-      count(*) as "instances"
-    from
-      oci_core_instance
-    group by shape
-    order by shape
-  EOQ
-}
-
-query "oci_compute_instance_by_pv_encryption_intransit_status" {
-  sql = <<-EOQ
-    select
-      count(i.*) as "Total"
-    from oci_core_instance i
-      left join oci_core_boot_volume_attachment a on a.instance_id = i.id
-      where a.is_pv_encryption_in_transit_enabled and a.lifecycle_state = 'ATTACHED'
   EOQ
 }
 
@@ -169,6 +153,8 @@ query "oci_compute_instance_by_creation_month" {
           'YYYY-MM') as creation_month
       from
         oci_core_instance
+      where
+        lifecycle_state <> 'TERMINATED'   
     ),
     months as (
       select
@@ -205,6 +191,23 @@ query "oci_compute_instance_by_creation_month" {
   EOQ
 }
 
+query "oci_compute_instance_by_type" {
+  sql = <<-EOQ
+    select
+      shape as "Shape",
+      count(*) as "Instances"
+    from
+      oci_core_instance
+    where
+      lifecycle_state <> 'TERMINATED'  
+    group by 
+      shape
+    order by 
+      shape
+  EOQ
+}
+
+# Performance & Utilization
 query "oci_compute_top10_cpu_past_week" {
   sql = <<-EOQ
      with top_n as (
@@ -287,17 +290,7 @@ dashboard "oci_compute_instance_summary" {
     }
 
     card {
-      sql   = query.oci_compute_instance_total_memory.sql
-      width = 2
-    }
-
-    card {
       sql   = query.oci_compute_instance_public_instance_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_compute_instance_running_above_90_days.sql
       width = 2
     }
 
@@ -309,7 +302,7 @@ dashboard "oci_compute_instance_summary" {
     width = 12
 
     chart {
-      title = "Volume State"
+      title = "Lifecycle State"
       sql   = query.oci_compute_instance_by_state.sql
       type  = "donut"
       width = 3
@@ -351,15 +344,15 @@ dashboard "oci_compute_instance_summary" {
     }
 
     chart {
-      title = "Instances by Shape"
-      sql   = query.oci_compute_instance_by_type.sql
+      title = "Instances by Age"
+      sql   = query.oci_compute_instance_by_creation_month.sql
       type  = "column"
       width = 3
     }
 
     chart {
-      title = "Instances by Age"
-      sql   = query.oci_compute_instance_by_creation_month.sql
+      title = "Instances by Shape"
+      sql   = query.oci_compute_instance_by_type.sql
       type  = "column"
       width = 3
     }
@@ -371,7 +364,7 @@ dashboard "oci_compute_instance_summary" {
     title = "Performance & Utilization"
 
     chart {
-      title = "Top 10 CPU - Last 7 days [ needs to be a crosstab?]"
+      title = "Top 10 CPU - Last 7 days"
       sql   = query.oci_compute_top10_cpu_past_week.sql
       type  = "line"
       width = 6
