@@ -1,5 +1,3 @@
-
-
 dashboard "oci_database_autonomous_database_age_report" {
 
   title = "OCI Autonomous Database Age Report"
@@ -7,7 +5,6 @@ dashboard "oci_database_autonomous_database_age_report" {
 
   container {
 
-    # Analysis
     card {
       sql   = query.oci_database_autonomous_database_count.sql
       width = 2
@@ -21,7 +18,7 @@ dashboard "oci_database_autonomous_database_age_report" {
         from
           oci_database_autonomous_database
         where
-          time_created > now() - '1 days' :: interval
+          time_created > now() - '1 days' :: interval and lifecycle_state <> 'DELETED'
       EOQ
       width = 2
       type  = "info"
@@ -36,6 +33,7 @@ dashboard "oci_database_autonomous_database_age_report" {
           oci_database_autonomous_database
         where
           time_created between symmetric now() - '1 days' :: interval and now() - '30 days' :: interval
+          and lifecycle_state <> 'DELETED'
       EOQ
       width = 2
       type  = "info"
@@ -50,6 +48,7 @@ dashboard "oci_database_autonomous_database_age_report" {
           oci_database_autonomous_database
         where
           time_created between symmetric now() - '30 days' :: interval and now() - '90 days' :: interval
+          and lifecycle_state <> 'DELETED'
       EOQ
       width = 2
       type  = "info"
@@ -64,6 +63,7 @@ dashboard "oci_database_autonomous_database_age_report" {
           oci_database_autonomous_database
         where
           time_created between symmetric (now() - '90 days'::interval) and (now() - '365 days'::interval)
+          and lifecycle_state <> 'DELETED'
       EOQ
       width = 2
       type  = "info"
@@ -77,7 +77,7 @@ dashboard "oci_database_autonomous_database_age_report" {
         from
           oci_database_autonomous_database
         where
-          time_created <= now() - '1 year' :: interval
+          time_created <= now() - '1 year' :: interval and lifecycle_state <> 'DELETED'
       EOQ
       width = 2
       type  = "info"

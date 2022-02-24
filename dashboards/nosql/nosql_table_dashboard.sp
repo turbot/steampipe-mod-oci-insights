@@ -1,10 +1,10 @@
 query "oci_nosql_table_count" {
   sql = <<-EOQ
-  select 
-    count(*) as "NoSQL Table" 
-  from 
-    oci_nosql_table 
-  where 
+  select
+    count(*) as "NoSQL Tables"
+  from
+    oci_nosql_table
+  where
     lifecycle_state <> 'DELETED'
   EOQ
 }
@@ -12,7 +12,7 @@ query "oci_nosql_table_count" {
 query "oci_nosql_table_auto_reclaimable_count" {
   sql = <<-EOQ
    select
-      count(*) as "Auto Reclaimable"
+      count(*) as "Auto Reclaimable Tables"
     from
       oci_nosql_table
     where
@@ -25,7 +25,7 @@ query "oci_nosql_table_stalled_more_than_90_days_count" {
    select
       count(*) as value,
       'Stalled > 90 Days' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as type 
+      case count(*) when 0 then 'ok' else 'alert' end as type
     from
       oci_nosql_table
     where
@@ -33,55 +33,7 @@ query "oci_nosql_table_stalled_more_than_90_days_count" {
   EOQ
 }
 
-query "oci_nosql_table_by_region" {
-  sql = <<-EOQ
-    select 
-      region as "Region", 
-      count(*) as "NoSQL Table" 
-    from 
-      oci_nosql_table
-    where
-      lifecycle_state <> 'DELETED'   
-    group by 
-      region 
-    order by 
-      region
-  EOQ
-}
-
-query "oci_nosql_table_by_compartment" {
-  sql = <<-EOQ
-    select 
-      c.title as "compartment",
-      count(t.*) as "NoSQL Table" 
-    from 
-      oci_nosql_table as t,
-      oci_identity_compartment as c 
-    where 
-      c.id = t.compartment_id and t.lifecycle_state <> 'DELETED'
-    group by 
-      c.title
-    order by 
-      c.title
-  EOQ
-}
-
-query "oci_nosql_table_by_tenancy" {
-  sql = <<-EOQ
-    select 
-      c.title as "Tenancy",
-      count(t.*) as "NoSQL Table" 
-    from 
-      oci_nosql_table as t,
-      oci_identity_tenancy as c 
-    where 
-      c.id = t.compartment_id and lifecycle_state <> 'DELETED'
-    group by 
-      c.title
-    order by 
-      c.title
-  EOQ
-}
+# Assessments
 
 query "oci_nosql_table_by_lifecycle_state" {
   sql = <<-EOQ
@@ -91,7 +43,7 @@ query "oci_nosql_table_by_lifecycle_state" {
     from
       oci_nosql_table
     where
-      lifecycle_state <> 'DELETED'     
+      lifecycle_state <> 'DELETED'
     group by
       lifecycle_state
   EOQ
@@ -112,6 +64,76 @@ query "oci_nosql_table_stalled_more_than_90_days" {
   EOQ
 }
 
+# Analysis
+
+query "oci_nosql_table_by_tenancy" {
+  sql = <<-EOQ
+    select
+      c.title as "Tenancy",
+      count(t.*) as "NoSQL Tables"
+    from
+      oci_nosql_table as t,
+      oci_identity_tenancy as c
+    where
+      c.id = t.tenant_id and lifecycle_state <> 'DELETED'
+    group by
+      c.title
+    order by
+      c.title
+  EOQ
+}
+
+query "oci_nosql_table_by_region" {
+  sql = <<-EOQ
+    select
+      region as "Region",
+      count(*) as "NoSQL Tables"
+    from
+      oci_nosql_table
+    where
+      lifecycle_state <> 'DELETED'
+    group by
+      region
+    order by
+      region
+  EOQ
+}
+
+query "oci_nosql_table_by_compartment" {
+  sql = <<-EOQ
+    with compartments as (
+      select
+        id, title
+      from
+        oci_identity_tenancy
+      union (
+      select
+        id,title
+      from
+        oci_identity_compartment
+      where
+        lifecycle_state = 'ACTIVE'
+        )
+       )
+    select
+      b.title as "Tenancy",
+      case when b.title = c.title then 'root' else c.title end as "Compartment",
+      count(a.*) as "NoSQL Tables"
+    from
+      oci_nosql_table as a,
+      oci_identity_tenancy as b,
+      compartments as c
+    where
+      c.id = a.compartment_id and a.tenant_id = b.id and lifecycle_state <> 'DELETED'
+    group by
+      b.title,
+      c.title
+    order by
+      b.title,
+      c.title
+  EOQ
+}
+
 query "oci_nosql_table_by_creation_month" {
   sql = <<-EOQ
     with nosql as (
@@ -123,7 +145,7 @@ query "oci_nosql_table_by_creation_month" {
       from
         oci_nosql_table
       where
-      lifecycle_state <> 'DELETED'     
+      lifecycle_state <> 'DELETED'
     ),
     months as (
       select
@@ -228,75 +250,77 @@ dashboard "oci_nosql_table_dashboard" {
   title = "OCI NoSQL Table Dashboard"
 
   container {
+
     card {
-      sql = query.oci_nosql_table_count.sql
+      sql   = query.oci_nosql_table_count.sql
       width = 2
     }
 
     card {
-      sql = query.oci_nosql_table_auto_reclaimable_count.sql
+      sql   = query.oci_nosql_table_auto_reclaimable_count.sql
       width = 2
     }
 
     card {
-      sql = query.oci_nosql_table_stalled_more_than_90_days_count.sql
+      sql   = query.oci_nosql_table_stalled_more_than_90_days_count.sql
       width = 2
     }
   }
 
   container {
-      title = "Assessments"
+    title = "Assessments"
+    width = 6
 
-      chart {
-        title = "Lifecycle State"
-        sql = query.oci_nosql_table_by_lifecycle_state.sql
-        type  = "donut"
-        width = 3
+    chart {
+      title = "Lifecycle State"
+      sql   = query.oci_nosql_table_by_lifecycle_state.sql
+      type  = "donut"
+      width = 3
 
-      }
-
-       chart {
-         title = "Stalled More Than 90 Days"
-         sql = query.oci_nosql_table_stalled_more_than_90_days.sql
-         type  = "donut"
-         width = 3
-       }
     }
 
+    chart {
+      title = "Stalled More Than 90 Days"
+      sql   = query.oci_nosql_table_stalled_more_than_90_days.sql
+      type  = "donut"
+      width = 3
+    }
+  }
+
   container {
-      title = "Analysis"   
+    title = "Analysis"
 
     chart {
       title = "Tables by Tenancy"
-      sql = query.oci_nosql_table_by_tenancy.sql
+      sql   = query.oci_nosql_table_by_tenancy.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Tables by Compartment"
-      sql = query.oci_nosql_table_by_compartment.sql
+      sql   = query.oci_nosql_table_by_compartment.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Tables by Region"
-      sql = query.oci_nosql_table_by_region.sql
+      sql   = query.oci_nosql_table_by_region.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Tables by Age"
-      sql = query.oci_nosql_table_by_creation_month.sql
+      sql   = query.oci_nosql_table_by_creation_month.sql
       type  = "column"
       width = 3
     }
   }
 
   container {
-    title  = "Performance & Utilization"
+    title = "Performance & Utilization"
 
     chart {
       title = "Top 10 Storage - Last 7 days"
@@ -304,74 +328,12 @@ dashboard "oci_nosql_table_dashboard" {
       type  = "line"
       width = 6
     }
-    
+
     chart {
       title = "Average Max Daily Storage - Last 30 days"
       sql   = query.oci_nosql_table_by_storage_utilization_category.sql
       type  = "column"
       width = 6
-    }
-
-    chart {
-      title = "Top 10 Average Read Throttle - Last 7 days"
-      type  = "line"
-      width = 6
-      sql   = <<-EOQ
-        with top_n as (
-          select
-            name,
-            avg(average)
-          from
-            oci_nosql_table_metric_read_throttle_count_daily
-          where
-            timestamp  >= CURRENT_DATE - INTERVAL '7 day'
-          group by
-            name
-          order by
-            avg desc
-          limit 10
-        )
-        select
-            timestamp,
-            name,
-            average
-          from
-            oci_nosql_table_metric_read_throttle_count_hourly
-          where
-            timestamp  >= CURRENT_DATE - INTERVAL '7 day'
-            and name in (select name from top_n)
-      EOQ
-    }
-    
-    chart {
-      title = "Top 10 Average Write Throttle - Last 7 days"
-      type  = "line"
-      width = 6
-      sql   = <<-EOQ
-        with top_n as (
-          select
-            name,
-            avg(average)
-          from
-            oci_nosql_table_metric_write_throttle_count_daily
-          where
-            timestamp  >= CURRENT_DATE - INTERVAL '7 day'
-          group by
-            name
-          order by
-            avg desc
-          limit 10
-        )
-        select
-            timestamp,
-            name,
-            average
-          from
-            oci_nosql_table_metric_write_throttle_count_hourly
-          where
-            timestamp  >= CURRENT_DATE - INTERVAL '7 day'
-            and name in (select name from top_n)
-      EOQ
     }
 
   }

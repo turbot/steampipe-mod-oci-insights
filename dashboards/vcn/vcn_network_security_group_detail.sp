@@ -9,7 +9,7 @@ dashboard "vcn_network_security_group_detail" {
   #   sql = <<-EOQ
   #     select
   #       display_name as label,
-  #       id as value 
+  #       id as value
   #     from
   #       oci_core_network_security_group
   #   EOQ
@@ -19,7 +19,7 @@ dashboard "vcn_network_security_group_detail" {
 
     card {
       width = 3
-      sql = <<-EOQ
+      sql   = <<-EOQ
         with non_compliant_rules as (
           select
             id,
@@ -40,18 +40,18 @@ dashboard "vcn_network_security_group_detail" {
             )
           group by id
         )
-        select 
+        select
           count(*) as value,
           'Unrestricted SSH ingress access' as label,
-          case when count(*) = 0 then 'ok' else 'alert' end as type    
-        from 
+          case when count(*) = 0 then 'ok' else 'alert' end as type
+        from
           non_compliant_rules
       EOQ
     }
 
     card {
       width = 3
-      sql = <<-EOQ
+      sql   = <<-EOQ
         with non_compliant_rules as (
           select
             id,
@@ -72,11 +72,11 @@ dashboard "vcn_network_security_group_detail" {
             )
             group by id
         )
-        select 
+        select
           count(*) as value,
           'Unrestricted RDP ingress access' as label,
-          case when count(*) = 0 then 'ok' else 'alert' end as type    
-        from 
+          case when count(*) = 0 then 'ok' else 'alert' end as type
+        from
           non_compliant_rules
       EOQ
     }
@@ -85,7 +85,7 @@ dashboard "vcn_network_security_group_detail" {
 
   container {
 
-    title  = "Analysis"
+    title = "Analysis"
 
     container {
 
@@ -94,7 +94,7 @@ dashboard "vcn_network_security_group_detail" {
         table {
           title = "Overview"
           width = 12
-          sql = <<-EOQ
+          sql   = <<-EOQ
             select
               display_name,
               id,
@@ -110,7 +110,7 @@ dashboard "vcn_network_security_group_detail" {
         table {
           title = "Tags"
           width = 4
-          sql = <<-EOQ
+          sql   = <<-EOQ
             select
               tag.key as "Key",
               tag.value as "Value"

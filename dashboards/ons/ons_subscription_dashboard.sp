@@ -6,64 +6,18 @@ query "oci_ons_subscription_count" {
 
 query "oci_ons_subscription_unused_count" {
   sql = <<-EOQ
-    select 
+    select
       count(*) as value,
       'Unused' as label,
       case count(*) when 0 then 'ok' else 'alert' end as type
-    from 
+    from
       oci_ons_subscription
     where
-      lifecycle_state <> 'ACTIVE'          
+      lifecycle_state <> 'ACTIVE'
   EOQ
 }
 
-query "oci_ons_subscription_by_region" {
-  sql = <<-EOQ
-    select 
-    region as "Region", 
-    count(*) as "Subscriptions" 
-    from 
-      oci_ons_subscription 
-    group by 
-      region 
-    order by 
-      region
-  EOQ
-}
-
-query "oci_ons_subscription_by_compartment" {
-  sql = <<-EOQ
-    select 
-      c.title as "Compartment",
-      count(t.*) as "Topics" 
-    from 
-      oci_ons_subscription as t,
-      oci_identity_compartment as c 
-    where 
-      c.id = t.compartment_id
-    group by 
-      c.title
-    order by 
-      c.title
-  EOQ
-}
-
-query "oci_ons_subscription_by_tenancy" {
-  sql = <<-EOQ
-    select 
-      c.title as "Tenancy",
-      count(t.*) as "Topics" 
-    from 
-      oci_ons_subscription as t,
-      oci_identity_tenancy as c 
-    where 
-      c.id = t.compartment_id
-    group by 
-      c.title
-    order by 
-      c.title
-  EOQ
-}
+#Assessments
 
 query "oci_ons_subscription_by_lifecycle_state" {
   sql = <<-EOQ
@@ -71,9 +25,76 @@ query "oci_ons_subscription_by_lifecycle_state" {
       lifecycle_state,
       count(lifecycle_state)
     from
-      oci_ons_subscription     
+      oci_ons_subscription
     group by
       lifecycle_state
+  EOQ
+}
+
+# Analysis
+query "oci_ons_subscription_by_tenancy" {
+  sql = <<-EOQ
+    select
+       t.name as "Tenancy",
+       count(a.id)::numeric as "Keys"
+    from
+      oci_ons_subscription as a,
+      oci_identity_tenancy as t
+    where
+      t.id = a.tenant_id
+    group by
+      t.name
+    order by
+      t.name
+  EOQ
+}
+
+query "oci_ons_subscription_by_compartment" {
+  sql = <<-EOQ
+    with compartments as (
+      select
+        id, title
+      from
+        oci_identity_tenancy
+      union (
+      select
+        id,title
+      from
+        oci_identity_compartment
+      where
+        lifecycle_state = 'ACTIVE'
+        )
+      )
+    select
+      b.title as "Tenancy",
+      case when b.title = c.title then 'root' else c.title end as "Compartment",
+      count(a.*) as "Subscriptions"
+    from
+      oci_ons_subscription as a,
+      oci_identity_tenancy as b,
+      compartments as c
+    where
+      c.id = a.compartment_id and a.tenant_id = b.id
+    group by
+      b.title,
+      c.title
+    order by
+      b.title,
+      c.title
+  EOQ
+}
+
+query "oci_ons_subscription_by_region" {
+  sql = <<-EOQ
+    select
+    region as "Region",
+    count(*) as "Subscriptions"
+    from
+      oci_ons_subscription
+    group by
+      region
+    order by
+      region
   EOQ
 }
 
@@ -86,7 +107,7 @@ query "oci_ons_subscription_by_creation_month" {
         to_char(created_time,
           'YYYY-MM') as creation_month
       from
-        oci_ons_subscription    
+        oci_ons_subscription
     ),
     months as (
       select
@@ -127,56 +148,58 @@ dashboard "oci_ons_subscription_dashboard" {
   title = "OCI ONS Subscription Dashboard"
 
   container {
+
     card {
-      sql = query.oci_ons_subscription_count.sql
+      sql   = query.oci_ons_subscription_count.sql
       width = 2
     }
 
     card {
-      sql = query.oci_ons_subscription_unused_count.sql
+      sql   = query.oci_ons_subscription_unused_count.sql
       width = 2
     }
+
   }
 
   container {
-      title = "Assessments"
+    title = "Assessments"
 
-      chart {
-        title = "Lifecycle State"
-        sql = query.oci_ons_subscription_by_lifecycle_state.sql
-        type  = "donut"
-        width = 3
-      }
-
+    chart {
+      title = "Lifecycle State"
+      sql   = query.oci_ons_subscription_by_lifecycle_state.sql
+      type  = "donut"
+      width = 3
     }
 
+  }
+
   container {
-      title = "Analysis"  
+    title = "Analysis"
 
     chart {
       title = "Subscriptions by Tenancy"
-      sql = query.oci_ons_subscription_by_tenancy.sql
+      sql   = query.oci_ons_subscription_by_tenancy.sql
       type  = "column"
       width = 3
-    }    
+    }
 
     chart {
       title = "Subscriptions by Compartment"
-      sql = query.oci_ons_subscription_by_compartment.sql
+      sql   = query.oci_ons_subscription_by_compartment.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Subscriptions by Region"
-      sql = query.oci_ons_subscription_by_region.sql
+      sql   = query.oci_ons_subscription_by_region.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Subscriptions by Age"
-      sql = query.oci_ons_subscription_by_creation_month.sql
+      sql   = query.oci_ons_subscription_by_creation_month.sql
       type  = "column"
       width = 3
     }

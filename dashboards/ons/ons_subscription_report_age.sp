@@ -5,7 +5,6 @@ dashboard "oci_ons_subscription_age_report" {
 
   container {
 
-    # Analysis
     card {
       sql   = query.oci_ons_subscription_count.sql
       width = 2
@@ -85,7 +84,6 @@ dashboard "oci_ons_subscription_age_report" {
 
   container {
 
-
     table {
 
       sql = <<-EOQ
@@ -96,7 +94,7 @@ dashboard "oci_ons_subscription_age_report" {
           v.lifecycle_state as "Lifecycle State",
           coalesce(c.title, 'root') as "Compartment",
           t.title as "Tenancy",
-          v.region as "Region" 
+          v.region as "Region"
         from
           oci_ons_subscription as v
           left join oci_identity_compartment as c on v.compartment_id = c.id
@@ -106,7 +104,6 @@ dashboard "oci_ons_subscription_age_report" {
           v.title
       EOQ
     }
-
 
   }
 

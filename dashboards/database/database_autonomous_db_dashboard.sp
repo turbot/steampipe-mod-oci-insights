@@ -4,7 +4,6 @@ query "oci_database_autonomous_database_count" {
   EOQ
 }
 
-# cpu_core_count
 query "oci_database_autonomous_db_total_cores" {
   sql = <<-EOQ
     select
@@ -23,7 +22,6 @@ query "oci_database_autonomous_db_total_size" {
   EOQ
 }
 
-
 query "oci_database_autonomous_database_need_attention_count" {
   sql = <<-EOQ
     select
@@ -36,32 +34,6 @@ query "oci_database_autonomous_database_need_attention_count" {
       lifecycle_state = 'AVAILABLE_NEEDS_ATTENTION'
   EOQ
 }
-
-# query "oci_database_autonomous_database_restore_failed_count" {
-#   sql = <<-EOQ
-#     select
-#       count(*) as  value,
-#       'DBs Failed Restore State' as label,
-#       case count(*) when 0 then 'ok' else 'alert' end as type
-#     from
-#       oci_database_autonomous_database
-#     where
-#       lifecycle_state = 'RESTORE_FAILED'
-#   EOQ
-# }
-
-# query "oci_database_autonomous_database_unavailable_count" {
-#   sql = <<-EOQ
-#     select
-#       count(*) as  value,
-#       'DBs Not Available State' as label,
-#       case count(*) when 0 then 'ok' else 'alert' end as type
-#     from
-#       oci_database_autonomous_database
-#     where
-#       lifecycle_state = 'UNAVAILABLE'
-#   EOQ
-# }
 
 query "oci_database_autonomous_db_with_data_guard" {
   sql = <<-EOQ
@@ -80,31 +52,16 @@ query "oci_database_autonomous_db_autoscaling_count" {
   EOQ
 }
 
-query "oci_database_autonomous_db_by_compartment" {
+# Assessments
+query "oci_database_autonomous_db_by_state" {
   sql = <<-EOQ
     select
-      c.title as "compartment",
-      count(a.*) as "total"
+      lifecycle_state,
+      count(lifecycle_state)
     from
-      oci_database_autonomous_database as a,
-      oci_identity_compartment as c
-    where
-      c.id = a.compartment_id and a.lifecycle_state <> 'DELETED'
+      oci_database_autonomous_database
     group by
-      compartment
-    order by compartment
-  EOQ
-}
-
-query "oci_database_autonomous_db_by_region" {
-  sql = <<-EOQ
-    select
-      region,
-      count(db.*) as total
-    from
-      oci_database_autonomous_database as db
-    group by
-      region
+      lifecycle_state
   EOQ
 }
 
@@ -177,7 +134,7 @@ query "oci_database_autonomous_db_by_operations_insights_status" {
   EOQ
 }
 
-# permission_level RESTRICTED, UNRESTRICTED
+# permission_level is  RESTRICTED or UNRESTRICTED
 # The Autonomous Database permission level. Restricted mode allows access only to admin users. Default UNRESTRICTED
 query "oci_database_autonomous_db_by_permission_level" {
   sql = <<-EOQ
@@ -200,22 +157,11 @@ query "oci_database_autonomous_db_by_permission_level" {
   EOQ
 }
 
-query "oci_database_autonomous_db_by_state" {
-  sql = <<-EOQ
-    select
-      lifecycle_state,
-      count(lifecycle_state)
-    from
-      oci_database_autonomous_database
-    group by
-      lifecycle_state
-  EOQ
-}
-
+# Analysis
 query "oci_database_autonomous_db_by_tenancy" {
   sql = <<-EOQ
     select
-       t.name as "tenancy",
+       t.name as "Tenancy",
        count(a.id)::numeric as "Autonomous DBs"
     from
       oci_database_autonomous_database as a,
@@ -223,9 +169,56 @@ query "oci_database_autonomous_db_by_tenancy" {
     where
       t.id = a.tenant_id
     group by
-      tenancy
+      t.name
     order by
-      tenancy
+      t.name
+  EOQ
+}
+
+query "oci_database_autonomous_db_by_compartment" {
+  sql = <<-EOQ
+    with compartments as (
+      select
+        id, title
+      from
+        oci_identity_tenancy
+      union (
+      select
+        id,title
+      from
+        oci_identity_compartment
+      where
+        lifecycle_state = 'ACTIVE'
+        )
+       )
+    select
+      b.title as "Tenancy",
+      case when b.title = c.title then 'root' else c.title end as "Compartment",
+      count(a.*) as "Autonomous DBs"
+    from
+      oci_database_autonomous_database as a,
+      oci_identity_tenancy as b,
+      compartments as c
+    where
+      c.id = a.compartment_id and a.tenant_id = b.id
+    group by
+      b.title,
+      c.title
+    order by
+      b.title,
+      c.title
+  EOQ
+}
+
+query "oci_database_autonomous_db_by_region" {
+  sql = <<-EOQ
+    select
+      region,
+      count(db.*) as total
+    from
+      oci_database_autonomous_database as db
+    group by
+      region
   EOQ
 }
 
@@ -309,7 +302,6 @@ query "oci_database_autonomous_db_by_creation_month" {
 #   EOQ
 # }
 
-
 dashboard "oci_database_autonomous_db_summary" {
 
   title = "OCI Autonomous Database Dashboard"
@@ -353,30 +345,31 @@ dashboard "oci_database_autonomous_db_summary" {
 
   container {
     title = "Assessments"
+    width = 6
 
     chart {
       title = "Data Guard Status"
       sql   = query.oci_database_autonomous_db_data_guard_status.sql
       type  = "donut"
-      width = 2
+      width = 3
     }
 
     chart {
       title = "Lifecycle State"
       sql   = query.oci_database_autonomous_db_by_state.sql
       type  = "donut"
-      width = 2
+      width = 3
     }
 
     chart {
       title = "Operations Insight Status"
       sql   = query.oci_database_autonomous_db_by_operations_insights_status.sql
       type  = "donut"
-      width = 2
+      width = 3
 
-      series "Enabled" {
-        color = "green"
-      }
+      # series "Enabled" {
+      #   color = "green"
+      # }
     }
 
     chart {
@@ -385,9 +378,9 @@ dashboard "oci_database_autonomous_db_summary" {
       type  = "donut"
       width = 3
 
-      series "Restricted" {
-        color = "green"
-      }
+      # series "Restricted" {
+      #   color = "green"
+      # }
     }
   }
 
@@ -437,13 +430,13 @@ dashboard "oci_database_autonomous_db_summary" {
       title = "Top 10 Average CPU - Last 7 days"
       type  = "line"
       width = 6
-      sql = <<-EOQ
+      sql   = <<-EOQ
         with top_n as (
           select
             id,
             avg(average)
         from
-          oci_database_autonomous_database_metric_cpu_utilization_daily
+          oci_database_autonomous_db_metric_cpu_utilization_daily
         where
           timestamp  >= CURRENT_DATE - INTERVAL '7 day'
         group by
@@ -457,7 +450,7 @@ dashboard "oci_database_autonomous_db_summary" {
           id,
           average
         from
-          oci_database_autonomous_database_metric_cpu_utilization_hourly
+          oci_database_autonomous_db_metric_cpu_utilization_hourly
         where
           timestamp  >= CURRENT_DATE - INTERVAL '7 day'
           and id in (select id from top_n)
@@ -468,13 +461,13 @@ dashboard "oci_database_autonomous_db_summary" {
       title = "Top 10 Average Storage - Last 7 days"
       type  = "line"
       width = 6
-      sql = <<-EOQ
+      sql   = <<-EOQ
         with top_n as (
           select
             id,
             avg(average)
         from
-          oci_database_autonomous_database_metric_storage_utilization_daily
+          oci_database_autonomous_db_metric_storage_utilization_daily
         where
           timestamp  >= CURRENT_DATE - INTERVAL '7 day'
         group by
@@ -488,7 +481,7 @@ dashboard "oci_database_autonomous_db_summary" {
           id,
           average
         from
-          oci_database_autonomous_database_metric_storage_utilization_hourly
+          oci_database_autonomous_db_metric_storage_utilization_hourly
         where
           timestamp  >= CURRENT_DATE - INTERVAL '7 day'
           and id in (select id from top_n)
@@ -497,4 +490,3 @@ dashboard "oci_database_autonomous_db_summary" {
   }
 
 }
-

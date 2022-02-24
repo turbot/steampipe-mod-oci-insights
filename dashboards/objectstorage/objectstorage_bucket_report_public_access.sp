@@ -5,6 +5,11 @@ dashboard "oci_objectstorage_bucket_public_access_report" {
   container {
 
     card {
+      sql   = query.oci_objectstorage_bucket_count.sql
+      width = 2
+    }
+
+    card {
       sql = query.oci_objectstorage_bucket_public_access_count.sql
       width = 2
     }
@@ -21,7 +26,6 @@ dashboard "oci_objectstorage_bucket_public_access_report" {
         v.name as "Name",
         public_access_type as "Bucket Access Type",
         v.is_read_only as "Read Only",
-        now()::date - v.time_created::date as "Age in Days",
         v.time_created as "Create Time",
         coalesce(c.title, 'root') as "Compartment",
         t.title as "Tenancy",

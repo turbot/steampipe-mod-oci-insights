@@ -18,12 +18,19 @@ dashboard "oci_identity_user_mfa_report" {
   container {
 
     card {
+      sql   = query.oci_identity_user_count.sql
+      width = 2
+    }
+
+    card {
       sql   = query.oci_identity_user_mfa_not_enabled_count.sql
       width = 2
     }
+
   }
 
   container {
+
     table {
       sql = <<-EOQ
       select

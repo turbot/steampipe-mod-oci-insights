@@ -4,14 +4,14 @@ query "oci_block_storage_boot_volume_unattached_volumes_count" {
       count(*) as value,
       'Unattached' as label,
       case count(*) when 0 then 'ok' else 'alert' end as type
-    from 
+    from
       oci_core_boot_volume
-    where 
+    where
       id not in (
-        select 
+        select
           boot_volume_id
         from
-          oci_core_boot_volume_attachment  
+          oci_core_boot_volume_attachment
       ) and lifecycle_state <> 'TERMINATED'
   EOQ
 }
@@ -23,7 +23,12 @@ dashboard "oci_block_storage_boot_volume_unattached_report" {
   container {
 
     card {
-      sql = query.oci_block_storage_boot_volume_unattached_volumes_count.sql
+      sql   = query.oci_block_storage_boot_volume_count.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_block_storage_boot_volume_unattached_volumes_count.sql
       width = 2
     }
   }

@@ -11,7 +11,27 @@ query "oci_objectstorage_bucket_read_only_access_count" {
     from
       oci_objectstorage_bucket
     where
-      is_read_only  
+      is_read_only
+  EOQ
+}
+
+query "oci_objectstorage_bucket_default_encryption_count" {
+  sql = <<-EOQ
+    select count(*) as "OCI Managed Encryption"
+    from
+      oci_objectstorage_bucket
+    where
+    kms_key_id is null
+  EOQ
+}
+
+query "oci_objectstorage_bucket_archived_count" {
+  sql = <<-EOQ
+    select count(*) as "Archive"
+    from
+      oci_objectstorage_bucket
+    where
+    storage_tier = 'Archive'
   EOQ
 }
 
@@ -24,88 +44,24 @@ query "oci_objectstorage_bucket_public_access_count" {
     from
       oci_objectstorage_bucket
     where
-      public_access_type <> 'NoPublicAccess'  
+      public_access_type <> 'NoPublicAccess'
   EOQ
 }
 
 query "oci_objectstorage_bucket_versioning_disabled_count" {
   sql = <<-EOQ
-    select 
+    select
       count(*) as value,
       'Versioning Disabled' as label,
       case count(*) when 0 then 'ok' else 'alert' end as type
-    from 
-      oci_objectstorage_bucket 
-    where 
+    from
+      oci_objectstorage_bucket
+    where
       versioning = 'Disabled'
   EOQ
 }
 
-query "oci_objectstorage_bucket_default_encryption_count" {
-  sql = <<-EOQ
-    select count(*) as "OCI Managed Encryption"
-    from 
-      oci_objectstorage_bucket 
-    where 
-    kms_key_id is null
-  EOQ
-}
-
-query "oci_objectstorage_bucket_archived_count" {
-  sql = <<-EOQ
-    select count(*) as "Archive"
-    from 
-      oci_objectstorage_bucket 
-    where 
-    storage_tier = 'Archive'
-  EOQ
-}
-
-query "oci_objectstorage_bucket_by_region" {
-  sql = <<-EOQ
-    select region as "Region", count(*) as "Buckets" 
-    from 
-      oci_objectstorage_bucket 
-    group by 
-      region 
-    order by 
-      region
-  EOQ
-}
-
-query "oci_objectstorage_bucket_by_compartment" {
-  sql = <<-EOQ
-   select 
-      c.title as "Compartment",
-      count(b.*) as "Buckets" 
-    from 
-      oci_objectstorage_bucket as b,
-      oci_identity_compartment as c 
-    where 
-      c.id = b.compartment_id
-    group by 
-      c.title
-    order by 
-      c.title
-  EOQ
-}
-
-query "oci_objectstorage_bucket_by_tenancy" {
-  sql = <<-EOQ
-   select 
-      c.title as "Tenancy",
-      count(b.*) as "Buckets" 
-    from 
-      oci_objectstorage_bucket as b,
-      oci_identity_tenancy as c 
-    where 
-      c.id = b.compartment_id
-    group by 
-      c.title
-    order by 
-      c.title
-  EOQ
-}
+# Assessments
 
 query "oci_objectstorage_bucket_encryption_status" {
   sql = <<-EOQ
@@ -115,9 +71,9 @@ query "oci_objectstorage_bucket_encryption_status" {
     from (
       select
         id,
-        case 
-         when kms_key_id is null then 'OCI Managed' 
-         else 'Customer Managed' 
+        case
+         when kms_key_id is null then 'OCI Managed'
+         else 'Customer Managed'
          end as encryption_status
       from
         oci_objectstorage_bucket) as b
@@ -133,7 +89,7 @@ query "oci_objectstorage_bucket_versioning_status" {
     select
       versioning,
       count(*)
-    from 
+    from
       oci_objectstorage_bucket
     group by
       versioning
@@ -149,10 +105,77 @@ query "oci_objectstorage_bucket_public_access_status" {
       count(*)
     from
       oci_objectstorage_bucket
-    group by  
+    group by
       public_access_type
     order by
       public_access_type desc
+  EOQ
+}
+
+# Analysis
+
+query "oci_objectstorage_bucket_by_tenancy" {
+  sql = <<-EOQ
+   select
+      c.title as "Tenancy",
+      count(b.*) as "Buckets"
+    from
+      oci_objectstorage_bucket as b,
+      oci_identity_tenancy as c
+    where
+      c.id = b.tenant_id
+    group by
+      c.title
+    order by
+      c.title
+  EOQ
+}
+
+
+query "oci_objectstorage_bucket_by_compartment" {
+  sql = <<-EOQ
+    with compartments as (
+      select
+        id, title
+      from
+        oci_identity_tenancy
+      union (
+      select
+        id,title
+      from
+        oci_identity_compartment
+      where
+        lifecycle_state = 'ACTIVE'
+        )
+       )
+    select
+      b.title as "Tenancy",
+      case when b.title = c.title then 'root' else c.title end as "Compartment",
+      count(a.*) as "Keys"
+    from
+      oci_objectstorage_bucket as a,
+      oci_identity_tenancy as b,
+      compartments as c
+    where
+      c.id = a.compartment_id and a.tenant_id = b.id
+    group by
+      b.title,
+      c.title
+    order by
+      b.title,
+      c.title
+  EOQ
+}
+
+query "oci_objectstorage_bucket_by_region" {
+  sql = <<-EOQ
+    select region as "Region", count(*) as "Buckets"
+    from
+      oci_objectstorage_bucket
+    group by
+      region
+    order by
+      region
   EOQ
 }
 
@@ -206,93 +229,93 @@ dashboard "oci_objectstorage_bucket_dashboard" {
   title = "OCI Object Storage Bucket Dashboard"
 
   container {
-    ## Analysis ...
 
     card {
-      sql = query.oci_objectstorage_bucket_count.sql
+      sql   = query.oci_objectstorage_bucket_count.sql
       width = 2
     }
 
     card {
-      sql = query.oci_objectstorage_bucket_read_only_access_count.sql
+      sql   = query.oci_objectstorage_bucket_read_only_access_count.sql
       width = 2
     }
 
     card {
-      sql = query.oci_objectstorage_bucket_default_encryption_count.sql
+      sql   = query.oci_objectstorage_bucket_default_encryption_count.sql
       width = 2
     }
 
     card {
-      sql = query.oci_objectstorage_bucket_archived_count.sql
+      sql   = query.oci_objectstorage_bucket_archived_count.sql
       width = 2
     }
 
     card {
-      sql = query.oci_objectstorage_bucket_public_access_count.sql
+      sql   = query.oci_objectstorage_bucket_public_access_count.sql
       width = 2
     }
 
     card {
-      sql = query.oci_objectstorage_bucket_versioning_disabled_count.sql
+      sql   = query.oci_objectstorage_bucket_versioning_disabled_count.sql
       width = 2
     }
 
   }
 
   container {
-      title = "Assessments"
+    title = "Assessments"
+    width = 6
 
-      chart {
-        title = "Encryption Status"
-        sql = query.oci_objectstorage_bucket_encryption_status.sql
-        type  = "donut"
-        width = 3
-      }
-
-       chart {
-        title = "Versioning Status"
-        sql = query.oci_objectstorage_bucket_versioning_status.sql
-        type  = "donut"
-        width = 3
-      }
-      
-      chart {
-        title = "Access Type"
-        sql = query.oci_objectstorage_bucket_public_access_status.sql
-        type  = "donut"
-        width = 3
-      }
-
+    chart {
+      title = "Encryption Status"
+      sql   = query.oci_objectstorage_bucket_encryption_status.sql
+      type  = "donut"
+      width = 3
     }
 
+    chart {
+      title = "Versioning Status"
+      sql   = query.oci_objectstorage_bucket_versioning_status.sql
+      type  = "donut"
+      width = 3
+    }
+
+    chart {
+      title = "Access Type"
+      sql   = query.oci_objectstorage_bucket_public_access_status.sql
+      type  = "donut"
+      width = 3
+    }
+
+  }
+
   container {
-      title = "Analysis" 
+    title = "Analysis"
 
     chart {
       title = "Buckets by Tenancy"
-      sql = query.oci_objectstorage_bucket_by_tenancy.sql
+      sql   = query.oci_objectstorage_bucket_by_tenancy.sql
       type  = "column"
       width = 3
-    }     
+    }
 
     chart {
       title = "Buckets by Compartment"
-      sql = query.oci_objectstorage_bucket_by_compartment.sql
+      sql   = query.oci_objectstorage_bucket_by_compartment.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Buckets by Region"
-      sql = query.oci_objectstorage_bucket_by_region.sql
+      sql   = query.oci_objectstorage_bucket_by_region.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Buckets by Age"
-      sql = query.oci_objectstorage_bucket_by_creation_month.sql
+      sql   = query.oci_objectstorage_bucket_by_creation_month.sql
       type  = "column"
       width = 3
     }

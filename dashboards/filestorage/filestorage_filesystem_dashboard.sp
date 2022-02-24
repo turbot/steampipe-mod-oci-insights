@@ -1,62 +1,49 @@
 query "oci_filestorage_filesystem_count" {
   sql = <<-EOQ
-    select count(*) as "File Systems" from oci_file_storage_file_system
+    select count(*) as "File Systems" from oci_file_storage_file_system where lifecycle_state <> 'DELETED'
   EOQ
 }
 
 query "oci_filestorage_filesystem_snapshot_count" {
   sql = <<-EOQ
-    select count(*) as "Snapshots" from oci_file_storage_snapshot
+    select count(*) as "Snapshots" from oci_file_storage_snapshot where lifecycle_state <> 'DELETED'
   EOQ
 }
 
 query "oci_filestorage_cloned_filesystem_count" {
   sql = <<-EOQ
     select
-      count(*) as "Cloned File System"
+      count(*) as "Cloned File Systems"
     from
       oci_file_storage_file_system
     where
-      is_clone_parent
+      is_clone_parent and lifecycle_state <> 'DELETED'
   EOQ
 }
 
 query "oci_filestorage_uncloned_filesystem_count" {
   sql = <<-EOQ
     select
-      count(*) as "Uncloned File System"
+      count(*) as "Uncloned File Systems"
     from
       oci_file_storage_file_system
     where
-      not is_clone_parent
+      not is_clone_parent and lifecycle_state <> 'DELETED'
   EOQ
 }
 
 query "oci_filestorage_cloned_snapshot_count" {
   sql = <<-EOQ
     select
-      count(*) as "Cloned Snapshot"
+      count(*) as "Cloned Snapshots"
     from
       oci_file_storage_snapshot
     where
-      is_clone_source
+      is_clone_source and lifecycle_state <> 'DELETED'
   EOQ
 }
 
-# metered_bytes ?
-
-# Hydration: Indicates whether the clone is currently copying metadata from the source. Not Added in to report
-# query "oci_filestorage_hydrated_filesystem_count" {
-#   sql = <<-EOQ
-#     select
-#       count(*) as "Unhydratd File System"
-#     from
-#       oci_file_storage_file_system
-#     where
-#       not is_hydrated
-#   EOQ
-# }
-
+# Assessments
 query "oci_filestorage_filesystem_by_state" {
   sql = <<-EOQ
     select
@@ -64,31 +51,34 @@ query "oci_filestorage_filesystem_by_state" {
       count(lifecycle_state)
     from
       oci_file_storage_file_system
+    where
+      lifecycle_state <> 'DELETED'
     group by
       lifecycle_state
   EOQ
 }
 
+# Analysis
 query "oci_filestorage_filesystem_by_tenancy" {
   sql = <<-EOQ
     select
-       t.name as "tenancy",
+       t.name as "Tenancy",
        count(a.id)::numeric as "File Systems"
     from
       oci_file_storage_file_system as a,
       oci_identity_tenancy as t
     where
-      t.id = a.tenant_id
+      t.id = a.tenant_id and a.lifecycle_state <> 'DELETED'
     group by
-      tenancy
+      t.name
     order by
-      tenancy
+      t.name
   EOQ
 }
 
 query "oci_filestorage_filesystem_by_compartment" {
   sql = <<-EOQ
-  with compartments as (
+    with compartments as (
       select
         id, title
       from
@@ -98,20 +88,26 @@ query "oci_filestorage_filesystem_by_compartment" {
         id,title
       from
         oci_identity_compartment
-      where lifecycle_state = 'ACTIVE')
-    )
-   select
-      c.title as "compartment",
-      count(b.*) as "filesystems"
+      where
+        lifecycle_state = 'ACTIVE'
+        )
+       )
+    select
+      b.title as "Tenancy",
+      case when b.title = c.title then 'root' else c.title end as "Compartment",
+      count(a.*) as "File Systems"
     from
-      oci_file_storage_file_system as b,
+      oci_file_storage_file_system as a,
+      oci_identity_tenancy as b,
       compartments as c
     where
-      c.id = b.compartment_id
+      c.id = a.compartment_id and a.tenant_id = b.id and a.lifecycle_state <> 'DELETED'
     group by
-      compartment
+      b.title,
+      c.title
     order by
-      compartment
+      b.title,
+      c.title
   EOQ
 }
 
@@ -120,6 +116,8 @@ query "oci_filestorage_filesystem_by_region" {
     select region as "Region", count(*) as "FileSystems"
     from
       oci_file_storage_file_system
+    where
+      lifecycle_state <> 'DELETED'
     group by
       region
     order by
@@ -138,6 +136,8 @@ query "oci_filestorage_filesystem_by_creation_month" {
           'YYYY-MM') as creation_month
       from
         oci_file_storage_file_system
+      where
+        lifecycle_state <> 'DELETED'
     ),
     months as (
       select
@@ -180,161 +180,75 @@ dashboard "oci_filestorage_filesystem_dashboard" {
   container {
 
     card {
-      sql = query.oci_filestorage_filesystem_count.sql
+      sql   = query.oci_filestorage_filesystem_count.sql
       width = 2
     }
 
     card {
-      sql = query.oci_filestorage_cloned_filesystem_count.sql
+      sql   = query.oci_filestorage_cloned_filesystem_count.sql
       width = 2
     }
 
     card {
-      sql = query.oci_filestorage_uncloned_filesystem_count.sql
+      sql   = query.oci_filestorage_uncloned_filesystem_count.sql
       width = 2
     }
 
     card {
-      sql = query.oci_filestorage_filesystem_snapshot_count.sql
+      sql   = query.oci_filestorage_filesystem_snapshot_count.sql
       width = 2
     }
 
     card {
-      sql = query.oci_filestorage_cloned_snapshot_count.sql
+      sql   = query.oci_filestorage_cloned_snapshot_count.sql
       width = 2
     }
   }
 
-container {
-      title = "Assessments"
-      width = 6
+  container {
+    title = "Assessments"
+    width = 6
 
     chart {
       title = "File Systems by State"
-      sql = query.oci_filestorage_filesystem_by_state.sql
+      sql   = query.oci_filestorage_filesystem_by_state.sql
       type  = "donut"
       width = 4
     }
 
-}
+  }
 
   container {
-      title = "Analysis"
+    title = "Analysis"
 
     chart {
       title = "File Systems by Tenancy"
-      sql = query.oci_filestorage_filesystem_by_tenancy.sql
+      sql   = query.oci_filestorage_filesystem_by_tenancy.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "File Systems by Compartment"
-      sql = query.oci_filestorage_filesystem_by_compartment.sql
+      sql   = query.oci_filestorage_filesystem_by_compartment.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "File Systems by Region"
-      sql = query.oci_filestorage_filesystem_by_region.sql
+      sql   = query.oci_filestorage_filesystem_by_region.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "File Systems Age"
-      sql = query.oci_filestorage_filesystem_by_creation_month.sql
+      sql   = query.oci_filestorage_filesystem_by_creation_month.sql
       type  = "column"
       width = 3
     }
 
   }
 
-  # container {
-  #   title = "Resources by Age"
-
-  #   chart {
-  #     title = "FileSystems by Creation Month"
-  #     sql = query.oci_filestorage_filesystem_by_creation_month.sql
-  #     type  = "column"
-  #     width = 4
-  #     series "month" {
-  #       color = "green"
-  #     }
-  #   }
-
-  #   table {
-  #     title = "Oldest filesystems"
-  #     width = 4
-
-  #     sql = <<-EOQ
-  #       with compartments as (
-  #         select
-  #           id, title
-  #         from
-  #           oci_identity_tenancy
-  #         union (
-  #         select
-  #           id,title
-  #         from
-  #           oci_identity_compartment
-  #         where
-  #           lifecycle_state = 'ACTIVE'
-  #         )
-  #      )
-  #      select
-  #         s.title as "filesystem",
-  #         current_date - s.time_created::date as "Age in Days",
-  #         c.title as "Compartment"
-  #       from
-  #         oci_file_storage_file_system as s
-  #         left join compartments as c on c.id = s.compartment_id
-  #       where
-  #         lifecycle_state <> 'DELETED'
-  #       order by
-  #         "Age in Days" desc,
-  #         s.title
-  #       limit 5
-  #     EOQ
-  #   }
-
-  #   table {
-  #     title = "Newest filesystems"
-  #     width = 4
-
-  #     sql = <<-EOQ
-  #       with compartments as (
-  #         select
-  #           id, title
-  #         from
-  #           oci_identity_tenancy
-  #         union (
-  #         select
-  #           id,title
-  #         from
-  #           oci_identity_compartment
-  #         where
-  #           lifecycle_state = 'ACTIVE'
-  #         )
-  #      )
-  #      select
-  #         s.title as "filesystem",
-  #         current_date - s.time_created::date as "Age in Days",
-  #         c.title as "Compartment"
-  #       from
-  #         oci_file_storage_file_system as s
-  #         left join compartments as c on c.id = s.compartment_id
-  #       where
-  #         lifecycle_state <> 'DELETED'
-  #       order by
-  #         "Age in Days" asc,
-  #         s.title
-  #       limit 5
-  #     EOQ
-  #   }
-
-  # }
-
 }
-

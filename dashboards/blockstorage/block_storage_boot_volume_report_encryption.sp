@@ -1,10 +1,11 @@
 query "oci_block_storage_boot_volume_customer_managed_encryption_count" {
   sql = <<-EOQ
-    select count(*) as "Customer Managed Encryption"
-      from 
-    oci_core_boot_volume 
-    where 
-    kms_key_id is not null and lifecycle_state <> 'TERMINATED'
+    select
+      count(*) as "Customer Managed Encryption"
+    from
+      oci_core_boot_volume
+    where
+      kms_key_id is not null and lifecycle_state <> 'TERMINATED'
   EOQ
 }
 
@@ -15,12 +16,17 @@ dashboard "oci_block_storage_boot_volume_encryption_report" {
   container {
 
     card {
-      sql = query.oci_block_storage_boot_volume_customer_managed_encryption_count.sql
+      sql   = query.oci_block_storage_boot_volume_count.sql
       width = 2
     }
 
     card {
-      sql = query.oci_block_storage_boot_volume_default_encrypted_volumes_count.sql
+      sql   = query.oci_block_storage_boot_volume_customer_managed_encryption_count.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_block_storage_boot_volume_default_encrypted_volumes_count.sql
       width = 2
     }
   }

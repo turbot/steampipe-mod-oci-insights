@@ -19,7 +19,7 @@ dashboard "oci_mysql_backup_age_report" {
         from
           oci_mysql_backup
         where
-          time_created > now() - '1 days' :: interval
+          time_created > now() - '1 days' :: interval and lifecycle_state <> 'DELETED'
       EOQ
       width = 2
       type  = "info"
@@ -34,6 +34,7 @@ dashboard "oci_mysql_backup_age_report" {
           oci_mysql_backup
         where
           time_created between symmetric now() - '1 days' :: interval and now() - '30 days' :: interval
+          and lifecycle_state <> 'DELETED'
       EOQ
       width = 2
       type  = "info"
@@ -48,6 +49,7 @@ dashboard "oci_mysql_backup_age_report" {
           oci_mysql_backup
         where
           time_created between symmetric now() - '30 days' :: interval and now() - '90 days' :: interval
+          and lifecycle_state <> 'DELETED'
       EOQ
       width = 2
       type  = "info"
@@ -62,6 +64,7 @@ dashboard "oci_mysql_backup_age_report" {
           oci_mysql_backup
         where
           time_created between symmetric (now() - '90 days'::interval) and (now() - '365 days'::interval)
+          and lifecycle_state <> 'DELETED'
       EOQ
       width = 2
       type  = "info"
@@ -75,7 +78,7 @@ dashboard "oci_mysql_backup_age_report" {
         from
           oci_mysql_backup
         where
-          time_created <= now() - '1 year' :: interval
+          time_created <= now() - '1 year' :: interval and lifecycle_state <> 'DELETED'
       EOQ
       width = 2
       type  = "info"
@@ -97,7 +100,7 @@ dashboard "oci_mysql_backup_age_report" {
           coalesce(c.title, 'root') as "Compartment",
           t.title as "Tenancy",
           v.region as "Region",
-          v.id as "OCID"  
+          v.id as "OCID"
         from
           oci_mysql_backup as v
           left join oci_identity_compartment as c on v.compartment_id = c.id

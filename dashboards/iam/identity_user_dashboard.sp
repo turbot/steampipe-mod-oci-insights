@@ -4,8 +4,6 @@ query "oci_identity_user_count" {
   EOQ
 }
 
-  # can_use_auth_tokens,
-
 query "oci_identity_user_unverified_email_count" {
   sql = <<-EOQ
     select count(*) as "Users With Unverified Email " from oci_identity_user where not email_verified
@@ -16,7 +14,7 @@ query "oci_identity_user_inactive_customer_key_count" {
   sql = <<-EOQ
     select
       count(*) as  value,
-      'Inactive Customer Key' as label,
+      'Inactive Customer Keys' as label,
       case count(*) when 0 then 'ok' else 'alert' end as type
     from
       oci_identity_customer_secret_key
@@ -29,7 +27,7 @@ query "oci_identity_user_inactive_api_key_count" {
   sql = <<-EOQ
     select
       count(*) as  value,
-      'Inactive API Key' as label,
+      'Inactive API Keys' as label,
       case count(*) when 0 then 'ok' else 'alert' end as type
     from
       oci_identity_api_key

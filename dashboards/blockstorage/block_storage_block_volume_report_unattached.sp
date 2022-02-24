@@ -4,14 +4,14 @@ query "oci_block_storage_block_volume_unattached_volumes_count" {
       count(*) as value,
       'Unattached' as label,
       case count(*) when 0 then 'ok' else 'alert' end as type
-    from 
+    from
       oci_core_volume
-    where 
+    where
       id not in (
-        select 
+        select
           volume_id
         from
-          oci_core_volume_attachment  
+          oci_core_volume_attachment
       ) and lifecycle_state <> 'TERMINATED'
   EOQ
 }
@@ -23,7 +23,7 @@ dashboard "oci_block_storage_block_volume_unattached_report" {
   container {
 
     card {
-      sql = query.oci_block_storage_block_volume_unattached_volumes_count.sql
+      sql   = query.oci_block_storage_block_volume_unattached_volumes_count.sql
       width = 2
     }
   }
@@ -39,7 +39,7 @@ dashboard "oci_block_storage_block_volume_unattached_report" {
         coalesce(c.title, 'root') as "Compartment",
         t.title as "Tenancy",
         v.region as "Region",
-        v.id as "OCID" 
+        v.id as "OCID"
       from
         oci_core_volume as v
         left join oci_core_volume_attachment as a on a.volume_id = v.id

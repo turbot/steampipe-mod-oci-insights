@@ -7,7 +7,6 @@ dashboard "oci_identity_customer_key_age_report" {
 
   container {
 
-    # Analysis
     card {
       sql   = <<-EOQ
         select count(*) as "Customer Keys" from oci_identity_customer_secret_key
@@ -88,7 +87,6 @@ dashboard "oci_identity_customer_key_age_report" {
   }
 
   container {
-
 
     table {
 

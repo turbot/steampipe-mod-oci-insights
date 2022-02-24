@@ -6,131 +6,32 @@ query "oci_ons_notification_topic_count" {
 
 query "oci_ons_notification_topic_unused_count" {
   sql = <<-EOQ
-    select 
+    select
       count(*) as value,
-      'Unused' as label,
+      'No Active Subscription' as label,
       case count(*) when 0 then 'ok' else 'alert' end as type
-    from 
+    from
       oci_ons_notification_topic
     where
       topic_id in (
-    select 
+    select
       topic_id
     from
-      oci_ons_subscription 
+      oci_ons_subscription
     where
-      lifecycle_state <> 'ACTIVE'          
-      )         
+      lifecycle_state <> 'ACTIVE'
+      )
   EOQ
 }
 
-query "oci_ons_notification_topic_by_region" {
-  sql = <<-EOQ
-    select 
-    region as "Region", 
-    count(*) as "Topics" 
-    from 
-      oci_ons_notification_topic 
-    group by 
-      region 
-    order by 
-      region
-  EOQ
-}
-
-query "oci_ons_notification_topic_by_compartment" {
-  sql = <<-EOQ
-    with compartments as ( 
-        select
-          id, title
-        from
-          oci_identity_tenancy
-        union (
-        select 
-          id,title 
-        from 
-          oci_identity_compartment 
-        where 
-          lifecycle_state = 'ACTIVE'
-        )  
-       )
-    select 
-      y.title as "Tenancy",
-      case when y.title = c.title then 'root' else c.title end as "Compartment",
-      count(t.*) as "Topics" 
-    from 
-      oci_ons_notification_topic as t,
-      oci_identity_tenancy as y, 
-      compartments as c 
-    where 
-      c.id = t.compartment_id and t.tenant_id = y.id
-    group by 
-      y.title,
-      c.title
-    order by 
-      y.title,
-      c.title
-  EOQ
-}
-
-query "oci_ons_notification_topic_by_compartment_1"{
-  sql =<<-EOQ
-  with compartments as ( 
-        select
-          id, 
-          title || ':root' as "title"
-        from
-          oci_identity_tenancy
-        union (
-        select 
-          c.id,
-          y.title || ':'  || c.title as "title" 
-        from 
-          oci_identity_compartment c,
-          oci_identity_tenancy as y 
-        where 
-          y.id = c.compartment_id and lifecycle_state = 'ACTIVE'
-        )  
-       )
-    select 
-      c.title,
-      count(t.*) as "Topics" 
-    from 
-      oci_ons_notification_topic as t,
-      oci_identity_tenancy as y, 
-      compartments as c 
-    where 
-      c.id = t.compartment_id and t.tenant_id = y.id
-    group by 
-      c.title
-    order by 
-      c.title
-   EOQ   
-}
-query "oci_ons_notification_topic_by_tenancy" {
-  sql = <<-EOQ
-    select 
-      c.title as "Tenancy",
-      count(t.*) as "Topics" 
-    from 
-      oci_ons_notification_topic as t,
-      oci_identity_tenancy as c 
-    where 
-      c.id = t.tenant_id
-    group by 
-      c.title
-    order by 
-      c.title
-  EOQ
-}
-
+# Assessments
 query "oci_ons_notification_topic_by_lifecycle_state" {
   sql = <<-EOQ
     select
       lifecycle_state,
       count(lifecycle_state)
     from
-      oci_ons_notification_topic     
+      oci_ons_notification_topic
     group by
       lifecycle_state
   EOQ
@@ -139,21 +40,88 @@ query "oci_ons_notification_topic_by_lifecycle_state" {
 query "oci_ons_notification_topic_by_subscription" {
   sql = <<-EOQ
     select
-      name, 
+      name,
       count(name)
-    from 
+    from
       oci_ons_notification_topic
     where
       topic_id in (
-    select 
+    select
       topic_id
     from
-      oci_ons_subscription 
+      oci_ons_subscription
     where
-      lifecycle_state <> 'ACTIVE'          
+      lifecycle_state <> 'ACTIVE'
       )
     group by
-      name           
+      name
+  EOQ
+}
+
+# Analysis
+query "oci_ons_notification_topic_by_tenancy" {
+  sql = <<-EOQ
+    select
+      c.title as "Tenancy",
+      count(t.*) as "Topics"
+    from
+      oci_ons_notification_topic as t,
+      oci_identity_tenancy as c
+    where
+      c.id = t.tenant_id
+    group by
+      c.title
+    order by
+      c.title
+  EOQ
+}
+
+query "oci_ons_notification_topic_by_compartment" {
+  sql = <<-EOQ
+    with compartments as (
+      select
+        id, title
+      from
+        oci_identity_tenancy
+      union (
+      select
+        id,title
+      from
+        oci_identity_compartment
+      where
+        lifecycle_state = 'ACTIVE'
+        )
+      )
+    select
+      b.title as "Tenancy",
+      case when b.title = c.title then 'root' else c.title end as "Compartment",
+      count(a.*) as "Topics"
+    from
+      oci_kms_key as a,
+      oci_identity_tenancy as b,
+      compartments as c
+    where
+      c.id = a.compartment_id and a.tenant_id = b.id
+    group by
+      b.title,
+      c.title
+    order by
+      b.title,
+      c.title
+  EOQ
+}
+
+query "oci_ons_notification_topic_by_region" {
+  sql = <<-EOQ
+    select
+    region as "Region",
+    count(*) as "Topics"
+    from
+      oci_ons_notification_topic
+    group by
+      region
+    order by
+      region
   EOQ
 }
 
@@ -166,7 +134,7 @@ query "oci_ons_notification_topic_by_creation_month" {
         to_char(time_created,
           'YYYY-MM') as creation_month
       from
-        oci_ons_notification_topic    
+        oci_ons_notification_topic
     ),
     months as (
       select
@@ -209,69 +177,62 @@ dashboard "oci_ons_notification_topic_dashboard" {
   container {
 
     card {
-      sql = query.oci_ons_notification_topic_count.sql
+      sql   = query.oci_ons_notification_topic_count.sql
       width = 2
     }
 
     card {
-      sql = query.oci_ons_notification_topic_unused_count.sql
+      sql   = query.oci_ons_notification_topic_unused_count.sql
       width = 2
     }
   }
 
   container {
-      title = "Assessments"
+    title = "Assessments"
 
-      chart {
-        title = "Lifecycle State"
-        sql = query.oci_ons_notification_topic_by_lifecycle_state.sql
-        type  = "donut"
-        width = 3
-      }
-
-      chart {
-        title = "No Active Subscription"
-        sql = query.oci_ons_notification_topic_by_subscription.sql
-        type  = "donut"
-        width = 3
-      }
-
+    chart {
+      title = "Lifecycle State"
+      sql   = query.oci_ons_notification_topic_by_lifecycle_state.sql
+      type  = "donut"
+      width = 3
     }
 
+    chart {
+      title = "No Active Subscription"
+      sql   = query.oci_ons_notification_topic_by_subscription.sql
+      type  = "donut"
+      width = 3
+    }
+
+  }
+
   container {
-      title = "Analysis"  
+    title = "Analysis"
 
     chart {
       title = "Topics by Tenancy"
-      sql = query.oci_ons_notification_topic_by_tenancy.sql
-      type  = "column"
-      width = 3
-    }      
-
-    chart {
-      title = "Topics by Compartment"
-      sql = query.oci_ons_notification_topic_by_compartment.sql
+      sql   = query.oci_ons_notification_topic_by_tenancy.sql
       type  = "column"
       width = 3
     }
 
     chart {
-      title = "Topics by Compartment Other"
-      sql = query.oci_ons_notification_topic_by_compartment_1.sql
+      title = "Topics by Compartment"
+      sql   = query.oci_ons_notification_topic_by_compartment.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Topics by Region"
-      sql = query.oci_ons_notification_topic_by_region.sql
+      sql   = query.oci_ons_notification_topic_by_region.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Topics by Age"
-      sql = query.oci_ons_notification_topic_by_creation_month.sql
+      sql   = query.oci_ons_notification_topic_by_creation_month.sql
       type  = "column"
       width = 3
     }
