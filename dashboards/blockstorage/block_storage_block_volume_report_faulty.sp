@@ -5,7 +5,12 @@ dashboard "oci_block_storage_block_volume_faulty_report" {
   container {
 
     card {
-      sql = query.oci_block_storage_block_volume_faulty_volumes_count.sql
+      sql   = query.oci_block_storage_block_volume_count.sql
+      width = 2
+    }
+    
+    card {
+      sql   = query.oci_block_storage_block_volume_faulty_volumes_count.sql
       width = 2
     }
   }
@@ -20,7 +25,7 @@ dashboard "oci_block_storage_block_volume_faulty_report" {
         coalesce(c.title, 'root') as "Compartment",
         t.title as "Tenancy",
         v.region as "Region",
-        v.id as "OCID" 
+        v.id as "OCID"
       from
         oci_core_volume as v
         left join oci_identity_compartment as c on v.compartment_id = c.id

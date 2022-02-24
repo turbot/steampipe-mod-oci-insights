@@ -1,10 +1,10 @@
 query "oci_mysql_db_system_count" {
   sql = <<-EOQ
-  select 
-    count(*) as "DB Systems" 
-  from 
-    oci_mysql_db_system 
-  where 
+  select
+    count(*) as "DB Systems"
+  from
+    oci_mysql_db_system
+  where
     lifecycle_state <> 'DELETED'
   EOQ
 }
@@ -16,7 +16,7 @@ query "oci_mysql_db_system_storage_total" {
     from
       oci_mysql_db_system
     where
-      lifecycle_state <> 'DELETED'  
+      lifecycle_state <> 'DELETED'
   EOQ
 }
 
@@ -42,6 +42,19 @@ query "oci_mysql_db_system_heat_wave_cluster_attached_count" {
   EOQ
 }
 
+query "oci_mysql_db_system_failed_lifecycle_count" {
+  sql = <<-EOQ
+    select
+      count(*) as value,
+      'Failed' as label,
+      case count(*) when 0 then 'ok' else 'alert' end as type
+    from
+      oci_mysql_db_system
+    where
+      lifecycle_state = 'FAILED'
+  EOQ
+}
+
 query "oci_mysql_db_system_backup_disabled_count" {
   sql = <<-EOQ
    select
@@ -62,118 +75,7 @@ query "oci_mysql_db_system_backup_disabled_count" {
   EOQ
 }
 
-query "oci_mysql_db_system_failed_lifecycle_count" {
-  sql = <<-EOQ
-    select
-      count(*) as value,
-      'Failed' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as type
-    from
-      oci_mysql_db_system
-    where
-      lifecycle_state = 'FAILED'
-  EOQ
-}
-
-query "oci_mysql_db_system_by_region" {
-  sql = <<-EOQ
-    select 
-      region as "Region", 
-      count(*) as "MySQL DB Systems" 
-    from 
-      oci_mysql_db_system
-    where
-      lifecycle_state <> 'DELETED'   
-    group by 
-      region 
-    order by 
-      region
-  EOQ
-}
-
-query "oci_mysql_db_system_storage_by_region" {
-  sql = <<-EOQ
-    select 
-      region as "Region", 
-      sum(data_storage_size_in_gbs) as "GB" 
-    from 
-      oci_mysql_db_system
-    where
-      lifecycle_state <> 'DELETED'   
-    group by 
-      region 
-    order by 
-      region
-  EOQ
-}
-
-query "oci_mysql_db_system_by_compartment" {
-  sql = <<-EOQ
-    select 
-      c.title as "Compartment",
-      count(d.*) as "DB Systems" 
-    from 
-      oci_mysql_db_system as d,
-      oci_identity_compartment as c 
-    where 
-      c.id = d.compartment_id and d.lifecycle_state <> 'DELETED'
-    group by 
-      c.title
-    order by 
-      c.title
-  EOQ
-}
-
-query "oci_mysql_db_system_storage_by_compartment" {
-  sql = <<-EOQ
-    select 
-      c.title as "Compartment",
-      sum(data_storage_size_in_gbs) as "GB" 
-    from 
-      oci_mysql_db_system as d,
-      oci_identity_compartment as c 
-    where 
-      c.id = d.compartment_id and d.lifecycle_state <> 'DELETED'
-    group by 
-      c.title
-    order by 
-      c.title
-  EOQ
-}
-
-query "oci_mysql_db_system_by_tenancy" {
-  sql = <<-EOQ
-    select 
-      t.title as "Tenancy",
-      count(d.*) as "DB Systems" 
-    from 
-      oci_mysql_db_system as d,
-      oci_identity_tenancy as t 
-    where 
-      t.id = d.compartment_id and lifecycle_state <> 'DELETED'
-    group by 
-      t.title
-    order by 
-      t.title
-  EOQ
-}
-
-query "oci_mysql_db_system_storage_by_tenancy" {
-  sql = <<-EOQ
-    select 
-      t.title as "Tenancy",
-      sum(data_storage_size_in_gbs) as "GB" 
-    from 
-      oci_mysql_db_system as d,
-      oci_identity_tenancy as t 
-    where 
-      t.id = d.compartment_id and lifecycle_state <> 'DELETED'
-    group by 
-      t.title
-    order by 
-      t.title
-  EOQ
-}
+# Assessments
 
 query "oci_mysql_db_system_by_lifecycle_state" {
   sql = <<-EOQ
@@ -183,7 +85,7 @@ query "oci_mysql_db_system_by_lifecycle_state" {
     from
       oci_mysql_db_system
     where
-      lifecycle_state <> 'DELETED'     
+      lifecycle_state <> 'DELETED'
     group by
       lifecycle_state
   EOQ
@@ -206,6 +108,76 @@ query "oci_mysql_db_system_with_no_backups" {
   EOQ
 }
 
+# Analysis
+
+query "oci_mysql_db_system_by_tenancy" {
+  sql = <<-EOQ
+    select
+      t.title as "Tenancy",
+      count(d.*) as "DB Systems"
+    from
+      oci_mysql_db_system as d,
+      oci_identity_tenancy as t
+    where
+      t.id = d.tenant_id and lifecycle_state <> 'DELETED'
+    group by
+      t.title
+    order by
+      t.title
+  EOQ
+}
+
+query "oci_mysql_db_system_by_compartment" {
+  sql = <<-EOQ
+    with compartments as (
+      select
+        id, title
+      from
+        oci_identity_tenancy
+      union (
+      select
+        id,title
+      from
+        oci_identity_compartment
+      where
+        lifecycle_state = 'ACTIVE'
+        )
+       )
+    select
+      b.title as "Tenancy",
+      case when b.title = c.title then 'root' else c.title end as "Compartment",
+      count(a.*) as "Db Systems"
+    from
+      oci_mysql_db_system as a,
+      oci_identity_tenancy as b,
+      compartments as c
+    where
+      c.id = a.compartment_id and a.tenant_id = b.id and lifecycle_state <> 'DELETED'
+    group by
+      b.title,
+      c.title
+    order by
+      b.title,
+      c.title
+  EOQ
+}
+
+query "oci_mysql_db_system_by_region" {
+  sql = <<-EOQ
+    select
+      region as "Region",
+      count(*) as "MySQL DB Systems"
+    from
+      oci_mysql_db_system
+    where
+      lifecycle_state <> 'DELETED'
+    group by
+      region
+    order by
+      region
+  EOQ
+}
+
 query "oci_mysql_db_system_by_creation_month" {
   sql = <<-EOQ
     with mysql_dbSystems as (
@@ -217,7 +189,7 @@ query "oci_mysql_db_system_by_creation_month" {
       from
         oci_mysql_db_system
       where
-      lifecycle_state <> 'DELETED'     
+      lifecycle_state <> 'DELETED'
     ),
     months as (
       select
@@ -253,6 +225,74 @@ query "oci_mysql_db_system_by_creation_month" {
   EOQ
 }
 
+query "oci_mysql_db_system_storage_by_tenancy" {
+  sql = <<-EOQ
+    select
+      t.title as "Tenancy",
+      sum(data_storage_size_in_gbs) as "GB"
+    from
+      oci_mysql_db_system as d,
+      oci_identity_tenancy as t
+    where
+      t.id = d.tenant_id and lifecycle_state <> 'DELETED'
+    group by
+      t.title
+    order by
+      t.title
+  EOQ
+}
+
+query "oci_mysql_db_system_storage_by_compartment" {
+  sql = <<-EOQ
+    with compartments as (
+      select
+        id, title
+      from
+        oci_identity_tenancy
+      union (
+      select
+        id,title
+      from
+        oci_identity_compartment
+      where
+        lifecycle_state <> 'DELETED'
+        )
+      )
+    select
+      b.title as "Tenancy",
+      case when b.title = c.title then 'root' else c.title end as "Compartment",
+      sum(a.data_storage_size_in_gbs) as "GB"
+    from
+      oci_mysql_db_system as a,
+      oci_identity_tenancy as b,
+      compartments as c
+    where
+      c.id = a.compartment_id and a.tenant_id = b.id and a.lifecycle_state <> 'DELETED'
+    group by
+      b.title,
+      c.title
+    order by
+      b.title,
+      c.title
+  EOQ
+}
+
+query "oci_mysql_db_system_storage_by_region" {
+  sql = <<-EOQ
+    select
+      region as "Region",
+      sum(data_storage_size_in_gbs) as "GB"
+    from
+      oci_mysql_db_system
+    where
+      lifecycle_state <> 'DELETED'
+    group by
+      region
+    order by
+      region
+  EOQ
+}
+
 query "oci_mysql_db_system_storage_by_creation_month" {
   sql = <<-EOQ
     with mysql_dbSystems as (
@@ -265,7 +305,7 @@ query "oci_mysql_db_system_storage_by_creation_month" {
       from
         oci_mysql_db_system
       where
-      lifecycle_state <> 'DELETED'  
+      lifecycle_state <> 'DELETED'
     ),
     months as (
       select
@@ -371,8 +411,14 @@ dashboard "oci_mysql_db_system_dashboard" {
   title = "OCI MySQL DB System Dashboard"
 
   container {
+
     card {
       sql = query.oci_mysql_db_system_count.sql
+      width = 2
+    }
+
+    card {
+      sql = query.oci_mysql_db_system_storage_total.sql
       width = 2
     }
 
@@ -386,30 +432,27 @@ dashboard "oci_mysql_db_system_dashboard" {
       width = 2
     }
 
-    card {
-      sql = query.oci_mysql_db_system_storage_total.sql
-      width = 2
-    }
 
     card {
       sql = query.oci_mysql_db_system_failed_lifecycle_count.sql
       width = 2
-    } 
+    }
 
     card {
       sql = query.oci_mysql_db_system_backup_disabled_count.sql
       width = 2
-    } 
+    }
   }
-  
+
   container {
       title = "Assessments"
-      
+      width = 6
+
       chart {
         title = "Lifecycle State"
         sql = query.oci_mysql_db_system_by_lifecycle_state.sql
         type  = "donut"
-        width = 3
+        width = 4
 
       }
 
@@ -417,19 +460,19 @@ dashboard "oci_mysql_db_system_dashboard" {
          title = "DB Systems With Backups Disabled"
          sql = query.oci_mysql_db_system_with_no_backups.sql
          type  = "donut"
-         width = 3
+         width = 4
        }
   }
 
   container {
-      title = "Analysis"    
+      title = "Analysis"
 
     chart {
       title = "DB Systems by Tenancy"
       sql = query.oci_mysql_db_system_by_tenancy.sql
       type  = "column"
       width = 3
-    }  
+    }
 
     chart {
       title = "DB Systems by Compartment"
@@ -464,7 +507,7 @@ dashboard "oci_mysql_db_system_dashboard" {
         color = "tan"
       }
     }
-    
+
     chart {
       title = "Storage by Compartment (GB)"
       sql   = query.oci_mysql_db_system_storage_by_compartment.sql
@@ -507,7 +550,7 @@ dashboard "oci_mysql_db_system_dashboard" {
       type  = "line"
       width = 6
     }
-    
+
     chart {
       title = "Average max daily CPU - Last 30 days"
       sql   = query.oci_mysql_db_system_by_cpu_utilization_category.sql

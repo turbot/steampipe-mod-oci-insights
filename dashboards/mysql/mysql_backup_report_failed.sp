@@ -5,6 +5,11 @@ dashboard "oci_mysql_backup_failed_report" {
   container {
 
     card {
+      sql = query.oci_mysql_backup_count.sql
+      width = 2
+    }
+    
+    card {
       sql = query.oci_mysql_backup_failed_lifecycle_count.sql
       width = 2
     }
@@ -20,16 +25,16 @@ dashboard "oci_mysql_backup_failed_report" {
         coalesce(a.title, 'root') as "Compartment",
         t.title as "Tenancy",
         v.region as "Region",
-        v.id as "OCID" 
+        v.id as "OCID"
       from
         oci_mysql_backup as v
         left join oci_identity_compartment as a on v.compartment_id = a.id
         left join oci_identity_tenancy as t on v.tenant_id = t.id
-      where 
+      where
         v.lifecycle_state = 'FAILED'
       order by
         v.time_created,
-        v.title    
+        v.title
     EOQ
   }
 

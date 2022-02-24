@@ -1,61 +1,81 @@
-query "vcn_security_groups_by_compartment" {
-  sql = <<-EOQ
-    select 
-      c.title as "Compartment",
-      count(sg.*) as "Security Groups" 
-    from 
-      oci_core_network_security_group as sg,
-      oci_identity_compartment as c 
-    where 
-      c.id = sg.compartment_id and sg.lifecycle_state <> 'TERMINATED'
-    group by 
-      c.title
-    order by 
-      c.title
-  EOQ
-}
+# Analysis
 
-query "vcn_security_groups_by_tenancy" {
+query "oci_vcn_security_groups_by_tenancy" {
   sql = <<-EOQ
-    select 
+    select
       c.title as "Tenancy",
-      count(sg.*) as "Security Groups" 
-    from 
+      count(sg.*) as "Security Groups"
+    from
       oci_core_network_security_group as sg,
-      oci_identity_tenancy as c 
-    where 
-      c.id = sg.compartment_id and lifecycle_state <> 'TERMINATED'
-    group by 
+      oci_identity_tenancy as c
+    where
+      c.id = sg.tenant_id and lifecycle_state <> 'TERMINATED'
+    group by
       c.title
-    order by 
+    order by
       c.title
   EOQ
 }
 
-query "vcn_security_groups_by_region" {
+query "oci_vcn_security_groups_by_compartment" {
+  sql = <<-EOQ
+    with compartments as (
+      select
+        id, title
+      from
+        oci_identity_tenancy
+      union (
+      select
+        id,title
+      from
+        oci_identity_compartment
+      where
+        lifecycle_state = 'ACTIVE'
+        )
+       )
+    select
+      b.title as "Tenancy",
+      case when b.title = c.title then 'root' else c.title end as "Compartment",
+      count(a.*) as "File Systems"
+    from
+      oci_core_network_security_group as a,
+      oci_identity_tenancy as b,
+      compartments as c
+    where
+      c.id = a.compartment_id and a.tenant_id = b.id and a.lifecycle_state <> 'DELETED'
+    group by
+      b.title,
+      c.title
+    order by
+      b.title,
+      c.title
+  EOQ
+}
+
+query "oci_vcn_security_groups_by_region" {
   sql = <<-EOQ
     select
       region as "Region",
-      count(*) as "Security Groups" 
-    from 
+      count(*) as "Security Groups"
+    from
       oci_core_network_security_group
     where
-      lifecycle_state <> 'TERMINATED'   
-    group by 
-      region 
-    order by 
+      lifecycle_state <> 'TERMINATED'
+    group by
+      region
+    order by
       region
   EOQ
 }
 
-dashboard "vcn_network_security_group_dashboard" {
+dashboard "oci_vcn_network_security_group_dashboard" {
+
   title = "OCI VCN Network Security Group Dashboard"
 
   container {
 
     card {
       width = 2
-
       sql = <<-EOQ
         select count(*) as "Security Groups" from oci_core_network_security_group where lifecycle_state <> 'TERMINATED'
       EOQ
@@ -63,7 +83,6 @@ dashboard "vcn_network_security_group_dashboard" {
 
     card {
       width = 2
-
       sql = <<-EOQ
         with non_compliant_rules as (
         select
@@ -98,7 +117,7 @@ dashboard "vcn_network_security_group_dashboard" {
             left join non_compliant_rules on non_compliant_rules.id = nsg.id
             left join oci_identity_compartment c on c.id = nsg.compartment_id
           where
-            nsg.lifecycle_state <> 'TERMINATED'  
+            nsg.lifecycle_state <> 'TERMINATED'
         )
         select
           count(*) as value,
@@ -112,7 +131,6 @@ dashboard "vcn_network_security_group_dashboard" {
 
     card {
       width = 2
-
       sql = <<-EOQ
         with non_compliant_rules as (
           select
@@ -147,7 +165,7 @@ dashboard "vcn_network_security_group_dashboard" {
             left join non_compliant_rules on non_compliant_rules.id = nsg.id
             left join oci_identity_compartment c on c.id = nsg.compartment_id
           where
-            nsg.lifecycle_state <> 'TERMINATED'  
+            nsg.lifecycle_state <> 'TERMINATED'
         )
         select
           count(*) as value,
@@ -163,8 +181,8 @@ dashboard "vcn_network_security_group_dashboard" {
   }
 
   container {
-
     title = "Assessments"
+    width = 6
 
     chart {
       title = "Ingress SSH Status"
@@ -189,7 +207,7 @@ dashboard "vcn_network_security_group_dashboard" {
                 and (r -> 'tcpOptions' -> 'destinationPortRange' ->> 'max')::integer >= 22
               )
             )
-          and lifecycle_state <> 'TERMINATED'  
+          and lifecycle_state <> 'TERMINATED'
           group by id
         ),
         sg_list as (
@@ -256,7 +274,7 @@ dashboard "vcn_network_security_group_dashboard" {
             left join non_compliant_rules on non_compliant_rules.id = nsg.id
             left join oci_identity_compartment c on c.id = nsg.compartment_id
           where
-            nsg.lifecycle_state <> 'TERMINATED'  
+            nsg.lifecycle_state <> 'TERMINATED'
         )
         select
           case
@@ -270,35 +288,34 @@ dashboard "vcn_network_security_group_dashboard" {
       EOQ
     }
   }
- 
- container {
 
-    title = "Analysis"  
+  container {
+    title = "Analysis"
 
     chart {
       title = "Network Security Groups by Tenancy"
-      sql = query.vcn_security_groups_by_tenancy.sql
+      sql   = query.oci_vcn_security_groups_by_tenancy.sql
       type  = "column"
       width = 3
-    }    
+    }
 
     chart {
       title = "Network Security Groups by Compartment"
-      sql = query.vcn_security_groups_by_compartment.sql
+      sql   = query.oci_vcn_security_groups_by_compartment.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Network Security Groups by Region"
-      sql = query.vcn_security_groups_by_region.sql
+      sql   = query.oci_vcn_security_groups_by_region.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Network Security Groups by VCN"
-      sql = <<-EOQ
+      sql   = <<-EOQ
         select
           v.display_name as "VCN",
           count(*) as "security_groups"
@@ -306,7 +323,7 @@ dashboard "vcn_network_security_group_dashboard" {
           oci_core_network_security_group sg
           left join oci_core_vcn v on sg.vcn_id = v.id
         where
-          sg.lifecycle_state <> 'TERMINATED'  
+          sg.lifecycle_state <> 'TERMINATED'
         group by v.display_name
         order by v.display_name;
       EOQ

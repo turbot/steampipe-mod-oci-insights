@@ -5,7 +5,6 @@ dashboard "oci_ons_notification_topic_age_report" {
 
   container {
 
-    # Analysis
     card {
       sql   = query.oci_ons_notification_topic_count.sql
       width = 2
@@ -97,7 +96,7 @@ dashboard "oci_ons_notification_topic_age_report" {
           coalesce(c.title, 'root') as "Compartment",
           t.title as "Tenancy",
           v.region as "Region",
-          v.topic_id as "OCID" 
+          v.topic_id as "OCID"
         from
           oci_ons_notification_topic as v
           left join oci_identity_compartment as c on v.compartment_id = c.id

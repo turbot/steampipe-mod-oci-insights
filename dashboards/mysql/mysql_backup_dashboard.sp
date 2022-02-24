@@ -1,14 +1,13 @@
 query "oci_mysql_backup_count" {
   sql = <<-EOQ
-  select 
-    count(*) as "Total Backups" 
-  from 
-    oci_mysql_backup 
-  where 
+  select
+    count(*) as "Total Backups"
+  from
+    oci_mysql_backup
+  where
     lifecycle_state <> 'DELETED'
   EOQ
 }
-
 
 query "oci_mysql_automatic_backup_count" {
   sql = <<-EOQ
@@ -24,7 +23,7 @@ query "oci_mysql_automatic_backup_count" {
 query "oci_mysql_backup_storage_total" {
   sql = <<-EOQ
     select
-      sum(backup_size_in_gbs) as "Total Storage in GBs"
+      sum(backup_size_in_gbs) as "Total Storage (GB)"
     from
       oci_mysql_backup
     where
@@ -56,6 +55,76 @@ query "oci_mysql_backup_failed_lifecycle_count" {
   EOQ
 }
 
+# Assessments
+
+query "oci_mysql_backup_by_lifecycle_state" {
+  sql = <<-EOQ
+    select
+      lifecycle_state,
+      count(lifecycle_state)
+    from
+      oci_mysql_backup
+    where
+      lifecycle_state <> 'DELETED'
+    group by
+      lifecycle_state
+  EOQ
+}
+
+# Analysis
+
+query "oci_mysql_backup_by_tenancy" {
+  sql = <<-EOQ
+    select
+      c.title as "Tenancy",
+      count(b.*) as "MySQL Backups"
+    from
+      oci_mysql_backup as b,
+      oci_identity_tenancy as c
+    where
+      c.id = b.tenant_id and lifecycle_state <> 'DELETED'
+    group by
+      c.title
+    order by
+      c.title
+  EOQ
+}
+
+query "oci_mysql_backup_by_compartment" {
+  sql = <<-EOQ
+    with compartments as (
+      select
+        id, title
+      from
+        oci_identity_tenancy
+      union (
+      select
+        id,title
+      from
+        oci_identity_compartment
+      where
+        lifecycle_state = 'ACTIVE'
+        )
+       )
+    select
+      b.title as "Tenancy",
+      case when b.title = c.title then 'root' else c.title end as "Compartment",
+      count(a.*) as "MySQL Backups"
+    from
+      oci_mysql_backup as a,
+      oci_identity_tenancy as b,
+      compartments as c
+    where
+      c.id = a.compartment_id and a.tenant_id = b.id and lifecycle_state <> 'DELETED'
+    group by
+      b.title,
+      c.title
+    order by
+      b.title,
+      c.title
+  EOQ
+}
+
 query "oci_mysql_backup_by_region" {
   sql = <<-EOQ
     select
@@ -69,168 +138,6 @@ query "oci_mysql_backup_by_region" {
       region
     order by
       region
-  EOQ
-}
-
-query "oci_mysql_backup_storage_by_region" {
-  sql = <<-EOQ
-    select
-      region as "Region",
-      sum(backup_size_in_gbs) as "GB"
-    from
-      oci_mysql_backup
-    where
-      lifecycle_state <> 'DELETED'
-    group by
-      region
-    order by
-      region  
-  EOQ
-}
-
-query "oci_mysql_backup_by_creation_type" {
-  sql = <<-EOQ
-    select
-      creation_type as "Creation Type",
-      count(*) as "MySQL Backups"
-    from
-      oci_mysql_backup
-    where
-      lifecycle_state <> 'DELETED'
-    group by
-      creation_type
-    order by
-      creation_type
-  EOQ
-}
-
-query "oci_mysql_backup_storage_by_creation_type" {
-  sql = <<-EOQ
-    select
-      creation_type as "Creation Type",
-      sum(backup_size_in_gbs) as "GB"
-    from
-      oci_mysql_backup
-    where
-      lifecycle_state <> 'DELETED'
-    group by
-      creation_type
-    order by
-      creation_type  
-  EOQ
-}
-
-query "oci_mysql_backup_by_backup_type" {
-  sql = <<-EOQ
-    select
-      backup_type as "Backup Type",
-      count(*) as "MySQL Backups"
-    from
-      oci_mysql_backup
-    where
-      lifecycle_state <> 'DELETED'
-    group by
-      backup_type
-    order by
-      backup_type
-  EOQ
-}
-
-query "oci_mysql_backup_storage_by_backup_type" {
-  sql = <<-EOQ
-    select
-      backup_type as "Backup Type",
-      sum(backup_size_in_gbs) as "GB"
-    from
-      oci_mysql_backup
-    where
-      lifecycle_state <> 'DELETED'
-    group by
-      backup_type
-    order by
-      backup_type  
-  EOQ
-}
-
-query "oci_mysql_backup_by_compartment" {
-  sql = <<-EOQ
-    select
-      c.title as "Compartment",
-      count(b.*) as "MySQL Backups"
-    from
-      oci_mysql_backup as b,
-      oci_identity_compartment as c
-    where
-      c.id = b.compartment_id and b.lifecycle_state <> 'DELETED'
-    group by
-      c.title
-    order by
-      c.title
-  EOQ
-}
-
-query "oci_mysql_backup_by_tenancy" {
-  sql = <<-EOQ
-    select
-      c.title as "Tenancy",
-      count(b.*) as "MySQL Backups"
-    from
-      oci_mysql_backup as b,
-      oci_identity_tenancy as c
-    where
-      c.id = b.compartment_id and lifecycle_state <> 'DELETED'
-    group by
-      c.title
-    order by
-      c.title
-  EOQ
-}
-
-query "oci_mysql_backup_storage_by_compartment" {
-  sql = <<-EOQ
-    select
-      c.title as "Compartment",
-      sum(backup_size_in_gbs) as "GB"
-    from
-      oci_mysql_backup as b,
-      oci_identity_compartment as c
-    where
-      c.id = b.compartment_id and b.lifecycle_state <> 'DELETED'
-    group by
-      c.title
-    order by
-      c.title 
-  EOQ
-}
-
-query "oci_mysql_backup_storage_by_tenancy" {
-  sql = <<-EOQ
-    select
-      c.title as "Tenancy",
-      sum(backup_size_in_gbs) as "GB"
-    from
-      oci_mysql_backup as b,
-      oci_identity_tenancy as c
-    where
-      c.id = b.compartment_id and lifecycle_state <> 'DELETED'
-    group by
-      c.title
-    order by
-      c.title 
-  EOQ
-}
-
-query "oci_mysql_backup_by_lifecycle_state" {
-  sql = <<-EOQ
-    select
-      lifecycle_state,
-      count(lifecycle_state)
-    from
-      oci_mysql_backup
-    where
-      lifecycle_state <> 'DELETED'
-    group by
-      lifecycle_state
   EOQ
 }
 
@@ -281,94 +188,167 @@ query "oci_mysql_backup_by_creation_month" {
   EOQ
 }
 
+# Analysis Storage
+
+query "oci_mysql_backup_storage_by_tenancy" {
+  sql = <<-EOQ
+    select
+      c.title as "Tenancy",
+      sum(backup_size_in_gbs) as "GB"
+    from
+      oci_mysql_backup as b,
+      oci_identity_tenancy as c
+    where
+      c.id = b.tenant_id and lifecycle_state <> 'DELETED'
+    group by
+      c.title
+    order by
+      c.title
+  EOQ
+}
+
+query "oci_mysql_backup_storage_by_compartment" {
+  sql = <<-EOQ
+    with compartments as (
+      select
+        id, title
+      from
+        oci_identity_tenancy
+      union (
+      select
+        id,title
+      from
+        oci_identity_compartment
+      where
+        lifecycle_state <> 'DELETED'
+        )
+      )
+    select
+      b.title as "Tenancy",
+      case when b.title = c.title then 'root' else c.title end as "Compartment",
+      sum(a.backup_size_in_gbs) as "GB"
+    from
+      oci_mysql_backup as a,
+      oci_identity_tenancy as b,
+      compartments as c
+    where
+      c.id = a.compartment_id and a.tenant_id = b.id and a.lifecycle_state <> 'DELETED'
+    group by
+      b.title,
+      c.title
+    order by
+      b.title,
+      c.title
+
+  EOQ
+}
+
+query "oci_mysql_backup_storage_by_region" {
+  sql = <<-EOQ
+    select
+      region as "Region",
+      sum(backup_size_in_gbs) as "GB"
+    from
+      oci_mysql_backup
+    where
+      lifecycle_state <> 'DELETED'
+    group by
+      region
+    order by
+      region
+  EOQ
+}
+
+
 dashboard "oci_mysql_backup_dashboard" {
 
   title = "OCI MySQL Backup Dashboard"
 
   container {
+
     card {
-      sql = query.oci_mysql_backup_count.sql
+      sql   = query.oci_mysql_backup_count.sql
       width = 2
     }
 
     card {
-      sql = query.oci_mysql_automatic_backup_count.sql
+      sql   = query.oci_mysql_backup_storage_total.sql
       width = 2
     }
 
     card {
-      sql = query.oci_mysql_backup_storage_total.sql
+      sql   = query.oci_mysql_automatic_backup_count.sql
       width = 2
     }
 
     card {
-      sql = query.oci_mysql_full_backup_count.sql
+      sql   = query.oci_mysql_full_backup_count.sql
       width = 2
-    } 
+    }
 
     card {
-      sql = query.oci_mysql_backup_failed_lifecycle_count.sql
+      sql   = query.oci_mysql_backup_failed_lifecycle_count.sql
       width = 2
     }
   }
 
   container {
-      title = "Assessments"
-      width = 3
+    title = "Assessments"
+    width = 3
 
-      chart {
-        title = "Lifecycle State"
-        sql = query.oci_mysql_backup_by_lifecycle_state.sql
-        type  = "donut"
-      }
+    chart {
+      title = "Lifecycle State"
+      sql   = query.oci_mysql_backup_by_lifecycle_state.sql
+      type  = "donut"
     }
+  }
 
   container {
-      title = "Analysis"
-    
+    title = "Analysis"
+
     chart {
       title = "Backups by Tenancy"
-      sql = query.oci_mysql_backup_by_tenancy.sql
+      sql   = query.oci_mysql_backup_by_tenancy.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Backups by Compartment"
-      sql = query.oci_mysql_backup_by_compartment.sql
+      sql   = query.oci_mysql_backup_by_compartment.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Backups by Region"
-      sql = query.oci_mysql_backup_by_region.sql
-      type  = "column"
-      width = 3
-    }
-    
-    chart {
-      title = "Backups by Age"
-      sql = query.oci_mysql_backup_by_creation_month.sql
-      type  = "column"
-      width = 3
-    }
-    
-    chart {
-      title = "Backups by Creation Type"
-      sql = query.oci_mysql_backup_by_creation_type.sql
+      sql   = query.oci_mysql_backup_by_region.sql
       type  = "column"
       width = 3
     }
 
     chart {
-      title = "Backups by Backup Type"
-      sql = query.oci_mysql_backup_by_backup_type.sql
+      title = "Backups by Age"
+      sql   = query.oci_mysql_backup_by_creation_month.sql
       type  = "column"
       width = 3
     }
+
   }
+
   container {
+
+    chart {
+      title = "Storage by Tenancy (GB)"
+      sql   = query.oci_mysql_backup_storage_by_tenancy.sql
+      type  = "column"
+      width = 3
+
+      series "GB" {
+        color = "tan"
+      }
+    }
+
     chart {
       title = "Storage by Compartment (GB)"
       sql   = query.oci_mysql_backup_storage_by_compartment.sql
@@ -379,7 +359,7 @@ dashboard "oci_mysql_backup_dashboard" {
         color = "tan"
       }
     }
-  
+
     chart {
       title = "Storage by Region (GB)"
       sql   = query.oci_mysql_backup_storage_by_region.sql
@@ -391,26 +371,6 @@ dashboard "oci_mysql_backup_dashboard" {
       }
     }
 
-    chart {
-      title = "Storage by Creation Type (GB)"
-      sql   = query.oci_mysql_backup_storage_by_creation_type.sql
-      type  = "column"
-      width = 3
+  }
 
-      series "GB" {
-        color = "tan"
-      }
-    }
-
-    chart {
-      title = "Storage by Backup Type (GB)"
-      sql   = query.oci_mysql_backup_storage_by_backup_type.sql
-      type  = "column"
-      width = 3
-
-      series "GB" {
-        color = "tan"
-      }
-    }
-}
 }

@@ -7,11 +7,11 @@ query "oci_block_storage_block_volume_count" {
 query "oci_block_storage_block_volume_storage_total" {
   sql = <<-EOQ
     select
-      sum(size_in_gbs) as "Total Storage in GBs"
+      sum(size_in_gbs) as "Total Storage (GB)"
     from
       oci_core_volume
     where
-      lifecycle_state <> 'TERMINATED'  
+      lifecycle_state <> 'TERMINATED'
   EOQ
 }
 
@@ -19,9 +19,9 @@ query "oci_block_storage_block_volume_default_encrypted_volumes_count" {
   sql = <<-EOQ
     select
       count(*) as "OCI Managed Encryption"
-    from 
-      oci_core_volume 
-    where 
+    from
+      oci_core_volume
+    where
       kms_key_id is null and lifecycle_state <> 'TERMINATED'
   EOQ
 }
@@ -32,9 +32,9 @@ query "oci_block_storage_block_volume_faulty_volumes_count" {
       count(*) as value,
       'Faulty' as label,
       case count(*) when 0 then 'ok' else 'alert' end as type
-    from 
+    from
       oci_core_volume
-    where 
+    where
       lifecycle_state = 'FAULTY'
   EOQ
 }
@@ -43,133 +43,23 @@ query "oci_block_storage_block_volume_with_no_backups_count" {
   sql = <<-EOQ
     select
       count(v.*) as value,
-      'Volume With No Backups' as label,
+      'Without Backups' as label,
       case count(v.*) when 0 then 'ok' else 'alert' end as type
     from
       oci_core_volume as v
     left join oci_core_volume_backup as b on v.id = b.volume_id
-    where 
+    where
       v.lifecycle_state <> 'TERMINATED'
     group by
       v.compartment_id,
       v.region,
-      v.id  
+      v.id
     having
       count(b.id) = 0
   EOQ
 }
 
-query "oci_block_storage_block_volume_by_compartment" {
-  sql = <<-EOQ
-    select 
-      c.title as "Compartment",
-      count(v.*) as "Block volumes" 
-    from 
-      oci_core_volume as v,
-      oci_identity_compartment as c 
-    where 
-      c.id = v.compartment_id and v.lifecycle_state <> 'TERMINATED'
-    group by 
-      c.title
-    order by 
-      c.title
-  EOQ
-}
-
-query "oci_block_storage_block_volume_by_tenancy" {
-  sql = <<-EOQ
-    select 
-      c.title as "Tenancy",
-      count(v.*) as "Block volumes" 
-    from 
-      oci_core_volume as v,
-      oci_identity_tenancy as c 
-    where 
-      c.id = v.compartment_id and v.lifecycle_state <> 'TERMINATED'
-    group by 
-      c.title
-    order by 
-      c.title
-  EOQ
-}
-
-query "oci_block_storage_block_volume_storage_by_compartment" {
-  sql = <<-EOQ
-   select 
-      c.title as "Compartment",
-      sum(v.size_in_gbs) as "GB" 
-    from 
-      oci_core_volume as v,
-      oci_identity_compartment as c 
-    where 
-      c.id = v.compartment_id and v.lifecycle_state <> 'TERMINATED'
-    group by 
-      c.title
-    order by 
-      c.title
-  EOQ
-}
-
-query "oci_block_storage_block_volume_storage_by_tenancy" {
-  sql = <<-EOQ
-   select 
-      c.title as "Tenancy",
-      sum(v.size_in_gbs) as "GB" 
-    from 
-      oci_core_volume as v,
-      oci_identity_tenancy as c 
-    where 
-      c.id = v.compartment_id and v.lifecycle_state <> 'TERMINATED'
-    group by 
-      c.title
-    order by 
-      c.title
-  EOQ
-}
-
-query "oci_block_storage_block_volume_by_region" {
-  sql = <<-EOQ
-    select
-      region as "Region",
-      count(*) as "Volumes"
-    from
-      oci_core_volume
-    where
-      lifecycle_state <> 'TERMINATED'  
-    group by
-      region
-  EOQ
-}
-
-query "oci_block_storage_block_volume_storage_by_region" {
-  sql = <<-EOQ
-    select
-      region as "Region",
-      sum(size_in_gbs) as "GB"
-    from
-      oci_core_volume
-    where
-      lifecycle_state <> 'TERMINATED'    
-    group by
-      region
-  EOQ
-}
-
-
-query "oci_block_storage_block_volume_by_lifecycle_state" {
-  sql = <<-EOQ
-    select
-      lifecycle_state,
-      count(lifecycle_state)
-    from
-      oci_core_volume
-    where
-      lifecycle_state <> 'TERMINATED'    
-    group by
-      lifecycle_state
-  EOQ
-}
-
+# Assessments
 
 query "oci_block_storage_block_volume_by_encryption_status" {
   sql = <<-EOQ
@@ -179,9 +69,9 @@ query "oci_block_storage_block_volume_by_encryption_status" {
     from (
       select
         id,
-        case 
-         when kms_key_id is null then 'OCI Managed' 
-         else 'Customer Managed' 
+        case
+         when kms_key_id is null then 'OCI Managed'
+         else 'Customer Managed'
          end as encryption_status
       from
         oci_core_volume
@@ -194,24 +84,102 @@ query "oci_block_storage_block_volume_by_encryption_status" {
   EOQ
 }
 
+query "oci_block_storage_block_volume_by_lifecycle_state" {
+  sql = <<-EOQ
+    select
+      lifecycle_state,
+      count(lifecycle_state)
+    from
+      oci_core_volume
+    where
+      lifecycle_state <> 'TERMINATED'
+    group by
+      lifecycle_state
+  EOQ
+}
 
 query "oci_block_storage_block_volume_with_no_backups" {
   sql = <<-EOQ
     select
-      v.id as "OCID",
-      v.compartment_id "Compartment Id",
-      v.region as "Region"
+      v.display_name,
+      count(v.display_name)
     from
       oci_core_volume as v
     left join oci_core_volume_backup as b on v.id = b.volume_id
-    where 
+    where
       v.lifecycle_state <> 'TERMINATED'
     group by
-      v.compartment_id,
-      v.region,
-      v.id  
+      v.display_name
     having
       count(b.id) = 0
+  EOQ
+}
+
+# Analysis
+
+query "oci_block_storage_block_volume_by_tenancy" {
+  sql = <<-EOQ
+    select
+      t.name as "Tenancy",
+      count(a.id)::numeric as "Block volumes"
+    from
+      oci_core_volume as a,
+      oci_identity_tenancy as t
+    where
+      t.id = a.tenant_id and a.lifecycle_state <> 'TERMINATED'
+    group by
+      t.name
+    order by
+      t.name
+  EOQ
+}
+
+query "oci_block_storage_block_volume_by_compartment" {
+  sql = <<-EOQ
+    with compartments as (
+      select
+        id, title
+      from
+        oci_identity_tenancy
+      union (
+      select
+        id,title
+      from
+        oci_identity_compartment
+      where
+        lifecycle_state = 'ACTIVE'
+        )
+      )
+    select
+      b.title as "Tenancy",
+      case when b.title = c.title then 'root' else c.title end as "Compartment",
+      count(a.*) as "Volumes"
+    from
+      oci_core_volume as a,
+      oci_identity_tenancy as b,
+      compartments as c
+    where
+      c.id = a.compartment_id and a.tenant_id = b.id and a.lifecycle_state <> 'TERMINATED'
+    group by
+      b.title,
+      c.title
+    order by
+      b.title,
+      c.title
+  EOQ
+}
+
+query "oci_block_storage_block_volume_by_region" {
+  sql = <<-EOQ
+    select
+      region as "Region",
+      count(*) as "Block Volumes"
+    from
+      oci_core_volume
+    where
+      lifecycle_state <> 'TERMINATED'
+    group by
+      region
   EOQ
 }
 
@@ -226,7 +194,7 @@ query "oci_block_storage_block_volume_by_creation_month" {
       from
         oci_core_volume
       where
-       lifecycle_state <> 'TERMINATED'   
+       lifecycle_state <> 'TERMINATED'
     ),
     months as (
       select
@@ -262,6 +230,74 @@ query "oci_block_storage_block_volume_by_creation_month" {
   EOQ
 }
 
+# Analysis by Storage Size
+
+query "oci_block_storage_block_volume_storage_by_tenancy" {
+  sql = <<-EOQ
+   select
+      c.title as "Tenancy",
+      sum(v.size_in_gbs) as "GB"
+    from
+      oci_core_volume as v,
+      oci_identity_tenancy as c
+    where
+      c.id = v.tenant_id and v.lifecycle_state <> 'TERMINATED'
+    group by
+      c.title
+    order by
+      c.title
+  EOQ
+}
+
+query "oci_block_storage_block_volume_storage_by_compartment" {
+  sql = <<-EOQ
+    with compartments as (
+      select
+        id, title
+      from
+        oci_identity_tenancy
+      union (
+      select
+        id,title
+      from
+        oci_identity_compartment
+      where
+        lifecycle_state = 'ACTIVE'
+        )
+      )
+    select
+      b.title as "Tenancy",
+      case when b.title = c.title then 'root' else c.title end as "Compartment",
+      sum(a.size_in_gbs) as "GB"
+    from
+      oci_core_volume as a,
+      oci_identity_tenancy as b,
+      compartments as c
+    where
+      c.id = a.compartment_id and a.tenant_id = b.id and a.lifecycle_state <> 'TERMINATED'
+    group by
+      b.title,
+      c.title
+    order by
+      b.title,
+      c.title
+  EOQ
+}
+
+query "oci_block_storage_block_volume_storage_by_region" {
+  sql = <<-EOQ
+    select
+      region as "Region",
+      sum(size_in_gbs) as "GB"
+    from
+      oci_core_volume
+    where
+      lifecycle_state <> 'TERMINATED'
+    group by
+      region
+  EOQ
+}
+
 query "oci_block_storage_block_volume_storage_by_creation_month" {
   sql = <<-EOQ
     with volumes as (
@@ -274,7 +310,7 @@ query "oci_block_storage_block_volume_storage_by_creation_month" {
       from
         oci_core_volume
       where
-      lifecycle_state <> 'TERMINATED'  
+      lifecycle_state <> 'TERMINATED'
     ),
     months as (
       select
@@ -315,96 +351,98 @@ dashboard "oci_block_storage_block_volume_dashboard" {
   title = "OCI Block Storage Block Volume Dashboard"
 
   container {
-    ## Analysis ...
 
     card {
-      sql = query.oci_block_storage_block_volume_count.sql
+      sql   = query.oci_block_storage_block_volume_count.sql
       width = 2
     }
 
     card {
-      sql = query.oci_block_storage_block_volume_storage_total.sql
+      sql   = query.oci_block_storage_block_volume_storage_total.sql
       width = 2
     }
 
     card {
-      sql = query.oci_block_storage_block_volume_default_encrypted_volumes_count.sql
+      sql   = query.oci_block_storage_block_volume_default_encrypted_volumes_count.sql
       width = 2
     }
 
     card {
-      sql = query.oci_block_storage_block_volume_faulty_volumes_count.sql
+      sql   = query.oci_block_storage_block_volume_faulty_volumes_count.sql
       width = 2
     }
 
     card {
-      sql = query.oci_block_storage_block_volume_with_no_backups_count.sql
+      sql   = query.oci_block_storage_block_volume_with_no_backups_count.sql
       width = 2
     }
-    
+
   }
 
   container {
     title = "Assessments"
+    width = 6
 
     chart {
       title = "Encryption Status"
-      sql = query.oci_block_storage_block_volume_by_encryption_status.sql
+      sql   = query.oci_block_storage_block_volume_by_encryption_status.sql
       type  = "donut"
       width = 3
     }
 
     chart {
       title = "Lifecycle State"
-      sql = query.oci_block_storage_block_volume_by_lifecycle_state.sql
+      sql   = query.oci_block_storage_block_volume_by_lifecycle_state.sql
       type  = "donut"
       width = 3
 
     }
 
-    table {
-      title = "No Backups"
-      sql = query.oci_block_storage_block_volume_with_no_backups.sql
+    chart {
+      title = "Without Backups"
+      sql   = query.oci_block_storage_block_volume_with_no_backups.sql
+      type  = "donut"
       width = 3
     }
-    }
-  
+  }
+
   container {
-      title = "Analysis" 
+    title = "Analysis"
 
     chart {
       title = "Block Volumes by Tenancy"
-      sql = query.oci_block_storage_block_volume_by_tenancy.sql
+      sql   = query.oci_block_storage_block_volume_by_tenancy.sql
       type  = "column"
       width = 3
-    }       
+    }
 
     chart {
       title = "Block Volumes by Compartment"
-      sql = query.oci_block_storage_block_volume_by_compartment.sql
+      sql   = query.oci_block_storage_block_volume_by_compartment.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Block Volumes by Region"
-      sql = query.oci_block_storage_block_volume_by_region.sql
+      sql   = query.oci_block_storage_block_volume_by_region.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Block Volume by Age"
-      sql = query.oci_block_storage_block_volume_by_creation_month.sql
+      sql   = query.oci_block_storage_block_volume_by_creation_month.sql
       type  = "column"
       width = 3
     }
   }
 
   container {
+
     chart {
       title = "Storage by Tenancy (GB)"
-      sql = query.oci_block_storage_block_volume_storage_by_tenancy.sql
+      sql   = query.oci_block_storage_block_volume_storage_by_tenancy.sql
       type  = "column"
       width = 3
 
@@ -415,7 +453,7 @@ dashboard "oci_block_storage_block_volume_dashboard" {
 
     chart {
       title = "Storage by Compartment (GB)"
-      sql = query.oci_block_storage_block_volume_storage_by_compartment.sql
+      sql   = query.oci_block_storage_block_volume_storage_by_compartment.sql
       type  = "column"
       width = 3
 
@@ -426,7 +464,7 @@ dashboard "oci_block_storage_block_volume_dashboard" {
 
     chart {
       title = "Storage by Region (GB)"
-      sql = query.oci_block_storage_block_volume_storage_by_region.sql
+      sql   = query.oci_block_storage_block_volume_storage_by_region.sql
       type  = "column"
       width = 3
 
@@ -437,7 +475,7 @@ dashboard "oci_block_storage_block_volume_dashboard" {
 
     chart {
       title = "Storage by Age (GB)"
-      sql = query.oci_block_storage_block_volume_storage_by_creation_month.sql
+      sql   = query.oci_block_storage_block_volume_storage_by_creation_month.sql
       type  = "column"
       width = 3
 
@@ -448,5 +486,3 @@ dashboard "oci_block_storage_block_volume_dashboard" {
   }
 
 }
-
-      

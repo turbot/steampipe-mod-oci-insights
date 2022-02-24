@@ -5,7 +5,12 @@ dashboard "oci_ons_subscription_unused_report" {
   container {
 
     card {
-      sql = query.oci_ons_subscription_unused_count.sql
+      sql   = query.oci_ons_subscription_count.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_ons_subscription_unused_count.sql
       width = 2
     }
   }
@@ -19,7 +24,7 @@ dashboard "oci_ons_subscription_unused_report" {
         v.lifecycle_state as "Lifecycle State",
         coalesce(c.title, 'root') as "Compartment",
         t.title as "Tenancy",
-        v.region as "Region" 
+        v.region as "Region"
       from
         oci_ons_subscription as v
         left join oci_identity_compartment as c on v.compartment_id = c.id

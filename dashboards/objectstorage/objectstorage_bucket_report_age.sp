@@ -5,7 +5,6 @@ dashboard "oci_objectstorage_bucket_age_report" {
 
   container {
 
-    # Analysis
     card {
       sql   = query.oci_objectstorage_bucket_count.sql
       width = 2
