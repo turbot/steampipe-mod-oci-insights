@@ -1,6 +1,6 @@
 query "oci_database_autonomous_database_count" {
   sql = <<-EOQ
-    select count(*) as "Autonomous DBs" from oci_database_autonomous_database where lifecycle_state <> 'TERMINATED'
+    select count(*) as "Autonomous DBs" from oci_database_autonomous_database where lifecycle_state <> 'TERMINATED';
   EOQ
 }
 
@@ -9,7 +9,7 @@ query "oci_database_autonomous_db_total_cores" {
     select
       sum(cpu_core_count)  as "Total OCPUs"
     from
-      oci_database_autonomous_database
+      oci_database_autonomous_database;
   EOQ
 }
 
@@ -18,7 +18,7 @@ query "oci_database_autonomous_db_total_size" {
     select
       sum(data_storage_size_in_gbs)  as "Total Size (GB)"
     from
-      oci_database_autonomous_database
+      oci_database_autonomous_database;
   EOQ
 }
 
@@ -31,13 +31,13 @@ query "oci_database_autonomous_database_need_attention_count" {
     from
       oci_database_autonomous_database
     where
-      lifecycle_state = 'AVAILABLE_NEEDS_ATTENTION'
+      lifecycle_state = 'AVAILABLE_NEEDS_ATTENTION';
   EOQ
 }
 
 query "oci_database_autonomous_db_with_data_guard" {
   sql = <<-EOQ
-    select count(*) as "Data Guard Enabled" from oci_database_autonomous_database where is_data_guard_enabled
+    select count(*) as "Data Guard Enabled" from oci_database_autonomous_database where is_data_guard_enabled;
   EOQ
 }
 
@@ -48,7 +48,7 @@ query "oci_database_autonomous_db_autoscaling_count" {
       from
         oci_database_autonomous_database
       where
-        is_auto_scaling_enabled
+        is_auto_scaling_enabled;
   EOQ
 }
 
@@ -61,7 +61,7 @@ query "oci_database_autonomous_db_by_state" {
     from
       oci_database_autonomous_database
     group by
-      lifecycle_state
+      lifecycle_state;
   EOQ
 }
 
@@ -72,7 +72,7 @@ query "oci_database_autonomous_db_by_workload_type" {
       count(*) as "databases"
     from
       oci_database_autonomous_database
-      group by db_workload order by db_workload
+      group by db_workload order by db_workload;
   EOQ
 }
 
@@ -83,7 +83,7 @@ query "oci_database_autonomous_db_by_license_model" {
       count(*) as "databases"
     from
       oci_database_autonomous_database
-      group by db_workload order by db_workload
+      group by db_workload order by db_workload;
   EOQ
 }
 
@@ -130,7 +130,7 @@ query "oci_database_autonomous_db_by_operations_insights_status" {
     group by
       insight_status
     order by
-      insight_status desc
+      insight_status desc;
   EOQ
 }
 
@@ -153,7 +153,7 @@ query "oci_database_autonomous_db_by_permission_level" {
     group by
       permission_status
     order by
-      permission_status desc
+      permission_status desc;
   EOQ
 }
 
@@ -171,7 +171,7 @@ query "oci_database_autonomous_db_by_tenancy" {
     group by
       t.name
     order by
-      t.name
+      t.name;
   EOQ
 }
 
@@ -206,7 +206,7 @@ query "oci_database_autonomous_db_by_compartment" {
       c.title
     order by
       b.title,
-      c.title
+      c.title;
   EOQ
 }
 
@@ -218,7 +218,7 @@ query "oci_database_autonomous_db_by_region" {
     from
       oci_database_autonomous_database as db
     group by
-      region
+      region;
   EOQ
 }
 
@@ -409,18 +409,19 @@ dashboard "oci_database_autonomous_db_summary" {
     }
 
     chart {
+      title = "Autonomous Databases by Age"
+      sql   = query.oci_database_autonomous_db_by_creation_month.sql
+      type  = "column"
+      width = 3
+    }
+    
+    chart {
       title = "Autonomous Databases by Workload Type"
       sql   = query.oci_database_autonomous_db_by_workload_type.sql
       type  = "column"
       width = 3
     }
 
-    chart {
-      title = "Autonomous Databases by Age"
-      sql   = query.oci_database_autonomous_db_by_creation_month.sql
-      type  = "column"
-      width = 3
-    }
   }
 
   container {
@@ -453,7 +454,7 @@ dashboard "oci_database_autonomous_db_summary" {
           oci_database_autonomous_db_metric_cpu_utilization_hourly
         where
           timestamp  >= CURRENT_DATE - INTERVAL '7 day'
-          and id in (select id from top_n)
+          and id in (select id from top_n);
       EOQ
     }
 
@@ -484,7 +485,7 @@ dashboard "oci_database_autonomous_db_summary" {
           oci_database_autonomous_db_metric_storage_utilization_hourly
         where
           timestamp  >= CURRENT_DATE - INTERVAL '7 day'
-          and id in (select id from top_n)
+          and id in (select id from top_n);
       EOQ
     }
   }

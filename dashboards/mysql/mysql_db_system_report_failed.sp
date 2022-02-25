@@ -5,12 +5,12 @@ dashboard "oci_mysql_db_system_failed_report" {
   container {
 
     card {
-      sql = query.oci_mysql_db_system_count.sql
+      sql   = query.oci_mysql_db_system_count.sql
       width = 2
     }
 
     card {
-      sql = query.oci_mysql_db_system_failed_lifecycle_count.sql
+      sql   = query.oci_mysql_db_system_failed_lifecycle_count.sql
       width = 2
     }
   }
@@ -33,7 +33,7 @@ dashboard "oci_mysql_db_system_failed_report" {
         v.lifecycle_state = 'FAILED'
       order by
         v.time_created,
-        v.title
+        v.title;
     EOQ
   }
 

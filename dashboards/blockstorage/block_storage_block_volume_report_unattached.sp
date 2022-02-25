@@ -12,7 +12,7 @@ query "oci_block_storage_block_volume_unattached_volumes_count" {
           volume_id
         from
           oci_core_volume_attachment
-      ) and lifecycle_state <> 'TERMINATED'
+      ) and lifecycle_state <> 'TERMINATED';
   EOQ
 }
 
@@ -49,7 +49,7 @@ dashboard "oci_block_storage_block_volume_unattached_report" {
           v.lifecycle_state <> 'TERMINATED'
         order by
           v.time_created,
-          v.title
+          v.title;
     EOQ
   }
 

@@ -37,7 +37,7 @@ dashboard "oci_objectstorage_bucket_public_access_report" {
         left join oci_identity_tenancy as t on v.tenant_id = t.id
         order by
           v.time_created,
-          v.title
+          v.title;
     EOQ
   }
 

@@ -8,7 +8,7 @@ dashboard "oci_mysql_backup_failed_report" {
       sql = query.oci_mysql_backup_count.sql
       width = 2
     }
-    
+
     card {
       sql = query.oci_mysql_backup_failed_lifecycle_count.sql
       width = 2
@@ -34,7 +34,7 @@ dashboard "oci_mysql_backup_failed_report" {
         v.lifecycle_state = 'FAILED'
       order by
         v.time_created,
-        v.title
+        v.title;
     EOQ
   }
 

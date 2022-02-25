@@ -1,6 +1,6 @@
 query "oci_core_vcn_count" {
   sql = <<-EOQ
-    select count(*) as "VCNs" from oci_core_vcn where lifecycle_state <> 'TERMINATED'
+    select count(*) as "VCNs" from oci_core_vcn where lifecycle_state <> 'TERMINATED';
   EOQ
 }
 
@@ -13,7 +13,7 @@ query "oci_core_vcn_no_subnet_count" {
     from
       oci_core_vcn as vcn
     where
-      vcn.id not in (select oci_core_subnet.vcn_id from oci_core_subnet) and lifecycle_state <> 'TERMINATED'
+      vcn.id not in (select oci_core_subnet.vcn_id from oci_core_subnet) and lifecycle_state <> 'TERMINATED';
   EOQ
 }
 
@@ -29,7 +29,7 @@ query "oci_core_vcn_no_subnet" {
     where
       vcn.id not in (select vcn_id from oci_core_subnet) and lifecycle_state <> 'TERMINATED'
     group by
-      display_name
+      display_name;
   EOQ
 }
 
@@ -48,7 +48,7 @@ query "oci_core_vcn_by_tenancy" {
     group by
       c.title
     order by
-      c.title
+      c.title;
   EOQ
 }
 
@@ -83,7 +83,7 @@ query "oci_core_vcn_by_compartment" {
       c.title
     order by
       b.title,
-      c.title
+      c.title;
   EOQ
 }
 
@@ -97,7 +97,7 @@ query "oci_core_vcn_by_region" {
     where
       lifecycle_state <> 'TERMINATED'
     group by
-      region
+      region;
   EOQ
 }
 
@@ -128,7 +128,7 @@ query "oci_vcn_by_rfc1918_range" {
     group by
       rfc1918_bucket
     order by
-      rfc1918_bucket
+      rfc1918_bucket;
   EOQ
 }
 

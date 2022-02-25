@@ -1,6 +1,6 @@
 query "oci_vcn_subnet_count" {
   sql = <<-EOQ
-    select count(*) as "Subnets" from oci_core_vcn where lifecycle_state <> 'TERMINATED'
+    select count(*) as "Subnets" from oci_core_vcn where lifecycle_state <> 'TERMINATED';
   EOQ
 }
 
@@ -15,7 +15,7 @@ query "oci_vcn_subnet_flowlog_not_configured_count" {
         left join oci_logging_log as l
         on s.id = l.configuration -> 'source' ->> 'resource'
       where
-        l.is_enabled is null or not l.is_enabled and s.lifecycle_state <> 'TERMINATED'
+        l.is_enabled is null or not l.is_enabled and s.lifecycle_state <> 'TERMINATED';
   EOQ
 }
 
@@ -34,7 +34,7 @@ query "oci_vcn_subnets_by_tenancy" {
     group by
       c.title
     order by
-      c.title
+      c.title;
   EOQ
 }
 
@@ -69,7 +69,7 @@ query "oci_vcn_subnets_by_compartment" {
       c.title
     order by
       b.title,
-      c.title
+      c.title;
   EOQ
 }
 
@@ -85,7 +85,7 @@ query "oci_vcn_subnets_by_region" {
     group by
       region
     order by
-      region
+      region;
   EOQ
 }
 
@@ -136,7 +136,7 @@ dashboard "oci_vcn_subnet_dashboard" {
         from
           subnet_logs
         group by
-          flow_logs_configured
+          flow_logs_configured;
       EOQ
     }
 

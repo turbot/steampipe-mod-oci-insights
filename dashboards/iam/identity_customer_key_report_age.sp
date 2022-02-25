@@ -9,7 +9,7 @@ dashboard "oci_identity_customer_key_age_report" {
 
     card {
       sql   = <<-EOQ
-        select count(*) as "Customer Keys" from oci_identity_customer_secret_key
+        select count(*) as "Customer Keys" from oci_identity_customer_secret_key;
       EOQ
       width = 2
     }
@@ -22,7 +22,7 @@ dashboard "oci_identity_customer_key_age_report" {
         from
           oci_identity_customer_secret_key
         where
-          time_created > now() - '1 days' :: interval
+          time_created > now() - '1 days' :: interval;
       EOQ
       width = 2
       type  = "info"
@@ -36,7 +36,7 @@ dashboard "oci_identity_customer_key_age_report" {
         from
           oci_identity_customer_secret_key
         where
-          time_created between symmetric now() - '1 days' :: interval and now() - '30 days' :: interval
+          time_created between symmetric now() - '1 days' :: interval and now() - '30 days' :: interval;
       EOQ
       width = 2
       type  = "info"
@@ -50,7 +50,7 @@ dashboard "oci_identity_customer_key_age_report" {
         from
           oci_identity_customer_secret_key
         where
-          time_created between symmetric now() - '30 days' :: interval and now() - '90 days' :: interval
+          time_created between symmetric now() - '30 days' :: interval and now() - '90 days' :: interval;
       EOQ
       width = 2
       type  = "info"
@@ -64,7 +64,7 @@ dashboard "oci_identity_customer_key_age_report" {
         from
           oci_identity_customer_secret_key
         where
-          time_created between symmetric (now() - '90 days'::interval) and (now() - '365 days'::interval)
+          time_created between symmetric (now() - '90 days'::interval) and (now() - '365 days'::interval);
       EOQ
       width = 2
       type  = "info"
@@ -78,7 +78,7 @@ dashboard "oci_identity_customer_key_age_report" {
         from
           oci_identity_customer_secret_key
         where
-          time_created <= now() - '1 year' :: interval
+          time_created <= now() - '1 year' :: interval;
       EOQ
       width = 2
       type  = "info"
@@ -107,7 +107,7 @@ dashboard "oci_identity_customer_key_age_report" {
           t.id = k.tenant_id
         order by
           k.time_created,
-          k.title
+          k.title;
       EOQ
     }
 

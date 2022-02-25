@@ -18,7 +18,7 @@ dashboard "oci_block_storage_block_volume_age_report" {
         from
           oci_core_volume
         where
-          time_created > now() - '1 days' :: interval and lifecycle_state <> 'TERMINATED'
+          time_created > now() - '1 days' :: interval and lifecycle_state <> 'TERMINATED';
       EOQ
       width = 2
       type  = "info"
@@ -33,7 +33,7 @@ dashboard "oci_block_storage_block_volume_age_report" {
           oci_core_volume
         where
           time_created between symmetric now() - '1 days' :: interval and now() - '30 days' :: interval
-          and lifecycle_state <> 'TERMINATED'
+          and lifecycle_state <> 'TERMINATED';
       EOQ
       width = 2
       type  = "info"
@@ -48,7 +48,7 @@ dashboard "oci_block_storage_block_volume_age_report" {
           oci_core_volume
         where
           time_created between symmetric now() - '30 days' :: interval and now() - '90 days' :: interval
-          and lifecycle_state <> 'TERMINATED'
+          and lifecycle_state <> 'TERMINATED';
       EOQ
       width = 2
       type  = "info"
@@ -63,7 +63,7 @@ dashboard "oci_block_storage_block_volume_age_report" {
           oci_core_volume
         where
           time_created between symmetric (now() - '90 days'::interval) and (now() - '365 days'::interval)
-          and lifecycle_state <> 'TERMINATED'
+          and lifecycle_state <> 'TERMINATED';
       EOQ
       width = 2
       type  = "info"
@@ -77,7 +77,7 @@ dashboard "oci_block_storage_block_volume_age_report" {
         from
           oci_core_volume
         where
-          time_created <= now() - '1 year' :: interval and lifecycle_state <> 'TERMINATED'
+          time_created <= now() - '1 year' :: interval and lifecycle_state <> 'TERMINATED';
       EOQ
       width = 2
       type  = "info"
@@ -108,7 +108,7 @@ dashboard "oci_block_storage_block_volume_age_report" {
           v.lifecycle_state <> 'TERMINATED'
         order by
           v.time_created,
-          v.title
+          v.title;
       EOQ
     }
 

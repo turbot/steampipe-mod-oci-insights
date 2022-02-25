@@ -4,7 +4,7 @@ query "oci_objectstorage_bucket_report_customer_managed_encryption_count" {
       from
     oci_objectstorage_bucket
     where
-    kms_key_id is not null
+    kms_key_id is not null;
   EOQ
 }
 
@@ -46,7 +46,7 @@ dashboard "oci_objectstorage_bucket_encryption_report" {
         left join oci_identity_tenancy as t on v.tenant_id = t.id
       order by
         v.time_created,
-        v.title
+        v.title;
     EOQ
   }
 

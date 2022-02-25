@@ -5,7 +5,7 @@ query "oci_nosql_table_count" {
   from
     oci_nosql_table
   where
-    lifecycle_state <> 'DELETED'
+    lifecycle_state <> 'DELETED';
   EOQ
 }
 
@@ -16,7 +16,7 @@ query "oci_nosql_table_auto_reclaimable_count" {
     from
       oci_nosql_table
     where
-      is_auto_reclaimable and lifecycle_state <> 'DELETED'
+      is_auto_reclaimable and lifecycle_state <> 'DELETED';
   EOQ
 }
 
@@ -29,7 +29,7 @@ query "oci_nosql_table_stalled_more_than_90_days_count" {
     from
       oci_nosql_table
     where
-      date_part('day', now()-(time_updated::timestamptz)) > 90 and lifecycle_state <> 'DELETED'
+      date_part('day', now()-(time_updated::timestamptz)) > 90 and lifecycle_state <> 'DELETED';
   EOQ
 }
 
@@ -45,7 +45,7 @@ query "oci_nosql_table_by_lifecycle_state" {
     where
       lifecycle_state <> 'DELETED'
     group by
-      lifecycle_state
+      lifecycle_state;
   EOQ
 }
 
@@ -60,7 +60,7 @@ query "oci_nosql_table_stalled_more_than_90_days" {
       date_part('day', now()-(time_updated::timestamptz)) > 90
       and lifecycle_state <> 'DELETED'
     group by
-      name
+      name;
   EOQ
 }
 
@@ -79,7 +79,7 @@ query "oci_nosql_table_by_tenancy" {
     group by
       c.title
     order by
-      c.title
+      c.title;
   EOQ
 }
 
@@ -95,7 +95,7 @@ query "oci_nosql_table_by_region" {
     group by
       region
     order by
-      region
+      region;
   EOQ
 }
 
@@ -130,7 +130,7 @@ query "oci_nosql_table_by_compartment" {
       c.title
     order by
       b.title,
-      c.title
+      c.title;
   EOQ
 }
 
@@ -207,7 +207,7 @@ query "oci_nosql_table_top10_storage_past_week" {
       timestamp  >= CURRENT_DATE - INTERVAL '7 day'
       and name in (select name from top_n)
     order by
-      timestamp
+      timestamp;
   EOQ
 }
 
@@ -241,7 +241,7 @@ query "oci_nosql_table_by_storage_utilization_category" {
       storage_buckets as b
     left join max_averages as a on b.storage_bucket = a.storage_bucket
     group by
-      b.storage_bucket
+      b.storage_bucket;
   EOQ
 }
 

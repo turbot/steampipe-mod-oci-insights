@@ -1,12 +1,12 @@
 query "oci_filestorage_filesystem_count" {
   sql = <<-EOQ
-    select count(*) as "File Systems" from oci_file_storage_file_system where lifecycle_state <> 'DELETED'
+    select count(*) as "File Systems" from oci_file_storage_file_system where lifecycle_state <> 'DELETED';
   EOQ
 }
 
 query "oci_filestorage_filesystem_snapshot_count" {
   sql = <<-EOQ
-    select count(*) as "Snapshots" from oci_file_storage_snapshot where lifecycle_state <> 'DELETED'
+    select count(*) as "Snapshots" from oci_file_storage_snapshot where lifecycle_state <> 'DELETED';
   EOQ
 }
 
@@ -17,7 +17,7 @@ query "oci_filestorage_cloned_filesystem_count" {
     from
       oci_file_storage_file_system
     where
-      is_clone_parent and lifecycle_state <> 'DELETED'
+      is_clone_parent and lifecycle_state <> 'DELETED';
   EOQ
 }
 
@@ -28,7 +28,7 @@ query "oci_filestorage_uncloned_filesystem_count" {
     from
       oci_file_storage_file_system
     where
-      not is_clone_parent and lifecycle_state <> 'DELETED'
+      not is_clone_parent and lifecycle_state <> 'DELETED';
   EOQ
 }
 
@@ -39,7 +39,7 @@ query "oci_filestorage_cloned_snapshot_count" {
     from
       oci_file_storage_snapshot
     where
-      is_clone_source and lifecycle_state <> 'DELETED'
+      is_clone_source and lifecycle_state <> 'DELETED';
   EOQ
 }
 
@@ -54,7 +54,7 @@ query "oci_filestorage_filesystem_by_state" {
     where
       lifecycle_state <> 'DELETED'
     group by
-      lifecycle_state
+      lifecycle_state;
   EOQ
 }
 
@@ -72,7 +72,7 @@ query "oci_filestorage_filesystem_by_tenancy" {
     group by
       t.name
     order by
-      t.name
+      t.name;
   EOQ
 }
 
@@ -107,7 +107,7 @@ query "oci_filestorage_filesystem_by_compartment" {
       c.title
     order by
       b.title,
-      c.title
+      c.title;
   EOQ
 }
 
@@ -121,7 +121,7 @@ query "oci_filestorage_filesystem_by_region" {
     group by
       region
     order by
-      region
+      region;
   EOQ
 }
 

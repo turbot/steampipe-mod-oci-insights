@@ -17,7 +17,7 @@ query "oci_objectstorage_bucket_disabled_count" {
       oci_objectstorage_bucket as b
       left join name_with_region as n on concat(b.name, b.region) = n.name_with_region
     where
-      not n.is_enabled or n.is_enabled is null
+      not n.is_enabled or n.is_enabled is null;
   EOQ
 }
 
@@ -64,7 +64,7 @@ dashboard "oci_objectstorage_bucket_logging_report" {
         left join oci_identity_tenancy as t on v.tenant_id = t.id
         order by
           v.time_created,
-          v.title
+          v.title;
     EOQ
   }
 }

@@ -1,6 +1,6 @@
 query "oci_ons_notification_topic_count" {
   sql = <<-EOQ
-    select count(*) as "Topics" from oci_ons_notification_topic
+    select count(*) as "Topics" from oci_ons_notification_topic;
   EOQ
 }
 
@@ -20,7 +20,7 @@ query "oci_ons_notification_topic_unused_count" {
       oci_ons_subscription
     where
       lifecycle_state <> 'ACTIVE'
-      )
+      );
   EOQ
 }
 
@@ -33,7 +33,7 @@ query "oci_ons_notification_topic_by_lifecycle_state" {
     from
       oci_ons_notification_topic
     group by
-      lifecycle_state
+      lifecycle_state;
   EOQ
 }
 
@@ -54,7 +54,7 @@ query "oci_ons_notification_topic_by_subscription" {
       lifecycle_state <> 'ACTIVE'
       )
     group by
-      name
+      name;
   EOQ
 }
 
@@ -72,7 +72,7 @@ query "oci_ons_notification_topic_by_tenancy" {
     group by
       c.title
     order by
-      c.title
+      c.title;
   EOQ
 }
 
@@ -107,7 +107,7 @@ query "oci_ons_notification_topic_by_compartment" {
       c.title
     order by
       b.title,
-      c.title
+      c.title;
   EOQ
 }
 
@@ -121,7 +121,7 @@ query "oci_ons_notification_topic_by_region" {
     group by
       region
     order by
-      region
+      region;
   EOQ
 }
 

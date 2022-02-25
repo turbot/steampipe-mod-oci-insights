@@ -5,7 +5,7 @@ query "oci_mysql_backup_count" {
   from
     oci_mysql_backup
   where
-    lifecycle_state <> 'DELETED'
+    lifecycle_state <> 'DELETED';
   EOQ
 }
 
@@ -16,7 +16,7 @@ query "oci_mysql_automatic_backup_count" {
     from
       oci_mysql_backup
     where
-      creation_type = 'AUTOMATIC' and lifecycle_state <> 'DELETED'
+      creation_type = 'AUTOMATIC' and lifecycle_state <> 'DELETED';
   EOQ
 }
 
@@ -27,7 +27,7 @@ query "oci_mysql_backup_storage_total" {
     from
       oci_mysql_backup
     where
-      lifecycle_state <> 'DELETED'
+      lifecycle_state <> 'DELETED';
   EOQ
 }
 
@@ -38,7 +38,7 @@ query "oci_mysql_full_backup_count" {
     from
       oci_mysql_backup
     where
-      backup_type = 'FULL' and lifecycle_state <> 'DELETED'
+      backup_type = 'FULL' and lifecycle_state <> 'DELETED';
   EOQ
 }
 
@@ -51,7 +51,7 @@ query "oci_mysql_backup_failed_lifecycle_count" {
     from
       oci_mysql_backup
     where
-      lifecycle_state = 'FAILED'
+      lifecycle_state = 'FAILED';
   EOQ
 }
 
@@ -67,7 +67,7 @@ query "oci_mysql_backup_by_lifecycle_state" {
     where
       lifecycle_state <> 'DELETED'
     group by
-      lifecycle_state
+      lifecycle_state;
   EOQ
 }
 
@@ -86,7 +86,7 @@ query "oci_mysql_backup_by_tenancy" {
     group by
       c.title
     order by
-      c.title
+      c.title;
   EOQ
 }
 
@@ -121,7 +121,7 @@ query "oci_mysql_backup_by_compartment" {
       c.title
     order by
       b.title,
-      c.title
+      c.title;
   EOQ
 }
 
@@ -137,7 +137,7 @@ query "oci_mysql_backup_by_region" {
     group by
       region
     order by
-      region
+      region;
   EOQ
 }
 
@@ -203,7 +203,7 @@ query "oci_mysql_backup_storage_by_tenancy" {
     group by
       c.title
     order by
-      c.title
+      c.title;
   EOQ
 }
 
@@ -238,7 +238,7 @@ query "oci_mysql_backup_storage_by_compartment" {
       c.title
     order by
       b.title,
-      c.title
+      c.title;
 
   EOQ
 }
@@ -255,7 +255,7 @@ query "oci_mysql_backup_storage_by_region" {
     group by
       region
     order by
-      region
+      region;
   EOQ
 }
 
