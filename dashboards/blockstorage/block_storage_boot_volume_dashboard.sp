@@ -165,7 +165,7 @@ query "oci_block_storage_boot_volume_by_compartment" {
       c.title
     order by
       b.title,
-      c.title
+      c.title;
   EOQ
 }
 
@@ -179,7 +179,7 @@ query "oci_block_storage_boot_volume_by_region" {
     where
       lifecycle_state <> 'TERMINATED'
     group by
-      region
+      region;
   EOQ
 }
 
@@ -226,7 +226,7 @@ query "oci_block_storage_boot_volume_by_creation_month" {
       months
       left join volumes_by_month on months.month = volumes_by_month.creation_month
     order by
-      months.month
+      months.month;
   EOQ
 }
 
@@ -245,7 +245,7 @@ query "oci_block_storage_boot_volume_storage_by_tenancy" {
     group by
       c.title
     order by
-      c.title
+      c.title;
   EOQ
 }
 
@@ -280,7 +280,7 @@ query "oci_block_storage_boot_volume_storage_by_compartment" {
       c.title
     order by
       b.title,
-      c.title
+      c.title;
   EOQ
 }
 
@@ -294,7 +294,7 @@ query "oci_block_storage_boot_volume_storage_by_region" {
     where
       lifecycle_state <> 'TERMINATED'
     group by
-      region
+      region;
   EOQ
 }
 

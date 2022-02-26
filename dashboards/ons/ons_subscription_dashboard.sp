@@ -1,6 +1,6 @@
 query "oci_ons_subscription_count" {
   sql = <<-EOQ
-    select count(*) as "Subscriptions" from oci_ons_subscription
+    select count(*) as "Subscriptions" from oci_ons_subscription;
   EOQ
 }
 
@@ -13,7 +13,7 @@ query "oci_ons_subscription_unused_count" {
     from
       oci_ons_subscription
     where
-      lifecycle_state <> 'ACTIVE'
+      lifecycle_state <> 'ACTIVE';
   EOQ
 }
 
@@ -27,7 +27,7 @@ query "oci_ons_subscription_by_lifecycle_state" {
     from
       oci_ons_subscription
     group by
-      lifecycle_state
+      lifecycle_state;
   EOQ
 }
 
@@ -45,7 +45,7 @@ query "oci_ons_subscription_by_tenancy" {
     group by
       t.name
     order by
-      t.name
+      t.name;
   EOQ
 }
 
@@ -80,7 +80,7 @@ query "oci_ons_subscription_by_compartment" {
       c.title
     order by
       b.title,
-      c.title
+      c.title;
   EOQ
 }
 

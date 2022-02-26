@@ -32,7 +32,7 @@ dashboard "oci_ons_notification_topic_unused_report" {
         left join oci_identity_tenancy as t on a.tenant_id = t.id
       order by
         a.time_created,
-        a.title
+        a.title;
     EOQ
   }
 

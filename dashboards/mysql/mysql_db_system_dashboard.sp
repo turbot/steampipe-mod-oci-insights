@@ -5,7 +5,7 @@ query "oci_mysql_db_system_count" {
   from
     oci_mysql_db_system
   where
-    lifecycle_state <> 'DELETED'
+    lifecycle_state <> 'DELETED';
   EOQ
 }
 
@@ -16,7 +16,7 @@ query "oci_mysql_db_system_storage_total" {
     from
       oci_mysql_db_system
     where
-      lifecycle_state <> 'DELETED'
+      lifecycle_state <> 'DELETED';
   EOQ
 }
 
@@ -27,7 +27,7 @@ query "oci_mysql_db_system_analytics_cluster_attached_count" {
     from
       oci_mysql_db_system
     where
-      is_analytics_cluster_attached and lifecycle_state <> 'DELETED'
+      is_analytics_cluster_attached and lifecycle_state <> 'DELETED';
   EOQ
 }
 
@@ -38,7 +38,7 @@ query "oci_mysql_db_system_heat_wave_cluster_attached_count" {
     from
       oci_mysql_db_system
     where
-      is_heat_wave_cluster_attached and lifecycle_state <> 'DELETED'
+      is_heat_wave_cluster_attached and lifecycle_state <> 'DELETED';
   EOQ
 }
 
@@ -51,7 +51,7 @@ query "oci_mysql_db_system_failed_lifecycle_count" {
     from
       oci_mysql_db_system
     where
-      lifecycle_state = 'FAILED'
+      lifecycle_state = 'FAILED';
   EOQ
 }
 
@@ -71,7 +71,7 @@ query "oci_mysql_db_system_backup_disabled_count" {
       v.region,
       v.id
     having
-      count(b.id) = 0
+      count(b.id) = 0;
   EOQ
 }
 
@@ -87,7 +87,7 @@ query "oci_mysql_db_system_by_lifecycle_state" {
     where
       lifecycle_state <> 'DELETED'
     group by
-      lifecycle_state
+      lifecycle_state;
   EOQ
 }
 
@@ -104,7 +104,7 @@ query "oci_mysql_db_system_with_no_backups" {
     group by
       v.display_name
     having
-      count(b.id) = 0
+      count(b.id) = 0;
   EOQ
 }
 
@@ -123,7 +123,7 @@ query "oci_mysql_db_system_by_tenancy" {
     group by
       t.title
     order by
-      t.title
+      t.title;
   EOQ
 }
 
@@ -158,7 +158,7 @@ query "oci_mysql_db_system_by_compartment" {
       c.title
     order by
       b.title,
-      c.title
+      c.title;
   EOQ
 }
 
@@ -174,7 +174,7 @@ query "oci_mysql_db_system_by_region" {
     group by
       region
     order by
-      region
+      region;
   EOQ
 }
 
@@ -238,7 +238,7 @@ query "oci_mysql_db_system_storage_by_tenancy" {
     group by
       t.title
     order by
-      t.title
+      t.title;
   EOQ
 }
 
@@ -273,7 +273,7 @@ query "oci_mysql_db_system_storage_by_compartment" {
       c.title
     order by
       b.title,
-      c.title
+      c.title;
   EOQ
 }
 
@@ -289,7 +289,7 @@ query "oci_mysql_db_system_storage_by_region" {
     group by
       region
     order by
-      region
+      region;
   EOQ
 }
 
@@ -367,7 +367,7 @@ query "oci_mysql_db_system_top10_cpu_past_week" {
       timestamp  >= CURRENT_DATE - INTERVAL '7 day'
       and id in (select id from top_n)
     order by
-      timestamp
+      timestamp;
   EOQ
 }
 
@@ -402,7 +402,7 @@ query "oci_mysql_db_system_by_cpu_utilization_category" {
       cpu_buckets as b
     left join max_averages as a on b.cpu_bucket = a.cpu_bucket
     group by
-      b.cpu_bucket
+      b.cpu_bucket;
   EOQ
 }
 

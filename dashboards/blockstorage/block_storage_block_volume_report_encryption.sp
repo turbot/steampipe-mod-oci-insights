@@ -5,7 +5,7 @@ query "oci_block_storage_block_volume_customer_managed_encryption_count" {
     from
       oci_core_volume
     where
-      kms_key_id is not null and lifecycle_state <> 'TERMINATED'
+      kms_key_id is not null and lifecycle_state <> 'TERMINATED';
   EOQ
 }
 
@@ -19,7 +19,7 @@ dashboard "oci_block_storage_block_volume_encryption_report" {
       sql   = query.oci_block_storage_block_volume_count.sql
       width = 2
     }
-    
+
     card {
       sql   = query.oci_block_storage_block_volume_customer_managed_encryption_count.sql
       width = 2
@@ -51,7 +51,7 @@ dashboard "oci_block_storage_block_volume_encryption_report" {
           v.lifecycle_state <> 'TERMINATED'
         order by
           v.time_created,
-          v.title
+          v.title;
     EOQ
   }
 

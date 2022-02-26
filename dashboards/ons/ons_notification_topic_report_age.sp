@@ -18,7 +18,7 @@ dashboard "oci_ons_notification_topic_age_report" {
         from
           oci_ons_notification_topic
         where
-          time_created > now() - '1 days' :: interval
+          time_created > now() - '1 days' :: interval;
       EOQ
       width = 2
       type  = "info"
@@ -32,7 +32,7 @@ dashboard "oci_ons_notification_topic_age_report" {
         from
           oci_ons_notification_topic
         where
-          time_created between symmetric now() - '1 days' :: interval and now() - '30 days' :: interval
+          time_created between symmetric now() - '1 days' :: interval and now() - '30 days' :: interval;
       EOQ
       width = 2
       type  = "info"
@@ -46,7 +46,7 @@ dashboard "oci_ons_notification_topic_age_report" {
         from
           oci_ons_notification_topic
         where
-          time_created between symmetric now() - '30 days' :: interval and now() - '90 days' :: interval
+          time_created between symmetric now() - '30 days' :: interval and now() - '90 days' :: interval;
       EOQ
       width = 2
       type  = "info"
@@ -60,7 +60,7 @@ dashboard "oci_ons_notification_topic_age_report" {
         from
           oci_ons_notification_topic
         where
-          time_created between symmetric (now() - '90 days'::interval) and (now() - '365 days'::interval)
+          time_created between symmetric (now() - '90 days'::interval) and (now() - '365 days'::interval);
       EOQ
       width = 2
       type  = "info"
@@ -74,7 +74,7 @@ dashboard "oci_ons_notification_topic_age_report" {
         from
           oci_ons_notification_topic
         where
-          time_created <= now() - '1 year' :: interval
+          time_created <= now() - '1 year' :: interval;
       EOQ
       width = 2
       type  = "info"
@@ -103,7 +103,7 @@ dashboard "oci_ons_notification_topic_age_report" {
           left join oci_identity_tenancy as t on v.tenant_id = t.id
         order by
           v.time_created,
-          v.title
+          v.title;
       EOQ
     }
 

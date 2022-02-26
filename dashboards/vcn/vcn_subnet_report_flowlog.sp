@@ -38,7 +38,7 @@ dashboard "oci_vcn_subnet_flowlog_report" {
         v.lifecycle_state <> 'TERMINATED'
       order by
         v.time_created,
-        v.title
+        v.title;
     EOQ
   }
 

@@ -13,7 +13,7 @@ query "oci_vcn_security_groups_by_tenancy" {
     group by
       c.title
     order by
-      c.title
+      c.title;
   EOQ
 }
 
@@ -48,7 +48,7 @@ query "oci_vcn_security_groups_by_compartment" {
       c.title
     order by
       b.title,
-      c.title
+      c.title;
   EOQ
 }
 
@@ -64,7 +64,7 @@ query "oci_vcn_security_groups_by_region" {
     group by
       region
     order by
-      region
+      region;
   EOQ
 }
 
@@ -77,7 +77,7 @@ dashboard "oci_vcn_network_security_group_dashboard" {
     card {
       width = 2
       sql = <<-EOQ
-        select count(*) as "Security Groups" from oci_core_network_security_group where lifecycle_state <> 'TERMINATED'
+        select count(*) as "Security Groups" from oci_core_network_security_group where lifecycle_state <> 'TERMINATED';
       EOQ
     }
 
@@ -125,7 +125,7 @@ dashboard "oci_vcn_network_security_group_dashboard" {
           case count(*) when 0 then 'ok' else 'alert' end as type
         from
           sg_list
-        where not restricted
+        where not restricted;
       EOQ
     }
 
@@ -174,7 +174,7 @@ dashboard "oci_vcn_network_security_group_dashboard" {
         from
           sg_list
         where
-          not restricted
+          not restricted;
       EOQ
     }
 
@@ -232,7 +232,7 @@ dashboard "oci_vcn_network_security_group_dashboard" {
           count(*)
         from
           sg_list
-        group by restricted
+        group by restricted;
       EOQ
     }
 
@@ -284,7 +284,7 @@ dashboard "oci_vcn_network_security_group_dashboard" {
           count(*)
         from
           sg_list
-        group by restricted
+        group by restricted;
       EOQ
     }
   }

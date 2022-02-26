@@ -34,7 +34,7 @@ dashboard "oci_block_storage_boot_volume_faulty_report" {
           v.lifecycle_state <> 'TERMINATED'
         order by
           v.time_created,
-          v.title
+          v.title;
     EOQ
   }
 

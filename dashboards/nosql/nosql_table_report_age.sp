@@ -17,7 +17,7 @@ dashboard "oci_nosql_table_age_report" {
         from
           oci_nosql_table
         where
-          time_created > now() - '1 days' :: interval and lifecycle_state <> 'DELETED'
+          time_created > now() - '1 days' :: interval and lifecycle_state <> 'DELETED';
       EOQ
       width = 2
       type  = "info"
@@ -32,7 +32,7 @@ dashboard "oci_nosql_table_age_report" {
           oci_nosql_table
         where
           time_created between symmetric now() - '1 days' :: interval and now() - '30 days' :: interval
-          and lifecycle_state <> 'DELETED'
+          and lifecycle_state <> 'DELETED';
       EOQ
       width = 2
       type  = "info"
@@ -47,7 +47,7 @@ dashboard "oci_nosql_table_age_report" {
           oci_nosql_table
         where
           time_created between symmetric now() - '30 days' :: interval and now() - '90 days' :: interval
-          and lifecycle_state <> 'DELETED'
+          and lifecycle_state <> 'DELETED';
       EOQ
       width = 2
       type  = "info"
@@ -62,7 +62,7 @@ dashboard "oci_nosql_table_age_report" {
           oci_nosql_table
         where
           time_created between symmetric (now() - '90 days'::interval) and (now() - '365 days'::interval)
-          and lifecycle_state <> 'DELETED'
+          and lifecycle_state <> 'DELETED';
       EOQ
       width = 2
       type  = "info"
@@ -76,7 +76,7 @@ dashboard "oci_nosql_table_age_report" {
         from
           oci_nosql_table
         where
-          time_created <= now() - '1 year' :: interval and lifecycle_state <> 'DELETED'
+          time_created <= now() - '1 year' :: interval and lifecycle_state <> 'DELETED';
       EOQ
       width = 2
       type  = "info"
@@ -107,7 +107,7 @@ dashboard "oci_nosql_table_age_report" {
           v.lifecycle_state <> 'DELETED'
         order by
           v.time_created,
-          v.title
+          v.title;
       EOQ
     }
 

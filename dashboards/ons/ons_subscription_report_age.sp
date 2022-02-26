@@ -18,7 +18,7 @@ dashboard "oci_ons_subscription_age_report" {
         from
           oci_ons_subscription
         where
-          created_time > now() - '1 days' :: interval
+          created_time > now() - '1 days' :: interval;
       EOQ
       width = 2
       type  = "info"
@@ -32,7 +32,7 @@ dashboard "oci_ons_subscription_age_report" {
         from
           oci_ons_subscription
         where
-          created_time between symmetric now() - '1 days' :: interval and now() - '30 days' :: interval
+          created_time between symmetric now() - '1 days' :: interval and now() - '30 days' :: interval;
       EOQ
       width = 2
       type  = "info"
@@ -46,7 +46,7 @@ dashboard "oci_ons_subscription_age_report" {
         from
           oci_ons_subscription
         where
-          created_time between symmetric now() - '30 days' :: interval and now() - '90 days' :: interval
+          created_time between symmetric now() - '30 days' :: interval and now() - '90 days' :: interval;
       EOQ
       width = 2
       type  = "info"
@@ -60,7 +60,7 @@ dashboard "oci_ons_subscription_age_report" {
         from
           oci_ons_subscription
         where
-          created_time between symmetric (now() - '90 days'::interval) and (now() - '365 days'::interval)
+          created_time between symmetric (now() - '90 days'::interval) and (now() - '365 days'::interval);
       EOQ
       width = 2
       type  = "info"
@@ -74,7 +74,7 @@ dashboard "oci_ons_subscription_age_report" {
         from
           oci_ons_subscription
         where
-          created_time <= now() - '1 year' :: interval
+          created_time <= now() - '1 year' :: interval;
       EOQ
       width = 2
       type  = "info"
@@ -101,7 +101,7 @@ dashboard "oci_ons_subscription_age_report" {
           left join oci_identity_tenancy as t on v.tenant_id = t.id
         order by
           v.created_time,
-          v.title
+          v.title;
       EOQ
     }
 
