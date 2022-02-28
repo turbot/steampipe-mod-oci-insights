@@ -25,6 +25,32 @@ query "oci_mysql_db_system_name_for_db_system" {
   param "id" {}
 }
 
+query "oci_mysql_db_system_analytics_cluster_attached_for_db_system" {
+  sql = <<-EOQ
+    select
+      case when is_analytics_cluster_attached then 'true' else 'false' end as "Analytics Cluster Attached"
+    from
+      oci_mysql_db_system
+    where
+      id = $1 and lifecycle_state <> 'DELETED';
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_mysql_db_system_heat_wave_cluster_attached_for_db_system" {
+  sql = <<-EOQ
+    select
+      case when is_heat_wave_cluster_attached then 'true' else 'false' end as "Heat Wave Cluster Attached"
+    from
+      oci_mysql_db_system
+    where
+      id = $1 and lifecycle_state <> 'DELETED';
+  EOQ
+
+  param "id" {}
+}
+
 query "oci_mysql_db_system_failed_for_db_system" {
   sql = <<-EOQ
     select
@@ -65,6 +91,11 @@ query "oci_mysql_db_system_backup_for_db_system" {
 dashboard "oci_mysql_db_system_detail" {
   title = "OCI MySQL DB System Detail"
 
+  tags = merge(local.mysql_common_tags, {
+    type     = "Report"
+    category = "Detail"
+  })
+
   input "db_system_id" {
     title = "Select a DB system:"
     sql   = query.oci_mysql_db_system_input.sql
@@ -78,6 +109,24 @@ dashboard "oci_mysql_db_system_detail" {
       width = 2
 
       query = query.oci_mysql_db_system_name_for_db_system
+      args = {
+        id = self.input.db_system_id.value
+      }
+    }
+
+    card {
+      width = 2
+
+      query = query.oci_mysql_db_system_analytics_cluster_attached_for_db_system
+      args = {
+        id = self.input.db_system_id.value
+      }
+    }
+
+    card {
+      width = 2
+
+      query = query.oci_mysql_db_system_heat_wave_cluster_attached_for_db_system
       args = {
         id = self.input.db_system_id.value
       }

@@ -6,14 +6,14 @@ query "oci_identity_user_count" {
 
 query "oci_identity_user_unverified_email_count" {
   sql = <<-EOQ
-    select count(*) as "Users With Unverified Email " from oci_identity_user where not email_verified;
+    select count(*) as "Users With Unverified Email" from oci_identity_user where not email_verified;
   EOQ
 }
 
 query "oci_identity_user_inactive_customer_key_count" {
   sql = <<-EOQ
     select
-      count(*) as  value,
+      count(*) as value,
       'Inactive Customer Keys' as label,
       case count(*) when 0 then 'ok' else 'alert' end as type
     from
@@ -26,7 +26,7 @@ query "oci_identity_user_inactive_customer_key_count" {
 query "oci_identity_user_inactive_api_key_count" {
   sql = <<-EOQ
     select
-      count(*) as  value,
+      count(*) as value,
       'Inactive API Keys' as label,
       case count(*) when 0 then 'ok' else 'alert' end as type
     from
@@ -39,7 +39,7 @@ query "oci_identity_user_inactive_api_key_count" {
 query "oci_identity_mfa_not_enabled_users_count" {
   sql = <<-EOQ
     select
-      count(*) as  value,
+      count(*) as value,
       'MFA Disabled' as label,
       case count(*) when 0 then 'ok' else 'alert' end as type
     from
@@ -51,7 +51,7 @@ query "oci_identity_mfa_not_enabled_users_count" {
 
 query "oci_identity_console_login_enabled_users_count" {
   sql = <<-EOQ
-  select count(*) as "Console Login Enabled" from oci_identity_user where can_use_api_keys;
+  select count(*) as "Console Login Enabled" from oci_identity_user where can_use_console_password;
   EOQ
 }
 
@@ -78,13 +78,13 @@ query "oci_identity_user_access_key_age_gt_90_days" {
 query "oci_identity_user_not_attached_to_groups" {
   sql = <<-EOQ
   select
-    count(oci_identity_user.name) as  value,
+    count(oci_identity_user.name) as value,
     'Users Without Group' as label,
     case count(*) when 0 then 'ok' else 'alert' end as type
   from
     oci_identity_user,
     jsonb_array_elements(user_groups) as user_group
-    inner join oci_identity_group ON (oci_identity_group.id = user_group ->> 'groupId' );
+    inner join oci_identity_group ON (oci_identity_group.id = user_group ->> 'groupId');
   EOQ
 }
 

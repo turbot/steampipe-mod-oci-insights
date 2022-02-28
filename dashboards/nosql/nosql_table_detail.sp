@@ -56,6 +56,11 @@ query "oci_nosql_table_auto_reclaimable_for_table" {
 dashboard "oci_nosql_table_detail" {
   title = "OCI NoSQL Table Detail"
 
+  tags = merge(local.nosql_common_tags, {
+    type     = "Report"
+    category = "Detail"
+  })
+
   input "table_id" {
     title = "Select a table:"
     sql   = query.oci_nosql_table_input.sql

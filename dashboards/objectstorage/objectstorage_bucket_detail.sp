@@ -56,6 +56,11 @@ query "oci_objectstorage_bucket_public_access_for_bucket" {
 dashboard "oci_objectstorage_bucket_detail" {
   title = "OCI Object Storage Bucket Detail"
 
+  tags = merge(local.objectstorage_common_tags, {
+    type     = "Report"
+    category = "Detail"
+  })
+
   input "bucket_id" {
     title = "Select a bucket:"
     sql   = query.oci_objectstorage_bucket_input.sql

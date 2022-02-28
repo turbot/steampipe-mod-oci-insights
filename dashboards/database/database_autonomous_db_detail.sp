@@ -25,12 +25,38 @@ query "oci_database_autonomous_database_name_for_db" {
   param "id" {}
 }
 
+query "oci_database_autonomous_database_core_for_db" {
+  sql = <<-EOQ
+    select
+      cpu_core_count as "OCPUs"
+    from
+      oci_database_autonomous_database
+    where
+      id = $1 and lifecycle_state <> 'TERMINATED';
+  EOQ
+
+  param "id" {}
+}
+
 query "oci_database_autonomous_database_need_attention_for_db" {
   sql = <<-EOQ
     select
       lifecycle_state as value,
       'Lifecycle State' as label,
       case when lifecycle_state = 'AVAILABLE_NEEDS_ATTENTION' then 'alert' else 'ok' end as type
+    from
+      oci_database_autonomous_database
+    where
+      id = $1 and lifecycle_state <> 'TERMINATED';
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_database_autonomous_database_autoscaling_for_db" {
+  sql = <<-EOQ
+    select
+      case when is_auto_scaling_enabled then 'Enabled' else 'Disabled' end as "Auto Scaling"
     from
       oci_database_autonomous_database
     where
@@ -56,6 +82,11 @@ query "oci_database_autonomous_database_data_guard_for_db" {
 dashboard "oci_database_autonomous_database_detail" {
   title = "OCI Autonomous Database Detail"
 
+  tags = merge(local.database_common_tags, {
+    type     = "Report"
+    category = "Detail"
+  })
+
   input "db_id" {
     title = "Select a autonomous DB:"
     sql   = query.oci_database_autonomous_database_input.sql
@@ -77,7 +108,26 @@ dashboard "oci_database_autonomous_database_detail" {
     card {
       width = 2
 
+      query = query.oci_database_autonomous_database_core_for_db
+      args = {
+        id = self.input.db_id.value
+      }
+    }
+
+    card {
+      width = 2
+
       query = query.oci_database_autonomous_database_need_attention_for_db
+      args = {
+        id = self.input.db_id.value
+      }
+    }
+
+    card {
+      width = 2
+
+      query = query.oci_database_autonomous_database_autoscaling_for_db
+      type  = "info"
       args = {
         id = self.input.db_id.value
       }

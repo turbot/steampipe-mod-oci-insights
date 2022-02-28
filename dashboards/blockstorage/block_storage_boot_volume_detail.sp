@@ -25,6 +25,19 @@ query "oci_block_storage_boot_volume_name_for_volume" {
   param "id" {}
 }
 
+query "oci_block_storage_boot_volume_storage_for_volume" {
+  sql = <<-EOQ
+    select
+      size_in_gbs as "Storage (GB)"
+    from
+      oci_core_boot_volume
+    where
+      id = $1 and lifecycle_state <> 'TERMINATED';
+  EOQ
+
+  param "id" {}
+}
+
 query "oci_block_storage_boot_volume_faulty_for_volume" {
   sql = <<-EOQ
     select
@@ -65,6 +78,11 @@ query "oci_block_storage_boot_volume_backup_for_volume" {
 dashboard "oci_block_storage_boot_volume_detail" {
   title = "OCI Block Storage Boot Volume Detail"
 
+  tags = merge(local.blockstorage_common_tags, {
+    type     = "Report"
+    category = "Detail"
+  })
+
   input "volume_id" {
     title = "Select a boot volume:"
     sql   = query.oci_block_storage_boot_volume_input.sql
@@ -78,6 +96,15 @@ dashboard "oci_block_storage_boot_volume_detail" {
       width = 2
 
       query = query.oci_block_storage_boot_volume_name_for_volume
+      args = {
+        id = self.input.volume_id.value
+      }
+    }
+
+    card {
+      width = 2
+
+      query = query.oci_block_storage_boot_volume_storage_for_volume
       args = {
         id = self.input.volume_id.value
       }

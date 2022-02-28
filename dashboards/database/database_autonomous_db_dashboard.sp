@@ -7,7 +7,7 @@ query "oci_database_autonomous_database_count" {
 query "oci_database_autonomous_db_total_cores" {
   sql = <<-EOQ
     select
-      sum(cpu_core_count)  as "Total OCPUs"
+      sum(cpu_core_count) as "Total OCPUs"
     from
       oci_database_autonomous_database;
   EOQ
