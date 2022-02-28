@@ -2,6 +2,10 @@ dashboard "oci_mysql_db_system_failed_report" {
 
   title = "OCI MySQL DB System Failed Report"
 
+  tags = merge(local.mysql_common_tags, {
+    type = "Report"
+  })
+
   container {
 
     card {

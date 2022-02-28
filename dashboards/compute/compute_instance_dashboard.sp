@@ -279,6 +279,10 @@ dashboard "oci_compute_instance_summary" {
 
   title = "OCI Compute Instance Dashboard"
 
+  tags = merge(local.compute_common_tags, {
+    type = "Dashboard"
+  })
+
   container {
 
     card {

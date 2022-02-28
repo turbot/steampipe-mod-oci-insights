@@ -306,6 +306,10 @@ dashboard "oci_database_autonomous_db_summary" {
 
   title = "OCI Autonomous Database Dashboard"
 
+  tags = merge(local.database_common_tags, {
+    type = "Dashboard"
+  })
+
   container {
 
     card {
@@ -414,7 +418,7 @@ dashboard "oci_database_autonomous_db_summary" {
       type  = "column"
       width = 3
     }
-    
+
     chart {
       title = "Autonomous Databases by Workload Type"
       sql   = query.oci_database_autonomous_db_by_workload_type.sql

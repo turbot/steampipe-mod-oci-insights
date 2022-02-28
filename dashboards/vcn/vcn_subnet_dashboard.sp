@@ -93,6 +93,10 @@ dashboard "oci_vcn_subnet_dashboard" {
 
   title = "OCI VCN Subnet Dashboard"
 
+  tags = merge(local.vcn_common_tags, {
+    type = "Dashboard"
+  })
+
   container {
 
     card {

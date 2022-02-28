@@ -72,6 +72,10 @@ dashboard "oci_vcn_network_security_group_dashboard" {
 
   title = "OCI VCN Network Security Group Dashboard"
 
+  tags = merge(local.vcn_common_tags, {
+    type = "Dashboard"
+  })
+  
   container {
 
     card {

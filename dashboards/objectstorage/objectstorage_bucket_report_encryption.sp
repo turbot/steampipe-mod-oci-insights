@@ -12,6 +12,11 @@ dashboard "oci_objectstorage_bucket_encryption_report" {
 
   title = "OCI Object Storage Bucket Encryption Report"
 
+  tags = merge(local.objectstorage_common_tags, {
+    type = "Report"
+    category = "Encryption"
+  })
+
   container {
 
     card {

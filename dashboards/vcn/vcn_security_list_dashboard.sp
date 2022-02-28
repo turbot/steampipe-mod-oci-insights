@@ -67,7 +67,12 @@ query "vcn_security_lists_by_region" {
 }
 
 dashboard "vcn_network_security_list_dashboard" {
+
   title = "OCI VCN Network Security List Dashboard"
+
+  tags = merge(local.vcn_common_tags, {
+    type = "Dashboard"
+  })
 
   container {
 

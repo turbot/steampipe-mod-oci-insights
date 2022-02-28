@@ -178,6 +178,10 @@ dashboard "oci_kms_key_summary" {
 
   title = "OCI KMS Key Dashboard"
 
+  tags = merge(local.kms_common_tags, {
+    type = "Dashboard"
+  })
+
   container {
 
     card {

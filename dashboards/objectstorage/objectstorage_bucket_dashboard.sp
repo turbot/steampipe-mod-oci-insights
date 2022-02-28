@@ -228,6 +228,10 @@ dashboard "oci_objectstorage_bucket_dashboard" {
 
   title = "OCI Object Storage Bucket Dashboard"
 
+  tags = merge(local.objectstorage_common_tags, {
+    type = "Dashboard"
+  })
+
   container {
 
     card {

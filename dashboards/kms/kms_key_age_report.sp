@@ -4,6 +4,10 @@ dashboard "oci_kms_key_age_report" {
 
   title = "OCI KMS Key Age Report"
 
+  tags = merge(local.kms_common_tags, {
+    type = "Report"
+    category = "Age"
+  })
 
   container {
 

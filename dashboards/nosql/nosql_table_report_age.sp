@@ -2,6 +2,11 @@ dashboard "oci_nosql_table_age_report" {
 
   title = "OCI NoSQL Table Age Report"
 
+  tags = merge(local.nosql_common_tags, {
+    type = "Report"
+    category = "Age"
+  })
+
   container {
 
     card {

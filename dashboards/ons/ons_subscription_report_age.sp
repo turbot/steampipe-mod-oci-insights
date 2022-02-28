@@ -2,6 +2,10 @@ dashboard "oci_ons_subscription_age_report" {
 
   title = "OCI ONS Subscription Age Report"
 
+  tags = merge(local.ons_common_tags, {
+    type = "Report"
+    category = "Age"
+  })
 
   container {
 

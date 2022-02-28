@@ -264,6 +264,10 @@ dashboard "oci_mysql_backup_dashboard" {
 
   title = "OCI MySQL Backup Dashboard"
 
+  tags = merge(local.mysql_common_tags, {
+    type = "Dashboard"
+  })
+
   container {
 
     card {

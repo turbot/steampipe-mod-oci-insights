@@ -174,6 +174,10 @@ dashboard "oci_ons_notification_topic_dashboard" {
 
   title = "OCI ONS Notification Topic Dashboard"
 
+  tags = merge(local.ons_common_tags, {
+    type = "Dashboard"
+  })
+
   container {
 
     card {

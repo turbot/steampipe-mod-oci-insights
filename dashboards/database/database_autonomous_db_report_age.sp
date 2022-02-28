@@ -2,6 +2,10 @@ dashboard "oci_database_autonomous_database_age_report" {
 
   title = "OCI Autonomous Database Age Report"
 
+  tags = merge(local.database_common_tags, {
+    type = "Report"
+    category = "Age"
+  })
 
   container {
 

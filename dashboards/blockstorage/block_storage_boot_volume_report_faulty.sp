@@ -2,6 +2,10 @@ dashboard "oci_block_storage_boot_volume_faulty_report" {
 
   title = "OCI Block Storage Boot Volume Faulty Report"
 
+  tags = merge(local.blockstorage_common_tags, {
+    type = "Report"
+  })
+  
   container {
 
     card {

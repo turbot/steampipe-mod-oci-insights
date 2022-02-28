@@ -239,6 +239,10 @@ dashboard "oci_identity_user_dashboard" {
 
   title = "OCI Identity User Dashboard"
 
+  tags = merge(local.identity_common_tags, {
+    type = "Dashboard"
+  })
+
   container {
 
     card {
