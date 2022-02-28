@@ -20,6 +20,11 @@ dashboard "oci_block_storage_block_volume_unattached_report" {
 
   title = "OCI Block Storage Block Volume Unattached Report"
 
+  tags = merge(local.blockstorage_common_tags, {
+    type = "Report"
+    category = "Unused"
+  })
+
   container {
 
     card {

@@ -2,6 +2,11 @@ dashboard "oci_vcn_subnet_flowlog_report" {
 
   title = "OCI VCN Subnet Flow Log Report"
 
+  tags = merge(local.vcn_common_tags, {
+    type = "Report"
+    category = "Logging"
+  })
+
   container {
 
     card {

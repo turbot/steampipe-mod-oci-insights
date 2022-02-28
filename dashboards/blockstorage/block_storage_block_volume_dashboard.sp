@@ -350,6 +350,10 @@ dashboard "oci_block_storage_block_volume_dashboard" {
 
   title = "OCI Block Storage Block Volume Dashboard"
 
+  tags = merge(local.blockstorage_common_tags, {
+    type = "Dashboard"
+  })
+
   container {
 
     card {

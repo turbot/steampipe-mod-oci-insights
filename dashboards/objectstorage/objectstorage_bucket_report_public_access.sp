@@ -2,6 +2,11 @@ dashboard "oci_objectstorage_bucket_public_access_report" {
 
   title = "OCI Object Storage Bucket Public Access Report"
 
+  tags = merge(local.objectstorage_common_tags, {
+    type = "Report"
+    category = "PublicAccess"
+  })
+
   container {
 
     card {

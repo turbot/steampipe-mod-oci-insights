@@ -147,6 +147,10 @@ dashboard "oci_ons_subscription_dashboard" {
 
   title = "OCI ONS Subscription Dashboard"
 
+  tags = merge(local.ons_common_tags, {
+    type = "Dashboard"
+  })
+
   container {
 
     card {
