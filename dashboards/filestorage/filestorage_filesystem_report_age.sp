@@ -18,7 +18,7 @@ dashboard "oci_filestorage_filesystem_age_report" {
         from
           oci_file_storage_file_system
         where
-          time_created > now() - '1 days' :: interval and lifecycle_state <> 'DELETED'
+          time_created > now() - '1 days' :: interval and lifecycle_state <> 'DELETED';
       EOQ
       width = 2
       type  = "info"
@@ -33,7 +33,7 @@ dashboard "oci_filestorage_filesystem_age_report" {
           oci_file_storage_file_system
         where
           time_created between symmetric now() - '1 days' :: interval and now() - '30 days' :: interval
-          and lifecycle_state <> 'DELETED'
+          and lifecycle_state <> 'DELETED';
       EOQ
       width = 2
       type  = "info"
@@ -48,7 +48,7 @@ dashboard "oci_filestorage_filesystem_age_report" {
           oci_file_storage_file_system
         where
           time_created between symmetric now() - '30 days' :: interval and now() - '90 days' :: interval
-          and lifecycle_state <> 'DELETED'
+          and lifecycle_state <> 'DELETED';
       EOQ
       width = 2
       type  = "info"
@@ -63,7 +63,7 @@ dashboard "oci_filestorage_filesystem_age_report" {
           oci_file_storage_file_system
         where
           time_created between symmetric (now() - '90 days'::interval) and (now() - '365 days'::interval)
-          and lifecycle_state <> 'DELETED'
+          and lifecycle_state <> 'DELETED';
       EOQ
       width = 2
       type  = "info"
@@ -77,7 +77,7 @@ dashboard "oci_filestorage_filesystem_age_report" {
         from
           oci_file_storage_file_system
         where
-          time_created <= now() - '1 year' :: interval and lifecycle_state <> 'DELETED'
+          time_created <= now() - '1 year' :: interval and lifecycle_state <> 'DELETED';
       EOQ
       width = 2
       type  = "info"
@@ -108,7 +108,7 @@ dashboard "oci_filestorage_filesystem_age_report" {
           k.lifecycle_state <> 'DELETED'
         order by
           k.time_created,
-          k.title
+          k.title;
       EOQ
     }
 

@@ -1,6 +1,6 @@
 query "oci_kms_key_count" {
   sql = <<-EOQ
-    select count(*) as "Keys" from oci_kms_key
+    select count(*) as "Keys" from oci_kms_key;
   EOQ
 }
 
@@ -13,20 +13,20 @@ query "oci_kms_key_disabled_count" {
     from
       oci_kms_key
     where
-      lifecycle_state = 'DISABLED'
+      lifecycle_state = 'DISABLED';
   EOQ
 }
 
 # Key count by protection_mode i.e. HSM or Software
 query "oci_kms_hsm_key_count" {
   sql = <<-EOQ
-    select count(*) as "HSM Based Keys" from oci_kms_key where protection_mode = 'HSM' and lifecycle_state <> 'DELETED'
+    select count(*) as "HSM Based Keys" from oci_kms_key where protection_mode = 'HSM' and lifecycle_state <> 'DELETED';
   EOQ
 }
 
 query "oci_kms_software_key_count" {
   sql = <<-EOQ
-    select count(*) as "Software Based Keys" from oci_kms_key where protection_mode = 'SOFTWARE' and lifecycle_state <> 'DELETED'
+    select count(*) as "Software Based Keys" from oci_kms_key where protection_mode = 'SOFTWARE' and lifecycle_state <> 'DELETED';
   EOQ
 }
 
@@ -59,7 +59,7 @@ query "oci_database_autonomous_db_by_protection_mode" {
     from
       oci_kms_key
     group by
-      protection_mode
+      protection_mode;
   EOQ
 }
 
@@ -78,7 +78,7 @@ query "oci_kms_key_by_tenancy" {
     group by
       t.name
     order by
-      t.name
+      t.name;
   EOQ
 }
 
@@ -113,7 +113,7 @@ query "oci_kms_key_by_compartment" {
       c.title
     order by
       b.title,
-      c.title
+      c.title;
   EOQ
 }
 
@@ -125,7 +125,7 @@ query "oci_kms_key_by_region" {
     from
       oci_kms_key as k
     group by
-      region
+      region;
   EOQ
 }
 

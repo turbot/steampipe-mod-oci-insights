@@ -7,7 +7,7 @@ query "oci_identity_user_mfa_not_enabled_count" {
     from
       oci_identity_user
     where
-      not is_mfa_activated
+      not is_mfa_activated;
   EOQ
 }
 
@@ -41,7 +41,7 @@ dashboard "oci_identity_user_mfa_report" {
       from
         oci_identity_user
       order by
-        is_mfa_activated
+        is_mfa_activated;
       EOQ
     }
   }

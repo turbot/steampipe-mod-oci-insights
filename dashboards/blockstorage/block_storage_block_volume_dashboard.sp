@@ -1,6 +1,6 @@
 query "oci_block_storage_block_volume_count" {
   sql = <<-EOQ
-    select count(*) as "Block Volumes" from oci_core_volume where lifecycle_state <> 'TERMINATED'
+    select count(*) as "Block Volumes" from oci_core_volume where lifecycle_state <> 'TERMINATED';
   EOQ
 }
 
@@ -11,7 +11,7 @@ query "oci_block_storage_block_volume_storage_total" {
     from
       oci_core_volume
     where
-      lifecycle_state <> 'TERMINATED'
+      lifecycle_state <> 'TERMINATED';
   EOQ
 }
 
@@ -22,7 +22,7 @@ query "oci_block_storage_block_volume_default_encrypted_volumes_count" {
     from
       oci_core_volume
     where
-      kms_key_id is null and lifecycle_state <> 'TERMINATED'
+      kms_key_id is null and lifecycle_state <> 'TERMINATED';
   EOQ
 }
 
@@ -35,7 +35,7 @@ query "oci_block_storage_block_volume_faulty_volumes_count" {
     from
       oci_core_volume
     where
-      lifecycle_state = 'FAULTY'
+      lifecycle_state = 'FAULTY';
   EOQ
 }
 
@@ -55,7 +55,7 @@ query "oci_block_storage_block_volume_with_no_backups_count" {
       v.region,
       v.id
     having
-      count(b.id) = 0
+      count(b.id) = 0;
   EOQ
 }
 
@@ -80,7 +80,7 @@ query "oci_block_storage_block_volume_by_encryption_status" {
     group by
       encryption_status
     order by
-      encryption_status desc
+      encryption_status desc;
   EOQ
 }
 
@@ -94,7 +94,7 @@ query "oci_block_storage_block_volume_by_lifecycle_state" {
     where
       lifecycle_state <> 'TERMINATED'
     group by
-      lifecycle_state
+      lifecycle_state;
   EOQ
 }
 
@@ -111,7 +111,7 @@ query "oci_block_storage_block_volume_with_no_backups" {
     group by
       v.display_name
     having
-      count(b.id) = 0
+      count(b.id) = 0;
   EOQ
 }
 
@@ -130,7 +130,7 @@ query "oci_block_storage_block_volume_by_tenancy" {
     group by
       t.name
     order by
-      t.name
+      t.name;
   EOQ
 }
 
@@ -165,7 +165,7 @@ query "oci_block_storage_block_volume_by_compartment" {
       c.title
     order by
       b.title,
-      c.title
+      c.title;
   EOQ
 }
 
@@ -179,7 +179,7 @@ query "oci_block_storage_block_volume_by_region" {
     where
       lifecycle_state <> 'TERMINATED'
     group by
-      region
+      region;
   EOQ
 }
 
@@ -226,7 +226,7 @@ query "oci_block_storage_block_volume_by_creation_month" {
       months
       left join volumes_by_month on months.month = volumes_by_month.creation_month
     order by
-      months.month
+      months.month;
   EOQ
 }
 
@@ -245,7 +245,7 @@ query "oci_block_storage_block_volume_storage_by_tenancy" {
     group by
       c.title
     order by
-      c.title
+      c.title;
   EOQ
 }
 
@@ -280,7 +280,7 @@ query "oci_block_storage_block_volume_storage_by_compartment" {
       c.title
     order by
       b.title,
-      c.title
+      c.title;
   EOQ
 }
 
@@ -294,7 +294,7 @@ query "oci_block_storage_block_volume_storage_by_region" {
     where
       lifecycle_state <> 'TERMINATED'
     group by
-      region
+      region;
   EOQ
 }
 

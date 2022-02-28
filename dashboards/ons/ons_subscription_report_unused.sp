@@ -31,7 +31,7 @@ dashboard "oci_ons_subscription_unused_report" {
         left join oci_identity_tenancy as t on v.tenant_id = t.id
       order by
         v.created_time,
-        v.title
+        v.title;
     EOQ
   }
 

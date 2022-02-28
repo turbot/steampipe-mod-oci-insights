@@ -1,12 +1,12 @@
 query "oci_identity_user_count" {
   sql = <<-EOQ
-    select count(*) as "Users" from oci_identity_user
+    select count(*) as "Users" from oci_identity_user;
   EOQ
 }
 
 query "oci_identity_user_unverified_email_count" {
   sql = <<-EOQ
-    select count(*) as "Users With Unverified Email " from oci_identity_user where not email_verified
+    select count(*) as "Users With Unverified Email " from oci_identity_user where not email_verified;
   EOQ
 }
 
@@ -45,19 +45,19 @@ query "oci_identity_mfa_not_enabled_users_count" {
     from
       oci_identity_user
     where
-      not is_mfa_activated
+      not is_mfa_activated;
   EOQ
 }
 
 query "oci_identity_console_login_enabled_users_count" {
   sql = <<-EOQ
-  select count(*) as "Console Login Enabled" from oci_identity_user where can_use_api_keys
+  select count(*) as "Console Login Enabled" from oci_identity_user where can_use_api_keys;
   EOQ
 }
 
 query "oci_identity_users_can_use_api_key_count" {
   sql = <<-EOQ
-  select count(*) as "API Key Use Enabled" from oci_identity_user where can_use_api_keys
+  select count(*) as "API Key Use Enabled" from oci_identity_user where can_use_api_keys;
   EOQ
 }
 
@@ -71,7 +71,7 @@ query "oci_identity_user_access_key_age_gt_90_days" {
     oci_identity_api_key
   where
     time_created > now() - interval '90 days' and
-    lifecycle_state = 'ACTIVE'
+    lifecycle_state = 'ACTIVE';
   EOQ
 }
 
@@ -100,7 +100,7 @@ query "oci_identity_users_by_tenancy" {
       t.id = u.tenant_id
     group by
       tenancy
-    order by count(u.*) desc
+    order by count(u.*) desc;
   EOQ
 }
 
@@ -162,7 +162,7 @@ query "oci_identity_user_mfa_enabled_by_tenancy" {
     group by
       tenancy
     order by
-      tenancy
+      tenancy;
   EOQ
 }
 
@@ -177,7 +177,7 @@ query "oci_identity_user_by_type" {
     group by
       user_type
     order by
-      user_type
+      user_type;
   EOQ
 }
 
@@ -201,7 +201,7 @@ query "oci_identity_user_by_groups" {
     group by
       group_name
     order by
-      group_name
+      group_name;
   EOQ
 }
 

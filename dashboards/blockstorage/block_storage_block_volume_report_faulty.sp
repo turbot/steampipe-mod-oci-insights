@@ -8,7 +8,7 @@ dashboard "oci_block_storage_block_volume_faulty_report" {
       sql   = query.oci_block_storage_block_volume_count.sql
       width = 2
     }
-    
+
     card {
       sql   = query.oci_block_storage_block_volume_faulty_volumes_count.sql
       width = 2
@@ -34,7 +34,7 @@ dashboard "oci_block_storage_block_volume_faulty_report" {
           v.lifecycle_state <> 'TERMINATED'
         order by
           v.time_created,
-          v.title
+          v.title;
     EOQ
   }
 

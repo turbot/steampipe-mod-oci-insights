@@ -7,7 +7,7 @@ query "oci_objectstorage_bucket_report_versioning_disabled_count" {
     from
       oci_objectstorage_bucket
     where
-      versioning = 'Disabled'
+      versioning = 'Disabled';
   EOQ
 }
 
@@ -46,7 +46,7 @@ dashboard "oci_objectstorage_bucket_lifecycle_report" {
           v.versioning = 'Disabled'
         order by
           v.time_created,
-          v.title
+          v.title;
     EOQ
   }
 

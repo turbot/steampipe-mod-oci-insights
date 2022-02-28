@@ -1,6 +1,6 @@
 query "oci_objectstorage_bucket_count" {
   sql = <<-EOQ
-    select count(*) as "Buckets" from oci_objectstorage_bucket
+    select count(*) as "Buckets" from oci_objectstorage_bucket;
   EOQ
 }
 
@@ -11,7 +11,7 @@ query "oci_objectstorage_bucket_read_only_access_count" {
     from
       oci_objectstorage_bucket
     where
-      is_read_only
+      is_read_only;
   EOQ
 }
 
@@ -21,7 +21,7 @@ query "oci_objectstorage_bucket_default_encryption_count" {
     from
       oci_objectstorage_bucket
     where
-    kms_key_id is null
+    kms_key_id is null;
   EOQ
 }
 
@@ -31,7 +31,7 @@ query "oci_objectstorage_bucket_archived_count" {
     from
       oci_objectstorage_bucket
     where
-    storage_tier = 'Archive'
+    storage_tier = 'Archive';
   EOQ
 }
 
@@ -44,7 +44,7 @@ query "oci_objectstorage_bucket_public_access_count" {
     from
       oci_objectstorage_bucket
     where
-      public_access_type <> 'NoPublicAccess'
+      public_access_type <> 'NoPublicAccess';
   EOQ
 }
 
@@ -57,7 +57,7 @@ query "oci_objectstorage_bucket_versioning_disabled_count" {
     from
       oci_objectstorage_bucket
     where
-      versioning = 'Disabled'
+      versioning = 'Disabled';
   EOQ
 }
 
@@ -80,7 +80,7 @@ query "oci_objectstorage_bucket_encryption_status" {
     group by
       encryption_status
     order by
-      encryption_status desc
+      encryption_status desc;
   EOQ
 }
 
@@ -94,7 +94,7 @@ query "oci_objectstorage_bucket_versioning_status" {
     group by
       versioning
     order by
-      versioning desc
+      versioning desc;
   EOQ
 }
 
@@ -108,7 +108,7 @@ query "oci_objectstorage_bucket_public_access_status" {
     group by
       public_access_type
     order by
-      public_access_type desc
+      public_access_type desc;
   EOQ
 }
 
@@ -127,7 +127,7 @@ query "oci_objectstorage_bucket_by_tenancy" {
     group by
       c.title
     order by
-      c.title
+      c.title;
   EOQ
 }
 
@@ -163,7 +163,7 @@ query "oci_objectstorage_bucket_by_compartment" {
       c.title
     order by
       b.title,
-      c.title
+      c.title;
   EOQ
 }
 
@@ -175,7 +175,7 @@ query "oci_objectstorage_bucket_by_region" {
     group by
       region
     order by
-      region
+      region;
   EOQ
 }
 
