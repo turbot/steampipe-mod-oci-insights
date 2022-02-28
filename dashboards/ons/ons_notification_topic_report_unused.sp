@@ -2,6 +2,11 @@ dashboard "oci_ons_notification_topic_unused_report" {
 
   title = "OCI ONS Notification Topic Unused Report"
 
+  tags = merge(local.ons_common_tags, {
+    type = "Report"
+    category = "Unused"
+  })
+
   container {
 
     card {

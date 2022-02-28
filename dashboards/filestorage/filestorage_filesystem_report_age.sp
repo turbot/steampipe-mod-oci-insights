@@ -2,6 +2,10 @@ dashboard "oci_filestorage_filesystem_age_report" {
 
   title = "OCI File Storage File System Age Report"
 
+  tags = merge(local.filestorage_common_tags, {
+    type = "Report"
+    category = "Age"
+  })
 
   container {
 

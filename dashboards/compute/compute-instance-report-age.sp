@@ -2,6 +2,11 @@ dashboard "oci_compute_instance_age_report" {
 
   title = "OCI Compute Instance Age Report"
 
+  tags = merge(local.compute_common_tags, {
+    type = "Report"
+    category = "Age"
+  })
+
   container {
 
     card {

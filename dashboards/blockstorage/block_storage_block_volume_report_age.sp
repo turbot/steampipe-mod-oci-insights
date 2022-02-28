@@ -2,6 +2,10 @@ dashboard "oci_block_storage_block_volume_age_report" {
 
   title = "OCI Block Storage Block Volume Age Report"
 
+  tags = merge(local.blockstorage_common_tags, {
+    type = "Report"
+    category = "Age"
+  })
 
   container {
 

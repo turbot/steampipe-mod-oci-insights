@@ -2,6 +2,10 @@ dashboard "oci_mysql_backup_age_report" {
 
   title = "OCI MySQL Backup Age Report"
 
+  tags = merge(local.mysql_common_tags, {
+    type = "Report"
+    category = "Age"
+  })
 
   container {
 

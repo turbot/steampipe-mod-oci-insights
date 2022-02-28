@@ -410,6 +410,10 @@ dashboard "oci_mysql_db_system_dashboard" {
 
   title = "OCI MySQL DB System Dashboard"
 
+  tags = merge(local.mysql_common_tags, {
+    type = "Dashboard"
+  })
+
   container {
 
     card {

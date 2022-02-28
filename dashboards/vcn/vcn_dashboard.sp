@@ -136,6 +136,10 @@ dashboard "oci_core_vcn_dashboard" {
 
   title = "OCI VCN Dashboard"
 
+  tags = merge(local.vcn_common_tags, {
+    type = "Dashboard"
+  })
+
   container {
 
     card {

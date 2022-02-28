@@ -249,6 +249,10 @@ dashboard "oci_nosql_table_dashboard" {
 
   title = "OCI NoSQL Table Dashboard"
 
+  tags = merge(local.nosql_common_tags, {
+    type = "Dashboard"
+  })
+
   container {
 
     card {

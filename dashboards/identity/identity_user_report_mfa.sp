@@ -15,6 +15,10 @@ dashboard "oci_identity_user_mfa_report" {
 
   title = "OCI Identity User MFA Report"
 
+  tags = merge(local.identity_common_tags, {
+    type = "Report"
+  })
+
   container {
 
     card {

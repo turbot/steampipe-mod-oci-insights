@@ -15,6 +15,11 @@ dashboard "oci_objectstorage_bucket_lifecycle_report" {
 
   title = "OCI Object Storage Bucket Lifecycle Report"
 
+  tags = merge(local.objectstorage_common_tags, {
+    type = "Report"
+    category = "LifeCycle"
+  })
+
   container {
 
     card {
