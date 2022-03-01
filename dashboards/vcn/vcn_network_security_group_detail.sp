@@ -103,8 +103,7 @@ dashboard "oci_vcn_network_security_group_detail" {
   title = "OCI VCN Network Security Group Detail"
 
   tags = merge(local.vcn_common_tags, {
-    type     = "Report"
-    category = "Detail"
+    type     = "Detail"
   })
 
   input "security_group_id" {
@@ -180,7 +179,7 @@ dashboard "oci_vcn_network_security_group_detail" {
         width = 6
 
         sql = <<-EOQ
-          WITH jsondata AS (
+          with jsondata as (
             select
               tags::json as tags
             from
