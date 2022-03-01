@@ -1,4 +1,4 @@
-query "vcn_security_lists_by_compartment" {
+query "oci_vcn_security_lists_by_compartment" {
   sql = <<-EOQ
     with compartments as (
       select
@@ -33,7 +33,7 @@ query "vcn_security_lists_by_compartment" {
   EOQ
 }
 
-query "vcn_security_lists_by_tenancy" {
+query "oci_vcn_security_lists_by_tenancy" {
   sql = <<-EOQ
     select
       c.title as "Tenancy",
@@ -50,7 +50,7 @@ query "vcn_security_lists_by_tenancy" {
   EOQ
 }
 
-query "vcn_security_lists_by_region" {
+query "oci_vcn_security_lists_by_region" {
   sql = <<-EOQ
     select
       region as "Region",
@@ -66,7 +66,7 @@ query "vcn_security_lists_by_region" {
   EOQ
 }
 
-dashboard "vcn_network_security_list_dashboard" {
+dashboard "oci_vcn_network_security_list_dashboard" {
 
   title = "OCI VCN Network Security List Dashboard"
 
@@ -302,33 +302,33 @@ dashboard "vcn_network_security_list_dashboard" {
     }
   }
 
- container {
+  container {
     title = "Analysis"
 
     chart {
       title = "Network Security Lists by Tenancy"
-      sql = query.vcn_security_lists_by_tenancy.sql
+      sql   = query.oci_vcn_security_lists_by_tenancy.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Network Security Lists by Compartment"
-      sql = query.vcn_security_lists_by_compartment.sql
+      sql   = query.oci_vcn_security_lists_by_compartment.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Network Security Lists by Region"
-      sql = query.vcn_security_lists_by_region.sql
+      sql   = query.oci_vcn_security_lists_by_region.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Network Security Lists by VCN"
-      sql = <<-EOQ
+      sql   = <<-EOQ
         select
           v.display_name as "VCN",
           count(*) as "security_lists"

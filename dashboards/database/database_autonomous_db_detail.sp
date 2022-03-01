@@ -127,7 +127,6 @@ dashboard "oci_database_autonomous_database_detail" {
       width = 2
 
       query = query.oci_database_autonomous_database_autoscaling_for_db
-      type  = "info"
       args = {
         id = self.input.db_id.value
       }
@@ -135,7 +134,6 @@ dashboard "oci_database_autonomous_database_detail" {
 
     card {
       query = query.oci_database_autonomous_database_data_guard_for_db
-      type  = "info"
       width = 2
 
       args = {

@@ -56,6 +56,11 @@ query "oci_kms_key_protection_mode_for_key" {
 dashboard "oci_kms_key_detail" {
   title = "OCI KMS Key Detail"
 
+  tags = merge(local.kms_common_tags, {
+    type     = "Report"
+    category = "Detail"
+  })
+
   input "key_id" {
     title = "Select a key:"
     sql   = query.oci_kms_key_input.sql
@@ -85,7 +90,6 @@ dashboard "oci_kms_key_detail" {
 
     card {
       query = query.oci_kms_key_protection_mode_for_key
-      type  = "info"
       width = 2
 
       args = {

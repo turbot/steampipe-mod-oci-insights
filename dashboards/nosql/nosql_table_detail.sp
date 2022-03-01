@@ -90,7 +90,6 @@ dashboard "oci_nosql_table_detail" {
 
     card {
       query = query.oci_nosql_table_auto_reclaimable_for_table
-      type  = "info"
       width = 2
 
       args = {
