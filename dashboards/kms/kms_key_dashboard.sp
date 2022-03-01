@@ -31,23 +31,54 @@ query "oci_kms_software_key_count" {
 }
 
 # Assessments
+# query "oci_kms_key_lifecycle_state" {
+#   sql = <<-EOQ
+#       with lifecycles as (
+#         select
+#           lifecycle_state
+#         from
+#           oci_kms_key
+#         where lifecycle_state IN ('PENDING_DELETION','DISABLED','ENABLED')
+#         )
+#         select
+#           lifecycle_state,
+#           count(lifecycle_state)
+#         from
+#           lifecycles
+#         group by
+#           lifecycle_state;
+#   EOQ
+# }
 
 query "oci_kms_key_lifecycle_state" {
   sql = <<-EOQ
-      with lifecycles as (
-        select
-          lifecycle_state
-        from
-          oci_kms_key
-        where lifecycle_state IN ('PENDING_DELETION','DISABLED','ENABLED')
-        )
-        select
-          lifecycle_state,
-          count(lifecycle_state)
-        from
-          lifecycles
-        group by
-          lifecycle_state;
+    with lifecycle_stat as (
+      select
+        case
+          when lifecycle_state = 'DISABLED' then 'disabled'
+          when lifecycle_state = 'PENDING_DELETION' then 'pending_deletion'
+          when lifecycle_state = 'ENABLING' then 'enabling'
+          when lifecycle_state = 'CREATING' then 'creating'
+          when lifecycle_state = 'DISABLING' then 'disabling'
+          when lifecycle_state = 'DELETING' then 'deleting'
+          when lifecycle_state = 'SCHEDULING_DELETION' then 'scheduling_deletion'
+          when lifecycle_state = 'CANCELLING_DELETION' then 'cancelling_deletion'
+          when lifecycle_state = 'UPDATING' then 'updating'
+          when lifecycle_state = 'BACKUP_IN_PROGRESS' then 'backup_in_progress'
+          when lifecycle_state = 'RESTORING' then 'restoring'
+          else 'enabled'
+        end as lifecycle_stat
+      from
+        oci_kms_key
+      where lifecycle_state <> 'DELETED'
+    )
+      select
+        lifecycle_stat,
+        count(*)
+      from
+        lifecycle_stat
+      group by
+        lifecycle_stat
   EOQ
 }
 
@@ -190,12 +221,6 @@ dashboard "oci_kms_key_summary" {
     }
 
     card {
-      sql   = query.oci_kms_key_disabled_count.sql
-      width = 2
-      type  = "info"
-    }
-
-    card {
       sql   = query.oci_kms_hsm_key_count.sql
       width = 2
       type  = "info"
@@ -207,17 +232,31 @@ dashboard "oci_kms_key_summary" {
       type  = "info"
     }
 
+    card {
+      sql   = query.oci_kms_key_disabled_count.sql
+      width = 2
+    }
+
   }
 
   container {
     title = "Assessments"
-    width = 6
+    # width = 6
 
     chart {
       title = "Lifecycle State"
       sql   = query.oci_kms_key_lifecycle_state.sql
       type  = "donut"
       width = 3
+
+      series "count" {
+        point "enabled" {
+          color = "green"
+        }
+        point "disabled" {
+          color = "red"
+        }
+      }
     }
 
     chart {

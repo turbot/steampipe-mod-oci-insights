@@ -113,7 +113,7 @@ dashboard "oci_vcn_subnet_dashboard" {
 
   container {
     title = "Assessments"
-    width = 6
+    # width = 6
 
     chart {
       title = "Subnet Flow Log Status"
@@ -124,8 +124,8 @@ dashboard "oci_vcn_subnet_dashboard" {
           select
            s.id,
            case
-             when l.is_enabled is null or not l.is_enabled then 'Not Configured'
-             else 'Configured'
+             when l.is_enabled is null or not l.is_enabled then 'disabled'
+             else 'enabled'
            end as flow_logs_configured
            from
              oci_core_subnet as s
@@ -142,6 +142,15 @@ dashboard "oci_vcn_subnet_dashboard" {
         group by
           flow_logs_configured;
       EOQ
+
+      series "count" {
+        point "enabled" {
+          color = "green"
+        }
+        point "disabled" {
+          color = "red"
+        }
+      }
     }
 
   }

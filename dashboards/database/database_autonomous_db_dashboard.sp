@@ -26,7 +26,7 @@ query "oci_database_autonomous_database_need_attention_count" {
   sql = <<-EOQ
     select
       count(*) as  value,
-      'Need Attention State' as label,
+      'Need Attention' as label,
       case count(*) when 0 then 'ok' else 'alert' end as type
     from
       oci_database_autonomous_database
@@ -53,6 +53,7 @@ query "oci_database_autonomous_db_autoscaling_count" {
 }
 
 # Assessments
+# https://pkg.go.dev/github.com/oracle/oci-go-sdk@v24.3.0+incompatible/database#AutonomousDatabaseLifecycleStateEnum
 query "oci_database_autonomous_db_by_state" {
   sql = <<-EOQ
     select
@@ -92,23 +93,19 @@ query "oci_database_autonomous_db_data_guard_status" {
   sql = <<-EOQ
     with dataguard_stat as (
       select
-        db_name as name
+        case
+          when is_data_guard_enabled then 'enabled'
+          else 'disabled'
+        end as dataguard_stat
       from
         oci_database_autonomous_database
-      where
-        is_data_guard_enabled
       )
-      select
-        'Enabled' as "Data Guard Status",
-        count(name) as "Total"
-      from
-        dataguard_stat
-    union
-    select
-      'Disabled' as "Data Guard Status",
-      count( db_name) as "Total"
-    from
-      oci_database_autonomous_database as s where s.db_name not in (select name from dataguard_stat);
+  select
+    dataguard_stat,
+    count(*)
+  from
+    dataguard_stat
+    group by dataguard_stat
   EOQ
 }
 
@@ -121,9 +118,9 @@ query "oci_database_autonomous_db_by_operations_insights_status" {
     from (
       select operations_insights_status,
         case when operations_insights_status = 'NOT_ENABLED' then
-          'Disabled'
+          'disabled'
         else
-          'Enabled'
+          'enabled'
         end insight_status
       from
         oci_database_autonomous_database) as t
@@ -144,9 +141,9 @@ query "oci_database_autonomous_db_by_permission_level" {
     from (
       select permission_level,
         case when permission_level = 'RESTRICTED' then
-          'Restricted'
+          'restricted'
         else
-          'Unrestricted'
+          'unrestricted'
         end permission_status
       from
         oci_database_autonomous_database) as t
@@ -156,6 +153,23 @@ query "oci_database_autonomous_db_by_permission_level" {
       permission_status desc;
   EOQ
 }
+
+  #   with dataguard_stat as (
+  #     select
+  #       case
+  #         when is_data_guard_enabled then 'enabled'
+  #         else 'disabled'
+  #       end as dataguard_stat
+  #     from
+  #       oci_database_autonomous_database
+  #     )
+  # select
+  #   dataguard_stat,
+  #   count(*)
+  # from
+  #   dataguard_stat
+  #   group by dataguard_stat
+
 
 # Analysis
 query "oci_database_autonomous_db_by_tenancy" {
@@ -330,7 +344,7 @@ dashboard "oci_database_autonomous_db_summary" {
     card {
       sql   = query.oci_database_autonomous_db_with_data_guard.sql
       width = 2
-      type  = "info"
+      type = "info"
     }
 
     card {
@@ -349,20 +363,22 @@ dashboard "oci_database_autonomous_db_summary" {
 
   container {
     title = "Assessments"
-    width = 6
+    # width = 6
 
     chart {
       title = "Data Guard Status"
       sql   = query.oci_database_autonomous_db_data_guard_status.sql
       type  = "donut"
       width = 3
-    }
 
-    chart {
-      title = "Lifecycle State"
-      sql   = query.oci_database_autonomous_db_by_state.sql
-      type  = "donut"
-      width = 3
+      series "count" {
+        point "enabled" {
+          color = "green"
+        }
+        point "disabled" {
+          color = "red"
+        }
+      }
     }
 
     chart {
@@ -371,9 +387,14 @@ dashboard "oci_database_autonomous_db_summary" {
       type  = "donut"
       width = 3
 
-      # series "Enabled" {
-      #   color = "green"
-      # }
+      series "count" {
+        point "enabled" {
+          color = "green"
+        }
+        point "disabled" {
+          color = "red"
+        }
+      }
     }
 
     chart {
@@ -382,9 +403,21 @@ dashboard "oci_database_autonomous_db_summary" {
       type  = "donut"
       width = 3
 
-      # series "Restricted" {
-      #   color = "green"
-      # }
+      series "count" {
+        point "restricted" {
+          color = "green"
+        }
+        point "unrestricted" {
+          color = "red"
+        }
+      }
+    }
+    
+    chart {
+      title = "Lifecycle State"
+      sql   = query.oci_database_autonomous_db_by_state.sql
+      type  = "donut"
+      width = 3
     }
   }
 

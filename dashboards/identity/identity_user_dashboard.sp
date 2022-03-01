@@ -4,6 +4,40 @@ query "oci_identity_user_count" {
   EOQ
 }
 
+query "oci_identity_mfa_not_enabled_users_count" {
+  sql = <<-EOQ
+    select
+      count(*) as  value,
+      'MFA Disabled' as label,
+      case count(*) when 0 then 'ok' else 'alert' end as type
+    from
+      oci_identity_user
+    where
+      not is_mfa_activated;
+  EOQ
+}
+
+query "oci_identity_user_mfa_enabled" {
+  sql = <<-EOQ
+    with mfa_stat as (
+      select
+        case
+          when is_mfa_activated then 'enabled'
+          else 'disabled'
+        end as mfa_stat
+      from
+        oci_identity_user
+    )
+    select
+      mfa_stat,
+      count(*)
+    from
+      mfa_stat
+    group by
+      mfa_stat
+  EOQ
+}
+
 query "oci_identity_user_unverified_email_count" {
   sql = <<-EOQ
     select count(*) as "Users With Unverified Email " from oci_identity_user where not email_verified;
@@ -33,19 +67,6 @@ query "oci_identity_user_inactive_api_key_count" {
       oci_identity_api_key
     where
       lifecycle_state = 'INACTIVE';
-  EOQ
-}
-
-query "oci_identity_mfa_not_enabled_users_count" {
-  sql = <<-EOQ
-    select
-      count(*) as  value,
-      'MFA Disabled' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as type
-    from
-      oci_identity_user
-    where
-      not is_mfa_activated;
   EOQ
 }
 
@@ -87,6 +108,8 @@ query "oci_identity_user_not_attached_to_groups" {
     inner join oci_identity_group ON (oci_identity_group.id = user_group ->> 'groupId' );
   EOQ
 }
+
+# Analysis
 
 query "oci_identity_users_by_tenancy" {
   sql = <<-EOQ
@@ -166,7 +189,7 @@ query "oci_identity_user_mfa_enabled_by_tenancy" {
   EOQ
 }
 
-# This can be shown as stacked bar for each tanancy?
+
 query "oci_identity_user_by_type" {
   sql = <<-EOQ
     select
@@ -207,25 +230,21 @@ query "oci_identity_user_by_groups" {
 
 query "oci_identity_user_by_verified_email" {
   sql = <<-EOQ
-    with verified_email_stat as (
+    with email_stat as (
       select
-      name as name
+        case
+          when email_verified then 'verified' else 'unverified'
+        end as email_stat
       from
         oci_identity_user
-      where
-        email_verified
-      )
+    )
       select
-        'Verified' as "Email Verification Status",
-        count(name) as "Users"
+        email_stat,
+        count(*)
       from
-        verified_email_stat
-    union
-    select
-      'Unverified' as "Email Verification Status",
-      count(name) as "Users"
-    from
-      oci_identity_user as s where s.name not in (select name from verified_email_stat);
+        email_stat
+      group by
+        email_stat
   EOQ
 }
 
@@ -283,9 +302,18 @@ dashboard "oci_identity_user_dashboard" {
 
     chart {
       title = "MFA Enabled Users"
-      sql   = query.oci_identity_user_mfa_enabled_by_tenancy.sql
+      sql   = query.oci_identity_user_mfa_enabled.sql
       type  = "donut"
       width = 4
+
+      series "count" {
+        point "enabled" {
+          color = "green"
+        }
+        point "disabled" {
+          color = "red"
+        }
+      }
     }
 
     chart {
@@ -293,6 +321,15 @@ dashboard "oci_identity_user_dashboard" {
       sql   = query.oci_identity_user_by_verified_email.sql
       type  = "donut"
       width = 4
+
+      series "count" {
+        point "verified" {
+          color = "green"
+        }
+        point "unverified" {
+          color = "red"
+        }
+      }
     }
 
   }

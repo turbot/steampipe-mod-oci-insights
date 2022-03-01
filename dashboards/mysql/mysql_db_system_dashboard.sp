@@ -77,7 +77,7 @@ query "oci_mysql_db_system_backup_disabled_count" {
 
 # Assessments
 
-query "oci_mysql_db_system_by_lifecycle_state" {
+query "oci_mysql_db_system_by_lifecycle_state_1" {
   sql = <<-EOQ
     select
       lifecycle_state,
@@ -88,6 +88,32 @@ query "oci_mysql_db_system_by_lifecycle_state" {
       lifecycle_state <> 'DELETED'
     group by
       lifecycle_state;
+  EOQ
+}
+
+query "oci_mysql_db_system_by_lifecycle_state" {
+  sql = <<-EOQ
+    with lifecycle_stat as (
+      select
+        case
+          when lifecycle_state = 'FAILED' then 'failed'
+          when lifecycle_state = 'INACTIVE' then 'inactive'
+          when lifecycle_state = 'CREATING' then 'creating'
+          when lifecycle_state = 'DELETING' then 'deleting'
+          when lifecycle_state = 'UPDATING' then 'updating'
+          else 'active'
+        end as lifecycle_stat
+      from
+        oci_mysql_db_system
+      where lifecycle_state <> 'DELETED'
+    )
+      select
+        lifecycle_stat,
+        count(*)
+      from
+        lifecycle_stat
+      group by
+        lifecycle_stat
   EOQ
 }
 
@@ -417,77 +443,86 @@ dashboard "oci_mysql_db_system_dashboard" {
   container {
 
     card {
-      sql = query.oci_mysql_db_system_count.sql
+      sql   = query.oci_mysql_db_system_count.sql
       width = 2
     }
 
     card {
-      sql = query.oci_mysql_db_system_storage_total.sql
+      sql   = query.oci_mysql_db_system_storage_total.sql
       width = 2
     }
 
     card {
-      sql = query.oci_mysql_db_system_analytics_cluster_attached_count.sql
+      sql   = query.oci_mysql_db_system_analytics_cluster_attached_count.sql
       width = 2
     }
 
     card {
-      sql = query.oci_mysql_db_system_heat_wave_cluster_attached_count.sql
+      sql   = query.oci_mysql_db_system_heat_wave_cluster_attached_count.sql
       width = 2
     }
 
 
     card {
-      sql = query.oci_mysql_db_system_failed_lifecycle_count.sql
+      sql   = query.oci_mysql_db_system_failed_lifecycle_count.sql
       width = 2
     }
 
     card {
-      sql = query.oci_mysql_db_system_backup_disabled_count.sql
+      sql   = query.oci_mysql_db_system_backup_disabled_count.sql
       width = 2
     }
   }
 
   container {
-      title = "Assessments"
-      width = 6
+    title = "Assessments"
+    width = 6
 
-      chart {
-        title = "Lifecycle State"
-        sql = query.oci_mysql_db_system_by_lifecycle_state.sql
-        type  = "donut"
-        width = 4
+    chart {
+      title = "Lifecycle State"
+      sql   = query.oci_mysql_db_system_by_lifecycle_state.sql
+      type  = "donut"
+      width = 4
 
+      series "count" {
+        point "active" {
+          color = "green"
+        }
+        point "inactive" {
+          color = "red"
+        }
       }
 
-       chart {
-         title = "DB Systems With Backups Disabled"
-         sql = query.oci_mysql_db_system_with_no_backups.sql
-         type  = "donut"
-         width = 4
-       }
+    }
+
+    chart {
+      title = "DB Systems With Backups Disabled"
+      sql   = query.oci_mysql_db_system_with_no_backups.sql
+      type  = "donut"
+      width = 4
+    }
   }
 
   container {
-      title = "Analysis"
+    title = "Analysis"
 
     chart {
       title = "DB Systems by Tenancy"
-      sql = query.oci_mysql_db_system_by_tenancy.sql
+      sql   = query.oci_mysql_db_system_by_tenancy.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "DB Systems by Compartment"
-      sql = query.oci_mysql_db_system_by_compartment.sql
+      sql   = query.oci_mysql_db_system_by_compartment.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "DB Systems by Region"
-      sql = query.oci_mysql_db_system_by_region.sql
+      sql   = query.oci_mysql_db_system_by_region.sql
       type  = "column"
       width = 3
     }
@@ -546,7 +581,7 @@ dashboard "oci_mysql_db_system_dashboard" {
     }
   }
   container {
-    title  = "Performance & Utilization"
+    title = "Performance & Utilization"
 
     chart {
       title = "Top 10 CPU - Last 7 days"
