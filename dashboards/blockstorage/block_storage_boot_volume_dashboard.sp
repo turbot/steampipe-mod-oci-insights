@@ -84,17 +84,17 @@ query "oci_block_storage_boot_volume_by_encryption_status" {
       select
         id,
         case
-         when kms_key_id is null then 'OCI Managed'
-         else 'Customer Managed'
-         end as encryption_status
+          when kms_key_id is null then 'oci_managed'
+          else 'customer_managed'
+        end as encryption_status
       from
         oci_core_boot_volume
       where
-      lifecycle_state <> 'TERMINATED') as v
-    group by
-      encryption_status
-    order by
-      encryption_status desc
+        lifecycle_state <> 'TERMINATED') as v
+      group by
+        encryption_status
+      order by
+        encryption_status desc
   EOQ
 }
 
@@ -385,7 +385,7 @@ dashboard "oci_block_storage_boot_volume_dashboard" {
 
   container {
     title = "Assessments"
-    width = 6
+    # width = 6
 
     chart {
       title = "Lifecycle State"

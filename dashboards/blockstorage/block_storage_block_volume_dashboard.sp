@@ -70,9 +70,9 @@ query "oci_block_storage_block_volume_by_encryption_status" {
       select
         id,
         case
-         when kms_key_id is null then 'OCI Managed'
-         else 'Customer Managed'
-         end as encryption_status
+          when kms_key_id is null then 'oci_managed'
+          else 'customer_managed'
+        end as encryption_status
       from
         oci_core_volume
       where
@@ -385,7 +385,7 @@ dashboard "oci_block_storage_block_volume_dashboard" {
 
   container {
     title = "Assessments"
-    width = 6
+    # width = 6
 
     chart {
       title = "Encryption Status"

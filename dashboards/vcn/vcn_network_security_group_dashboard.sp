@@ -75,7 +75,7 @@ dashboard "oci_vcn_network_security_group_dashboard" {
   tags = merge(local.vcn_common_tags, {
     type = "Dashboard"
   })
-  
+
   container {
 
     card {
@@ -89,12 +89,12 @@ dashboard "oci_vcn_network_security_group_dashboard" {
       width = 2
       sql = <<-EOQ
         with non_compliant_rules as (
-        select
-        id,
-        count(*) as num_noncompliant_rules
+          select
+            id,
+            count(*) as num_noncompliant_rules
         from
-        oci_core_network_security_group,
-        jsonb_array_elements(rules) as r
+          oci_core_network_security_group,
+          jsonb_array_elements(rules) as r
         where
           r ->> 'direction' = 'INGRESS'
           and r ->> 'sourceType' = 'CIDR_BLOCK'
@@ -106,7 +106,7 @@ dashboard "oci_vcn_network_security_group_dashboard" {
           and (r -> 'tcpOptions' -> 'destinationPortRange' ->> 'max')::integer >= 22
           )
         )
-        and lifecycle_state <> 'TERMINATED'
+          and lifecycle_state <> 'TERMINATED'
         group by id
         ),
         sg_list as (
@@ -186,7 +186,7 @@ dashboard "oci_vcn_network_security_group_dashboard" {
 
   container {
     title = "Assessments"
-    width = 6
+    # width = 6
 
     chart {
       title = "Ingress SSH Status"
@@ -230,14 +230,23 @@ dashboard "oci_vcn_network_security_group_dashboard" {
         )
         select
           case
-            when restricted then 'Restricted'
-            else 'Unrestricted'
+            when restricted then 'restricted'
+            else 'unrestricted'
           end as restrict_ingress_ssh_status,
           count(*)
         from
           sg_list
         group by restricted;
       EOQ
+
+      series "count" {
+        point "restricted" {
+          color = "green"
+        }
+        point "unrestricted" {
+          color = "red"
+        }
+      }
     }
 
     chart {
@@ -282,14 +291,23 @@ dashboard "oci_vcn_network_security_group_dashboard" {
         )
         select
           case
-            when restricted then 'Restricted'
-            else 'Unrestricted'
+            when restricted then 'restricted'
+            else 'unrestricted'
           end as restrict_ingress_rdp_status,
           count(*)
         from
           sg_list
         group by restricted;
       EOQ
+
+      series "count" {
+        point "restricted" {
+          color = "green"
+        }
+        point "unrestricted" {
+          color = "red"
+        }
+      }
     }
   }
 

@@ -191,7 +191,7 @@ dashboard "oci_vcn_network_security_list_dashboard" {
 
   container {
     title = "Assessments"
-    width = 6
+    # width = 6
 
     chart {
       title = "Ingress SSH Status"
@@ -237,14 +237,23 @@ dashboard "oci_vcn_network_security_list_dashboard" {
         )
         select
           case
-            when restricted then 'Restricted'
-            else 'Unrestricted'
+            when restricted then 'restricted'
+            else 'unrestricted'
           end as restrict_ingress_ssh_status,
           count(*)
         from
           sl_list
         group by restricted;
       EOQ
+
+      series "count" {
+        point "restricted" {
+          color = "green"
+        }
+        point "unrestricted" {
+          color = "red"
+        }
+      }
     }
 
     chart {
@@ -291,14 +300,23 @@ dashboard "oci_vcn_network_security_list_dashboard" {
         )
         select
           case
-            when restricted then 'Restricted'
-            else 'Unrestricted'
+            when restricted then 'restricted'
+            else 'unrestricted'
           end as restrict_ingress_rdp_status,
           count(*)
         from
           sl_list
         group by restricted;
       EOQ
+
+      series "count" {
+        point "restricted" {
+          color = "green"
+        }
+        point "unrestricted" {
+          color = "red"
+        }
+      }
     }
   }
 

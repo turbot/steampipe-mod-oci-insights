@@ -1,7 +1,7 @@
 query "oci_mysql_backup_count" {
   sql = <<-EOQ
   select
-    count(*) as "Total Backups"
+    count(*) as "Backups"
   from
     oci_mysql_backup
   where
@@ -57,17 +57,43 @@ query "oci_mysql_backup_failed_lifecycle_count" {
 
 # Assessments
 
+# query "oci_mysql_backup_by_lifecycle_state" {
+#   sql = <<-EOQ
+#     select
+#       lifecycle_state,
+#       count(lifecycle_state)
+#     from
+#       oci_mysql_backup
+#     where
+#       lifecycle_state <> 'DELETED'
+#     group by
+#       lifecycle_state;
+#   EOQ
+# }
+
 query "oci_mysql_backup_by_lifecycle_state" {
   sql = <<-EOQ
-    select
-      lifecycle_state,
-      count(lifecycle_state)
-    from
-      oci_mysql_backup
-    where
-      lifecycle_state <> 'DELETED'
-    group by
-      lifecycle_state;
+    with lifecycle_stat as (
+      select
+        case
+          when lifecycle_state = 'FAILED' then 'failed'
+          when lifecycle_state = 'INACTIVE' then 'inactive'
+          when lifecycle_state = 'CREATING' then 'creating'
+          when lifecycle_state = 'DELETING' then 'deleting'
+          when lifecycle_state = 'UPDATING' then 'updating'
+          else 'active'
+        end as lifecycle_stat
+      from
+        oci_mysql_backup
+      where lifecycle_state <> 'DELETED'
+    )
+      select
+        lifecycle_stat,
+        count(*)
+      from
+        lifecycle_stat
+      group by
+        lifecycle_stat
   EOQ
 }
 
@@ -304,6 +330,15 @@ dashboard "oci_mysql_backup_dashboard" {
       title = "Lifecycle State"
       sql   = query.oci_mysql_backup_by_lifecycle_state.sql
       type  = "donut"
+
+      series "count" {
+        point "active" {
+          color = "green"
+        }
+        point "failed" {
+          color = "red"
+        }
+      }
     }
   }
 
