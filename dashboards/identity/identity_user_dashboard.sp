@@ -70,19 +70,6 @@ query "oci_identity_user_inactive_api_key_count" {
   EOQ
 }
 
-query "oci_identity_mfa_not_enabled_users_count" {
-  sql = <<-EOQ
-    select
-      count(*) as value,
-      'MFA Disabled' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as type
-    from
-      oci_identity_user
-    where
-      not is_mfa_activated;
-  EOQ
-}
-
 query "oci_identity_console_login_enabled_users_count" {
   sql = <<-EOQ
   select count(*) as "Console Login Enabled" from oci_identity_user where can_use_console_password;
