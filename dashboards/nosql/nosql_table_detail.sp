@@ -28,7 +28,7 @@ query "oci_nosql_table_name_for_table" {
 query "oci_nosql_table_stalled_more_than_90_days_for_table" {
   sql = <<-EOQ
     select
-      case when date_part('day', now()-(time_updated::timestamptz)) > 90 then 'True' else 'False' end as value,
+      case when date_part('day', now()-(time_updated::timestamptz)) > 90 then 'TRUE' else 'FALSE' end as value,
       'Stalled > 90 Days' as label,
       case when date_part('day', now()-(time_updated::timestamptz)) > 90 then 'alert' else 'ok' end as type
     from
@@ -43,7 +43,7 @@ query "oci_nosql_table_stalled_more_than_90_days_for_table" {
 query "oci_nosql_table_auto_reclaimable_for_table" {
   sql = <<-EOQ
     select
-      case when is_auto_reclaimable then 'Enabled' else 'Disabled' end as "Auto Reclaimable"
+      case when is_auto_reclaimable then 'ENABLED' else 'DISABLED' end as "Auto Reclaimable"
     from
       oci_nosql_table
     where

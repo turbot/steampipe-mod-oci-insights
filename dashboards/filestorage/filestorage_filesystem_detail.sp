@@ -28,7 +28,7 @@ query "oci_filestorage_filesystem_name_for_filesystem" {
 query "oci_filestorage_filesystem_cloned_for_filesystem" {
   sql = <<-EOQ
     select
-      case when is_clone_parent then 'true' else 'false' end as "Cloned File System"
+      case when is_clone_parent then 'TRUE' else 'FALSE' end as "Cloned File System"
     from
       oci_file_storage_file_system
     where

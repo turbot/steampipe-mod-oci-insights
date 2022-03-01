@@ -28,7 +28,7 @@ query "oci_vcn_subnet_name_for_subnet" {
 query "oci_vcn_subnet_flow_log_for_subnet" {
   sql = <<-EOQ
     select
-      case when is_enabled then 'Enabled' else 'Disabled' end as value,
+      case when is_enabled then 'ENABLED' else 'DISABLED' end as value,
       'Flow Log' as label,
       case when is_enabled then 'ok' else 'alert' end as type
     from

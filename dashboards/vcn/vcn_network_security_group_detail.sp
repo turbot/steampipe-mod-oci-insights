@@ -49,7 +49,7 @@ query "oci_vcn_network_security_group_ingress_ssh_for_security_group" {
       group by id
       )
       select
-        case when non_compliant_rules.id is null then 'Restricted' else 'Unrestricted' end as value,
+        case when non_compliant_rules.id is null then 'RESTRICTED' else 'UNRESTRICTED' end as value,
         'Ingress RDP' as label,
         case when non_compliant_rules.id is null then 'ok' else 'alert' end as type
       from
@@ -86,7 +86,7 @@ query "oci_vcn_network_security_group_ingress_rdp_for_security_group" {
       group by id
       )
       select
-        case when non_compliant_rules.id is null then 'Restricted' else 'Unrestricted' end as value,
+        case when non_compliant_rules.id is null then 'RESTRICTED' else 'UNRESTRICTED' end as value,
         'Ingress RDP' as label,
         case when non_compliant_rules.id is null then 'ok' else 'alert' end as type
       from

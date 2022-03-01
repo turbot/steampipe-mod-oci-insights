@@ -28,7 +28,7 @@ query "oci_mysql_db_system_name_for_db_system" {
 query "oci_mysql_db_system_analytics_cluster_attached_for_db_system" {
   sql = <<-EOQ
     select
-      case when is_analytics_cluster_attached then 'true' else 'false' end as "Analytics Cluster Attached"
+      case when is_analytics_cluster_attached then 'TRUE' else 'FALSE' end as "Analytics Cluster Attached"
     from
       oci_mysql_db_system
     where
@@ -41,7 +41,7 @@ query "oci_mysql_db_system_analytics_cluster_attached_for_db_system" {
 query "oci_mysql_db_system_heat_wave_cluster_attached_for_db_system" {
   sql = <<-EOQ
     select
-      case when is_heat_wave_cluster_attached then 'true' else 'false' end as "Heat Wave Cluster Attached"
+      case when is_heat_wave_cluster_attached then 'TRUE' else 'FALSE' end as "Heat Wave Cluster Attached"
     from
       oci_mysql_db_system
     where
@@ -69,7 +69,7 @@ query "oci_mysql_db_system_failed_for_db_system" {
 query "oci_mysql_db_system_backup_for_db_system" {
   sql = <<-EOQ
     select
-      case count(s.*) when 0 then 'Enabled' else 'Disabled' end as value,
+      case count(s.*) when 0 then 'ENABLED' else 'DISABLED' end as value,
       'Backups Status' as label,
       case count(s.*) when 0 then 'ok' else 'alert' end as type
     from

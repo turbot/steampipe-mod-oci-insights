@@ -2,7 +2,7 @@ query "oci_identity_user_input" {
   sql = <<EOQ
     select
       id as label,
-      id as value
+      name as value
     from
       oci_identity_user
     order by
@@ -26,7 +26,7 @@ query "oci_identity_user_name_for_user" {
 query "oci_identity_user_email_for_user" {
   sql = <<-EOQ
     select
-      case when email_verified then 'true' else 'false' end as value,
+      case when email_verified then 'TRUE' else 'FALSE' end as value,
       'Email Verified' as label,
       case when email_verified then 'ok' else 'alert' end as type
     from
@@ -41,7 +41,7 @@ query "oci_identity_user_email_for_user" {
 query "oci_identity_user_mfa_for_user" {
   sql = <<-EOQ
     select
-      case when is_mfa_activated then 'true' else 'false' end as value,
+      case when is_mfa_activated then 'TRUE' else 'FALSE' end as value,
       'MFA Activated' as label,
       case when is_mfa_activated then 'ok' else 'alert' end as type
     from

@@ -41,7 +41,7 @@ query "oci_compute_instance_core_for_instance" {
 query "oci_compute_instance_public_for_instance" {
   sql = <<-EOQ
     select
-      case when title = '' then 'false' else 'true' end as value,
+      case when title = '' then 'FALSE' else 'TRUE' end as value,
       'Public Instance' as label,
       case when title = '' then 'ok' else 'alert' end as type
     from

@@ -56,7 +56,7 @@ query "oci_database_autonomous_database_need_attention_for_db" {
 query "oci_database_autonomous_database_autoscaling_for_db" {
   sql = <<-EOQ
     select
-      case when is_auto_scaling_enabled then 'Enabled' else 'Disabled' end as "Auto Scaling"
+      case when is_auto_scaling_enabled then 'ENABLED' else 'DISABLED' end as "Auto Scaling"
     from
       oci_database_autonomous_database
     where
@@ -69,7 +69,7 @@ query "oci_database_autonomous_database_autoscaling_for_db" {
 query "oci_database_autonomous_database_data_guard_for_db" {
   sql = <<-EOQ
     select
-      case when is_data_guard_enabled then 'Enabled' else 'Disabled' end as "Data Guard"
+      case when is_data_guard_enabled then 'ENABLED' else 'DISABLED' end as "Data Guard"
     from
       oci_database_autonomous_database
     where

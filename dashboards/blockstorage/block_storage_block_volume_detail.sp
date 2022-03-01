@@ -56,7 +56,7 @@ query "oci_block_storage_block_volume_faulty_for_volume" {
 query "oci_block_storage_block_volume_backup_for_volume" {
   sql = <<-EOQ
     select
-      case count(v.*) when 0 then 'Enabled' else 'Disabled' end as value,
+      case count(v.*) when 0 then 'ENABLED' else 'DISABLED' end as value,
       'Backups Status' as label,
       case count(v.*) when 0 then 'ok' else 'alert' end as type
     from

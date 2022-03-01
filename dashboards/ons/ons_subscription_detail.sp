@@ -26,7 +26,7 @@ query "oci_ons_subscription_name_for_subscription" {
 query "oci_ons_subscription_unused_for_subscription" {
   sql = <<-EOQ
     select
-      case when lifecycle_state <> 'ACTIVE' then 'true' else 'false' end as value,
+      case when lifecycle_state <> 'ACTIVE' then 'TRUE' else 'FALSE' end as value,
       'Unused' as label,
       case when lifecycle_state <> 'ACTIVE' then 'alert' else 'ok' end as type
     from

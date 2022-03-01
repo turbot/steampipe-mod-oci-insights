@@ -26,7 +26,7 @@ query "oci_objectstorage_bucket_name_for_bucket" {
 query "oci_objectstorage_bucket_versioning_for_bucket" {
   sql = <<-EOQ
     select
-      case when versioning = 'Disabled' then 'Disabled' else 'Enabled' end as value,
+      case when versioning = 'Disabled' then 'DISABLED' else 'ENABLED' end as value,
       'Versioning Status' as label,
       case when versioning = 'Disabled' then 'alert' else 'ok' end as type
     from
@@ -41,7 +41,7 @@ query "oci_objectstorage_bucket_versioning_for_bucket" {
 query "oci_objectstorage_bucket_public_access_for_bucket" {
   sql = <<-EOQ
     select
-      case when public_access_type <> 'NoPublicAccess' then 'Enabled' else 'Disabled' end as value,
+      case when public_access_type <> 'NoPublicAccess' then 'ENABLED' else 'DISABLED' end as value,
       'Public Access' as label,
       case when public_access_type <> 'NoPublicAccess' then 'alert' else 'ok' end as type
     from
