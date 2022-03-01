@@ -10,12 +10,12 @@ query "oci_vcn_subnet_flowlog_not_configured_count" {
       count(s.*) as value,
       'Flow Log Not Configured' as label,
       case count(s.*) when 0 then 'ok' else 'alert' end as type
-      from
-        oci_core_subnet as s
-        left join oci_logging_log as l
-        on s.id = l.configuration -> 'source' ->> 'resource'
-      where
-        l.is_enabled is null or not l.is_enabled and s.lifecycle_state <> 'TERMINATED';
+    from
+      oci_core_subnet as s
+      left join oci_logging_log as l
+      on s.id = l.configuration -> 'source' ->> 'resource'
+    where
+      l.is_enabled is null or not l.is_enabled and s.lifecycle_state <> 'TERMINATED';
   EOQ
 }
 

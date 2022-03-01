@@ -40,14 +40,14 @@ query "oci_identity_user_mfa_enabled" {
 
 query "oci_identity_user_unverified_email_count" {
   sql = <<-EOQ
-    select count(*) as "Users With Unverified Email " from oci_identity_user where not email_verified;
+    select count(*) as "Users With Unverified Email" from oci_identity_user where not email_verified;
   EOQ
 }
 
 query "oci_identity_user_inactive_customer_key_count" {
   sql = <<-EOQ
     select
-      count(*) as  value,
+      count(*) as value,
       'Inactive Customer Keys' as label,
       case count(*) when 0 then 'ok' else 'alert' end as type
     from
@@ -72,7 +72,7 @@ query "oci_identity_user_inactive_api_key_count" {
 
 query "oci_identity_console_login_enabled_users_count" {
   sql = <<-EOQ
-  select count(*) as "Console Login Enabled" from oci_identity_user where can_use_api_keys;
+  select count(*) as "Console Login Enabled" from oci_identity_user where can_use_console_password;
   EOQ
 }
 
