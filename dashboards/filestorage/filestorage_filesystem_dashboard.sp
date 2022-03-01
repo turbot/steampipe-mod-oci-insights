@@ -211,13 +211,13 @@ dashboard "oci_filestorage_filesystem_dashboard" {
 
   container {
     title = "Assessments"
-    width = 6
+    # width = 6
 
     chart {
       title = "File Systems by State"
       sql   = query.oci_filestorage_filesystem_by_state.sql
       type  = "donut"
-      width = 4
+      width = 3
     }
 
   }

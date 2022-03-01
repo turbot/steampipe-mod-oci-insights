@@ -191,7 +191,7 @@ dashboard "vcn_network_security_list_dashboard" {
 
   container {
     title = "Assessments"
-    width = 6
+    # width = 6
 
     chart {
       title = "Ingress SSH Status"
@@ -237,14 +237,23 @@ dashboard "vcn_network_security_list_dashboard" {
         )
         select
           case
-            when restricted then 'Restricted'
-            else 'Unrestricted'
+            when restricted then 'restricted'
+            else 'unrestricted'
           end as restrict_ingress_ssh_status,
           count(*)
         from
           sl_list
         group by restricted;
       EOQ
+
+      series "count" {
+        point "restricted" {
+          color = "green"
+        }
+        point "unrestricted" {
+          color = "red"
+        }
+      }
     }
 
     chart {
@@ -291,44 +300,53 @@ dashboard "vcn_network_security_list_dashboard" {
         )
         select
           case
-            when restricted then 'Restricted'
-            else 'Unrestricted'
+            when restricted then 'restricted'
+            else 'unrestricted'
           end as restrict_ingress_rdp_status,
           count(*)
         from
           sl_list
         group by restricted;
       EOQ
+
+      series "count" {
+        point "restricted" {
+          color = "green"
+        }
+        point "unrestricted" {
+          color = "red"
+        }
+      }
     }
   }
 
- container {
+  container {
     title = "Analysis"
 
     chart {
       title = "Network Security Lists by Tenancy"
-      sql = query.vcn_security_lists_by_tenancy.sql
+      sql   = query.vcn_security_lists_by_tenancy.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Network Security Lists by Compartment"
-      sql = query.vcn_security_lists_by_compartment.sql
+      sql   = query.vcn_security_lists_by_compartment.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Network Security Lists by Region"
-      sql = query.vcn_security_lists_by_region.sql
+      sql   = query.vcn_security_lists_by_region.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Network Security Lists by VCN"
-      sql = <<-EOQ
+      sql   = <<-EOQ
         select
           v.display_name as "VCN",
           count(*) as "security_lists"

@@ -19,15 +19,38 @@ query "oci_ons_subscription_unused_count" {
 
 #Assessments
 
+# query "oci_ons_subscription_by_lifecycle_state" {
+#   sql = <<-EOQ
+#     select
+#       lifecycle_state,
+#       count(lifecycle_state)
+#     from
+#       oci_ons_subscription
+#     group by
+#       lifecycle_state;
+#   EOQ
+# }
+
+# https://pkg.go.dev/github.com/oracle/oci-go-sdk@v24.3.0+incompatible/ons#SubscriptionLifecycleStateEnum
 query "oci_ons_subscription_by_lifecycle_state" {
   sql = <<-EOQ
-    select
-      lifecycle_state,
-      count(lifecycle_state)
-    from
-      oci_ons_subscription
-    group by
-      lifecycle_state;
+    with lifecycle_stat as (
+      select
+        case
+          when lifecycle_state = 'PENDING' then 'pending'
+          else 'active'
+        end as lifecycle_stat
+      from
+        oci_ons_subscription
+      where lifecycle_state <> 'DELETED'
+    )
+      select
+        lifecycle_stat,
+        count(*)
+      from
+        lifecycle_stat
+      group by
+        lifecycle_stat
   EOQ
 }
 
@@ -173,6 +196,15 @@ dashboard "oci_ons_subscription_dashboard" {
       sql   = query.oci_ons_subscription_by_lifecycle_state.sql
       type  = "donut"
       width = 3
+
+      series "count" {
+        point "active" {
+          color = "green"
+        }
+        point "pending" {
+          color = "red"
+        }
+      }
     }
 
   }

@@ -305,7 +305,7 @@ dashboard "oci_compute_instance_summary" {
   container {
 
     title = "Assesments"
-    width = 6
+    # width = 6
 
     chart {
       title = "Lifecycle State"
@@ -319,6 +319,15 @@ dashboard "oci_compute_instance_summary" {
       sql   = query.oci_compute_instance_by_public_ip.sql
       type  = "donut"
       width = 3
+
+      series "count" {
+        point "private" {
+          color = "green"
+        }
+        point "public" {
+          color = "red"
+        }
+      }
     }
 
   }

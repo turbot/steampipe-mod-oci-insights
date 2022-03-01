@@ -25,15 +25,39 @@ query "oci_ons_notification_topic_unused_count" {
 }
 
 # Assessments
+
+# query "oci_ons_notification_topic_by_lifecycle_state" {
+#   sql = <<-EOQ
+#     select
+#       lifecycle_state,
+#       count(lifecycle_state)
+#     from
+#       oci_ons_notification_topic
+#     group by
+#       lifecycle_state;
+#   EOQ
+# }
+
+# https://pkg.go.dev/github.com/oracle/oci-go-sdk@v24.3.0+incompatible/ons#NotificationTopicLifecycleStateEnum
 query "oci_ons_notification_topic_by_lifecycle_state" {
   sql = <<-EOQ
-    select
-      lifecycle_state,
-      count(lifecycle_state)
-    from
-      oci_ons_notification_topic
-    group by
-      lifecycle_state;
+    with lifecycle_stat as (
+      select
+        case
+          when lifecycle_state = 'CREATING' then 'creating'
+          when lifecycle_state = 'DELETING' then 'deleting'
+          else 'active'
+        end as lifecycle_stat
+      from
+        oci_ons_notification_topic
+    )
+      select
+        lifecycle_stat,
+        count(*)
+      from
+        lifecycle_stat
+      group by
+        lifecycle_stat
   EOQ
 }
 
@@ -199,6 +223,12 @@ dashboard "oci_ons_notification_topic_dashboard" {
       sql   = query.oci_ons_notification_topic_by_lifecycle_state.sql
       type  = "donut"
       width = 3
+
+      series "count" {
+        point "active" {
+          color = "green"
+        }
+      }
     }
 
     chart {

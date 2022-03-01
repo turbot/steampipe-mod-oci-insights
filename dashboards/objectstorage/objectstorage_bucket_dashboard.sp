@@ -86,29 +86,57 @@ query "oci_objectstorage_bucket_encryption_status" {
 
 query "oci_objectstorage_bucket_versioning_status" {
   sql = <<-EOQ
+    with versioning_stat as (
+      select
+        case
+          when versioning = 'Disabled' then 'disabled'
+          else 'enabled'
+        end as versioning_stat
+      from
+        oci_objectstorage_bucket
+    )
     select
-      versioning,
+      versioning_stat,
       count(*)
     from
-      oci_objectstorage_bucket
+      versioning_stat
     group by
-      versioning
-    order by
-      versioning desc;
+      versioning_stat
   EOQ
 }
 
+# query "oci_objectstorage_bucket_public_access_status" {
+#   sql = <<-EOQ
+#     select
+#       public_access_type,
+#       count(*)
+#     from
+#       oci_objectstorage_bucket
+#     group by
+#       public_access_type
+#     order by
+#       public_access_type desc;
+#   EOQ
+# }
+
 query "oci_objectstorage_bucket_public_access_status" {
   sql = <<-EOQ
+    with public_access_stat as (
+      select
+        case
+          when public_access_type = 'NoPublicAccess' then 'disabled'
+          else 'enabled'
+        end as public_access_stat
+      from
+        oci_objectstorage_bucket
+    )
     select
-      public_access_type,
+      public_access_stat,
       count(*)
     from
-      oci_objectstorage_bucket
+      public_access_stat
     group by
-      public_access_type
-    order by
-      public_access_type desc;
+      public_access_stat
   EOQ
 }
 
@@ -255,12 +283,12 @@ dashboard "oci_objectstorage_bucket_dashboard" {
     }
 
     card {
-      sql   = query.oci_objectstorage_bucket_public_access_count.sql
+      sql   = query.oci_objectstorage_bucket_versioning_disabled_count.sql
       width = 2
     }
 
     card {
-      sql   = query.oci_objectstorage_bucket_versioning_disabled_count.sql
+      sql   = query.oci_objectstorage_bucket_public_access_count.sql
       width = 2
     }
 
@@ -268,7 +296,7 @@ dashboard "oci_objectstorage_bucket_dashboard" {
 
   container {
     title = "Assessments"
-    width = 6
+    # width = 6
 
     chart {
       title = "Encryption Status"
@@ -282,13 +310,32 @@ dashboard "oci_objectstorage_bucket_dashboard" {
       sql   = query.oci_objectstorage_bucket_versioning_status.sql
       type  = "donut"
       width = 3
+
+      series "count" {
+        point "enabled" {
+          color = "green"
+        }
+        point "disabled" {
+          color = "red"
+        }
+      }
     }
 
+
     chart {
-      title = "Access Type"
+      title = "Public Access Type"
       sql   = query.oci_objectstorage_bucket_public_access_status.sql
       type  = "donut"
       width = 3
+
+      series "count" {
+        point "enabled" {
+          color = "red"
+        }
+        point "disabled" {
+          color = "green"
+        }
+      }
     }
 
   }
