@@ -7,7 +7,7 @@ query "oci_database_autonomous_database_count" {
 query "oci_database_autonomous_db_total_cores" {
   sql = <<-EOQ
     select
-      sum(cpu_core_count)  as "Total OCPUs"
+      sum(cpu_core_count) as "Total OCPUs"
     from
       oci_database_autonomous_database;
   EOQ
@@ -154,21 +154,21 @@ query "oci_database_autonomous_db_by_permission_level" {
   EOQ
 }
 
-  #   with dataguard_stat as (
-  #     select
-  #       case
-  #         when is_data_guard_enabled then 'enabled'
-  #         else 'disabled'
-  #       end as dataguard_stat
-  #     from
-  #       oci_database_autonomous_database
-  #     )
-  # select
-  #   dataguard_stat,
-  #   count(*)
-  # from
-  #   dataguard_stat
-  #   group by dataguard_stat
+#   with dataguard_stat as (
+#     select
+#       case
+#         when is_data_guard_enabled then 'enabled'
+#         else 'disabled'
+#       end as dataguard_stat
+#     from
+#       oci_database_autonomous_database
+#     )
+# select
+#   dataguard_stat,
+#   count(*)
+# from
+#   dataguard_stat
+#   group by dataguard_stat
 
 
 # Analysis
@@ -344,7 +344,7 @@ dashboard "oci_database_autonomous_db_summary" {
     card {
       sql   = query.oci_database_autonomous_db_with_data_guard.sql
       width = 2
-      type = "info"
+      type  = "info"
     }
 
     card {
@@ -412,7 +412,7 @@ dashboard "oci_database_autonomous_db_summary" {
         }
       }
     }
-    
+
     chart {
       title = "Lifecycle State"
       sql   = query.oci_database_autonomous_db_by_state.sql

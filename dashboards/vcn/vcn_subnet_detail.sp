@@ -1,88 +1,188 @@
-dashboard "vcn_subnet_detail" {
+query "oci_vcn_subnet_input" {
+  sql = <<EOQ
+    select
+      id as label,
+      id as value
+    from
+      oci_core_subnet
+    where
+      lifecycle_state <> 'TERMINATED'
+    order by
+      id;
+EOQ
+}
+
+query "oci_vcn_subnet_name_for_subnet" {
+  sql = <<-EOQ
+    select
+      display_name as "Subnet"
+    from
+      oci_core_subnet
+    where
+      id = $1 and lifecycle_state <> 'TERMINATED';
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_vcn_subnet_flow_log_for_subnet" {
+  sql = <<-EOQ
+    select
+      case when is_enabled then 'ENABLED' else 'DISABLED' end as value,
+      'Flow Log' as label,
+      case when is_enabled then 'ok' else 'alert' end as type
+    from
+      oci_core_subnet as s
+      left join oci_logging_log as l
+      on s.id = l.configuration -> 'source' ->> 'resource'
+    where
+      s.id = $1 and s.lifecycle_state <> 'TERMINATED';
+  EOQ
+
+  param "id" {}
+}
+
+dashboard "oci_vcn_subnet_detail" {
   title = "OCI VCN Subnet Detail"
 
-  # input {
-  #   title = "Subnet List"
-  #   type = "select"
-  #   sql = <<-EOQ
-  #     select
-  #       display_name as label,
-  #       id as value
-  #     from
-  #       oci_core_subnet
-  #   EOQ
-  #   width = 3
-  # }
+  tags = merge(local.vcn_common_tags, {
+    type = "Detail"
+  })
 
-  container {
-
-    card {
-      width = 2
-      sql = <<-EOQ
-        select
-          count(*) as value,
-          'Public IP not prohibited on VNIC' as label,
-          case when count(*) = 0 then 'ok' else 'alert' end as type
-        from
-          oci_core_subnet
-        where
-          not prohibit_public_ip_on_vnic
-      EOQ
-    }
-
-    card {
-      width = 2
-      sql = <<-EOQ
-        select
-          count(*) as value,
-          'Flow Logs not Configured' as label,
-          case when count(*) = 0 then 'ok' else 'alert' end as type
-        from
-          oci_logging_log
-        where
-          (configuration -> 'source' ->> 'resource') not like 'ocid1.subnet.oc1%'
-      EOQ
-    }
+  input "subnet_id" {
+    title = "Select a subnet:"
+    sql   = query.oci_vcn_subnet_input.sql
+    width = 4
   }
 
   container {
 
-    title  = "Analysis"
+    # Assessments
+    card {
+      width = 2
 
-    container {
+      query = query.oci_vcn_subnet_name_for_subnet
+      args = {
+        id = self.input.subnet_id.value
+      }
+    }
 
-      container {
+    card {
+      width = 2
 
-        table {
-          title = "Overview"
-          width = 12
-          sql   = <<-EOQ
-            select
-              display_name,
-              id,
-              vcn_id,
-              lifecycle_state,
-              title,
-              tenant_id
-            from
-              oci_core_subnet
-          EOQ
-        }
-
-        table {
-          title = "Tags"
-          width = 4
-          sql = <<-EOQ
-            select
-              tag.key as "Key",
-              tag.value as "Value"
-            from
-              oci_core_subnet,
-              jsonb_each_text(tags) as tag
-          EOQ
-        }
+      query = query.oci_vcn_subnet_flow_log_for_subnet
+      args = {
+        id = self.input.subnet_id.value
       }
     }
   }
 
+  container {
+
+    container {
+      width = 6
+
+      table {
+        title = "Overview"
+        type  = "line"
+        width = 6
+
+        sql = <<-EOQ
+          select
+            display_name as "Name",
+            time_created as "Time Created",
+            prohibit_public_ip_on_vnic as "Prohibit Public IP On VNIC",
+            virtual_router_ip as "Virtual Router IP",
+            subnet_domain_name as "Subnet Domain Name",
+            id as "OCID",
+            compartment_id as "Compartment ID"
+          from
+            oci_core_subnet
+          where
+           id = $1 and lifecycle_state <> 'TERMINATED';
+        EOQ
+
+        param "id" {}
+
+        args = {
+          id = self.input.subnet_id.value
+        }
+
+      }
+
+      table {
+        title = "Tags"
+        width = 6
+
+        sql = <<-EOQ
+          with jsondata as (
+            select
+              tags::json as tags
+            from
+              oci_core_subnet
+            where
+              id = $1 and lifecycle_state <> 'TERMINATED'
+          )
+          select
+            key as "Key",
+            value as "Value"
+          from
+            jsondata,
+            json_each_text(tags);
+        EOQ
+
+        param "id" {}
+
+        args = {
+          id = self.input.subnet_id.value
+        }
+
+      }
+    }
+
+    container {
+      width = 6
+
+      table {
+        title = "IPv4 CIDR Block"
+        sql   = <<-EOQ
+          select
+            display_name as "Name",
+            time_created as "Time Created",
+            cidr_block as "CIDR Block"
+          from
+            oci_core_subnet
+          where
+           id  = $1 and lifecycle_state <> 'TERMINATED';
+        EOQ
+
+        param "id" {}
+
+        args = {
+          id = self.input.subnet_id.value
+        }
+      }
+
+      table {
+        title = "IPv6 CIDR Block"
+        sql   = <<-EOQ
+          select
+            display_name as "Name",
+            time_created as "Time Created",
+            ipv6_cidr_block as "IPv6 CIDR Block"
+          from
+            oci_core_subnet
+          where
+           id  = $1 and lifecycle_state <> 'TERMINATED';
+        EOQ
+
+        param "id" {}
+
+        args = {
+          id = self.input.subnet_id.value
+        }
+      }
+    }
+
+  }
 }
