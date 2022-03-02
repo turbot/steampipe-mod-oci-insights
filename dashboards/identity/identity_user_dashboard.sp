@@ -311,7 +311,7 @@ dashboard "oci_identity_user_dashboard" {
     }
 
     chart {
-      title = "Verified Email"
+      title = "Email Verification Status"
       sql   = query.oci_identity_user_by_verified_email.sql
       type  = "donut"
       width = 4
