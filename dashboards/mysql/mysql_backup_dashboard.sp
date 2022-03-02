@@ -189,20 +189,6 @@ query "oci_mysql_backup_failed_lifecycle_count" {
 
 # Assessment Queries
 
-# query "oci_mysql_backup_by_lifecycle_state" {
-#   sql = <<-EOQ
-#     select
-#       lifecycle_state,
-#       count(lifecycle_state)
-#     from
-#       oci_mysql_backup
-#     where
-#       lifecycle_state <> 'DELETED'
-#     group by
-#       lifecycle_state;
-#   EOQ
-# }
-
 query "oci_mysql_backup_by_lifecycle_state" {
   sql = <<-EOQ
     with lifecycle_stat as (

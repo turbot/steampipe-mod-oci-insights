@@ -222,7 +222,6 @@ query "oci_database_autonomous_database_need_attention_count" {
 
 # Assessment Queries
 
-# https://pkg.go.dev/github.com/oracle/oci-go-sdk@v24.3.0+incompatible/database#AutonomousDatabaseLifecycleStateEnum
 query "oci_database_autonomous_db_by_state" {
   sql = <<-EOQ
     select
@@ -257,7 +256,6 @@ query "oci_database_autonomous_db_by_license_model" {
   EOQ
 }
 
-# oci_database_autonomous_db_with_data_guard
 query "oci_database_autonomous_db_data_guard_status" {
   sql = <<-EOQ
     with dataguard_stat as (
@@ -278,7 +276,6 @@ query "oci_database_autonomous_db_data_guard_status" {
   EOQ
 }
 
-# operations_insights_status
 query "oci_database_autonomous_db_by_operations_insights_status" {
   sql = <<-EOQ
     select
@@ -322,23 +319,6 @@ query "oci_database_autonomous_db_by_permission_level" {
       permission_status desc;
   EOQ
 }
-
-#   with dataguard_stat as (
-#     select
-#       case
-#         when is_data_guard_enabled then 'enabled'
-#         else 'disabled'
-#       end as dataguard_stat
-#     from
-#       oci_database_autonomous_database
-#     )
-# select
-#   dataguard_stat,
-#   count(*)
-# from
-#   dataguard_stat
-#   group by dataguard_stat
-
 
 # Analysis Queries
 

@@ -132,25 +132,6 @@ query "oci_kms_software_key_count" {
 
 # Assessment Queries
 
-# query "oci_kms_key_lifecycle_state" {
-#   sql = <<-EOQ
-#       with lifecycles as (
-#         select
-#           lifecycle_state
-#         from
-#           oci_kms_key
-#         where lifecycle_state IN ('PENDING_DELETION','DISABLED','ENABLED')
-#         )
-#         select
-#           lifecycle_state,
-#           count(lifecycle_state)
-#         from
-#           lifecycles
-#         group by
-#           lifecycle_state;
-#   EOQ
-# }
-
 query "oci_kms_key_lifecycle_state" {
   sql = <<-EOQ
     with lifecycle_stat as (
