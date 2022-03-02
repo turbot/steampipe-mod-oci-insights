@@ -1,3 +1,77 @@
+dashboard "oci_core_vcn_dashboard" {
+
+  title = "OCI VCN Dashboard"
+
+  tags = merge(local.vcn_common_tags, {
+    type = "Dashboard"
+  })
+
+  container {
+
+    card {
+      sql   = query.oci_core_vcn_count.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_core_vcn_no_subnet_count.sql
+      width = 2
+    }
+
+  }
+
+  container {
+
+    title = "Assessments"
+
+    chart {
+      title = "Empty VCN (No Subnets)"
+      sql   = query.oci_core_vcn_no_subnet.sql
+      type  = "donut"
+      width = 3
+
+    }
+
+  }
+
+  container {
+
+    title = "Analysis"
+
+    chart {
+      title = "VCNs by Tenancy"
+      sql   = query.oci_core_vcn_by_tenancy.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "VCNs by Compartment"
+      sql   = query.oci_core_vcn_by_compartment.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "VCNs by Region"
+      sql   = query.oci_core_vcn_by_region.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "VCNs by RFC1918 Range"
+      sql   = query.oci_vcn_by_rfc1918_range.sql
+      type  = "column"
+      width = 3
+    }
+
+  }
+
+}
+
+# Card Queries
+
 query "oci_core_vcn_count" {
   sql = <<-EOQ
     select count(*) as "VCNs" from oci_core_vcn where lifecycle_state <> 'TERMINATED';
@@ -17,7 +91,7 @@ query "oci_core_vcn_no_subnet_count" {
   EOQ
 }
 
-# Assessments
+# Assessment Queries
 
 query "oci_core_vcn_no_subnet" {
   sql = <<-EOQ
@@ -33,7 +107,7 @@ query "oci_core_vcn_no_subnet" {
   EOQ
 }
 
-# Analysis
+# Analysis Queries
 
 query "oci_core_vcn_by_tenancy" {
   sql = <<-EOQ
@@ -130,73 +204,4 @@ query "oci_vcn_by_rfc1918_range" {
     order by
       rfc1918_bucket;
   EOQ
-}
-
-dashboard "oci_core_vcn_dashboard" {
-
-  title = "OCI VCN Dashboard"
-
-  tags = merge(local.vcn_common_tags, {
-    type = "Dashboard"
-  })
-
-  container {
-
-    card {
-      sql   = query.oci_core_vcn_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_core_vcn_no_subnet_count.sql
-      width = 2
-    }
-
-  }
-
-  container {
-    title = "Assessments"
-
-    chart {
-      title = "Empty VCN (No Subnets)"
-      sql   = query.oci_core_vcn_no_subnet.sql
-      type  = "donut"
-      width = 3
-
-    }
-
-  }
-
-  container {
-    title = "Analysis"
-
-    chart {
-      title = "VCNs by Tenancy"
-      sql   = query.oci_core_vcn_by_tenancy.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "VCNs by Compartment"
-      sql   = query.oci_core_vcn_by_compartment.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "VCNs by Region"
-      sql   = query.oci_core_vcn_by_region.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "VCNs by RFC1918 Range"
-      sql   = query.oci_vcn_by_rfc1918_range.sql
-      type  = "column"
-      width = 3
-    }
-  }
-
 }

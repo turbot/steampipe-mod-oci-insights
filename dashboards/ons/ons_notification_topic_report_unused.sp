@@ -3,7 +3,7 @@ dashboard "oci_ons_notification_topic_unused_report" {
   title = "OCI ONS Notification Topic Unused Report"
 
   tags = merge(local.ons_common_tags, {
-    type = "Report"
+    type     = "Report"
     category = "Unused"
   })
 
@@ -18,10 +18,17 @@ dashboard "oci_ons_notification_topic_unused_report" {
       sql   = query.oci_ons_notification_topic_unused_count.sql
       width = 2
     }
+
   }
 
   table {
-    sql = <<-EOQ
+    sql = query.oci_ons_notification_topic_unused_table.sql
+  }
+
+}
+
+query "oci_ons_notification_topic_unused_table" {
+  sql = <<-EOQ
       select
         a.name,
         now()::date - a.time_created::date as "Age in Days",
@@ -38,7 +45,5 @@ dashboard "oci_ons_notification_topic_unused_report" {
       order by
         a.time_created,
         a.title;
-    EOQ
-  }
-
+  EOQ
 }

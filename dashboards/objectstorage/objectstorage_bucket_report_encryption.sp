@@ -1,19 +1,9 @@
-query "oci_objectstorage_bucket_report_customer_managed_encryption_count" {
-  sql = <<-EOQ
-    select count(*) as "Customer Managed Encryption"
-      from
-    oci_objectstorage_bucket
-    where
-    kms_key_id is not null;
-  EOQ
-}
-
 dashboard "oci_objectstorage_bucket_encryption_report" {
 
   title = "OCI Object Storage Bucket Encryption Report"
 
   tags = merge(local.objectstorage_common_tags, {
-    type = "Report"
+    type     = "Report"
     category = "Encryption"
   })
 
@@ -25,18 +15,35 @@ dashboard "oci_objectstorage_bucket_encryption_report" {
     }
 
     card {
-      sql = query.oci_objectstorage_bucket_report_customer_managed_encryption_count.sql
+      sql   = query.oci_objectstorage_bucket_report_customer_managed_encryption_count.sql
       width = 2
     }
 
     card {
-      sql = query.oci_objectstorage_bucket_default_encryption_count.sql
+      sql   = query.oci_objectstorage_bucket_default_encryption_count.sql
       width = 2
     }
+
   }
 
   table {
-    sql = <<-EOQ
+    sql = query.oci_objectstorage_bucket_encryption_table.sql
+  }
+
+}
+
+query "oci_objectstorage_bucket_report_customer_managed_encryption_count" {
+  sql = <<-EOQ
+    select count(*) as "Customer Managed Encryption"
+      from
+    oci_objectstorage_bucket
+    where
+    kms_key_id is not null;
+  EOQ
+}
+
+query "oci_objectstorage_bucket_encryption_table" {
+  sql = <<-EOQ
       select
         v.name as "Name",
         case when v.kms_key_id is not null then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
@@ -52,8 +59,5 @@ dashboard "oci_objectstorage_bucket_encryption_report" {
       order by
         v.time_created,
         v.title;
-    EOQ
-  }
-
+  EOQ
 }
-

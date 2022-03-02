@@ -1,4 +1,32 @@
-query "oci_objectstorage_bucket_disabled_count" {
+dashboard "oci_objectstorage_bucket_logging_report" {
+
+  title = "OCI Object Storage Bucket Logging Report"
+
+  tags = merge(local.objectstorage_common_tags, {
+    type     = "Report"
+    category = "Logging"
+  })
+
+  container {
+
+    card {
+      sql   = query.oci_objectstorage_bucket_count.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_objectstorage_bucket_logging_disabled_count.sql
+      width = 2
+    }
+  }
+
+  table {
+    sql = query.oci_objectstorage_bucket_logging_table.sql
+  }
+
+}
+
+query "oci_objectstorage_bucket_logging_disabled_count" {
   sql = <<-EOQ
     with name_with_region as (
       select
@@ -21,31 +49,9 @@ query "oci_objectstorage_bucket_disabled_count" {
   EOQ
 }
 
-dashboard "oci_objectstorage_bucket_logging_report" {
-
-  title = "OCI Object Storage Bucket Logging Report"
-
-  tags = merge(local.objectstorage_common_tags, {
-    type = "Report"
-    category = "Logging"
-  })
-
-  container {
-
-    card {
-      sql   = query.oci_objectstorage_bucket_count.sql
-      width = 2
-    }
-
-    card {
-      sql = query.oci_objectstorage_bucket_disabled_count.sql
-      width = 2
-    }
-  }
-
-  table {
-    sql = <<-EOQ
-      with name_with_region as (
+query "oci_objectstorage_bucket_logging_table" {
+  sql = <<-EOQ
+    with name_with_region as (
       select
         concat(configuration -> 'source' ->> 'resource', region) as name_with_region,
         is_enabled
@@ -67,10 +73,8 @@ dashboard "oci_objectstorage_bucket_logging_report" {
         left join name_with_region as n on concat(v.name, v.region) = n.name_with_region
         left join oci_identity_compartment as c on v.compartment_id = c.id
         left join oci_identity_tenancy as t on v.tenant_id = t.id
-        order by
-          v.time_created,
-          v.title;
-    EOQ
-  }
+      order by
+        v.time_created,
+        v.title;
+  EOQ
 }
-

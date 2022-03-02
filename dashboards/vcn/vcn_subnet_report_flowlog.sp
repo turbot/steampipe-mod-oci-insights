@@ -3,7 +3,7 @@ dashboard "oci_vcn_subnet_flowlog_report" {
   title = "OCI VCN Subnet Flow Log Report"
 
   tags = merge(local.vcn_common_tags, {
-    type = "Report"
+    type     = "Report"
     category = "Logging"
   })
 
@@ -18,15 +18,22 @@ dashboard "oci_vcn_subnet_flowlog_report" {
       sql   = query.oci_vcn_subnet_flowlog_not_configured_count.sql
       width = 2
     }
+
   }
 
   table {
-    sql = <<-EOQ
+    sql = query.oci_vcn_subnet_flowlog_table.sql
+  }
+
+}
+
+query "oci_vcn_subnet_flowlog_table" {
+  sql = <<-EOQ
       select
         v.display_name as "Name",
         case
-          when l.is_enabled is null or not l.is_enabled then 'Not Configured'
-          else 'Configured'
+          when l.is_enabled is null or not l.is_enabled then 'DISABLED'
+          else 'ENABLED'
         end as "Flow Log Status",
         v.lifecycle_state as "Lifecycle State",
         v.time_created as "Create Time",
@@ -44,7 +51,5 @@ dashboard "oci_vcn_subnet_flowlog_report" {
       order by
         v.time_created,
         v.title;
-    EOQ
-  }
-
+   EOQ
 }

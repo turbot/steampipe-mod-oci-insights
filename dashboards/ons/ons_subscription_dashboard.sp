@@ -1,3 +1,83 @@
+dashboard "oci_ons_subscription_dashboard" {
+
+  title = "OCI ONS Subscription Dashboard"
+
+  tags = merge(local.ons_common_tags, {
+    type = "Dashboard"
+  })
+
+  container {
+
+    card {
+      sql   = query.oci_ons_subscription_count.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_ons_subscription_unused_count.sql
+      width = 2
+    }
+
+  }
+
+  container {
+    title = "Assessments"
+
+    chart {
+      title = "Lifecycle State"
+      sql   = query.oci_ons_subscription_by_lifecycle_state.sql
+      type  = "donut"
+      width = 3
+
+      series "count" {
+        point "active" {
+          color = "ok"
+        }
+        point "pending" {
+          color = "alert"
+        }
+      }
+    }
+
+  }
+
+  container {
+    title = "Analysis"
+
+    chart {
+      title = "Subscriptions by Tenancy"
+      sql   = query.oci_ons_subscription_by_tenancy.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Subscriptions by Compartment"
+      sql   = query.oci_ons_subscription_by_compartment.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Subscriptions by Region"
+      sql   = query.oci_ons_subscription_by_region.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Subscriptions by Age"
+      sql   = query.oci_ons_subscription_by_creation_month.sql
+      type  = "column"
+      width = 3
+    }
+
+  }
+
+}
+
+# Card Queries
+
 query "oci_ons_subscription_count" {
   sql = <<-EOQ
     select count(*) as "Subscriptions" from oci_ons_subscription;
@@ -17,21 +97,8 @@ query "oci_ons_subscription_unused_count" {
   EOQ
 }
 
-#Assessments
+# Assessment Queries
 
-# query "oci_ons_subscription_by_lifecycle_state" {
-#   sql = <<-EOQ
-#     select
-#       lifecycle_state,
-#       count(lifecycle_state)
-#     from
-#       oci_ons_subscription
-#     group by
-#       lifecycle_state;
-#   EOQ
-# }
-
-# https://pkg.go.dev/github.com/oracle/oci-go-sdk@v24.3.0+incompatible/ons#SubscriptionLifecycleStateEnum
 query "oci_ons_subscription_by_lifecycle_state" {
   sql = <<-EOQ
     with lifecycle_stat as (
@@ -54,7 +121,8 @@ query "oci_ons_subscription_by_lifecycle_state" {
   EOQ
 }
 
-# Analysis
+# Analysis Queries
+
 query "oci_ons_subscription_by_tenancy" {
   sql = <<-EOQ
     select
@@ -164,82 +232,4 @@ query "oci_ons_subscription_by_creation_month" {
     order by
       months.month;
   EOQ
-}
-
-dashboard "oci_ons_subscription_dashboard" {
-
-  title = "OCI ONS Subscription Dashboard"
-
-  tags = merge(local.ons_common_tags, {
-    type = "Dashboard"
-  })
-
-  container {
-
-    card {
-      sql   = query.oci_ons_subscription_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_ons_subscription_unused_count.sql
-      width = 2
-    }
-
-  }
-
-  container {
-    title = "Assessments"
-
-    chart {
-      title = "Lifecycle State"
-      sql   = query.oci_ons_subscription_by_lifecycle_state.sql
-      type  = "donut"
-      width = 3
-
-      series "count" {
-        point "active" {
-          color = "green"
-        }
-        point "pending" {
-          color = "red"
-        }
-      }
-    }
-
-  }
-
-  container {
-    title = "Analysis"
-
-    chart {
-      title = "Subscriptions by Tenancy"
-      sql   = query.oci_ons_subscription_by_tenancy.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Subscriptions by Compartment"
-      sql   = query.oci_ons_subscription_by_compartment.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Subscriptions by Region"
-      sql   = query.oci_ons_subscription_by_region.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Subscriptions by Age"
-      sql   = query.oci_ons_subscription_by_creation_month.sql
-      type  = "column"
-      width = 3
-    }
-
-  }
-
 }

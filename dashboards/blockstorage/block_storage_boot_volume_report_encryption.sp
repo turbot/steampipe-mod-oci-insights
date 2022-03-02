@@ -1,20 +1,9 @@
-query "oci_block_storage_boot_volume_customer_managed_encryption_count" {
-  sql = <<-EOQ
-    select
-      count(*) as "Customer Managed Encryption"
-    from
-      oci_core_boot_volume
-    where
-      kms_key_id is not null and lifecycle_state <> 'TERMINATED'
-  EOQ
-}
-
 dashboard "oci_block_storage_boot_volume_encryption_report" {
 
   title = "OCI Block Storage Boot Volume Encryption Report"
 
   tags = merge(local.blockstorage_common_tags, {
-    type = "Report"
+    type     = "Report"
     category = "Encryption"
   })
 
@@ -37,7 +26,24 @@ dashboard "oci_block_storage_boot_volume_encryption_report" {
   }
 
   table {
-    sql = <<-EOQ
+    sql = query.oci_block_storage_boot_volume_encryption_table.sql
+  }
+
+}
+
+query "oci_block_storage_boot_volume_customer_managed_encryption_count" {
+  sql = <<-EOQ
+    select
+      count(*) as "Customer Managed Encryption"
+    from
+      oci_core_boot_volume
+    where
+      kms_key_id is not null and lifecycle_state <> 'TERMINATED'
+  EOQ
+}
+
+query "oci_block_storage_boot_volume_encryption_table" {
+  sql = <<-EOQ
       select
         v.display_name as "Name",
         case when v.kms_key_id is not null then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
@@ -52,12 +58,10 @@ dashboard "oci_block_storage_boot_volume_encryption_report" {
         oci_core_boot_volume as v
         left join oci_identity_compartment as c on v.compartment_id = c.id
         left join oci_identity_tenancy as t on v.tenant_id = t.id
-        where
-          v.lifecycle_state <> 'TERMINATED'
-        order by
-          v.time_created,
-          v.title;
-    EOQ
-  }
-
+      where
+        v.lifecycle_state <> 'TERMINATED'
+      order by
+        v.time_created,
+        v.title;
+  EOQ
 }

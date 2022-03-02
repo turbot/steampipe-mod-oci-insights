@@ -1,10 +1,127 @@
+dashboard "oci_identity_user_dashboard" {
+
+  title = "OCI Identity User Dashboard"
+
+  tags = merge(local.identity_common_tags, {
+    type = "Dashboard"
+  })
+
+  container {
+
+    card {
+      sql   = query.oci_identity_user_count.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_identity_user_mfa_disabled_count.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_identity_user_inactive_api_key_count.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_identity_user_inactive_customer_key_count.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_identity_user_not_attached_to_groups.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_identity_user_access_key_age_gt_90_days.sql
+      width = 2
+    }
+
+  }
+
+  container {
+    title = "Assesments"
+    width = 6
+
+    chart {
+      title = "MFA Status"
+      sql   = query.oci_identity_user_mfa_enabled.sql
+      type  = "donut"
+      width = 4
+
+      series "count" {
+        point "enabled" {
+          color = "ok"
+        }
+        point "disabled" {
+          color = "alert"
+        }
+      }
+    }
+
+    chart {
+      title = "Email Verification Status"
+      sql   = query.oci_identity_user_by_verified_email.sql
+      type  = "donut"
+      width = 4
+
+      series "count" {
+        point "verified" {
+          color = "ok"
+        }
+        point "unverified" {
+          color = "alert"
+        }
+      }
+    }
+
+  }
+
+  container {
+    title = "Analysis"
+
+    chart {
+      title = "Users by Tenancy"
+      sql   = query.oci_identity_users_by_tenancy.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Users by Type"
+      sql   = query.oci_identity_user_by_type.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Users by Group"
+      sql   = query.oci_identity_user_by_groups.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Users by Age"
+      sql   = query.oci_identity_users_by_creation_month.sql
+      type  = "column"
+      width = 3
+    }
+
+  }
+
+}
+
+# Card Queries
+
 query "oci_identity_user_count" {
   sql = <<-EOQ
     select count(*) as "Users" from oci_identity_user;
   EOQ
 }
 
-query "oci_identity_mfa_not_enabled_users_count" {
+query "oci_identity_user_mfa_disabled_count" {
   sql = <<-EOQ
     select
       count(*) as  value,
@@ -16,6 +133,61 @@ query "oci_identity_mfa_not_enabled_users_count" {
       not is_mfa_activated;
   EOQ
 }
+
+query "oci_identity_user_inactive_api_key_count" {
+  sql = <<-EOQ
+    select
+      count(*) as  value,
+      'Inactive API Keys' as label,
+      case count(*) when 0 then 'ok' else 'alert' end as type
+    from
+      oci_identity_api_key
+    where
+      lifecycle_state = 'INACTIVE';
+  EOQ
+}
+
+query "oci_identity_user_inactive_customer_key_count" {
+  sql = <<-EOQ
+    select
+      count(*) as value,
+      'Inactive Customer Keys' as label,
+      case count(*) when 0 then 'ok' else 'alert' end as type
+    from
+      oci_identity_customer_secret_key
+    where
+      lifecycle_state = 'INACTIVE';
+  EOQ
+}
+
+query "oci_identity_user_not_attached_to_groups" {
+  sql = <<-EOQ
+  select
+    count(oci_identity_user.name) as  value,
+    'Users Without Group' as label,
+    case count(*) when 0 then 'ok' else 'alert' end as type
+  from
+    oci_identity_user,
+    jsonb_array_elements(user_groups) as user_group
+    inner join oci_identity_group ON (oci_identity_group.id = user_group ->> 'groupId' );
+  EOQ
+}
+
+query "oci_identity_user_access_key_age_gt_90_days" {
+  sql = <<-EOQ
+  select
+    count(distinct user_name) as value,
+    'Active API Key Age > 90 Days' as label,
+    case count(*) when 0 then 'ok' else 'alert' end as type
+  from
+    oci_identity_api_key
+  where
+    time_created > now() - interval '90 days' and
+    lifecycle_state = 'ACTIVE';
+  EOQ
+}
+
+# Assesment Queries
 
 query "oci_identity_user_mfa_enabled" {
   sql = <<-EOQ
@@ -38,72 +210,27 @@ query "oci_identity_user_mfa_enabled" {
   EOQ
 }
 
-query "oci_identity_user_inactive_customer_key_count" {
+query "oci_identity_user_by_verified_email" {
   sql = <<-EOQ
-    select
-      count(*) as value,
-      'Inactive Customer Keys' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as type
-    from
-      oci_identity_customer_secret_key
-    where
-      lifecycle_state = 'INACTIVE';
+    with email_stat as (
+      select
+        case
+          when email_verified then 'verified' else 'unverified'
+        end as email_stat
+      from
+        oci_identity_user
+    )
+      select
+        email_stat,
+        count(*)
+      from
+        email_stat
+      group by
+        email_stat
   EOQ
 }
 
-query "oci_identity_user_inactive_api_key_count" {
-  sql = <<-EOQ
-    select
-      count(*) as  value,
-      'Inactive API Keys' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as type
-    from
-      oci_identity_api_key
-    where
-      lifecycle_state = 'INACTIVE';
-  EOQ
-}
-
-query "oci_identity_console_login_enabled_users_count" {
-  sql = <<-EOQ
-  select count(*) as "Console Login Enabled" from oci_identity_user where can_use_console_password;
-  EOQ
-}
-
-query "oci_identity_users_can_use_api_key_count" {
-  sql = <<-EOQ
-  select count(*) as "API Key Use Enabled" from oci_identity_user where can_use_api_keys;
-  EOQ
-}
-
-query "oci_identity_user_access_key_age_gt_90_days" {
-  sql = <<-EOQ
-  select
-    count(distinct user_name) as value,
-    'Active API Key Age > 90 Days' as label,
-    case count(*) when 0 then 'ok' else 'alert' end as type
-  from
-    oci_identity_api_key
-  where
-    time_created > now() - interval '90 days' and
-    lifecycle_state = 'ACTIVE';
-  EOQ
-}
-
-query "oci_identity_user_not_attached_to_groups" {
-  sql = <<-EOQ
-  select
-    count(oci_identity_user.name) as  value,
-    'Users Without Group' as label,
-    case count(*) when 0 then 'ok' else 'alert' end as type
-  from
-    oci_identity_user,
-    jsonb_array_elements(user_groups) as user_group
-    inner join oci_identity_group ON (oci_identity_group.id = user_group ->> 'groupId' );
-  EOQ
-}
-
-# Analysis
+# Analysis Queries
 
 query "oci_identity_users_by_tenancy" {
   sql = <<-EOQ
@@ -220,145 +347,4 @@ query "oci_identity_user_by_groups" {
     order by
       group_name;
   EOQ
-}
-
-query "oci_identity_user_by_verified_email" {
-  sql = <<-EOQ
-    with email_stat as (
-      select
-        case
-          when email_verified then 'verified' else 'unverified'
-        end as email_stat
-      from
-        oci_identity_user
-    )
-      select
-        email_stat,
-        count(*)
-      from
-        email_stat
-      group by
-        email_stat
-  EOQ
-}
-
-// TO DO
-# query "oci_identity_user_having_administrator_access" {
-#   EOQ
-# }
-
-
-dashboard "oci_identity_user_dashboard" {
-
-  title = "OCI Identity User Dashboard"
-
-  tags = merge(local.identity_common_tags, {
-    type = "Dashboard"
-  })
-
-  container {
-
-    card {
-      sql   = query.oci_identity_user_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_identity_mfa_not_enabled_users_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_identity_user_inactive_api_key_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_identity_user_inactive_customer_key_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_identity_user_not_attached_to_groups.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_identity_user_access_key_age_gt_90_days.sql
-      width = 2
-    }
-
-  }
-
-  container {
-    title = "Assesments"
-    width = 6
-
-    chart {
-      title = "MFA Status"
-      sql   = query.oci_identity_user_mfa_enabled.sql
-      type  = "donut"
-      width = 4
-
-      series "count" {
-        point "enabled" {
-          color = "green"
-        }
-        point "disabled" {
-          color = "red"
-        }
-      }
-    }
-
-    chart {
-      title = "Email Verification Status"
-      sql   = query.oci_identity_user_by_verified_email.sql
-      type  = "donut"
-      width = 4
-
-      series "count" {
-        point "verified" {
-          color = "green"
-        }
-        point "unverified" {
-          color = "red"
-        }
-      }
-    }
-
-  }
-
-  container {
-    title = "Analysis"
-
-    chart {
-      title = "Users by Tenancy"
-      sql   = query.oci_identity_users_by_tenancy.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Users by Type"
-      sql   = query.oci_identity_user_by_type.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Users by Group"
-      sql   = query.oci_identity_user_by_groups.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Users by Age"
-      sql   = query.oci_identity_users_by_creation_month.sql
-      type  = "column"
-      width = 3
-    }
-
-  }
-
 }

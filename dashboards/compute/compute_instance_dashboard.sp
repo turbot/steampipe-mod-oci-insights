@@ -1,3 +1,125 @@
+dashboard "oci_compute_instance_dashboard" {
+
+  title = "OCI Compute Instance Dashboard"
+
+  tags = merge(local.compute_common_tags, {
+    type = "Dashboard"
+  })
+
+  container {
+
+    card {
+      sql   = query.oci_compute_instance_count.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_compute_instance_total_cores.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_compute_instance_public_instance_count.sql
+      width = 2
+    }
+
+  }
+
+  container {
+
+    title = "Assesments"
+
+    chart {
+      title = "Lifecycle State"
+      sql   = query.oci_compute_instance_by_state.sql
+      type  = "donut"
+      width = 3
+    }
+
+    chart {
+      title = "Public/Private"
+      sql   = query.oci_compute_instance_by_public_ip.sql
+      type  = "donut"
+      width = 3
+
+      series "count" {
+        point "private" {
+          color = "ok"
+        }
+        point "public" {
+          color = "alert"
+        }
+      }
+    }
+
+  }
+
+
+  container {
+
+    title = "Analysis"
+
+    chart {
+      title = "Instances by Tenancy"
+      sql   = query.oci_compute_instance_by_tenancy.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Instances by Compartment"
+      sql   = query.oci_compute_instance_by_compartment.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Instances by Region"
+      sql   = query.oci_compute_instance_by_region.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Instances by Age"
+      sql   = query.oci_compute_instance_by_creation_month.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Instances by Shape"
+      sql   = query.oci_compute_instance_by_type.sql
+      type  = "column"
+      width = 3
+    }
+
+  }
+
+  container {
+
+    title = "Performance & Utilization"
+
+    chart {
+      title = "Top 10 CPU - Last 7 days"
+      sql   = query.oci_compute_top10_cpu_past_week.sql
+      type  = "line"
+      width = 6
+    }
+
+
+    chart {
+      title = "Average max daily CPU - Last 30 days"
+      sql   = query.oci_compute_instances_by_cpu_utilization_category.sql
+      type  = "column"
+      width = 6
+    }
+  }
+
+}
+
+# Card Queries
+
 query "oci_compute_instance_count" {
   sql = <<-EOQ
     select count(*) as "Instances" from oci_core_instance where lifecycle_state <> 'TERMINATED';
@@ -35,7 +157,7 @@ query "oci_compute_instance_public_instance_count" {
   EOQ
 }
 
-# Assesments
+# Assesments Queries
 
 query "oci_compute_instance_by_state" {
   sql = <<-EOQ
@@ -75,7 +197,8 @@ query "oci_compute_instance_by_public_ip" {
   EOQ
 }
 
-# Analysis
+# Analysis Queries
+
 query "oci_compute_instance_by_tenancy" {
   sql = <<-EOQ
     select
@@ -127,8 +250,6 @@ query "oci_compute_instance_by_compartment" {
       c.title;
   EOQ
 }
-
-
 
 query "oci_compute_instance_by_region" {
   sql = <<-EOQ
@@ -208,7 +329,7 @@ query "oci_compute_instance_by_type" {
   EOQ
 }
 
-# Performance & Utilization
+# Performance & Utilization Queries
 
 query "oci_compute_top10_cpu_past_week" {
   sql = <<-EOQ
@@ -273,126 +394,3 @@ query "oci_compute_instances_by_cpu_utilization_category" {
       b.compute_bucket
   EOQ
 }
-
-
-dashboard "oci_compute_instance_summary" {
-
-  title = "OCI Compute Instance Dashboard"
-
-  tags = merge(local.compute_common_tags, {
-    type = "Dashboard"
-  })
-
-  container {
-
-    card {
-      sql   = query.oci_compute_instance_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_compute_instance_total_cores.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_compute_instance_public_instance_count.sql
-      width = 2
-    }
-
-  }
-
-  container {
-
-    title = "Assesments"
-    # width = 6
-
-    chart {
-      title = "Lifecycle State"
-      sql   = query.oci_compute_instance_by_state.sql
-      type  = "donut"
-      width = 3
-    }
-
-    chart {
-      title = "Public/Private"
-      sql   = query.oci_compute_instance_by_public_ip.sql
-      type  = "donut"
-      width = 3
-
-      series "count" {
-        point "private" {
-          color = "green"
-        }
-        point "public" {
-          color = "red"
-        }
-      }
-    }
-
-  }
-
-
-  container {
-
-    title = "Analysis"
-
-    chart {
-      title = "Instances by Tenancy"
-      sql   = query.oci_compute_instance_by_tenancy.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Instances by Compartment"
-      sql   = query.oci_compute_instance_by_compartment.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Instances by Region"
-      sql   = query.oci_compute_instance_by_region.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Instances by Age"
-      sql   = query.oci_compute_instance_by_creation_month.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Instances by Shape"
-      sql   = query.oci_compute_instance_by_type.sql
-      type  = "column"
-      width = 3
-    }
-
-  }
-
-  container {
-
-    title = "Performance & Utilization"
-
-    chart {
-      title = "Top 10 CPU - Last 7 days"
-      sql   = query.oci_compute_top10_cpu_past_week.sql
-      type  = "line"
-      width = 6
-    }
-
-
-    chart {
-      title = "Average max daily CPU - Last 30 days"
-      sql   = query.oci_compute_instances_by_cpu_utilization_category.sql
-      type  = "column"
-      width = 6
-    }
-  }
-
-}
-
