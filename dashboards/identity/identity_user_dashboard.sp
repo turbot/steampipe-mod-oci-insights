@@ -38,12 +38,6 @@ query "oci_identity_user_mfa_enabled" {
   EOQ
 }
 
-query "oci_identity_user_unverified_email_count" {
-  sql = <<-EOQ
-    select count(*) as "Users With Unverified Email" from oci_identity_user where not email_verified;
-  EOQ
-}
-
 query "oci_identity_user_inactive_customer_key_count" {
   sql = <<-EOQ
     select
@@ -301,7 +295,7 @@ dashboard "oci_identity_user_dashboard" {
     width = 6
 
     chart {
-      title = "MFA Enabled Users"
+      title = "MFA Status"
       sql   = query.oci_identity_user_mfa_enabled.sql
       type  = "donut"
       width = 4
@@ -317,7 +311,7 @@ dashboard "oci_identity_user_dashboard" {
     }
 
     chart {
-      title = "Users by Verified Email"
+      title = "Verified Email"
       sql   = query.oci_identity_user_by_verified_email.sql
       type  = "donut"
       width = 4
