@@ -30,26 +30,25 @@ dashboard "oci_vcn_subnet_flowlog_report" {
 query "oci_vcn_subnet_flowlog_table" {
   sql = <<-EOQ
       select
-        v.display_name as "Name",
+        s.display_name as "Name",
         case
           when l.is_enabled is null or not l.is_enabled then 'DISABLED'
           else 'ENABLED'
         end as "Flow Log Status",
-        v.lifecycle_state as "Lifecycle State",
-        v.time_created as "Create Time",
+        s.lifecycle_state as "Lifecycle State",
+        s.time_created as "Create Time",
         coalesce(c.title, 'root') as "Compartment",
         t.title as "Tenancy",
-        v.region as "Region",
-        v.id as "OCID"
+        s.region as "Region",
+        s.id as "OCID"
       from
-        oci_core_subnet as v
-        left join oci_logging_log as l on v.id = l.configuration -> 'source' ->> 'resource'
-        left join oci_identity_compartment as c on v.compartment_id = c.id
-        left join oci_identity_tenancy as t on v.tenant_id = t.id
+        oci_core_subnet as s
+        left join oci_logging_log as l on s.id = l.configuration -> 'source' ->> 'resource'
+        left join oci_identity_compartment as c on s.compartment_id = c.id
+        left join oci_identity_tenancy as t on s.tenant_id = t.id
       where
-        v.lifecycle_state <> 'TERMINATED'
+        s.lifecycle_state <> 'TERMINATED'
       order by
-        v.time_created,
-        v.title;
+        s.display_name;
    EOQ
 }
