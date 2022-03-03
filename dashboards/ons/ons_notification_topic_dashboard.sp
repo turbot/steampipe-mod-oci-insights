@@ -20,6 +20,7 @@ dashboard "oci_ons_notification_topic_dashboard" {
   }
 
   container {
+
     title = "Assessments"
 
     chart {
@@ -36,10 +37,19 @@ dashboard "oci_ons_notification_topic_dashboard" {
     }
 
     chart {
-      title = "No Active Subscription"
+      title = "Subscription Status"
       sql   = query.oci_ons_notification_topic_by_subscription.sql
       type  = "donut"
       width = 3
+
+      series "count" {
+        point "ACTIVE" {
+          color = "ok"
+        }
+        point "No Subscription" {
+          color = "alert"
+        }
+      }
     }
 
   }
@@ -90,19 +100,13 @@ query "oci_ons_notification_topic_unused_count" {
   sql = <<-EOQ
     select
       count(*) as value,
-      'No Active Subscription' as label,
+      'No Subscription' as label,
       case count(*) when 0 then 'ok' else 'alert' end as type
     from
-      oci_ons_notification_topic
+      oci_ons_notification_topic t
+      left join oci_ons_subscription s on t.topic_id = s.topic_id
     where
-      topic_id in (
-    select
-      topic_id
-    from
-      oci_ons_subscription
-    where
-      lifecycle_state <> 'ACTIVE'
-      );
+      s.id is null;
   EOQ
 }
 
@@ -133,21 +137,13 @@ query "oci_ons_notification_topic_by_lifecycle_state" {
 query "oci_ons_notification_topic_by_subscription" {
   sql = <<-EOQ
     select
-      name,
-      count(name)
+      case when s.id is null then 'No Subscription' else s.lifecycle_state end as status,
+      count(*)
     from
-      oci_ons_notification_topic
-    where
-      topic_id in (
-    select
-      topic_id
-    from
-      oci_ons_subscription
-    where
-      lifecycle_state <> 'ACTIVE'
-      )
+      oci_ons_notification_topic t
+      left join oci_ons_subscription s on t.topic_id = s.topic_id
     group by
-      name;
+      status;
   EOQ
 }
 

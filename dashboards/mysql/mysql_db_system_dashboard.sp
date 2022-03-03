@@ -43,13 +43,12 @@ dashboard "oci_mysql_db_system_dashboard" {
 
   container {
     title = "Assessments"
-    width = 6
 
     chart {
       title = "Lifecycle State"
       sql   = query.oci_mysql_db_system_by_lifecycle_state.sql
       type  = "donut"
-      width = 4
+      width = 3
 
       series "count" {
         point "active" {
@@ -63,10 +62,19 @@ dashboard "oci_mysql_db_system_dashboard" {
     }
 
     chart {
-      title = "DB Systems With Backups Disabled"
-      sql   = query.oci_mysql_db_system_with_no_backups.sql
+      title = "Backup Status"
+      sql   = query.oci_mysql_db_system_with_backups.sql
       type  = "donut"
-      width = 4
+      width = 3
+
+      series "count" {
+        point "enabled" {
+          color = "ok"
+        }
+        point "disabled" {
+          color = "alert"
+        }
+      }
     }
 
   }
@@ -241,13 +249,7 @@ query "oci_mysql_db_system_backup_disabled_count" {
       oci_mysql_db_system as v
     left join oci_mysql_backup as b on v.id = b.db_system_id
     where
-      v.lifecycle_state <> 'DELETED'
-    group by
-      v.compartment_id,
-      v.region,
-      v.id
-    having
-      count(b.id) = 0;
+      b.id is null and v.lifecycle_state <> 'DELETED';
   EOQ
 }
 
@@ -293,20 +295,18 @@ query "oci_mysql_db_system_by_lifecycle_state" {
   EOQ
 }
 
-query "oci_mysql_db_system_with_no_backups" {
+query "oci_mysql_db_system_with_backups" {
   sql = <<-EOQ
     select
-      v.display_name,
-      count(v.display_name)
+      case when b.id is null then 'disabled' else 'enabled' end as status,
+      count(*)
     from
       oci_mysql_db_system as v
-    left join oci_mysql_backup as b on v.id = b.db_system_id
+      left join oci_mysql_backup as b on v.id = b.db_system_id
     where
       v.lifecycle_state <> 'DELETED'
     group by
-      v.display_name
-    having
-      count(b.id) = 0;
+      status;
   EOQ
 }
 

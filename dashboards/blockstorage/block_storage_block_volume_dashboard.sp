@@ -55,10 +55,19 @@ dashboard "oci_block_storage_block_volume_dashboard" {
     }
 
     chart {
-      title = "Without Backups"
-      sql   = query.oci_block_storage_block_volume_with_no_backups.sql
+      title = "Backup Status"
+      sql   = query.oci_block_storage_block_volume_with_backups.sql
       type  = "donut"
       width = 3
+
+      series "count" {
+        point "enabled" {
+          color = "ok"
+        }
+        point "disabled" {
+          color = "alert"
+        }
+      }
     }
 
   }
@@ -198,15 +207,9 @@ query "oci_block_storage_block_volume_with_no_backups_count" {
       case count(v.*) when 0 then 'ok' else 'alert' end as type
     from
       oci_core_volume as v
-    left join oci_core_volume_backup as b on v.id = b.volume_id
+      left join oci_core_volume_backup as b on v.id = b.volume_id
     where
-      v.lifecycle_state <> 'TERMINATED'
-    group by
-      v.compartment_id,
-      v.region,
-      v.id
-    having
-      count(b.id) = 0;
+      b.id is null and v.lifecycle_state <> 'TERMINATED';
   EOQ
 }
 
@@ -249,20 +252,18 @@ query "oci_block_storage_block_volume_by_lifecycle_state" {
   EOQ
 }
 
-query "oci_block_storage_block_volume_with_no_backups" {
+query "oci_block_storage_block_volume_with_backups" {
   sql = <<-EOQ
     select
-      v.display_name,
-      count(v.display_name)
+      case when b.id is null then 'disabled' else 'enabled' end as status,
+      count(*)
     from
       oci_core_volume as v
-    left join oci_core_volume_backup as b on v.id = b.volume_id
+      left join oci_core_volume_backup as b on v.id = b.volume_id
     where
       v.lifecycle_state <> 'TERMINATED'
     group by
-      v.display_name
-    having
-      count(b.id) = 0;
+      status;
   EOQ
 }
 
