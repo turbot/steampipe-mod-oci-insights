@@ -189,7 +189,7 @@ query "oci_database_autonomous_db_total_cores" {
 query "oci_database_autonomous_db_total_size" {
   sql = <<-EOQ
     select
-      sum(data_storage_size_in_gbs)  as "Total Size (GB)"
+      sum(data_storage_size_in_gbs) as "Total Size (GB)"
     from
       oci_database_autonomous_database;
   EOQ
@@ -318,7 +318,7 @@ query "oci_database_autonomous_db_by_permission_level" {
           'unrestricted'
         end permission_status
       from
-        oci_database_autonomous_database) as t
+        oci_database_autonomous_database) as a
     group by
       permission_status
     order by
@@ -362,20 +362,20 @@ query "oci_database_autonomous_db_by_compartment" {
         )
        )
     select
-      b.title as "Tenancy",
-      case when b.title = c.title then 'root' else c.title end as "Compartment",
+      t.title as "Tenancy",
+      case when t.title = c.title then 'root' else c.title end as "Compartment",
       count(a.*) as "Autonomous DBs"
     from
       oci_database_autonomous_database as a,
-      oci_identity_tenancy as b,
+      oci_identity_tenancy as t,
       compartments as c
     where
-      c.id = a.compartment_id and a.tenant_id = b.id
+      c.id = a.compartment_id and a.tenant_id = t.id
     group by
-      b.title,
+      t.title,
       c.title
     order by
-      b.title,
+      t.title,
       c.title;
   EOQ
 }

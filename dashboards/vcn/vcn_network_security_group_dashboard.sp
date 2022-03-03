@@ -337,20 +337,20 @@ query "oci_vcn_security_groups_by_compartment" {
         )
        )
     select
-      b.title as "Tenancy",
-      case when b.title = c.title then 'root' else c.title end as "Compartment",
-      count(a.*) as "File Systems"
+      t.title as "Tenancy",
+      case when t.title = c.title then 'root' else c.title end as "Compartment",
+      count(s.*) as "File Systems"
     from
-      oci_core_network_security_group as a,
-      oci_identity_tenancy as b,
+      oci_core_network_security_group as s,
+      oci_identity_tenancy as t,
       compartments as c
     where
-      c.id = a.compartment_id and a.tenant_id = b.id and a.lifecycle_state <> 'DELETED'
+      c.id = s.compartment_id and s.tenant_id = t.id and s.lifecycle_state <> 'DELETED'
     group by
-      b.title,
+      t.title,
       c.title
     order by
-      b.title,
+      t.title,
       c.title;
   EOQ
 }

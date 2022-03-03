@@ -202,17 +202,17 @@ query "oci_compute_instance_by_public_ip" {
 query "oci_compute_instance_by_tenancy" {
   sql = <<-EOQ
     select
-      c.title as "Tenancy",
+      t.title as "Tenancy",
       count(i.*) as "Instances"
     from
       oci_core_instance as i,
-      oci_identity_tenancy as c
+      oci_identity_tenancy as t
     where
-      c.id = i.tenant_id and i.lifecycle_state <> 'TERMINATED'
+      t.id = i.tenant_id and i.lifecycle_state <> 'TERMINATED'
     group by
-      c.title
+      t.title
     order by
-      c.title;
+      t.title;
   EOQ
 }
 

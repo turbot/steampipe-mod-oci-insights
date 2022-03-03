@@ -167,20 +167,20 @@ query "oci_ons_notification_topic_by_compartment" {
         )
       )
     select
-      b.title as "Tenancy",
-      case when b.title = c.title then 'root' else c.title end as "Compartment",
-      count(a.*) as "Topics"
+      t.title as "Tenancy",
+      case when t.title = c.title then 'root' else c.title end as "Compartment",
+      count(n.*) as "Topics"
     from
-      oci_kms_key as a,
-      oci_identity_tenancy as b,
+      oci_ons_notification_topic as n,
+      oci_identity_tenancy as t,
       compartments as c
     where
-      c.id = a.compartment_id and a.tenant_id = b.id
+      c.id = n.compartment_id and n.tenant_id = t.id
     group by
-      b.title,
+      t.title,
       c.title
     order by
-      b.title,
+      t.title,
       c.title;
   EOQ
 }

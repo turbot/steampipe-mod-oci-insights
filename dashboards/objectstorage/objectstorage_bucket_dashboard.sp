@@ -130,7 +130,7 @@ query "oci_objectstorage_bucket_count" {
 query "oci_objectstorage_bucket_read_only_access_count" {
   sql = <<-EOQ
     select
-      count(*) as "Read Only Access"
+      count(*) as "Read-Only Access"
     from
       oci_objectstorage_bucket
     where
@@ -150,7 +150,7 @@ query "oci_objectstorage_bucket_default_encryption_count" {
 
 query "oci_objectstorage_bucket_archived_count" {
   sql = <<-EOQ
-    select count(*) as "Archive"
+    select count(*) as "Archived"
     from
       oci_objectstorage_bucket
     where
@@ -254,17 +254,17 @@ query "oci_objectstorage_bucket_public_access_status" {
 query "oci_objectstorage_bucket_by_tenancy" {
   sql = <<-EOQ
    select
-      c.title as "Tenancy",
+      t.title as "Tenancy",
       count(b.*) as "Buckets"
     from
       oci_objectstorage_bucket as b,
-      oci_identity_tenancy as c
+      oci_identity_tenancy as t
     where
-      c.id = b.tenant_id
+      t.id = b.tenant_id
     group by
-      c.title
+      t.title
     order by
-      c.title;
+      t.title;
   EOQ
 }
 
@@ -285,20 +285,20 @@ query "oci_objectstorage_bucket_by_compartment" {
         )
        )
     select
-      b.title as "Tenancy",
-      case when b.title = c.title then 'root' else c.title end as "Compartment",
-      count(a.*) as "Keys"
+      t.title as "Tenancy",
+      case when t.title = c.title then 'root' else c.title end as "Compartment",
+      count(b.*) as "Keys"
     from
-      oci_objectstorage_bucket as a,
-      oci_identity_tenancy as b,
+      oci_objectstorage_bucket as b,
+      oci_identity_tenancy as t,
       compartments as c
     where
-      c.id = a.compartment_id and a.tenant_id = b.id
+      c.id = b.compartment_id and b.tenant_id = t.id
     group by
-      b.title,
+      t.title,
       c.title
     order by
-      b.title,
+      t.title,
       c.title;
   EOQ
 }

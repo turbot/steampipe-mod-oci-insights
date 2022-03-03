@@ -239,20 +239,20 @@ query "oci_mysql_backup_by_compartment" {
         )
        )
     select
-      b.title as "Tenancy",
-      case when b.title = c.title then 'root' else c.title end as "Compartment",
-      count(a.*) as "MySQL Backups"
+      t.title as "Tenancy",
+      case when t.title = c.title then 'root' else c.title end as "Compartment",
+      count(b.*) as "MySQL Backups"
     from
-      oci_mysql_backup as a,
-      oci_identity_tenancy as b,
+      oci_mysql_backup as b,
+      oci_identity_tenancy as t,
       compartments as c
     where
-      c.id = a.compartment_id and a.tenant_id = b.id and lifecycle_state <> 'DELETED'
+      c.id = b.compartment_id and b.tenant_id = t.id and lifecycle_state <> 'DELETED'
     group by
-      b.title,
+      t.title,
       c.title
     order by
-      b.title,
+      t.title,
       c.title;
   EOQ
 }
@@ -323,17 +323,17 @@ query "oci_mysql_backup_by_creation_month" {
 query "oci_mysql_backup_storage_by_tenancy" {
   sql = <<-EOQ
     select
-      c.title as "Tenancy",
+      t.title as "Tenancy",
       sum(backup_size_in_gbs) as "GB"
     from
       oci_mysql_backup as b,
-      oci_identity_tenancy as c
+      oci_identity_tenancy as t
     where
-      c.id = b.tenant_id and lifecycle_state <> 'DELETED'
+      t.id = b.tenant_id and lifecycle_state <> 'DELETED'
     group by
-      c.title
+      t.title
     order by
-      c.title;
+      t.title;
   EOQ
 }
 
@@ -354,22 +354,21 @@ query "oci_mysql_backup_storage_by_compartment" {
         )
       )
     select
-      b.title as "Tenancy",
-      case when b.title = c.title then 'root' else c.title end as "Compartment",
-      sum(a.backup_size_in_gbs) as "GB"
+      t.title as "Tenancy",
+      case when t.title = c.title then 'root' else c.title end as "Compartment",
+      sum(b.backup_size_in_gbs) as "GB"
     from
-      oci_mysql_backup as a,
-      oci_identity_tenancy as b,
+      oci_mysql_backup as b,
+      oci_identity_tenancy as t,
       compartments as c
     where
-      c.id = a.compartment_id and a.tenant_id = b.id and a.lifecycle_state <> 'DELETED'
+      c.id = b.compartment_id and b.tenant_id = t.id and b.lifecycle_state <> 'DELETED'
     group by
-      b.title,
+      t.title,
       c.title
     order by
-      b.title,
+      t.title,
       c.title;
-
   EOQ
 }
 

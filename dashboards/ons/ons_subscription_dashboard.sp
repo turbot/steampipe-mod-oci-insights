@@ -119,12 +119,12 @@ query "oci_ons_subscription_by_tenancy" {
   sql = <<-EOQ
     select
        t.name as "Tenancy",
-       count(a.id)::numeric as "Keys"
+       count(s.id)::numeric as "Keys"
     from
-      oci_ons_subscription as a,
+      oci_ons_subscription as s,
       oci_identity_tenancy as t
     where
-      t.id = a.tenant_id
+      t.id = s.tenant_id
     group by
       t.name
     order by
@@ -149,20 +149,20 @@ query "oci_ons_subscription_by_compartment" {
         )
       )
     select
-      b.title as "Tenancy",
-      case when b.title = c.title then 'root' else c.title end as "Compartment",
-      count(a.*) as "Subscriptions"
+      t.title as "Tenancy",
+      case when t.title = c.title then 'root' else c.title end as "Compartment",
+      count(s.*) as "Subscriptions"
     from
-      oci_ons_subscription as a,
-      oci_identity_tenancy as b,
+      oci_ons_subscription as s,
+      oci_identity_tenancy as t,
       compartments as c
     where
-      c.id = a.compartment_id and a.tenant_id = b.id
+      c.id = s.compartment_id and s.tenant_id = t.id
     group by
-      b.title,
+      t.title,
       c.title
     order by
-      b.title,
+      t.title,
       c.title;
   EOQ
 }
