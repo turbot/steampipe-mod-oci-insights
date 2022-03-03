@@ -242,14 +242,14 @@ query "oci_mysql_db_system_failed_lifecycle_count" {
 query "oci_mysql_db_system_backup_disabled_count" {
   sql = <<-EOQ
    select
-      count(v.*) as value,
+      count(s.*) as value,
       'Backups Disabled' as label,
       case count(*) when 0 then 'ok' else 'alert' end as type
     from
-      oci_mysql_db_system as v
-    left join oci_mysql_backup as b on v.id = b.db_system_id
+      oci_mysql_db_system as s
+    left join oci_mysql_backup as b on s.id = b.db_system_id
     where
-      b.id is null and v.lifecycle_state <> 'DELETED';
+      b.id is null and s.lifecycle_state <> 'DELETED';
   EOQ
 }
 
@@ -301,10 +301,10 @@ query "oci_mysql_db_system_with_backups" {
       case when b.id is null then 'disabled' else 'enabled' end as status,
       count(*)
     from
-      oci_mysql_db_system as v
-      left join oci_mysql_backup as b on v.id = b.db_system_id
+      oci_mysql_db_system as s
+      left join oci_mysql_backup as b on s.id = b.db_system_id
     where
-      v.lifecycle_state <> 'DELETED'
+      s.lifecycle_state <> 'DELETED'
     group by
       status;
   EOQ
