@@ -31,13 +31,13 @@ query "oci_mysql_backup_failed_table" {
       select
         b.display_name as "Name",
         b.lifecycle_state as "Lifecycle State",
-        coalesce(a.title, 'root') as "Compartment",
+        coalesce(c.title, 'root') as "Compartment",
         t.title as "Tenancy",
         b.region as "Region",
         b.id as "OCID"
       from
         oci_mysql_backup as b
-        left join oci_identity_compartment as a on b.compartment_id = a.id
+        left join oci_identity_compartment as c on b.compartment_id = c.id
         left join oci_identity_tenancy as t on b.tenant_id = t.id
       where
         b.lifecycle_state <> 'DELETED'

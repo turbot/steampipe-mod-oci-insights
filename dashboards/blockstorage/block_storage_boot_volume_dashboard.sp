@@ -277,17 +277,17 @@ query "oci_block_storage_boot_volume_with_backups" {
 query "oci_block_storage_boot_volume_by_tenancy" {
   sql = <<-EOQ
     select
-      c.title as "Tenancy",
+      t.title as "Tenancy",
       count(v.*) as "Boot volumes"
     from
       oci_core_boot_volume as v,
-      oci_identity_tenancy as c
+      oci_identity_tenancy as t
     where
-      c.id = v.tenant_id and v.lifecycle_state <> 'TERMINATED'
+      t.id = v.tenant_id and v.lifecycle_state <> 'TERMINATED'
     group by
-      c.title
+      t.title
     order by
-      c.title;
+      t.title;
   EOQ
 }
 
@@ -308,20 +308,20 @@ query "oci_block_storage_boot_volume_by_compartment" {
         )
       )
     select
-      b.title as "Tenancy",
-      case when b.title = c.title then 'root' else c.title end as "Compartment",
-      count(a.*) as "Volumes"
+      t.title as "Tenancy",
+      case when t.title = c.title then 'root' else c.title end as "Compartment",
+      count(v.*) as "Volumes"
     from
-      oci_core_boot_volume as a,
-      oci_identity_tenancy as b,
+      oci_core_boot_volume as v,
+      oci_identity_tenancy as t,
       compartments as c
     where
-      c.id = a.compartment_id and a.tenant_id = b.id and a.lifecycle_state <> 'TERMINATED'
+      c.id = v.compartment_id and v.tenant_id = t.id and v.lifecycle_state <> 'TERMINATED'
     group by
-      b.title,
+      t.title,
       c.title
     order by
-      b.title,
+      t.title,
       c.title;
   EOQ
 }
@@ -390,17 +390,17 @@ query "oci_block_storage_boot_volume_by_creation_month" {
 query "oci_block_storage_boot_volume_storage_by_tenancy" {
   sql = <<-EOQ
    select
-      c.title as "Tenancy",
+      t.title as "Tenancy",
       sum(v.size_in_gbs) as "GB"
     from
       oci_core_boot_volume as v,
-      oci_identity_tenancy as c
+      oci_identity_tenancy as t
     where
-      c.id = v.tenant_id and v.lifecycle_state <> 'TERMINATED'
+      t.id = v.tenant_id and v.lifecycle_state <> 'TERMINATED'
     group by
-      c.title
+      t.title
     order by
-      c.title;
+      t.title;
   EOQ
 }
 
@@ -421,20 +421,20 @@ query "oci_block_storage_boot_volume_storage_by_compartment" {
         )
       )
     select
-      b.title as "Tenancy",
-      case when b.title = c.title then 'root' else c.title end as "Compartment",
-      sum(a.size_in_gbs) as "GB"
+      t.title as "Tenancy",
+      case when t.title = c.title then 'root' else c.title end as "Compartment",
+      sum(v.size_in_gbs) as "GB"
     from
-      oci_core_boot_volume as a,
-      oci_identity_tenancy as b,
+      oci_core_boot_volume as v,
+      oci_identity_tenancy as t,
       compartments as c
     where
-      c.id = a.compartment_id and a.tenant_id = b.id and a.lifecycle_state <> 'TERMINATED'
+      c.id = v.compartment_id and v.tenant_id = t.id and v.lifecycle_state <> 'TERMINATED'
     group by
-      b.title,
+      t.title,
       c.title
     order by
-      b.title,
+      t.title,
       c.title;
   EOQ
 }

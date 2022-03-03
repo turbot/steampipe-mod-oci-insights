@@ -289,12 +289,12 @@ query "oci_mysql_db_system_by_tenancy" {
   sql = <<-EOQ
     select
       t.title as "Tenancy",
-      count(d.*) as "DB Systems"
+      count(s.*) as "DB Systems"
     from
-      oci_mysql_db_system as d,
+      oci_mysql_db_system as s,
       oci_identity_tenancy as t
     where
-      t.id = d.tenant_id and lifecycle_state <> 'DELETED'
+      t.id = s.tenant_id and lifecycle_state <> 'DELETED'
     group by
       t.title
     order by
@@ -319,20 +319,20 @@ query "oci_mysql_db_system_by_compartment" {
         )
        )
     select
-      b.title as "Tenancy",
-      case when b.title = c.title then 'root' else c.title end as "Compartment",
-      count(a.*) as "Db Systems"
+      t.title as "Tenancy",
+      case when t.title = c.title then 'root' else c.title end as "Compartment",
+      count(s.*) as "Db Systems"
     from
-      oci_mysql_db_system as a,
-      oci_identity_tenancy as b,
+      oci_mysql_db_system as s,
+      oci_identity_tenancy as t,
       compartments as c
     where
-      c.id = a.compartment_id and a.tenant_id = b.id and lifecycle_state <> 'DELETED'
+      c.id = s.compartment_id and s.tenant_id = t.id and lifecycle_state <> 'DELETED'
     group by
-      b.title,
+      t.title,
       c.title
     order by
-      b.title,
+      t.title,
       c.title;
   EOQ
 }
@@ -406,10 +406,10 @@ query "oci_mysql_db_system_storage_by_tenancy" {
       t.title as "Tenancy",
       sum(data_storage_size_in_gbs) as "GB"
     from
-      oci_mysql_db_system as d,
+      oci_mysql_db_system as s,
       oci_identity_tenancy as t
     where
-      t.id = d.tenant_id and lifecycle_state <> 'DELETED'
+      t.id = s.tenant_id and lifecycle_state <> 'DELETED'
     group by
       t.title
     order by
@@ -434,20 +434,20 @@ query "oci_mysql_db_system_storage_by_compartment" {
         )
       )
     select
-      b.title as "Tenancy",
-      case when b.title = c.title then 'root' else c.title end as "Compartment",
-      sum(a.data_storage_size_in_gbs) as "GB"
+      t.title as "Tenancy",
+      case when t.title = c.title then 'root' else c.title end as "Compartment",
+      sum(s.data_storage_size_in_gbs) as "GB"
     from
-      oci_mysql_db_system as a,
-      oci_identity_tenancy as b,
+      oci_mysql_db_system as s,
+      oci_identity_tenancy as t,
       compartments as c
     where
-      c.id = a.compartment_id and a.tenant_id = b.id and a.lifecycle_state <> 'DELETED'
+      c.id = s.compartment_id and s.tenant_id = t.id and s.lifecycle_state <> 'DELETED'
     group by
-      b.title,
+      t.title,
       c.title
     order by
-      b.title,
+      t.title,
       c.title;
   EOQ
 }

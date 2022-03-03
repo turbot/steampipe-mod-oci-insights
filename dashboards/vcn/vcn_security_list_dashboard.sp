@@ -346,20 +346,20 @@ query "oci_vcn_security_list_by_compartment" {
         )
        )
     select
-      b.title as "Tenancy",
-      case when b.title = c.title then 'root' else c.title end as "Compartment",
-      count(a.*) as "NoSQL Table"
+      t.title as "Tenancy",
+      case when t.title = c.title then 'root' else c.title end as "Compartment",
+      count(l.*) as "NoSQL Table"
     from
-      oci_core_security_list as a,
-      oci_identity_tenancy as b,
+      oci_core_security_list as l,
+      oci_identity_tenancy as t,
       compartments as c
     where
-      c.id = a.compartment_id and a.tenant_id = b.id and lifecycle_state <> 'TERMINATED'
+      c.id = l.compartment_id and l.tenant_id = t.id and lifecycle_state <> 'TERMINATED'
     group by
-      b.title,
+      t.title,
       c.title
     order by
-      b.title,
+      t.title,
       c.title;
   EOQ
 }

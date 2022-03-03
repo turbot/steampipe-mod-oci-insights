@@ -164,12 +164,12 @@ query "oci_kms_key_by_tenancy" {
   sql = <<-EOQ
     select
        t.name as "Tenancy",
-       count(a.id)::numeric as "Keys"
+       count(k.id)::numeric as "Keys"
     from
-      oci_kms_key as a,
+      oci_kms_key as k,
       oci_identity_tenancy as t
     where
-      t.id = a.tenant_id
+      t.id = k.tenant_id
     group by
       t.name
     order by
@@ -194,20 +194,20 @@ query "oci_kms_key_by_compartment" {
         )
        )
     select
-      b.title as "Tenancy",
-      case when b.title = c.title then 'root' else c.title end as "Compartment",
-      count(a.*) as "Keys"
+      t.title as "Tenancy",
+      case when t.title = c.title then 'root' else c.title end as "Compartment",
+      count(k.*) as "Keys"
     from
-      oci_kms_key as a,
-      oci_identity_tenancy as b,
+      oci_kms_key as k,
+      oci_identity_tenancy as t,
       compartments as c
     where
-      c.id = a.compartment_id and a.tenant_id = b.id
+      c.id = k.compartment_id and k.tenant_id = t.id
     group by
-      b.title,
+      t.title,
       c.title
     order by
-      b.title,
+      t.title,
       c.title;
   EOQ
 }

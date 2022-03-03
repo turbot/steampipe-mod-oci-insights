@@ -143,20 +143,20 @@ query "oci_core_vcn_by_compartment" {
         )
        )
     select
-      b.title as "Tenancy",
-      case when b.title = c.title then 'root' else c.title end as "Compartment",
-      count(a.*) as "File Systems"
+      t.title as "Tenancy",
+      case when t.title = c.title then 'root' else c.title end as "Compartment",
+      count(v.*) as "File Systems"
     from
-      oci_core_vcn as a,
-      oci_identity_tenancy as b,
+      oci_core_vcn as v,
+      oci_identity_tenancy as t,
       compartments as c
     where
-      c.id = a.compartment_id and a.tenant_id = b.id and a.lifecycle_state <> 'DELETED'
+      c.id = v.compartment_id and v.tenant_id = t.id and v.lifecycle_state <> 'DELETED'
     group by
-      b.title,
+      t.title,
       c.title
     order by
-      b.title,
+      t.title,
       c.title;
   EOQ
 }

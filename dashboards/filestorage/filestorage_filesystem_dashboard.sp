@@ -152,12 +152,12 @@ query "oci_filestorage_filesystem_by_tenancy" {
   sql = <<-EOQ
     select
        t.name as "Tenancy",
-       count(a.id)::numeric as "File Systems"
+       count(f.id)::numeric as "File Systems"
     from
-      oci_file_storage_file_system as a,
+      oci_file_storage_file_system as f,
       oci_identity_tenancy as t
     where
-      t.id = a.tenant_id and a.lifecycle_state <> 'DELETED'
+      t.id = f.tenant_id and f.lifecycle_state <> 'DELETED'
     group by
       t.name
     order by
@@ -182,20 +182,20 @@ query "oci_filestorage_filesystem_by_compartment" {
         )
        )
     select
-      b.title as "Tenancy",
-      case when b.title = c.title then 'root' else c.title end as "Compartment",
-      count(a.*) as "File Systems"
+      t.title as "Tenancy",
+      case when t.title = c.title then 'root' else c.title end as "Compartment",
+      count(f.*) as "File Systems"
     from
-      oci_file_storage_file_system as a,
-      oci_identity_tenancy as b,
+      oci_file_storage_file_system as f,
+      oci_identity_tenancy as t,
       compartments as c
     where
-      c.id = a.compartment_id and a.tenant_id = b.id and a.lifecycle_state <> 'DELETED'
+      c.id = f.compartment_id and f.tenant_id = t.id and f.lifecycle_state <> 'DELETED'
     group by
-      b.title,
+      t.title,
       c.title
     order by
-      b.title,
+      t.title,
       c.title;
   EOQ
 }
