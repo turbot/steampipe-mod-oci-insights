@@ -121,22 +121,21 @@ query "oci_mysql_db_system_1_year" {
 query "oci_mysql_db_system_age_table" {
   sql = <<-EOQ
     select
-      v.display_name as "Name",
-      now()::date - v.time_created::date as "Age in Days",
-      v.time_created as "Create Time",
-      v.lifecycle_state as "Lifecycle State",
+      s.display_name as "Name",
+      now()::date - s.time_created::date as "Age in Days",
+      s.time_created as "Create Time",
+      s.lifecycle_state as "Lifecycle State",
       coalesce(c.title, 'root') as "Compartment",
       t.title as "Tenancy",
-      v.region as "Region",
-      v.id as "OCID"
+      s.region as "Region",
+      s.id as "OCID"
     from
-      oci_mysql_db_system as v
-      left join oci_identity_compartment as c on v.compartment_id = c.id
-      left join oci_identity_tenancy as t on v.tenant_id = t.id
+      oci_mysql_db_system as s
+      left join oci_identity_compartment as c on s.compartment_id = c.id
+      left join oci_identity_tenancy as t on s.tenant_id = t.id
     where
-      v.lifecycle_state <> 'DELETED'
+      s.lifecycle_state <> 'DELETED'
     order by
-      v.time_created,
-      v.title;
+      s.display_name;
   EOQ
 }

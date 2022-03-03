@@ -136,7 +136,6 @@ query "oci_filestorage_filesystem_age_table" {
     where
       f.lifecycle_state <> 'DELETED'
     order by
-      f.time_created,
-      f.title;
+      f.display_name;
   EOQ
 }

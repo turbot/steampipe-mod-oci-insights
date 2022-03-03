@@ -122,20 +122,19 @@ query "oci_ons_notification_topic_1_year" {
 query "oci_ons_notification_topic_age_table" {
   sql = <<-EOQ
     select
-      v.name as "Name",
-      now()::date - v.time_created::date as "Age in Days",
-      v.time_created as "Create Time",
-      v.lifecycle_state as "Lifecycle State",
+      n.name as "Name",
+      now()::date - n.time_created::date as "Age in Days",
+      n.time_created as "Create Time",
+      n.lifecycle_state as "Lifecycle State",
       coalesce(c.title, 'root') as "Compartment",
       t.title as "Tenancy",
-      v.region as "Region",
-      v.topic_id as "OCID"
+      n.region as "Region",
+      n.topic_id as "OCID"
     from
-      oci_ons_notification_topic as v
-      left join oci_identity_compartment as c on v.compartment_id = c.id
-      left join oci_identity_tenancy as t on v.tenant_id = t.id
+      oci_ons_notification_topic as n
+      left join oci_identity_compartment as c on n.compartment_id = c.id
+      left join oci_identity_tenancy as t on n.tenant_id = t.id
     order by
-      v.time_created,
-      v.title;
+      n.name;
   EOQ
 }

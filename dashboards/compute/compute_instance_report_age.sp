@@ -134,7 +134,6 @@ query "oci_compute_instance_age_table" {
     where
       i.lifecycle_state <> 'TERMINATED'
     order by
-      i.time_created,
-      i.title;
+      i.display_name;
   EOQ
 }

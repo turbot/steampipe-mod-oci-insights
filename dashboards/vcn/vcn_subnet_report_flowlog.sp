@@ -36,7 +36,6 @@ query "oci_vcn_subnet_flowlog_table" {
           else 'ENABLED'
         end as "Flow Log Status",
         s.lifecycle_state as "Lifecycle State",
-        s.time_created as "Create Time",
         coalesce(c.title, 'root') as "Compartment",
         t.title as "Tenancy",
         s.region as "Region",

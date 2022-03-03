@@ -29,22 +29,19 @@ dashboard "oci_mysql_backup_failed_report" {
 query "oci_mysql_backup_failed_table" {
   sql = <<-EOQ
       select
-        v.display_name as "Name",
-        now()::date - v.time_created::date as "Age in Days",
-        v.time_created as "Create Time",
-        v.lifecycle_state as "Lifecycle State",
+        b.display_name as "Name",
+        b.lifecycle_state as "Lifecycle State",
         coalesce(a.title, 'root') as "Compartment",
         t.title as "Tenancy",
-        v.region as "Region",
-        v.id as "OCID"
+        b.region as "Region",
+        b.id as "OCID"
       from
-        oci_mysql_backup as v
-        left join oci_identity_compartment as a on v.compartment_id = a.id
-        left join oci_identity_tenancy as t on v.tenant_id = t.id
+        oci_mysql_backup as b
+        left join oci_identity_compartment as a on b.compartment_id = a.id
+        left join oci_identity_tenancy as t on b.tenant_id = t.id
       where
-        v.lifecycle_state = 'FAILED'
+        b.lifecycle_state <> 'DELETED'
       order by
-        v.time_created,
-        v.title;
+        b.display_name;
   EOQ
 }

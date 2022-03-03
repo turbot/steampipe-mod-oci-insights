@@ -60,21 +60,19 @@ query "oci_objectstorage_bucket_logging_table" {
       where
         lifecycle_state = 'ACTIVE'
     )
-      select
-        v.name as "Name",
-        case when n.is_enabled then 'Enabled' else 'Disabled' end as "Logging Status",
-        v.time_created as "Create Time",
-        coalesce(c.title, 'root') as "Compartment",
-        t.title as "Tenancy",
-        v.region as "Region",
-        v.id as "OCID"
-      from
-        oci_objectstorage_bucket as v
-        left join name_with_region as n on concat(v.name, v.region) = n.name_with_region
-        left join oci_identity_compartment as c on v.compartment_id = c.id
-        left join oci_identity_tenancy as t on v.tenant_id = t.id
-      order by
-        v.time_created,
-        v.title;
+    select
+      b.name as "Name",
+      case when n.is_enabled then 'Enabled' else 'Disabled' end as "Logging Status",
+      coalesce(c.title, 'root') as "Compartment",
+      t.title as "Tenancy",
+      b.region as "Region",
+      b.id as "OCID"
+    from
+      oci_objectstorage_bucket as b
+      left join name_with_region as n on concat(b.name, b.region) = n.name_with_region
+      left join oci_identity_compartment as c on b.compartment_id = c.id
+      left join oci_identity_tenancy as t on b.tenant_id = t.id
+    order by
+      b.name;
   EOQ
 }

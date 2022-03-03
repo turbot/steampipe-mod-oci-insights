@@ -119,25 +119,24 @@ query "oci_mysql_backup_1_year" {
   EOQ
 }
 
-query "oci_mysql_backup_age_table" {  
+query "oci_mysql_backup_age_table" {
   sql = <<-EOQ
     select
-      v.display_name as "Name",
-      now()::date - v.time_created::date as "Age in Days",
-      v.time_created as "Create Time",
-      v.lifecycle_state as "Lifecycle State",
+      b.display_name as "Name",
+      now()::date - b.time_created::date as "Age in Days",
+      b.time_created as "Create Time",
+      b.lifecycle_state as "Lifecycle State",
       coalesce(c.title, 'root') as "Compartment",
       t.title as "Tenancy",
-      v.region as "Region",
-      v.id as "OCID"
+      b.region as "Region",
+      b.id as "OCID"
     from
-      oci_mysql_backup as v
-      left join oci_identity_compartment as c on v.compartment_id = c.id
-      left join oci_identity_tenancy as t on v.tenant_id = t.id
+      oci_mysql_backup as b
+      left join oci_identity_compartment as c on b.compartment_id = c.id
+      left join oci_identity_tenancy as t on b.tenant_id = t.id
     where
-      v.lifecycle_state <> 'DELETED'
+      b.lifecycle_state <> 'DELETED'
     order by
-      v.time_created,
-      v.title;
+      b.display_name;
   EOQ
 }

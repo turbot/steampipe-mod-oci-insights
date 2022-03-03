@@ -137,7 +137,6 @@ query "oci_kms_key_age_table" {
     where
       k.lifecycle_state <> 'DELETED'
     order by
-      k.time_created,
-      k.title;
+      k.name;
   EOQ
 }

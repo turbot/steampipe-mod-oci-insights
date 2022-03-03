@@ -81,7 +81,7 @@ dashboard "oci_vcn_subnet_dashboard" {
 
 query "oci_vcn_subnet_count" {
   sql = <<-EOQ
-    select count(*) as "Subnets" from oci_core_vcn where lifecycle_state <> 'TERMINATED';
+    select count(*) as "Subnets" from oci_core_subnet where lifecycle_state <> 'TERMINATED';
   EOQ
 }
 
