@@ -42,10 +42,10 @@ dashboard "oci_kms_key_dashboard" {
       width = 3
 
       series "count" {
-        point "enabled" {
+        point "ENABLED" {
           color = "ok"
         }
-        point "disabled" {
+        point "DISABLED" {
           color = "alert"
         }
       }
@@ -134,33 +134,15 @@ query "oci_kms_software_key_count" {
 
 query "oci_kms_key_lifecycle_state" {
   sql = <<-EOQ
-    with lifecycle_stat as (
-      select
-        case
-          when lifecycle_state = 'DISABLED' then 'disabled'
-          when lifecycle_state = 'PENDING_DELETION' then 'pending_deletion'
-          when lifecycle_state = 'ENABLING' then 'enabling'
-          when lifecycle_state = 'CREATING' then 'creating'
-          when lifecycle_state = 'DISABLING' then 'disabling'
-          when lifecycle_state = 'DELETING' then 'deleting'
-          when lifecycle_state = 'SCHEDULING_DELETION' then 'scheduling_deletion'
-          when lifecycle_state = 'CANCELLING_DELETION' then 'cancelling_deletion'
-          when lifecycle_state = 'UPDATING' then 'updating'
-          when lifecycle_state = 'BACKUP_IN_PROGRESS' then 'backup_in_progress'
-          when lifecycle_state = 'RESTORING' then 'restoring'
-          else 'enabled'
-        end as lifecycle_stat
-      from
-        oci_kms_key
-      where lifecycle_state <> 'DELETED'
-    )
-      select
-        lifecycle_stat,
-        count(*)
-      from
-        lifecycle_stat
-      group by
-        lifecycle_stat
+    select
+      lifecycle_state,
+      count(lifecycle_state)
+    from
+      oci_kms_key
+    where
+      lifecycle_state <> 'DELETED'
+    group by
+      lifecycle_state;
   EOQ
 }
 

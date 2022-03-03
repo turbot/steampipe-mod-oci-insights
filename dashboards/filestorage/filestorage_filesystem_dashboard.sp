@@ -40,7 +40,7 @@ dashboard "oci_filestorage_filesystem_dashboard" {
     title = "Assessments"
 
     chart {
-      title = "File Systems by State"
+      title = "Lifecycle State"
       sql   = query.oci_filestorage_filesystem_by_state.sql
       type  = "donut"
       width = 3

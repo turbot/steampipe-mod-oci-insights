@@ -44,6 +44,12 @@ dashboard "oci_block_storage_boot_volume_dashboard" {
       sql   = query.oci_block_storage_boot_volume_by_lifecycle_state.sql
       type  = "donut"
       width = 3
+
+      series "count" {
+        point "FAULTY" {
+          color = "alert"
+        }
+      }
     }
 
     chart {

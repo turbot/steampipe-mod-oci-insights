@@ -28,7 +28,6 @@ dashboard "oci_mysql_db_system_dashboard" {
       width = 2
     }
 
-
     card {
       sql   = query.oci_mysql_db_system_failed_lifecycle_count.sql
       width = 2
@@ -51,10 +50,10 @@ dashboard "oci_mysql_db_system_dashboard" {
       width = 3
 
       series "count" {
-        point "active" {
+        point "ACTIVE" {
           color = "ok"
         }
-        point "inactive" {
+        point "FAILED" {
           color = "alert"
         }
       }
@@ -255,7 +254,7 @@ query "oci_mysql_db_system_backup_disabled_count" {
 
 # Assessment Queries
 
-query "oci_mysql_db_system_by_lifecycle_state_1" {
+query "oci_mysql_db_system_by_lifecycle_state" {
   sql = <<-EOQ
     select
       lifecycle_state,
@@ -266,32 +265,6 @@ query "oci_mysql_db_system_by_lifecycle_state_1" {
       lifecycle_state <> 'DELETED'
     group by
       lifecycle_state;
-  EOQ
-}
-
-query "oci_mysql_db_system_by_lifecycle_state" {
-  sql = <<-EOQ
-    with lifecycle_stat as (
-      select
-        case
-          when lifecycle_state = 'FAILED' then 'failed'
-          when lifecycle_state = 'INACTIVE' then 'inactive'
-          when lifecycle_state = 'CREATING' then 'creating'
-          when lifecycle_state = 'DELETING' then 'deleting'
-          when lifecycle_state = 'UPDATING' then 'updating'
-          else 'active'
-        end as lifecycle_stat
-      from
-        oci_mysql_db_system
-      where lifecycle_state <> 'DELETED'
-    )
-      select
-        lifecycle_stat,
-        count(*)
-      from
-        lifecycle_stat
-      group by
-        lifecycle_stat
   EOQ
 }
 

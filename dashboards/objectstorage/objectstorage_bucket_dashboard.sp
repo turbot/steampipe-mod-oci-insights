@@ -195,8 +195,8 @@ query "oci_objectstorage_bucket_encryption_status" {
       select
         id,
         case
-         when kms_key_id is null then 'OCI Managed'
-         else 'Customer Managed'
+         when kms_key_id is null then 'oci_managed'
+         else 'customer_managed'
          end as encryption_status
       from
         oci_objectstorage_bucket) as b

@@ -28,12 +28,6 @@ dashboard "oci_ons_notification_topic_dashboard" {
       sql   = query.oci_ons_notification_topic_by_lifecycle_state.sql
       type  = "donut"
       width = 3
-
-      series "count" {
-        point "active" {
-          color = "ok"
-        }
-      }
     }
 
     chart {
@@ -46,7 +40,7 @@ dashboard "oci_ons_notification_topic_dashboard" {
         point "ACTIVE" {
           color = "ok"
         }
-        point "No Subscription" {
+        point "NO_SUBSCRIPTION" {
           color = "alert"
         }
       }
@@ -114,30 +108,20 @@ query "oci_ons_notification_topic_unused_count" {
 
 query "oci_ons_notification_topic_by_lifecycle_state" {
   sql = <<-EOQ
-    with lifecycle_stat as (
-      select
-        case
-          when lifecycle_state = 'CREATING' then 'creating'
-          when lifecycle_state = 'DELETING' then 'deleting'
-          else 'active'
-        end as lifecycle_stat
-      from
-        oci_ons_notification_topic
-    )
-      select
-        lifecycle_stat,
-        count(*)
-      from
-        lifecycle_stat
-      group by
-        lifecycle_stat
+     select
+      lifecycle_state,
+      count(lifecycle_state)
+    from
+      oci_ons_notification_topic
+    group by
+      lifecycle_state;
   EOQ
 }
 
 query "oci_ons_notification_topic_by_subscription" {
   sql = <<-EOQ
     select
-      case when s.id is null then 'No Subscription' else s.lifecycle_state end as status,
+      case when s.id is null then 'NO_SUBSCRIPTION' else s.lifecycle_state end as status,
       count(*)
     from
       oci_ons_notification_topic t

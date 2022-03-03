@@ -52,6 +52,12 @@ dashboard "oci_block_storage_block_volume_dashboard" {
       type  = "donut"
       width = 3
 
+      series "count" {
+        point "FAULTY" {
+          color = "alert"
+        }
+      }
+
     }
 
     chart {
