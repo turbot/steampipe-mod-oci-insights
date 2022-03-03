@@ -93,7 +93,9 @@ dashboard "oci_vcn_network_security_group_detail" {
             value as "Value"
           from
             jsondata,
-            json_each_text(tags);
+            json_each_text(tags)
+          order by
+            key;
         EOQ
 
         param "id" {}

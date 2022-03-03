@@ -16,7 +16,6 @@ dashboard "oci_vcn_subnet_detail" {
 
     card {
       width = 2
-
       query = query.oci_vcn_subnet_name
       args = {
         id = self.input.subnet_id.value
@@ -25,7 +24,6 @@ dashboard "oci_vcn_subnet_detail" {
 
     card {
       width = 2
-
       query = query.oci_vcn_subnet_flow_log
       args = {
         id = self.input.subnet_id.value
@@ -43,7 +41,6 @@ dashboard "oci_vcn_subnet_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-
         sql = <<-EOQ
           select
             display_name as "Name",
@@ -69,7 +66,6 @@ dashboard "oci_vcn_subnet_detail" {
       table {
         title = "Tags"
         width = 6
-
         sql = <<-EOQ
           with jsondata as (
             select
@@ -84,7 +80,9 @@ dashboard "oci_vcn_subnet_detail" {
             value as "Value"
           from
             jsondata,
-            json_each_text(tags);
+            json_each_text(tags)
+          order by
+            key;
         EOQ
 
         param "id" {}
