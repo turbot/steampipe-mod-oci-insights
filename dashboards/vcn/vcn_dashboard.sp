@@ -82,7 +82,7 @@ query "oci_core_vcn_no_subnet_count" {
   sql = <<-EOQ
     select
       count(*) as value,
-      'Without Subnets' as label,
+      'No Subnets' as label,
       case when count(*) = 0 then 'ok' else 'alert' end as type
     from
       oci_core_vcn as vcn

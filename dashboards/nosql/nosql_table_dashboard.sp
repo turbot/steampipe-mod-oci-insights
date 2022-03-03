@@ -26,23 +26,12 @@ dashboard "oci_nosql_table_dashboard" {
 
   container {
     title = "Assessments"
-    width = 6
 
     chart {
       title = "Lifecycle State"
       sql   = query.oci_nosql_table_by_lifecycle_state.sql
       type  = "donut"
       width = 3
-
-      series "count" {
-        point "active" {
-          color = "ok"
-        }
-        point "inactive" {
-          color = "alert"
-        }
-      }
-
     }
 
     chart {
@@ -149,27 +138,15 @@ query "oci_nosql_table_stalled_more_than_90_days_count" {
 
 query "oci_nosql_table_by_lifecycle_state" {
   sql = <<-EOQ
-    with lifecycle_stat as (
-      select
-        case
-          when lifecycle_state = 'FAILED' then 'failed'
-          when lifecycle_state = 'INACTIVE' then 'inactive'
-          when lifecycle_state = 'CREATING' then 'creating'
-          when lifecycle_state = 'DELETING' then 'deleting'
-          when lifecycle_state = 'UPDATING' then 'updating'
-          else 'active'
-        end as lifecycle_stat
-      from
-        oci_nosql_table
-      where lifecycle_state <> 'DELETED'
-    )
-      select
-        lifecycle_stat,
-        count(*)
-      from
-        lifecycle_stat
-      group by
-        lifecycle_stat
+    select
+      lifecycle_state,
+      count(lifecycle_state)
+    from
+      oci_nosql_table
+    where
+      lifecycle_state <> 'DELETED'
+    group by
+      lifecycle_state;
   EOQ
 }
 

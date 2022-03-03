@@ -44,6 +44,12 @@ dashboard "oci_block_storage_boot_volume_dashboard" {
       sql   = query.oci_block_storage_boot_volume_by_lifecycle_state.sql
       type  = "donut"
       width = 3
+
+      series "count" {
+        point "FAULTY" {
+          color = "alert"
+        }
+      }
     }
 
     chart {
@@ -54,10 +60,19 @@ dashboard "oci_block_storage_boot_volume_dashboard" {
     }
 
     chart {
-      title = "No Backups"
-      sql   = query.oci_block_storage_boot_volume_with_no_backups.sql
+      title = "Backup Status"
+      sql   = query.oci_block_storage_boot_volume_with_backups.sql
       type  = "donut"
       width = 3
+
+      series "count" {
+        point "enabled" {
+          color = "ok"
+        }
+        point "disabled" {
+          color = "alert"
+        }
+      }
     }
 
   }
@@ -149,7 +164,7 @@ dashboard "oci_block_storage_boot_volume_dashboard" {
 
 query "oci_block_storage_boot_volume_count" {
   sql = <<-EOQ
-    select count(*) as "Boot Volumes" from oci_core_boot_volume where lifecycle_state <> 'TERMINATED'
+    select count(*) as "Boot Volumes" from oci_core_boot_volume where lifecycle_state <> 'TERMINATED';
   EOQ
 }
 
@@ -160,7 +175,7 @@ query "oci_block_storage_boot_volume_storage_total" {
     from
       oci_core_boot_volume
     where
-      lifecycle_state <> 'TERMINATED'
+      lifecycle_state <> 'TERMINATED';
   EOQ
 }
 
@@ -171,7 +186,7 @@ query "oci_block_storage_boot_volume_default_encrypted_volumes_count" {
     from
       oci_core_boot_volume
     where
-      kms_key_id is null and lifecycle_state <> 'TERMINATED'
+      kms_key_id is null and lifecycle_state <> 'TERMINATED';
   EOQ
 }
 
@@ -184,7 +199,7 @@ query "oci_block_storage_boot_volume_faulty_volumes_count" {
     from
       oci_core_boot_volume
     where
-      lifecycle_state = 'FAULTY'
+      lifecycle_state = 'FAULTY';
   EOQ
 }
 
@@ -199,13 +214,7 @@ query "oci_block_storage_boot_volume_with_no_backups_count" {
       oci_core_boot_volume as v
     left join oci_core_boot_volume_backup as b on v.id = b.boot_volume_id
     where
-      v.lifecycle_state <> 'TERMINATED'
-    group by
-      v.compartment_id,
-      v.region,
-      v.id
-    having
-      count(b.id) = 0
+      b.id is null and v.lifecycle_state <> 'TERMINATED';
   EOQ
 }
 
@@ -221,7 +230,7 @@ query "oci_block_storage_boot_volume_by_lifecycle_state" {
     where
       lifecycle_state <> 'TERMINATED'
     group by
-      lifecycle_state
+      lifecycle_state;
   EOQ
 }
 
@@ -244,24 +253,22 @@ query "oci_block_storage_boot_volume_by_encryption_status" {
       group by
         encryption_status
       order by
-        encryption_status desc
+        encryption_status desc;
   EOQ
 }
 
-query "oci_block_storage_boot_volume_with_no_backups" {
+query "oci_block_storage_boot_volume_with_backups" {
   sql = <<-EOQ
     select
-      v.display_name,
-      count(v.display_name)
+      case when b.id is null then 'disabled' else 'enabled' end as status,
+      count(*)
     from
       oci_core_boot_volume as v
-    left join oci_core_boot_volume_backup as b on v.id = b.boot_volume_id
+      left join oci_core_boot_volume_backup as b on v.id = b.boot_volume_id
     where
       v.lifecycle_state <> 'TERMINATED'
     group by
-      v.display_name
-    having
-      count(b.id) = 0
+      status;
   EOQ
 }
 
@@ -280,7 +287,7 @@ query "oci_block_storage_boot_volume_by_tenancy" {
     group by
       c.title
     order by
-      c.title
+      c.title;
   EOQ
 }
 

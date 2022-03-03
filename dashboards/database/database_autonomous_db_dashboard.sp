@@ -99,6 +99,12 @@ dashboard "oci_database_autonomous_db_dashboard" {
       sql   = query.oci_database_autonomous_db_by_state.sql
       type  = "donut"
       width = 3
+
+      series "count" {
+        point "AVAILABLE_NEEDS_ATTENTION" {
+          color = "alert"
+        }
+      }
     }
 
   }

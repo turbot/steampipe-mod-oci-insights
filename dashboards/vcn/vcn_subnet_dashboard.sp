@@ -31,10 +31,10 @@ dashboard "oci_vcn_subnet_dashboard" {
       sql   = query.oci_vcn_subnet_by_flowlog.sql
 
       series "count" {
-        point "ENABLED" {
+        point "enabled" {
           color = "ok"
         }
-        point "DISABLED" {
+        point "disabled" {
           color = "alert"
         }
       }
@@ -108,8 +108,8 @@ query "oci_vcn_subnet_by_flowlog" {
       select
         s.id,
         case
-          when l.is_enabled is null or not l.is_enabled then 'DISABLED'
-          else 'ENABLED'
+          when l.is_enabled is null or not l.is_enabled then 'disabled'
+          else 'enabled'
         end as flow_logs_configured
       from
         oci_core_subnet as s

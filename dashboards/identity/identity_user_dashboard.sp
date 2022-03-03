@@ -42,13 +42,12 @@ dashboard "oci_identity_user_dashboard" {
 
   container {
     title = "Assesments"
-    width = 6
 
     chart {
       title = "MFA Status"
       sql   = query.oci_identity_user_mfa_enabled.sql
       type  = "donut"
-      width = 4
+      width = 3
 
       series "count" {
         point "enabled" {
@@ -64,7 +63,7 @@ dashboard "oci_identity_user_dashboard" {
       title = "Email Verification Status"
       sql   = query.oci_identity_user_by_verified_email.sql
       type  = "donut"
-      width = 4
+      width = 3
 
       series "count" {
         point "verified" {
