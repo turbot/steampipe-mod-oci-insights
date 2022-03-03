@@ -3,7 +3,7 @@ dashboard "oci_ons_subscription_unused_report" {
   title = "OCI ONS Subscription Unused Report"
 
   tags = merge(local.ons_common_tags, {
-    type = "Report"
+    type     = "Report"
     category = "Unused"
   })
 
@@ -18,10 +18,17 @@ dashboard "oci_ons_subscription_unused_report" {
       sql   = query.oci_ons_subscription_unused_count.sql
       width = 2
     }
+
   }
 
   table {
-    sql = <<-EOQ
+    sql = query.oci_ons_subscription_unused_table.sql
+  }
+
+}
+
+query "oci_ons_subscription_unused_table" {
+  sql = <<-EOQ
       select
         v.id as "OCID",
         now()::date - v.created_time::date as "Age in Days",
@@ -37,7 +44,5 @@ dashboard "oci_ons_subscription_unused_report" {
       order by
         v.created_time,
         v.title;
-    EOQ
-  }
-
+  EOQ
 }

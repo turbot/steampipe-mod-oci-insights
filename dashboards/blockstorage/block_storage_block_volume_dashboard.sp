@@ -1,3 +1,154 @@
+dashboard "oci_block_storage_block_volume_dashboard" {
+
+  title = "OCI Block Storage Block Volume Dashboard"
+
+  tags = merge(local.blockstorage_common_tags, {
+    type = "Dashboard"
+  })
+
+  container {
+
+    card {
+      sql   = query.oci_block_storage_block_volume_count.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_block_storage_block_volume_storage_total.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_block_storage_block_volume_default_encrypted_volumes_count.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_block_storage_block_volume_faulty_volumes_count.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_block_storage_block_volume_with_no_backups_count.sql
+      width = 2
+    }
+
+  }
+
+  container {
+
+    title = "Assessments"
+
+    chart {
+      title = "Encryption Status"
+      sql   = query.oci_block_storage_block_volume_by_encryption_status.sql
+      type  = "donut"
+      width = 3
+    }
+
+    chart {
+      title = "Lifecycle State"
+      sql   = query.oci_block_storage_block_volume_by_lifecycle_state.sql
+      type  = "donut"
+      width = 3
+
+    }
+
+    chart {
+      title = "Without Backups"
+      sql   = query.oci_block_storage_block_volume_with_no_backups.sql
+      type  = "donut"
+      width = 3
+    }
+
+  }
+
+  container {
+
+    title = "Analysis"
+
+    chart {
+      title = "Block Volumes by Tenancy"
+      sql   = query.oci_block_storage_block_volume_by_tenancy.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Block Volumes by Compartment"
+      sql   = query.oci_block_storage_block_volume_by_compartment.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Block Volumes by Region"
+      sql   = query.oci_block_storage_block_volume_by_region.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Block Volume by Age"
+      sql   = query.oci_block_storage_block_volume_by_creation_month.sql
+      type  = "column"
+      width = 3
+    }
+
+  }
+
+  container {
+
+    chart {
+      title = "Storage by Tenancy (GB)"
+      sql   = query.oci_block_storage_block_volume_storage_by_tenancy.sql
+      type  = "column"
+      width = 3
+
+      series "GB" {
+        color = "tan"
+      }
+    }
+
+    chart {
+      title = "Storage by Compartment (GB)"
+      sql   = query.oci_block_storage_block_volume_storage_by_compartment.sql
+      type  = "column"
+      width = 3
+
+      series "GB" {
+        color = "tan"
+      }
+    }
+
+    chart {
+      title = "Storage by Region (GB)"
+      sql   = query.oci_block_storage_block_volume_storage_by_region.sql
+      type  = "column"
+      width = 3
+
+      series "GB" {
+        color = "tan"
+      }
+    }
+
+    chart {
+      title = "Storage by Age (GB)"
+      sql   = query.oci_block_storage_block_volume_storage_by_creation_month.sql
+      type  = "column"
+      width = 3
+
+      series "GB" {
+        color = "tan"
+      }
+    }
+
+  }
+
+}
+
+# Card Queries
+
 query "oci_block_storage_block_volume_count" {
   sql = <<-EOQ
     select count(*) as "Block Volumes" from oci_core_volume where lifecycle_state <> 'TERMINATED';
@@ -59,7 +210,7 @@ query "oci_block_storage_block_volume_with_no_backups_count" {
   EOQ
 }
 
-# Assessments
+# Assessment Queries
 
 query "oci_block_storage_block_volume_by_encryption_status" {
   sql = <<-EOQ
@@ -115,7 +266,7 @@ query "oci_block_storage_block_volume_with_no_backups" {
   EOQ
 }
 
-# Analysis
+# Analysis Queries
 
 query "oci_block_storage_block_volume_by_tenancy" {
   sql = <<-EOQ
@@ -230,8 +381,6 @@ query "oci_block_storage_block_volume_by_creation_month" {
   EOQ
 }
 
-# Analysis by Storage Size
-
 query "oci_block_storage_block_volume_storage_by_tenancy" {
   sql = <<-EOQ
    select
@@ -344,149 +493,4 @@ query "oci_block_storage_block_volume_storage_by_creation_month" {
     order by
       months.month;
   EOQ
-}
-
-dashboard "oci_block_storage_block_volume_dashboard" {
-
-  title = "OCI Block Storage Block Volume Dashboard"
-
-  tags = merge(local.blockstorage_common_tags, {
-    type = "Dashboard"
-  })
-
-  container {
-
-    card {
-      sql   = query.oci_block_storage_block_volume_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_block_storage_block_volume_storage_total.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_block_storage_block_volume_default_encrypted_volumes_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_block_storage_block_volume_faulty_volumes_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_block_storage_block_volume_with_no_backups_count.sql
-      width = 2
-    }
-
-  }
-
-  container {
-    title = "Assessments"
-    # width = 6
-
-    chart {
-      title = "Encryption Status"
-      sql   = query.oci_block_storage_block_volume_by_encryption_status.sql
-      type  = "donut"
-      width = 3
-    }
-
-    chart {
-      title = "Lifecycle State"
-      sql   = query.oci_block_storage_block_volume_by_lifecycle_state.sql
-      type  = "donut"
-      width = 3
-
-    }
-
-    chart {
-      title = "Without Backups"
-      sql   = query.oci_block_storage_block_volume_with_no_backups.sql
-      type  = "donut"
-      width = 3
-    }
-  }
-
-  container {
-    title = "Analysis"
-
-    chart {
-      title = "Block Volumes by Tenancy"
-      sql   = query.oci_block_storage_block_volume_by_tenancy.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Block Volumes by Compartment"
-      sql   = query.oci_block_storage_block_volume_by_compartment.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Block Volumes by Region"
-      sql   = query.oci_block_storage_block_volume_by_region.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Block Volume by Age"
-      sql   = query.oci_block_storage_block_volume_by_creation_month.sql
-      type  = "column"
-      width = 3
-    }
-  }
-
-  container {
-
-    chart {
-      title = "Storage by Tenancy (GB)"
-      sql   = query.oci_block_storage_block_volume_storage_by_tenancy.sql
-      type  = "column"
-      width = 3
-
-      series "GB" {
-        color = "tan"
-      }
-    }
-
-    chart {
-      title = "Storage by Compartment (GB)"
-      sql   = query.oci_block_storage_block_volume_storage_by_compartment.sql
-      type  = "column"
-      width = 3
-
-      series "GB" {
-        color = "tan"
-      }
-    }
-
-    chart {
-      title = "Storage by Region (GB)"
-      sql   = query.oci_block_storage_block_volume_storage_by_region.sql
-      type  = "column"
-      width = 3
-
-      series "GB" {
-        color = "tan"
-      }
-    }
-
-    chart {
-      title = "Storage by Age (GB)"
-      sql   = query.oci_block_storage_block_volume_storage_by_creation_month.sql
-      type  = "column"
-      width = 3
-
-      series "GB" {
-        color = "tan"
-      }
-    }
-  }
-
 }

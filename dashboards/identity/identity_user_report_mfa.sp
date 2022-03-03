@@ -1,16 +1,3 @@
-query "oci_identity_user_mfa_not_enabled_count" {
-  sql = <<-EOQ
-    select
-      count(*) as value,
-      'MFA Disabled' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as "type"
-    from
-      oci_identity_user
-    where
-      not is_mfa_activated;
-  EOQ
-}
-
 dashboard "oci_identity_user_mfa_report" {
 
   title = "OCI Identity User MFA Report"
@@ -27,7 +14,7 @@ dashboard "oci_identity_user_mfa_report" {
     }
 
     card {
-      sql   = query.oci_identity_user_mfa_not_enabled_count.sql
+      sql   = query.oci_identity_user_mfa_disabled_count.sql
       width = 2
     }
 
@@ -36,7 +23,13 @@ dashboard "oci_identity_user_mfa_report" {
   container {
 
     table {
-      sql = <<-EOQ
+      sql = query.oci_identity_user_mfa_table.sql
+    }
+  }
+}
+
+query "oci_identity_user_mfa_table" {
+  sql = <<-EOQ
       select
         name as "User",
         time_created as "Created Time",
@@ -46,7 +39,5 @@ dashboard "oci_identity_user_mfa_report" {
         oci_identity_user
       order by
         is_mfa_activated;
-      EOQ
-    }
-  }
+  EOQ
 }

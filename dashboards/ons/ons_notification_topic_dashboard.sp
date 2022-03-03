@@ -1,3 +1,85 @@
+dashboard "oci_ons_notification_topic_dashboard" {
+
+  title = "OCI ONS Notification Topic Dashboard"
+
+  tags = merge(local.ons_common_tags, {
+    type = "Dashboard"
+  })
+
+  container {
+
+    card {
+      sql   = query.oci_ons_notification_topic_count.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_ons_notification_topic_unused_count.sql
+      width = 2
+    }
+  }
+
+  container {
+    title = "Assessments"
+
+    chart {
+      title = "Lifecycle State"
+      sql   = query.oci_ons_notification_topic_by_lifecycle_state.sql
+      type  = "donut"
+      width = 3
+
+      series "count" {
+        point "active" {
+          color = "ok"
+        }
+      }
+    }
+
+    chart {
+      title = "No Active Subscription"
+      sql   = query.oci_ons_notification_topic_by_subscription.sql
+      type  = "donut"
+      width = 3
+    }
+
+  }
+
+  container {
+    title = "Analysis"
+
+    chart {
+      title = "Topics by Tenancy"
+      sql   = query.oci_ons_notification_topic_by_tenancy.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Topics by Compartment"
+      sql   = query.oci_ons_notification_topic_by_compartment.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Topics by Region"
+      sql   = query.oci_ons_notification_topic_by_region.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Topics by Age"
+      sql   = query.oci_ons_notification_topic_by_creation_month.sql
+      type  = "column"
+      width = 3
+    }
+  }
+
+}
+
+# Card Queries
+
 query "oci_ons_notification_topic_count" {
   sql = <<-EOQ
     select count(*) as "Topics" from oci_ons_notification_topic;
@@ -24,21 +106,8 @@ query "oci_ons_notification_topic_unused_count" {
   EOQ
 }
 
-# Assessments
+# Assessment Queries
 
-# query "oci_ons_notification_topic_by_lifecycle_state" {
-#   sql = <<-EOQ
-#     select
-#       lifecycle_state,
-#       count(lifecycle_state)
-#     from
-#       oci_ons_notification_topic
-#     group by
-#       lifecycle_state;
-#   EOQ
-# }
-
-# https://pkg.go.dev/github.com/oracle/oci-go-sdk@v24.3.0+incompatible/ons#NotificationTopicLifecycleStateEnum
 query "oci_ons_notification_topic_by_lifecycle_state" {
   sql = <<-EOQ
     with lifecycle_stat as (
@@ -82,7 +151,8 @@ query "oci_ons_notification_topic_by_subscription" {
   EOQ
 }
 
-# Analysis
+# Analysis Queries
+
 query "oci_ons_notification_topic_by_tenancy" {
   sql = <<-EOQ
     select
@@ -192,84 +262,4 @@ query "oci_ons_notification_topic_by_creation_month" {
     order by
       months.month;
   EOQ
-}
-
-dashboard "oci_ons_notification_topic_dashboard" {
-
-  title = "OCI ONS Notification Topic Dashboard"
-
-  tags = merge(local.ons_common_tags, {
-    type = "Dashboard"
-  })
-
-  container {
-
-    card {
-      sql   = query.oci_ons_notification_topic_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_ons_notification_topic_unused_count.sql
-      width = 2
-    }
-  }
-
-  container {
-    title = "Assessments"
-
-    chart {
-      title = "Lifecycle State"
-      sql   = query.oci_ons_notification_topic_by_lifecycle_state.sql
-      type  = "donut"
-      width = 3
-
-      series "count" {
-        point "active" {
-          color = "green"
-        }
-      }
-    }
-
-    chart {
-      title = "No Active Subscription"
-      sql   = query.oci_ons_notification_topic_by_subscription.sql
-      type  = "donut"
-      width = 3
-    }
-
-  }
-
-  container {
-    title = "Analysis"
-
-    chart {
-      title = "Topics by Tenancy"
-      sql   = query.oci_ons_notification_topic_by_tenancy.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Topics by Compartment"
-      sql   = query.oci_ons_notification_topic_by_compartment.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Topics by Region"
-      sql   = query.oci_ons_notification_topic_by_region.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Topics by Age"
-      sql   = query.oci_ons_notification_topic_by_creation_month.sql
-      type  = "column"
-      width = 3
-    }
-  }
-
 }

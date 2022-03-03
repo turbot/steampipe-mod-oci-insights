@@ -1,48 +1,5 @@
-query "oci_vcn_subnet_input" {
-  sql = <<EOQ
-    select
-      id as label,
-      id as value
-    from
-      oci_core_subnet
-    where
-      lifecycle_state <> 'TERMINATED'
-    order by
-      id;
-EOQ
-}
-
-query "oci_vcn_subnet_name_for_subnet" {
-  sql = <<-EOQ
-    select
-      display_name as "Subnet"
-    from
-      oci_core_subnet
-    where
-      id = $1 and lifecycle_state <> 'TERMINATED';
-  EOQ
-
-  param "id" {}
-}
-
-query "oci_vcn_subnet_flow_log_for_subnet" {
-  sql = <<-EOQ
-    select
-      case when is_enabled then 'ENABLED' else 'DISABLED' end as value,
-      'Flow Log' as label,
-      case when is_enabled then 'ok' else 'alert' end as type
-    from
-      oci_core_subnet as s
-      left join oci_logging_log as l
-      on s.id = l.configuration -> 'source' ->> 'resource'
-    where
-      s.id = $1 and s.lifecycle_state <> 'TERMINATED';
-  EOQ
-
-  param "id" {}
-}
-
 dashboard "oci_vcn_subnet_detail" {
+
   title = "OCI VCN Subnet Detail"
 
   tags = merge(local.vcn_common_tags, {
@@ -57,11 +14,9 @@ dashboard "oci_vcn_subnet_detail" {
 
   container {
 
-    # Assessments
     card {
       width = 2
-
-      query = query.oci_vcn_subnet_name_for_subnet
+      query = query.oci_vcn_subnet_name
       args = {
         id = self.input.subnet_id.value
       }
@@ -69,12 +24,12 @@ dashboard "oci_vcn_subnet_detail" {
 
     card {
       width = 2
-
-      query = query.oci_vcn_subnet_flow_log_for_subnet
+      query = query.oci_vcn_subnet_flow_log
       args = {
         id = self.input.subnet_id.value
       }
     }
+
   }
 
   container {
@@ -86,14 +41,12 @@ dashboard "oci_vcn_subnet_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-
         sql = <<-EOQ
           select
             display_name as "Name",
             time_created as "Time Created",
-            prohibit_public_ip_on_vnic as "Prohibit Public IP On VNIC",
-            virtual_router_ip as "Virtual Router IP",
             subnet_domain_name as "Subnet Domain Name",
+            region as "Region",
             id as "OCID",
             compartment_id as "Compartment ID"
           from
@@ -113,7 +66,6 @@ dashboard "oci_vcn_subnet_detail" {
       table {
         title = "Tags"
         width = 6
-
         sql = <<-EOQ
           with jsondata as (
             select
@@ -128,7 +80,9 @@ dashboard "oci_vcn_subnet_detail" {
             value as "Value"
           from
             jsondata,
-            json_each_text(tags);
+            json_each_text(tags)
+          order by
+            key;
         EOQ
 
         param "id" {}
@@ -185,4 +139,48 @@ dashboard "oci_vcn_subnet_detail" {
     }
 
   }
+}
+
+query "oci_vcn_subnet_input" {
+  sql = <<EOQ
+    select
+      id as label,
+      id as value
+    from
+      oci_core_subnet
+    where
+      lifecycle_state <> 'TERMINATED'
+    order by
+      id;
+EOQ
+}
+
+query "oci_vcn_subnet_name" {
+  sql = <<-EOQ
+    select
+      display_name as "Subnet"
+    from
+      oci_core_subnet
+    where
+      id = $1 and lifecycle_state <> 'TERMINATED';
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_vcn_subnet_flow_log" {
+  sql = <<-EOQ
+    select
+      case when is_enabled then 'ENABLED' else 'DISABLED' end as value,
+      'Flow Log' as label,
+      case when is_enabled then 'ok' else 'alert' end as type
+    from
+      oci_core_subnet as s
+      left join oci_logging_log as l
+      on s.id = l.configuration -> 'source' ->> 'resource'
+    where
+      s.id = $1 and s.lifecycle_state <> 'TERMINATED';
+  EOQ
+
+  param "id" {}
 }

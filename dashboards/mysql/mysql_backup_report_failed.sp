@@ -9,18 +9,25 @@ dashboard "oci_mysql_backup_failed_report" {
   container {
 
     card {
-      sql = query.oci_mysql_backup_count.sql
+      sql   = query.oci_mysql_backup_count.sql
       width = 2
     }
 
     card {
-      sql = query.oci_mysql_backup_failed_lifecycle_count.sql
+      sql   = query.oci_mysql_backup_failed_lifecycle_count.sql
       width = 2
     }
+
   }
 
   table {
-    sql = <<-EOQ
+    sql = query.oci_mysql_backup_failed_table.sql
+  }
+
+}
+
+query "oci_mysql_backup_failed_table" {
+  sql = <<-EOQ
       select
         v.display_name as "Name",
         now()::date - v.time_created::date as "Age in Days",
@@ -39,7 +46,5 @@ dashboard "oci_mysql_backup_failed_report" {
       order by
         v.time_created,
         v.title;
-    EOQ
-  }
-
+  EOQ
 }

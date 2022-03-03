@@ -5,7 +5,7 @@ dashboard "oci_block_storage_boot_volume_faulty_report" {
   tags = merge(local.blockstorage_common_tags, {
     type = "Report"
   })
-  
+
   container {
 
     card {
@@ -20,7 +20,13 @@ dashboard "oci_block_storage_boot_volume_faulty_report" {
   }
 
   table {
-    sql = <<-EOQ
+    sql = query.oci_block_storage_boot_volume_faulty_table.sql
+  }
+
+}
+
+query "oci_block_storage_boot_volume_faulty_table" {
+  sql = <<-EOQ
       select
         v.display_name as "Name",
         now()::date - v.time_created::date as "Age in Days",
@@ -34,12 +40,10 @@ dashboard "oci_block_storage_boot_volume_faulty_report" {
         oci_core_boot_volume as v
         left join oci_identity_compartment as c on v.compartment_id = c.id
         left join oci_identity_tenancy as t on v.tenant_id = t.id
-        where
-          v.lifecycle_state <> 'TERMINATED'
-        order by
-          v.time_created,
-          v.title;
-    EOQ
-  }
-
+      where
+        v.lifecycle_state <> 'TERMINATED'
+      order by
+        v.time_created,
+        v.title;
+  EOQ
 }

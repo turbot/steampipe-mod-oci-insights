@@ -1,3 +1,135 @@
+dashboard "oci_mysql_backup_dashboard" {
+
+  title = "OCI MySQL Backup Dashboard"
+
+  tags = merge(local.mysql_common_tags, {
+    type = "Dashboard"
+  })
+
+  container {
+
+    card {
+      sql   = query.oci_mysql_backup_count.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_mysql_backup_storage_total.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_mysql_automatic_backup_count.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_mysql_full_backup_count.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_mysql_backup_failed_lifecycle_count.sql
+      width = 2
+    }
+
+  }
+
+  container {
+    title = "Assessments"
+    width = 3
+
+    chart {
+      title = "Lifecycle State"
+      sql   = query.oci_mysql_backup_by_lifecycle_state.sql
+      type  = "donut"
+
+      series "count" {
+        point "active" {
+          color = "ok"
+        }
+        point "failed" {
+          color = "alert"
+        }
+      }
+    }
+
+  }
+
+  container {
+    title = "Analysis"
+
+    chart {
+      title = "Backups by Tenancy"
+      sql   = query.oci_mysql_backup_by_tenancy.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Backups by Compartment"
+      sql   = query.oci_mysql_backup_by_compartment.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Backups by Region"
+      sql   = query.oci_mysql_backup_by_region.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Backups by Age"
+      sql   = query.oci_mysql_backup_by_creation_month.sql
+      type  = "column"
+      width = 3
+    }
+
+  }
+
+  container {
+
+    chart {
+      title = "Storage by Tenancy (GB)"
+      sql   = query.oci_mysql_backup_storage_by_tenancy.sql
+      type  = "column"
+      width = 3
+
+      series "GB" {
+        color = "tan"
+      }
+    }
+
+    chart {
+      title = "Storage by Compartment (GB)"
+      sql   = query.oci_mysql_backup_storage_by_compartment.sql
+      type  = "column"
+      width = 3
+
+      series "GB" {
+        color = "tan"
+      }
+    }
+
+    chart {
+      title = "Storage by Region (GB)"
+      sql   = query.oci_mysql_backup_storage_by_region.sql
+      type  = "column"
+      width = 3
+
+      series "GB" {
+        color = "tan"
+      }
+    }
+
+  }
+
+}
+
+# Card Queries
+
 query "oci_mysql_backup_count" {
   sql = <<-EOQ
   select
@@ -55,21 +187,7 @@ query "oci_mysql_backup_failed_lifecycle_count" {
   EOQ
 }
 
-# Assessments
-
-# query "oci_mysql_backup_by_lifecycle_state" {
-#   sql = <<-EOQ
-#     select
-#       lifecycle_state,
-#       count(lifecycle_state)
-#     from
-#       oci_mysql_backup
-#     where
-#       lifecycle_state <> 'DELETED'
-#     group by
-#       lifecycle_state;
-#   EOQ
-# }
+# Assessment Queries
 
 query "oci_mysql_backup_by_lifecycle_state" {
   sql = <<-EOQ
@@ -97,7 +215,7 @@ query "oci_mysql_backup_by_lifecycle_state" {
   EOQ
 }
 
-# Analysis
+# Analysis Queries
 
 query "oci_mysql_backup_by_tenancy" {
   sql = <<-EOQ
@@ -214,8 +332,6 @@ query "oci_mysql_backup_by_creation_month" {
   EOQ
 }
 
-# Analysis Storage
-
 query "oci_mysql_backup_storage_by_tenancy" {
   sql = <<-EOQ
     select
@@ -283,133 +399,4 @@ query "oci_mysql_backup_storage_by_region" {
     order by
       region;
   EOQ
-}
-
-
-dashboard "oci_mysql_backup_dashboard" {
-
-  title = "OCI MySQL Backup Dashboard"
-
-  tags = merge(local.mysql_common_tags, {
-    type = "Dashboard"
-  })
-
-  container {
-
-    card {
-      sql   = query.oci_mysql_backup_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_mysql_backup_storage_total.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_mysql_automatic_backup_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_mysql_full_backup_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_mysql_backup_failed_lifecycle_count.sql
-      width = 2
-    }
-  }
-
-  container {
-    title = "Assessments"
-    width = 3
-
-    chart {
-      title = "Lifecycle State"
-      sql   = query.oci_mysql_backup_by_lifecycle_state.sql
-      type  = "donut"
-
-      series "count" {
-        point "active" {
-          color = "green"
-        }
-        point "failed" {
-          color = "red"
-        }
-      }
-    }
-  }
-
-  container {
-    title = "Analysis"
-
-    chart {
-      title = "Backups by Tenancy"
-      sql   = query.oci_mysql_backup_by_tenancy.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Backups by Compartment"
-      sql   = query.oci_mysql_backup_by_compartment.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Backups by Region"
-      sql   = query.oci_mysql_backup_by_region.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Backups by Age"
-      sql   = query.oci_mysql_backup_by_creation_month.sql
-      type  = "column"
-      width = 3
-    }
-
-  }
-
-  container {
-
-    chart {
-      title = "Storage by Tenancy (GB)"
-      sql   = query.oci_mysql_backup_storage_by_tenancy.sql
-      type  = "column"
-      width = 3
-
-      series "GB" {
-        color = "tan"
-      }
-    }
-
-    chart {
-      title = "Storage by Compartment (GB)"
-      sql   = query.oci_mysql_backup_storage_by_compartment.sql
-      type  = "column"
-      width = 3
-
-      series "GB" {
-        color = "tan"
-      }
-    }
-
-    chart {
-      title = "Storage by Region (GB)"
-      sql   = query.oci_mysql_backup_storage_by_region.sql
-      type  = "column"
-      width = 3
-
-      series "GB" {
-        color = "tan"
-      }
-    }
-
-  }
-
 }

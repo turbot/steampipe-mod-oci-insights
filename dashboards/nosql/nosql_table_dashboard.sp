@@ -1,3 +1,115 @@
+dashboard "oci_nosql_table_dashboard" {
+
+  title = "OCI NoSQL Table Dashboard"
+
+  tags = merge(local.nosql_common_tags, {
+    type = "Dashboard"
+  })
+
+  container {
+
+    card {
+      sql   = query.oci_nosql_table_count.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_nosql_table_auto_reclaimable_count.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_nosql_table_stalled_more_than_90_days_count.sql
+      width = 2
+    }
+  }
+
+  container {
+    title = "Assessments"
+    width = 6
+
+    chart {
+      title = "Lifecycle State"
+      sql   = query.oci_nosql_table_by_lifecycle_state.sql
+      type  = "donut"
+      width = 3
+
+      series "count" {
+        point "active" {
+          color = "ok"
+        }
+        point "inactive" {
+          color = "alert"
+        }
+      }
+
+    }
+
+    chart {
+      title = "Stalled More Than 90 Days"
+      sql   = query.oci_nosql_table_stalled_more_than_90_days.sql
+      type  = "donut"
+      width = 3
+    }
+
+  }
+
+  container {
+    title = "Analysis"
+
+    chart {
+      title = "Tables by Tenancy"
+      sql   = query.oci_nosql_table_by_tenancy.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Tables by Compartment"
+      sql   = query.oci_nosql_table_by_compartment.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Tables by Region"
+      sql   = query.oci_nosql_table_by_region.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Tables by Age"
+      sql   = query.oci_nosql_table_by_creation_month.sql
+      type  = "column"
+      width = 3
+    }
+
+  }
+
+  container {
+    title = "Performance & Utilization"
+
+    chart {
+      title = "Top 10 Storage - Last 7 days"
+      sql   = query.oci_nosql_table_top10_storage_past_week.sql
+      type  = "line"
+      width = 6
+    }
+
+    chart {
+      title = "Average Max Daily Storage - Last 30 days"
+      sql   = query.oci_nosql_table_by_storage_utilization_category.sql
+      type  = "column"
+      width = 6
+    }
+
+  }
+
+}
+
+# Card Queries
+
 query "oci_nosql_table_count" {
   sql = <<-EOQ
   select
@@ -33,23 +145,8 @@ query "oci_nosql_table_stalled_more_than_90_days_count" {
   EOQ
 }
 
-# Assessments
+# Assessment Queries
 
-# query "oci_nosql_table_by_lifecycle_state" {
-#   sql = <<-EOQ
-#     select
-#       lifecycle_state,
-#       count(lifecycle_state)
-#     from
-#       oci_nosql_table
-#     where
-#       lifecycle_state <> 'DELETED'
-#     group by
-#       lifecycle_state;
-#   EOQ
-# }
-
-# https://pkg.go.dev/github.com/oracle/oci-go-sdk@v24.3.0+incompatible/nosql#TableLifecycleStateEnum
 query "oci_nosql_table_by_lifecycle_state" {
   sql = <<-EOQ
     with lifecycle_stat as (
@@ -91,7 +188,7 @@ query "oci_nosql_table_stalled_more_than_90_days" {
   EOQ
 }
 
-# Analysis
+# Analysis Queries
 
 query "oci_nosql_table_by_tenancy" {
   sql = <<-EOQ
@@ -270,112 +367,4 @@ query "oci_nosql_table_by_storage_utilization_category" {
     group by
       b.storage_bucket;
   EOQ
-}
-
-dashboard "oci_nosql_table_dashboard" {
-
-  title = "OCI NoSQL Table Dashboard"
-
-  tags = merge(local.nosql_common_tags, {
-    type = "Dashboard"
-  })
-
-  container {
-
-    card {
-      sql   = query.oci_nosql_table_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_nosql_table_auto_reclaimable_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_nosql_table_stalled_more_than_90_days_count.sql
-      width = 2
-    }
-  }
-
-  container {
-    title = "Assessments"
-    width = 6
-
-    chart {
-      title = "Lifecycle State"
-      sql   = query.oci_nosql_table_by_lifecycle_state.sql
-      type  = "donut"
-      width = 3
-
-      series "count" {
-        point "active" {
-          color = "green"
-        }
-        point "inactive" {
-          color = "red"
-        }
-      }
-
-    }
-
-    chart {
-      title = "Stalled More Than 90 Days"
-      sql   = query.oci_nosql_table_stalled_more_than_90_days.sql
-      type  = "donut"
-      width = 3
-    }
-  }
-
-  container {
-    title = "Analysis"
-
-    chart {
-      title = "Tables by Tenancy"
-      sql   = query.oci_nosql_table_by_tenancy.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Tables by Compartment"
-      sql   = query.oci_nosql_table_by_compartment.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Tables by Region"
-      sql   = query.oci_nosql_table_by_region.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Tables by Age"
-      sql   = query.oci_nosql_table_by_creation_month.sql
-      type  = "column"
-      width = 3
-    }
-  }
-
-  container {
-    title = "Performance & Utilization"
-
-    chart {
-      title = "Top 10 Storage - Last 7 days"
-      sql   = query.oci_nosql_table_top10_storage_past_week.sql
-      type  = "line"
-      width = 6
-    }
-
-    chart {
-      title = "Average Max Daily Storage - Last 30 days"
-      sql   = query.oci_nosql_table_by_storage_utilization_category.sql
-      type  = "column"
-      width = 6
-    }
-
-  }
-
 }

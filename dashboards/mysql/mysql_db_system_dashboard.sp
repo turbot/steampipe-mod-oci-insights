@@ -1,3 +1,179 @@
+dashboard "oci_mysql_db_system_dashboard" {
+
+  title = "OCI MySQL DB System Dashboard"
+
+  tags = merge(local.mysql_common_tags, {
+    type = "Dashboard"
+  })
+
+  container {
+
+    card {
+      sql   = query.oci_mysql_db_system_count.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_mysql_db_system_storage_total.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_mysql_db_system_analytics_cluster_attached_count.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_mysql_db_system_heat_wave_cluster_attached_count.sql
+      width = 2
+    }
+
+
+    card {
+      sql   = query.oci_mysql_db_system_failed_lifecycle_count.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_mysql_db_system_backup_disabled_count.sql
+      width = 2
+    }
+
+  }
+
+  container {
+    title = "Assessments"
+    width = 6
+
+    chart {
+      title = "Lifecycle State"
+      sql   = query.oci_mysql_db_system_by_lifecycle_state.sql
+      type  = "donut"
+      width = 4
+
+      series "count" {
+        point "active" {
+          color = "ok"
+        }
+        point "inactive" {
+          color = "alert"
+        }
+      }
+
+    }
+
+    chart {
+      title = "DB Systems With Backups Disabled"
+      sql   = query.oci_mysql_db_system_with_no_backups.sql
+      type  = "donut"
+      width = 4
+    }
+
+  }
+
+  container {
+    title = "Analysis"
+
+    chart {
+      title = "DB Systems by Tenancy"
+      sql   = query.oci_mysql_db_system_by_tenancy.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "DB Systems by Compartment"
+      sql   = query.oci_mysql_db_system_by_compartment.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "DB Systems by Region"
+      sql   = query.oci_mysql_db_system_by_region.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "DB Systems by Age"
+      sql   = query.oci_mysql_db_system_by_creation_month.sql
+      type  = "column"
+      width = 3
+    }
+
+  }
+
+  container {
+    chart {
+      title = "Storage by Tenancy (GB)"
+      sql   = query.oci_mysql_db_system_storage_by_tenancy.sql
+      type  = "column"
+      width = 3
+
+      series "GB" {
+        color = "tan"
+      }
+    }
+
+    chart {
+      title = "Storage by Compartment (GB)"
+      sql   = query.oci_mysql_db_system_storage_by_compartment.sql
+      type  = "column"
+      width = 3
+
+      series "GB" {
+        color = "tan"
+      }
+    }
+
+    chart {
+      title = "Storage by Region (GB)"
+      sql   = query.oci_mysql_db_system_storage_by_region.sql
+      type  = "column"
+      width = 3
+
+      series "GB" {
+        color = "tan"
+      }
+    }
+
+    chart {
+      title = "Storage by Age (GB)"
+      sql   = query.oci_mysql_db_system_storage_by_creation_month.sql
+      type  = "column"
+      width = 3
+
+      series "GB" {
+        color = "tan"
+      }
+    }
+
+  }
+
+  container {
+    title = "Performance & Utilization"
+
+    chart {
+      title = "Top 10 CPU - Last 7 days"
+      sql   = query.oci_mysql_db_system_top10_cpu_past_week.sql
+      type  = "line"
+      width = 6
+    }
+
+    chart {
+      title = "Average max daily CPU - Last 30 days"
+      sql   = query.oci_mysql_db_system_by_cpu_utilization_category.sql
+      type  = "column"
+      width = 6
+    }
+
+  }
+
+}
+
+# Card Queries
+
 query "oci_mysql_db_system_count" {
   sql = <<-EOQ
   select
@@ -75,7 +251,7 @@ query "oci_mysql_db_system_backup_disabled_count" {
   EOQ
 }
 
-# Assessments
+# Assessment Queries
 
 query "oci_mysql_db_system_by_lifecycle_state_1" {
   sql = <<-EOQ
@@ -134,7 +310,7 @@ query "oci_mysql_db_system_with_no_backups" {
   EOQ
 }
 
-# Analysis
+# Analysis Queries
 
 query "oci_mysql_db_system_by_tenancy" {
   sql = <<-EOQ
@@ -367,6 +543,8 @@ query "oci_mysql_db_system_storage_by_creation_month" {
   EOQ
 }
 
+# Performance & Utilization Queries
+
 query "oci_mysql_db_system_top10_cpu_past_week" {
   sql = <<-EOQ
      with top_n as (
@@ -397,7 +575,8 @@ query "oci_mysql_db_system_top10_cpu_past_week" {
   EOQ
 }
 
-# underused if avg CPU < 10% every day for last month
+# Underused if avg CPU < 10% every day for last month
+
 query "oci_mysql_db_system_by_cpu_utilization_category" {
   sql = <<-EOQ
     with cpu_buckets as (
@@ -432,171 +611,3 @@ query "oci_mysql_db_system_by_cpu_utilization_category" {
   EOQ
 }
 
-dashboard "oci_mysql_db_system_dashboard" {
-
-  title = "OCI MySQL DB System Dashboard"
-
-  tags = merge(local.mysql_common_tags, {
-    type = "Dashboard"
-  })
-
-  container {
-
-    card {
-      sql   = query.oci_mysql_db_system_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_mysql_db_system_storage_total.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_mysql_db_system_analytics_cluster_attached_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_mysql_db_system_heat_wave_cluster_attached_count.sql
-      width = 2
-    }
-
-
-    card {
-      sql   = query.oci_mysql_db_system_failed_lifecycle_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_mysql_db_system_backup_disabled_count.sql
-      width = 2
-    }
-  }
-
-  container {
-    title = "Assessments"
-    width = 6
-
-    chart {
-      title = "Lifecycle State"
-      sql   = query.oci_mysql_db_system_by_lifecycle_state.sql
-      type  = "donut"
-      width = 4
-
-      series "count" {
-        point "active" {
-          color = "green"
-        }
-        point "inactive" {
-          color = "red"
-        }
-      }
-
-    }
-
-    chart {
-      title = "DB Systems With Backups Disabled"
-      sql   = query.oci_mysql_db_system_with_no_backups.sql
-      type  = "donut"
-      width = 4
-    }
-  }
-
-  container {
-    title = "Analysis"
-
-    chart {
-      title = "DB Systems by Tenancy"
-      sql   = query.oci_mysql_db_system_by_tenancy.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "DB Systems by Compartment"
-      sql   = query.oci_mysql_db_system_by_compartment.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "DB Systems by Region"
-      sql   = query.oci_mysql_db_system_by_region.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "DB Systems by Age"
-      sql   = query.oci_mysql_db_system_by_creation_month.sql
-      type  = "column"
-      width = 3
-    }
-  }
-
-  container {
-    chart {
-      title = "Storage by Tenancy (GB)"
-      sql   = query.oci_mysql_db_system_storage_by_tenancy.sql
-      type  = "column"
-      width = 3
-
-      series "GB" {
-        color = "tan"
-      }
-    }
-
-    chart {
-      title = "Storage by Compartment (GB)"
-      sql   = query.oci_mysql_db_system_storage_by_compartment.sql
-      type  = "column"
-      width = 3
-
-      series "GB" {
-        color = "tan"
-      }
-    }
-
-    chart {
-      title = "Storage by Region (GB)"
-      sql   = query.oci_mysql_db_system_storage_by_region.sql
-      type  = "column"
-      width = 3
-
-      series "GB" {
-        color = "tan"
-      }
-    }
-
-    chart {
-      title = "Storage by Age (GB)"
-      sql   = query.oci_mysql_db_system_storage_by_creation_month.sql
-      type  = "column"
-      width = 3
-
-      series "GB" {
-        color = "tan"
-      }
-    }
-  }
-  container {
-    title = "Performance & Utilization"
-
-    chart {
-      title = "Top 10 CPU - Last 7 days"
-      sql   = query.oci_mysql_db_system_top10_cpu_past_week.sql
-      type  = "line"
-      width = 6
-    }
-
-    chart {
-      title = "Average max daily CPU - Last 30 days"
-      sql   = query.oci_mysql_db_system_by_cpu_utilization_category.sql
-      type  = "column"
-      width = 6
-    }
-
-  }
-
-}

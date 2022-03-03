@@ -20,7 +20,13 @@ dashboard "oci_mysql_db_system_failed_report" {
   }
 
   table {
-    sql = <<-EOQ
+    sql = query.oci_mysql_db_system_failed_table.sql
+  }
+
+}
+
+query "oci_mysql_db_system_failed_table" {
+  sql = <<-EOQ
       select
         v.display_name as "Name",
         v.time_created as "Create Time",
@@ -38,7 +44,5 @@ dashboard "oci_mysql_db_system_failed_report" {
       order by
         v.time_created,
         v.title;
-    EOQ
-  }
-
+  EOQ
 }

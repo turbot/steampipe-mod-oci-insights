@@ -1,105 +1,5 @@
-query "oci_vcn_security_list_input" {
-  sql = <<EOQ
-    select
-      id as label,
-      id as value
-    from
-      oci_core_security_list
-    where
-      lifecycle_state <> 'TERMINATED'
-    order by
-      id;
-EOQ
-}
-
-query "oci_vcn_security_list_name_for_security_group" {
-  sql = <<-EOQ
-    select
-      display_name as "Security List"
-    from
-      oci_core_security_list
-    where
-      id = $1 and lifecycle_state <> 'TERMINATED';
-  EOQ
-
-  param "id" {}
-}
-
-query "oci_vcn_security_list_ingress_ssh_for_security_group" {
-  sql = <<-EOQ
-    with non_compliant_rules as (
-      select
-        id,
-        count(*) as num_noncompliant_rules
-      from
-        oci_core_security_list,
-        jsonb_array_elements(ingress_security_rules) as r
-      where
-        r ->> 'direction' = 'INGRESS'
-        and r ->> 'sourceType' = 'CIDR_BLOCK'
-        and r ->> 'source' = '0.0.0.0/0'
-        and (
-        r ->> 'protocol' = 'all'
-        or (
-        (r -> 'tcpOptions' -> 'destinationPortRange' ->> 'min')::integer <= 22
-        and (r -> 'tcpOptions' -> 'destinationPortRange' ->> 'max')::integer >= 22
-        )
-      )
-      and lifecycle_state <> 'TERMINATED'
-      group by id
-      )
-      select
-        case when non_compliant_rules.id is null then 'RESTRICTED' else 'UNRESTRICTED' end as value,
-        'Ingress RDP' as label,
-        case when non_compliant_rules.id is null then 'ok' else 'alert' end as type
-      from
-        oci_core_security_list as sl
-        left join non_compliant_rules on non_compliant_rules.id = sl.id
-      where
-        sl.id = $1 and sl.lifecycle_state <> 'TERMINATED';
-  EOQ
-
-  param "id" {}
-}
-
-query "oci_vcn_security_list_ingress_rdp_for_security_group" {
-  sql = <<-EOQ
-    with non_compliant_rules as (
-      select
-        id,
-        count(*) as num_noncompliant_rules
-      from
-        oci_core_security_list,
-        jsonb_array_elements(ingress_security_rules) as r
-      where
-        r ->> 'direction' = 'INGRESS'
-        and r ->> 'sourceType' = 'CIDR_BLOCK'
-        and r ->> 'source' = '0.0.0.0/0'
-        and (
-        r ->> 'protocol' = 'all'
-        or (
-        (r -> 'tcpOptions' -> 'destinationPortRange' ->> 'min')::integer <= 3389
-        and (r -> 'tcpOptions' -> 'destinationPortRange' ->> 'max')::integer >= 3389
-        )
-      )
-      and lifecycle_state <> 'TERMINATED'
-      group by id
-      )
-      select
-        case when non_compliant_rules.id is null then 'RESTRICTED' else 'UNRESTRICTED' end as value,
-        'Ingress RDP' as label,
-        case when non_compliant_rules.id is null then 'ok' else 'alert' end as type
-      from
-        oci_core_security_list as sl
-        left join non_compliant_rules on non_compliant_rules.id = sl.id
-      where
-        sl.id = $1 and sl.lifecycle_state <> 'TERMINATED';
-  EOQ
-
-  param "id" {}
-}
-
 dashboard "oci_vcn_security_list_detail" {
+
   title = "OCI VCN Security List Detail"
 
   tags = merge(local.vcn_common_tags, {
@@ -114,11 +14,10 @@ dashboard "oci_vcn_security_list_detail" {
 
   container {
 
-    # Assessments
     card {
       width = 2
 
-      query = query.oci_vcn_security_list_name_for_security_group
+      query = query.oci_vcn_security_list_name
       args = {
         id = self.input.security_list_id.value
       }
@@ -127,7 +26,7 @@ dashboard "oci_vcn_security_list_detail" {
     card {
       width = 2
 
-      query = query.oci_vcn_security_list_ingress_ssh_for_security_group
+      query = query.oci_vcn_security_list_ingress_ssh
       args = {
         id = self.input.security_list_id.value
       }
@@ -136,16 +35,18 @@ dashboard "oci_vcn_security_list_detail" {
     card {
       width = 2
 
-      query = query.oci_vcn_security_list_ingress_rdp_for_security_group
+      query = query.oci_vcn_security_list_ingress_rdp
       args = {
         id = self.input.security_list_id.value
       }
     }
+
   }
 
   container {
 
     container {
+
       width = 6
 
       table {
@@ -192,7 +93,9 @@ dashboard "oci_vcn_security_list_detail" {
             value as "Value"
           from
             jsondata,
-            json_each_text(tags);
+            json_each_text(tags)
+          order by
+            key;
         EOQ
 
         param "id" {}
@@ -202,9 +105,11 @@ dashboard "oci_vcn_security_list_detail" {
         }
 
       }
+
     }
 
     container {
+
       width = 6
 
       table {
@@ -248,7 +153,110 @@ dashboard "oci_vcn_security_list_detail" {
           id = self.input.security_list_id.value
         }
       }
+
     }
 
   }
+
+}
+
+query "oci_vcn_security_list_input" {
+  sql = <<EOQ
+    select
+      id as label,
+      id as value
+    from
+      oci_core_security_list
+    where
+      lifecycle_state <> 'TERMINATED'
+    order by
+      id;
+EOQ
+}
+
+query "oci_vcn_security_list_name" {
+  sql = <<-EOQ
+    select
+      display_name as "Security List"
+    from
+      oci_core_security_list
+    where
+      id = $1 and lifecycle_state <> 'TERMINATED';
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_vcn_security_list_ingress_ssh" {
+  sql = <<-EOQ
+    with non_compliant_rules as (
+      select
+        id,
+        count(*) as num_noncompliant_rules
+      from
+        oci_core_security_list,
+        jsonb_array_elements(ingress_security_rules) as r
+      where
+        r ->> 'direction' = 'INGRESS'
+        and r ->> 'sourceType' = 'CIDR_BLOCK'
+        and r ->> 'source' = '0.0.0.0/0'
+        and (
+        r ->> 'protocol' = 'all'
+        or (
+        (r -> 'tcpOptions' -> 'destinationPortRange' ->> 'min')::integer <= 22
+        and (r -> 'tcpOptions' -> 'destinationPortRange' ->> 'max')::integer >= 22
+        )
+      )
+      and lifecycle_state <> 'TERMINATED'
+      group by id
+      )
+      select
+        case when non_compliant_rules.id is null then 'RESTRICTED' else 'UNRESTRICTED' end as value,
+        'Ingress RDP' as label,
+        case when non_compliant_rules.id is null then 'ok' else 'alert' end as type
+      from
+        oci_core_security_list as sl
+        left join non_compliant_rules on non_compliant_rules.id = sl.id
+      where
+        sl.id = $1 and sl.lifecycle_state <> 'TERMINATED';
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_vcn_security_list_ingress_rdp" {
+  sql = <<-EOQ
+    with non_compliant_rules as (
+      select
+        id,
+        count(*) as num_noncompliant_rules
+      from
+        oci_core_security_list,
+        jsonb_array_elements(ingress_security_rules) as r
+      where
+        r ->> 'direction' = 'INGRESS'
+        and r ->> 'sourceType' = 'CIDR_BLOCK'
+        and r ->> 'source' = '0.0.0.0/0'
+        and (
+        r ->> 'protocol' = 'all'
+        or (
+        (r -> 'tcpOptions' -> 'destinationPortRange' ->> 'min')::integer <= 3389
+        and (r -> 'tcpOptions' -> 'destinationPortRange' ->> 'max')::integer >= 3389
+        )
+      )
+      and lifecycle_state <> 'TERMINATED'
+      group by id
+      )
+      select
+        case when non_compliant_rules.id is null then 'RESTRICTED' else 'UNRESTRICTED' end as value,
+        'Ingress RDP' as label,
+        case when non_compliant_rules.id is null then 'ok' else 'alert' end as type
+      from
+        oci_core_security_list as sl
+        left join non_compliant_rules on non_compliant_rules.id = sl.id
+      where
+        sl.id = $1 and sl.lifecycle_state <> 'TERMINATED';
+  EOQ
+
+  param "id" {}
 }

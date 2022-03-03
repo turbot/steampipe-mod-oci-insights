@@ -1,3 +1,84 @@
+dashboard "oci_vcn_subnet_dashboard" {
+
+  title = "OCI VCN Subnet Dashboard"
+
+  tags = merge(local.vcn_common_tags, {
+    type = "Dashboard"
+  })
+
+  container {
+
+    card {
+      width = 2
+      sql   = query.oci_vcn_subnet_count.sql
+    }
+
+    card {
+      width = 2
+      sql   = query.oci_vcn_subnet_flowlog_not_configured_count.sql
+    }
+
+  }
+
+  container {
+
+    title = "Assessments"
+
+    chart {
+      title = "Flow Log Status"
+      type  = "donut"
+      width = 3
+      sql   = query.oci_vcn_subnet_by_flowlog.sql
+
+      series "count" {
+        point "ENABLED" {
+          color = "ok"
+        }
+        point "DISABLED" {
+          color = "alert"
+        }
+      }
+    }
+
+  }
+
+  container {
+    title = "Analysis"
+
+    chart {
+      title = "Subnets by Tenancy"
+      sql   = query.oci_vcn_subnets_by_tenancy.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Subnets by Compartment"
+      sql   = query.oci_vcn_subnets_by_compartment.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Subnets by Region"
+      sql   = query.oci_vcn_subnets_by_region.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Subnets by VCN"
+      sql   = query.oci_vcn_subnets_by_vcn.sql
+      type  = "column"
+      width = 3
+    }
+
+  }
+
+}
+
+# Card Queries
+
 query "oci_vcn_subnet_count" {
   sql = <<-EOQ
     select count(*) as "Subnets" from oci_core_vcn where lifecycle_state <> 'TERMINATED';
@@ -8,7 +89,7 @@ query "oci_vcn_subnet_flowlog_not_configured_count" {
   sql = <<-EOQ
     select
       count(s.*) as value,
-      'Flow Log Not Configured' as label,
+      'Flow Log Disabled' as label,
       case count(s.*) when 0 then 'ok' else 'alert' end as type
     from
       oci_core_subnet as s
@@ -19,7 +100,35 @@ query "oci_vcn_subnet_flowlog_not_configured_count" {
   EOQ
 }
 
-# Analysis
+# Assessment Queries
+
+query "oci_vcn_subnet_by_flowlog" {
+  sql = <<-EOQ
+    with subnet_logs as (
+      select
+        s.id,
+        case
+          when l.is_enabled is null or not l.is_enabled then 'DISABLED'
+          else 'ENABLED'
+        end as flow_logs_configured
+      from
+        oci_core_subnet as s
+        left join oci_logging_log as l
+        on s.id = l.configuration -> 'source' ->> 'resource'
+      where
+        s.lifecycle_state <> 'TERMINATED'
+    )
+    select
+      flow_logs_configured,
+      count(*)
+    from
+      subnet_logs
+    group by
+      flow_logs_configured;
+  EOQ
+}
+
+# Analysis Queries
 
 query "oci_vcn_subnets_by_tenancy" {
   sql = <<-EOQ
@@ -89,112 +198,17 @@ query "oci_vcn_subnets_by_region" {
   EOQ
 }
 
-dashboard "oci_vcn_subnet_dashboard" {
-
-  title = "OCI VCN Subnet Dashboard"
-
-  tags = merge(local.vcn_common_tags, {
-    type = "Dashboard"
-  })
-
-  container {
-
-    card {
-      width = 2
-      sql   = query.oci_vcn_subnet_count.sql
-    }
-
-    card {
-      width = 2
-      sql   = query.oci_vcn_subnet_flowlog_not_configured_count.sql
-    }
-
-  }
-
-  container {
-    title = "Assessments"
-    # width = 6
-
-    chart {
-      title = "Subnet Flow Log Status"
-      type  = "donut"
-      width = 3
-      sql   = <<-EOQ
-        with subnet_logs as (
-          select
-           s.id,
-           case
-             when l.is_enabled is null or not l.is_enabled then 'disabled'
-             else 'enabled'
-           end as flow_logs_configured
-           from
-             oci_core_subnet as s
-             left join oci_logging_log as l
-             on s.id = l.configuration -> 'source' ->> 'resource'
-           where
-             s.lifecycle_state <> 'TERMINATED'
-        )
-        select
-          flow_logs_configured,
-          count(*)
-        from
-          subnet_logs
-        group by
-          flow_logs_configured;
-      EOQ
-
-      series "count" {
-        point "enabled" {
-          color = "green"
-        }
-        point "disabled" {
-          color = "red"
-        }
-      }
-    }
-
-  }
-
-  container {
-    title = "Analysis"
-
-    chart {
-      title = "Subnets by Tenancy"
-      sql   = query.oci_vcn_subnets_by_tenancy.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Subnets by Compartment"
-      sql   = query.oci_vcn_subnets_by_compartment.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Subnets by Region"
-      sql   = query.oci_vcn_subnets_by_region.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Subnets by VCN"
-      sql   = <<-EOQ
-        select
-          v.display_name as "VCN",
-          count(*) as "subnets"
-        from
-          oci_core_subnet s
-          left join oci_core_vcn v on s.vcn_id = v.id
-        where
-          s.lifecycle_state <> 'TERMINATED'
-        group by v.display_name
-        order by v.display_name;
-      EOQ
-      type  = "column"
-      width = 3
-    }
-  }
+query "oci_vcn_subnets_by_vcn" {
+  sql = <<-EOQ
+    select
+      v.display_name as "VCN",
+      count(*) as "subnets"
+    from
+      oci_core_subnet s
+      left join oci_core_vcn v on s.vcn_id = v.id
+    where
+      s.lifecycle_state <> 'TERMINATED'
+      group by v.display_name
+      order by v.display_name;
+  EOQ
 }

@@ -1,4 +1,32 @@
-query "oci_block_storage_boot_volume_unattached_volumes_count" {
+dashboard "oci_block_storage_boot_volume_unattached_report" {
+
+  title = "OCI Block Storage Boot Volume Unattached Report"
+
+  tags = merge(local.blockstorage_common_tags, {
+    type     = "Report"
+    category = "Unused"
+  })
+
+  container {
+
+    card {
+      sql   = query.oci_block_storage_boot_volume_count.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_block_storage_boot_volume_unattached_count.sql
+      width = 2
+    }
+  }
+
+  table {
+    sql = query.oci_block_storage_boot_volume_unattached_table.sql
+  }
+
+}
+
+query "oci_block_storage_boot_volume_unattached_count" {
   sql = <<-EOQ
    select
       count(*) as value,
@@ -16,30 +44,8 @@ query "oci_block_storage_boot_volume_unattached_volumes_count" {
   EOQ
 }
 
-dashboard "oci_block_storage_boot_volume_unattached_report" {
-
-  title = "OCI Block Storage Boot Volume Unattached Report"
-
-  tags = merge(local.blockstorage_common_tags, {
-    type = "Report"
-    category = "Unused"
-  })
-
-  container {
-
-    card {
-      sql   = query.oci_block_storage_boot_volume_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_block_storage_boot_volume_unattached_volumes_count.sql
-      width = 2
-    }
-  }
-
-  table {
-    sql = <<-EOQ
+query "oci_block_storage_boot_volume_unattached_table" {
+  sql = <<-EOQ
       select
         v.display_name as "Name",
         a.lifecycle_state as "Attachment Status",
@@ -55,12 +61,10 @@ dashboard "oci_block_storage_boot_volume_unattached_report" {
         left join oci_core_boot_volume_attachment as a on a.boot_volume_id = v.id
         left join oci_identity_compartment as c on v.compartment_id = c.id
         left join oci_identity_tenancy as t on v.tenant_id = t.id
-        where
-          v.lifecycle_state <> 'TERMINATED'
-        order by
-          v.time_created,
-          v.title;
-    EOQ
-  }
-
+      where
+        v.lifecycle_state <> 'TERMINATED'
+      order by
+        v.time_created,
+        v.title;
+  EOQ
 }

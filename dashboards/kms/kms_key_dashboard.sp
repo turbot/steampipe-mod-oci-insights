@@ -1,3 +1,103 @@
+dashboard "oci_kms_key_dashboard" {
+
+  title = "OCI KMS Key Dashboard"
+
+  tags = merge(local.kms_common_tags, {
+    type = "Dashboard"
+  })
+
+  container {
+
+    card {
+      sql   = query.oci_kms_key_count.sql
+      width = 2
+    }
+
+    card {
+      sql   = query.oci_kms_hsm_key_count.sql
+      width = 2
+      type  = "info"
+    }
+
+    card {
+      sql   = query.oci_kms_software_key_count.sql
+      width = 2
+      type  = "info"
+    }
+
+    card {
+      sql   = query.oci_kms_key_disabled_count.sql
+      width = 2
+    }
+
+  }
+
+  container {
+    title = "Assessments"
+
+    chart {
+      title = "Lifecycle State"
+      sql   = query.oci_kms_key_lifecycle_state.sql
+      type  = "donut"
+      width = 3
+
+      series "count" {
+        point "enabled" {
+          color = "ok"
+        }
+        point "disabled" {
+          color = "alert"
+        }
+      }
+    }
+
+    chart {
+      title = "Protection Mode"
+      sql   = query.oci_database_autonomous_db_by_protection_mode.sql
+      type  = "donut"
+      width = 3
+    }
+
+  }
+
+  container {
+    title = "Analysis"
+
+    chart {
+      title = "Keys by Tenancy"
+      sql   = query.oci_kms_key_by_tenancy.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Keys by Compartment"
+      sql   = query.oci_kms_key_by_compartment.sql
+      type  = "column"
+      width = 3
+    }
+
+
+    chart {
+      title = "Keys by Region"
+      sql   = query.oci_kms_key_by_region.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Keys by Age"
+      sql   = query.oci_kms_key_by_creation_month.sql
+      type  = "column"
+      width = 3
+    }
+
+  }
+
+}
+
+# Card Queries
+
 query "oci_kms_key_count" {
   sql = <<-EOQ
     select count(*) as "Keys" from oci_kms_key;
@@ -30,25 +130,7 @@ query "oci_kms_software_key_count" {
   EOQ
 }
 
-# Assessments
-# query "oci_kms_key_lifecycle_state" {
-#   sql = <<-EOQ
-#       with lifecycles as (
-#         select
-#           lifecycle_state
-#         from
-#           oci_kms_key
-#         where lifecycle_state IN ('PENDING_DELETION','DISABLED','ENABLED')
-#         )
-#         select
-#           lifecycle_state,
-#           count(lifecycle_state)
-#         from
-#           lifecycles
-#         group by
-#           lifecycle_state;
-#   EOQ
-# }
+# Assessment Queries
 
 query "oci_kms_key_lifecycle_state" {
   sql = <<-EOQ
@@ -94,7 +176,7 @@ query "oci_database_autonomous_db_by_protection_mode" {
   EOQ
 }
 
-# Analysis
+# Analysis Queries
 
 query "oci_kms_key_by_tenancy" {
   sql = <<-EOQ
@@ -203,103 +285,4 @@ query "oci_kms_key_by_creation_month" {
     order by
       months.month desc;
   EOQ
-}
-
-dashboard "oci_kms_key_summary" {
-
-  title = "OCI KMS Key Dashboard"
-
-  tags = merge(local.kms_common_tags, {
-    type = "Dashboard"
-  })
-
-  container {
-
-    card {
-      sql   = query.oci_kms_key_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_kms_hsm_key_count.sql
-      width = 2
-      type  = "info"
-    }
-
-    card {
-      sql   = query.oci_kms_software_key_count.sql
-      width = 2
-      type  = "info"
-    }
-
-    card {
-      sql   = query.oci_kms_key_disabled_count.sql
-      width = 2
-    }
-
-  }
-
-  container {
-    title = "Assessments"
-    # width = 6
-
-    chart {
-      title = "Lifecycle State"
-      sql   = query.oci_kms_key_lifecycle_state.sql
-      type  = "donut"
-      width = 3
-
-      series "count" {
-        point "enabled" {
-          color = "green"
-        }
-        point "disabled" {
-          color = "red"
-        }
-      }
-    }
-
-    chart {
-      title = "Protection Mode"
-      sql   = query.oci_database_autonomous_db_by_protection_mode.sql
-      type  = "donut"
-      width = 3
-    }
-
-  }
-
-  container {
-    title = "Analysis"
-
-    chart {
-      title = "Keys by Tenancy"
-      sql   = query.oci_kms_key_by_tenancy.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Keys by Compartment"
-      sql   = query.oci_kms_key_by_compartment.sql
-      type  = "column"
-      width = 3
-    }
-
-
-    chart {
-      title = "Keys by Region"
-      sql   = query.oci_kms_key_by_region.sql
-      type  = "column"
-      width = 3
-    }
-
-    chart {
-      title = "Keys by Age"
-      sql   = query.oci_kms_key_by_creation_month.sql
-      type  = "column"
-      width = 3
-    }
-
-  }
-
 }
