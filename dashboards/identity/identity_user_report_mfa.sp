@@ -31,13 +31,16 @@ dashboard "oci_identity_user_mfa_report" {
 query "oci_identity_user_mfa_table" {
   sql = <<-EOQ
       select
-        name as "User",
-        time_created as "Created Time",
-        is_mfa_activated as "mfa status",
-        id as "ID"
+        u.name as "User",
+        u.is_mfa_activated as "mfa status",
+        t.name as "Tenancy",
+        u.id as "ID"
       from
-        oci_identity_user
+        oci_identity_user as u,
+        oci_identity_tenancy as t
+      where
+        t.id = u.tenant_id
       order by
-        is_mfa_activated;
+        u.name;
   EOQ
 }

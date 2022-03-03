@@ -141,7 +141,6 @@ query "oci_identity_customer_secret_key_age_table" {
     where
       t.id = k.tenant_id
     order by
-      k.time_created,
       k.title;
   EOQ
 }

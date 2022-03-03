@@ -120,19 +120,18 @@ query "oci_ons_subscription_1_year" {
 query "oci_ons_subscription_age_table" {
   sql = <<-EOQ
     select
-      v.id as "OCID",
-      now()::date - v.created_time::date as "Age in Days",
-      v.created_time as "Create Time",
-      v.lifecycle_state as "Lifecycle State",
+      s.id as "OCID",
+      now()::date - s.created_time::date as "Age in Days",
+      s.created_time as "Create Time",
+      s.lifecycle_state as "Lifecycle State",
       coalesce(c.title, 'root') as "Compartment",
       t.title as "Tenancy",
-      v.region as "Region"
+      s.region as "Region"
     from
-      oci_ons_subscription as v
-      left join oci_identity_compartment as c on v.compartment_id = c.id
-      left join oci_identity_tenancy as t on v.tenant_id = t.id
+      oci_ons_subscription as s
+      left join oci_identity_compartment as c on s.compartment_id = c.id
+      left join oci_identity_tenancy as t on s.tenant_id = t.id
     order by
-      v.created_time,
-      v.title;
+      s.title;
   EOQ
 }

@@ -29,8 +29,6 @@ query "oci_block_storage_block_volume_faulty_table" {
   sql = <<-EOQ
       select
         v.display_name as "Name",
-        now()::date - v.time_created::date as "Age in Days",
-        v.time_created as "Create Time",
         v.lifecycle_state as "Lifecycle State",
         coalesce(c.title, 'root') as "Compartment",
         t.title as "Tenancy",
@@ -43,7 +41,6 @@ query "oci_block_storage_block_volume_faulty_table" {
       where
         v.lifecycle_state <> 'TERMINATED'
       order by
-        v.time_created,
-        v.title;
+        v.display_name;
   EOQ
 }

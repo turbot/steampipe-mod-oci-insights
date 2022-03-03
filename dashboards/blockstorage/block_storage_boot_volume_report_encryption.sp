@@ -47,8 +47,6 @@ query "oci_block_storage_boot_volume_encryption_table" {
       select
         v.display_name as "Name",
         case when v.kms_key_id is not null then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
-        now()::date - v.time_created::date as "Age in Days",
-        v.time_created as "Create Time",
         v.lifecycle_state as "Lifecycle State",
         coalesce(c.title, 'root') as "Compartment",
         t.title as "Tenancy",
@@ -61,7 +59,6 @@ query "oci_block_storage_boot_volume_encryption_table" {
       where
         v.lifecycle_state <> 'TERMINATED'
       order by
-        v.time_created,
-        v.title;
+        v.display_name;
   EOQ
 }

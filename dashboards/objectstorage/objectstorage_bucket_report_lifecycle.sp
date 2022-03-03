@@ -30,21 +30,17 @@ dashboard "oci_objectstorage_bucket_lifecycle_report" {
 query "oci_objectstorage_bucket_lifecycle_table" {
   sql = <<-EOQ
       select
-        v.name as "Name",
-        v.versioning as "Versioning",
-        v.time_created as "Create Time",
+        b.name as "Name",
+        b.versioning as "Versioning",
         coalesce(c.title, 'root') as "Compartment",
         t.title as "Tenancy",
-        v.region as "Region",
-        v.id as "OCID"
+        b.region as "Region",
+        b.id as "OCID"
       from
-        oci_objectstorage_bucket as v
-        left join oci_identity_compartment as c on v.compartment_id = c.id
-        left join oci_identity_tenancy as t on v.tenant_id = t.id
-      where
-        v.versioning = 'Disabled'
+        oci_objectstorage_bucket as b
+        left join oci_identity_compartment as c on b.compartment_id = c.id
+        left join oci_identity_tenancy as t on b.tenant_id = t.id
       order by
-        v.time_created,
-        v.title;
+        b.name;
   EOQ
 }

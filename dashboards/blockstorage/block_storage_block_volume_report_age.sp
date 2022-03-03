@@ -137,7 +137,6 @@ query "oci_block_storage_block_volume_age_table" {
     where
       v.lifecycle_state <> 'TERMINATED'
     order by
-      v.time_created,
-      v.title;
+      v.display_name;
   EOQ
 }

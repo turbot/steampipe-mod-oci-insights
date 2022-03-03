@@ -136,7 +136,6 @@ query "oci_database_autonomous_database_age_table" {
     where
       d.lifecycle_state <> 'TERMINATED'
     order by
-      d.time_created,
-      d.title;
+      d.display_name;
   EOQ
 }

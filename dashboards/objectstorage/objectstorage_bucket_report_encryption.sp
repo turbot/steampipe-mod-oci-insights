@@ -45,19 +45,17 @@ query "oci_objectstorage_bucket_report_customer_managed_encryption_count" {
 query "oci_objectstorage_bucket_encryption_table" {
   sql = <<-EOQ
       select
-        v.name as "Name",
-        case when v.kms_key_id is not null then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
-        v.time_created as "Create Time",
+        b.name as "Name",
+        case when b.kms_key_id is not null then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
         coalesce(c.title, 'root') as "Compartment",
         t.title as "Tenancy",
-        v.region as "Region",
-        v.id as "OCID"
+        b.region as "Region",
+        b.id as "OCID"
       from
-        oci_objectstorage_bucket as v
-        left join oci_identity_compartment as c on v.compartment_id = c.id
-        left join oci_identity_tenancy as t on v.tenant_id = t.id
+        oci_objectstorage_bucket as b
+        left join oci_identity_compartment as c on b.compartment_id = c.id
+        left join oci_identity_tenancy as t on b.tenant_id = t.id
       order by
-        v.time_created,
-        v.title;
+        b.name;
   EOQ
 }
