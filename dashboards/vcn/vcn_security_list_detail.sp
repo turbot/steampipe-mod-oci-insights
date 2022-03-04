@@ -53,22 +53,7 @@ dashboard "oci_vcn_security_list_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-
-        sql = <<-EOQ
-          select
-            display_name as "Name",
-            time_created as "Time Created",
-            region as "Region",
-            id as "OCID",
-            compartment_id as "Compartment ID"
-          from
-            oci_core_security_list
-          where
-           id = $1 and lifecycle_state <> 'TERMINATED';
-        EOQ
-
-        param "id" {}
-
+        query = query.oci_vcn_security_list_overview
         args = {
           id = self.input.security_list_id.value
         }
@@ -78,28 +63,7 @@ dashboard "oci_vcn_security_list_detail" {
       table {
         title = "Tags"
         width = 6
-
-        sql = <<-EOQ
-          with jsondata as (
-            select
-              tags::json as tags
-            from
-              oci_core_security_list
-            where
-              id = $1 and lifecycle_state <> 'TERMINATED'
-          )
-          select
-            key as "Key",
-            value as "Value"
-          from
-            jsondata,
-            json_each_text(tags)
-          order by
-            key;
-        EOQ
-
-        param "id" {}
-
+        query = query.oci_vcn_security_list_tag
         args = {
           id = self.input.security_list_id.value
         }
@@ -114,20 +78,7 @@ dashboard "oci_vcn_security_list_detail" {
 
       table {
         title = "Ingress Rules"
-        sql   = <<-EOQ
-          select
-            r ->> 'protocol' as "Protocol",
-            r ->> 'source' as "Source",
-            r ->> 'isStateless' as "Stateless"
-          from
-            oci_core_security_list,
-            jsonb_array_elements(ingress_security_rules) as r
-          where
-           id  = $1 and lifecycle_state <> 'TERMINATED';
-        EOQ
-
-        param "id" {}
-
+        query = query.oci_vcn_network_security_list_ingress_rule
         args = {
           id = self.input.security_list_id.value
         }
@@ -135,20 +86,7 @@ dashboard "oci_vcn_security_list_detail" {
 
       table {
         title = "Egress Rules"
-        sql   = <<-EOQ
-          select
-            r ->> 'protocol' as "Protocol",
-            r ->> 'destination' as "Destination",
-            r ->> 'isStateless' as "Stateless"
-          from
-            oci_core_security_list,
-            jsonb_array_elements(egress_security_rules) as r
-          where
-           id  = $1 and lifecycle_state <> 'TERMINATED';
-        EOQ
-
-        param "id" {}
-
+        query = query.oci_vcn_network_security_list_egress_rule
         args = {
           id = self.input.security_list_id.value
         }
@@ -256,6 +194,78 @@ query "oci_vcn_security_list_ingress_rdp" {
         left join non_compliant_rules on non_compliant_rules.id = sl.id
       where
         sl.id = $1 and sl.lifecycle_state <> 'TERMINATED';
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_vcn_security_list_overview" {
+  sql = <<-EOQ
+    select
+      display_name as "Name",
+      time_created as "Time Created",
+      region as "Region",
+      id as "OCID",
+      compartment_id as "Compartment ID"
+    from
+      oci_core_security_list
+    where
+      id = $1 and lifecycle_state <> 'TERMINATED';
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_vcn_security_list_tag" {
+  sql = <<-EOQ
+    with jsondata as (
+      select
+        tags::json as tags
+      from
+        oci_core_security_list
+      where
+        id = $1 and lifecycle_state <> 'TERMINATED'
+    )
+    select
+      key as "Key",
+      value as "Value"
+    from
+      jsondata,
+      json_each_text(tags)
+    order by
+      key;
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_vcn_network_security_list_ingress_rule" {
+  sql = <<-EOQ
+    select
+      r ->> 'protocol' as "Protocol",
+      r ->> 'source' as "Source",
+      r ->> 'isStateless' as "Stateless"
+    from
+      oci_core_security_list,
+      jsonb_array_elements(ingress_security_rules) as r
+    where
+      id  = $1 and lifecycle_state <> 'TERMINATED';
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_vcn_network_security_list_egress_rule" {
+  sql = <<-EOQ
+    select
+      r ->> 'protocol' as "Protocol",
+      r ->> 'destination' as "Destination",
+      r ->> 'isStateless' as "Stateless"
+    from
+      oci_core_security_list,
+      jsonb_array_elements(egress_security_rules) as r
+    where
+      id  = $1 and lifecycle_state <> 'TERMINATED';
   EOQ
 
   param "id" {}

@@ -41,22 +41,7 @@ dashboard "oci_vcn_subnet_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-        sql   = <<-EOQ
-          select
-            display_name as "Name",
-            time_created as "Time Created",
-            subnet_domain_name as "Subnet Domain Name",
-            region as "Region",
-            id as "OCID",
-            compartment_id as "Compartment ID"
-          from
-            oci_core_subnet
-          where
-           id = $1 and lifecycle_state <> 'TERMINATED';
-        EOQ
-
-        param "id" {}
-
+        query = query.oci_vcn_subnet_overview
         args = {
           id = self.input.subnet_id.value
         }
@@ -66,27 +51,7 @@ dashboard "oci_vcn_subnet_detail" {
       table {
         title = "Tags"
         width = 6
-        sql   = <<-EOQ
-          with jsondata as (
-            select
-              tags::json as tags
-            from
-              oci_core_subnet
-            where
-              id = $1 and lifecycle_state <> 'TERMINATED'
-          )
-          select
-            key as "Key",
-            value as "Value"
-          from
-            jsondata,
-            json_each_text(tags)
-          order by
-            key;
-        EOQ
-
-        param "id" {}
-
+        query = query.oci_vcn_subnet_tag
         args = {
           id = self.input.subnet_id.value
         }
@@ -99,19 +64,7 @@ dashboard "oci_vcn_subnet_detail" {
 
       table {
         title = "IPv4 CIDR Block"
-        sql   = <<-EOQ
-          select
-            display_name as "Name",
-            time_created as "Time Created",
-            cidr_block as "CIDR Block"
-          from
-            oci_core_subnet
-          where
-           id  = $1 and lifecycle_state <> 'TERMINATED';
-        EOQ
-
-        param "id" {}
-
+        query = query.oci_vcn_subnet_ipv6_cidr_block
         args = {
           id = self.input.subnet_id.value
         }
@@ -119,19 +72,7 @@ dashboard "oci_vcn_subnet_detail" {
 
       table {
         title = "IPv6 CIDR Block"
-        sql   = <<-EOQ
-          select
-            display_name as "Name",
-            time_created as "Time Created",
-            ipv6_cidr_block as "IPv6 CIDR Block"
-          from
-            oci_core_subnet
-          where
-           id  = $1 and lifecycle_state <> 'TERMINATED';
-        EOQ
-
-        param "id" {}
-
+        query = query.oci_vcn_subnet_ipv6_cidr_block
         args = {
           id = self.input.subnet_id.value
         }
@@ -153,6 +94,47 @@ query "oci_vcn_subnet_input" {
     order by
       id;
 EOQ
+}
+
+query "oci_vcn_subnet_overview" {
+  sql = <<-EOQ
+    select
+      display_name as "Name",
+      time_created as "Time Created",
+      subnet_domain_name as "Subnet Domain Name",
+      region as "Region",
+      id as "OCID",
+      compartment_id as "Compartment ID"
+    from
+      oci_core_subnet
+    where
+      id = $1 and lifecycle_state <> 'TERMINATED';
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_vcn_subnet_tag" {
+  sql = <<-EOQ
+    with jsondata as (
+      select
+        tags::json as tags
+      from
+        oci_core_subnet
+      where
+        id = $1 and lifecycle_state <> 'TERMINATED'
+    )
+    select
+      key as "Key",
+      value as "Value"
+    from
+      jsondata,
+      json_each_text(tags)
+    order by
+      key;
+  EOQ
+
+  param "id" {}
 }
 
 query "oci_vcn_subnet_name" {
@@ -180,6 +162,36 @@ query "oci_vcn_subnet_flow_log" {
       on s.id = l.configuration -> 'source' ->> 'resource'
     where
       s.id = $1 and s.lifecycle_state <> 'TERMINATED';
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_vcn_subnet_ipv4_cidr_block" {
+  sql = <<-EOQ
+    select
+      display_name as "Name",
+      time_created as "Time Created",
+      cidr_block as "CIDR Block"
+    from
+      oci_core_subnet
+    where
+      id  = $1 and lifecycle_state <> 'TERMINATED';
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_vcn_subnet_ipv6_cidr_block" {
+  sql = <<-EOQ
+    select
+      display_name as "Name",
+      time_created as "Time Created",
+      ipv6_cidr_block as "IPv6 CIDR Block"
+    from
+      oci_core_subnet
+    where
+      id  = $1 and lifecycle_state <> 'TERMINATED';
   EOQ
 
   param "id" {}

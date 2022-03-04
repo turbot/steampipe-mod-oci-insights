@@ -17,7 +17,7 @@ dashboard "oci_vcn_network_security_group_detail" {
     card {
       width = 2
 
-      query = query.oci_vcn_network_security_group_name_for_security_group
+      query = query.oci_vcn_network_security_group_name
       args = {
         id = self.input.security_group_id.value
       }
@@ -26,7 +26,7 @@ dashboard "oci_vcn_network_security_group_detail" {
     card {
       width = 2
 
-      query = query.oci_vcn_network_security_group_ingress_ssh_for_security_group
+      query = query.oci_vcn_network_security_group_ingress_ssh
       args = {
         id = self.input.security_group_id.value
       }
@@ -35,7 +35,7 @@ dashboard "oci_vcn_network_security_group_detail" {
     card {
       width = 2
 
-      query = query.oci_vcn_network_security_group_ingress_rdp_for_security_group
+      query = query.oci_vcn_network_security_group_ingress_rdp
       args = {
         id = self.input.security_group_id.value
       }
@@ -53,22 +53,7 @@ dashboard "oci_vcn_network_security_group_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-
-        sql = <<-EOQ
-          select
-            display_name as "Name",
-            time_created as "Time Created",
-            region as "Region",
-            id as "OCID",
-            compartment_id as "Compartment ID"
-          from
-            oci_core_network_security_group
-          where
-           id = $1 and lifecycle_state <> 'TERMINATED';
-        EOQ
-
-        param "id" {}
-
+        query = query.oci_vcn_network_security_group_overview
         args = {
           id = self.input.security_group_id.value
         }
@@ -79,27 +64,7 @@ dashboard "oci_vcn_network_security_group_detail" {
         title = "Tags"
         width = 6
 
-        sql = <<-EOQ
-          with jsondata as (
-            select
-              tags::json as tags
-            from
-              oci_core_network_security_group
-            where
-              id = $1 and lifecycle_state <> 'TERMINATED'
-          )
-          select
-            key as "Key",
-            value as "Value"
-          from
-            jsondata,
-            json_each_text(tags)
-          order by
-            key;
-        EOQ
-
-        param "id" {}
-
+        query = query.oci_vcn_network_security_group_tag
         args = {
           id = self.input.security_group_id.value
         }
@@ -113,22 +78,7 @@ dashboard "oci_vcn_network_security_group_detail" {
 
       table {
         title = "Ingress Rules"
-        sql   = <<-EOQ
-          select
-            r ->> 'protocol' as "Protocol",
-            r ->> 'source' as "Source",
-            r ->> 'isStateless' as "Stateless",
-            r ->> 'isValid' as "Valid"
-          from
-            oci_core_network_security_group,
-            jsonb_array_elements(rules) as r
-          where
-          r ->> 'direction' = 'INGRESS' and
-           id  = $1 and lifecycle_state <> 'TERMINATED';
-        EOQ
-
-        param "id" {}
-
+        query = query.oci_vcn_network_security_group_ingress_rule
         args = {
           id = self.input.security_group_id.value
         }
@@ -136,22 +86,7 @@ dashboard "oci_vcn_network_security_group_detail" {
 
       table {
         title = "Egress Rules"
-        sql   = <<-EOQ
-          select
-            r ->> 'protocol' as "Protocol",
-            r ->> 'destination' as "Destination",
-            r ->> 'isStateless' as "Stateless",
-            r ->> 'isValid' as "Valid"
-          from
-            oci_core_network_security_group,
-            jsonb_array_elements(rules) as r
-          where
-           r ->> 'direction' = 'EGRESS' and
-           id  = $1 and lifecycle_state <> 'TERMINATED';
-        EOQ
-
-        param "id" {}
-
+        query = query.oci_vcn_network_security_group_egress_rule
         args = {
           id = self.input.security_group_id.value
         }
@@ -177,7 +112,7 @@ query "oci_vcn_network_security_group_input" {
   EOQ
 }
 
-query "oci_vcn_network_security_group_name_for_security_group" {
+query "oci_vcn_network_security_group_name" {
   sql = <<-EOQ
     select
       display_name as "Security Group"
@@ -190,7 +125,7 @@ query "oci_vcn_network_security_group_name_for_security_group" {
   param "id" {}
 }
 
-query "oci_vcn_network_security_group_ingress_ssh_for_security_group" {
+query "oci_vcn_network_security_group_ingress_ssh" {
   sql = <<-EOQ
     with non_compliant_rules as (
       select
@@ -227,7 +162,7 @@ query "oci_vcn_network_security_group_ingress_ssh_for_security_group" {
   param "id" {}
 }
 
-query "oci_vcn_network_security_group_ingress_rdp_for_security_group" {
+query "oci_vcn_network_security_group_ingress_rdp" {
   sql = <<-EOQ
     with non_compliant_rules as (
       select
@@ -259,6 +194,82 @@ query "oci_vcn_network_security_group_ingress_rdp_for_security_group" {
         left join non_compliant_rules on non_compliant_rules.id = nsg.id
       where
         nsg.id = $1 and nsg.lifecycle_state <> 'TERMINATED';
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_vcn_network_security_group_overview" {
+  sql = <<-EOQ
+    select
+      display_name as "Name",
+      time_created as "Time Created",
+      region as "Region",
+      id as "OCID",
+      compartment_id as "Compartment ID"
+    from
+      oci_core_network_security_group
+    where
+      id = $1 and lifecycle_state <> 'TERMINATED';
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_vcn_network_security_group_tag" {
+  sql = <<-EOQ
+    with jsondata as (
+      select
+        tags::json as tags
+      from
+        oci_core_network_security_group
+      where
+        id = $1 and lifecycle_state <> 'TERMINATED'
+    )
+    select
+      key as "Key",
+      value as "Value"
+    from
+      jsondata,
+      json_each_text(tags)
+    order by
+      key;
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_vcn_network_security_group_ingress_rule" {
+  sql = <<-EOQ
+    select
+      r ->> 'protocol' as "Protocol",
+      r ->> 'source' as "Source",
+      r ->> 'isStateless' as "Stateless",
+      r ->> 'isValid' as "Valid"
+    from
+      oci_core_network_security_group,
+      jsonb_array_elements(rules) as r
+    where
+    r ->> 'direction' = 'INGRESS' and
+      id  = $1 and lifecycle_state <> 'TERMINATED';
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_vcn_network_security_group_egress_rule" {
+  sql = <<-EOQ
+    select
+      r ->> 'protocol' as "Protocol",
+      r ->> 'destination' as "Destination",
+      r ->> 'isStateless' as "Stateless",
+      r ->> 'isValid' as "Valid"
+    from
+      oci_core_network_security_group,
+      jsonb_array_elements(rules) as r
+    where
+      r ->> 'direction' = 'EGRESS' and
+      id  = $1 and lifecycle_state <> 'TERMINATED';
   EOQ
 
   param "id" {}
