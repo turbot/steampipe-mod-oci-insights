@@ -242,7 +242,7 @@ query "oci_block_storage_block_volume_with_backups" {
   sql = <<-EOQ
     select
       case when b.id is null then 'disabled' else 'enabled' end as status,
-      count(*)
+      count(distinct v.id)
     from
       oci_core_volume as v
       left join oci_core_volume_backup as b on v.id = b.volume_id
