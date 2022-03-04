@@ -107,8 +107,8 @@ query "oci_core_vcn_no_subnet" {
       case when s.id is null then 'no_subnet' else 'has_subnet' end as status,
       count(*)
     from
-      oci_core_vcn v
-      left join oci_core_subnet s on v.id = s.vcn_id
+       oci_core_subnet s
+      left join oci_core_vcn v on s.vcn_id = v.id
     where
       v.lifecycle_state <> 'TERMINATED'
     group by
