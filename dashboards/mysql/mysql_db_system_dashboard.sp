@@ -272,7 +272,7 @@ query "oci_mysql_db_system_with_backups" {
   sql = <<-EOQ
     select
       case when b.id is null then 'disabled' else 'enabled' end as status,
-      count(*)
+      count(distinct s.id)
     from
       oci_mysql_db_system as s
       left join oci_mysql_backup as b on s.id = b.db_system_id
