@@ -62,7 +62,7 @@ query "oci_objectstorage_bucket_logging_table" {
     )
     select
       b.name as "Name",
-      case when n.is_enabled then 'Enabled' else 'Disabled' end as "Logging Status",
+      case when n.is_enabled then 'Enabled' else null end as "Logging Status",
       coalesce(c.title, 'root') as "Compartment",
       t.title as "Tenancy",
       b.region as "Region",
