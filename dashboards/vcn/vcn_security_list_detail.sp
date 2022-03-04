@@ -53,22 +53,7 @@ dashboard "oci_vcn_security_list_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-
-        sql = <<-EOQ
-          select
-            display_name as "Name",
-            time_created as "Time Created",
-            region as "Region",
-            id as "OCID",
-            compartment_id as "Compartment ID"
-          from
-            oci_core_security_list
-          where
-           id = $1 and lifecycle_state <> 'TERMINATED';
-        EOQ
-
-        param "id" {}
-
+        query = query.oci_vcn_security_list_overview
         args = {
           id = self.input.security_list_id.value
         }
@@ -78,28 +63,7 @@ dashboard "oci_vcn_security_list_detail" {
       table {
         title = "Tags"
         width = 6
-
-        sql = <<-EOQ
-          with jsondata as (
-            select
-              tags::json as tags
-            from
-              oci_core_security_list
-            where
-              id = $1 and lifecycle_state <> 'TERMINATED'
-          )
-          select
-            key as "Key",
-            value as "Value"
-          from
-            jsondata,
-            json_each_text(tags)
-          order by
-            key;
-        EOQ
-
-        param "id" {}
-
+        query = query.oci_vcn_security_list_tag
         args = {
           id = self.input.security_list_id.value
         }
@@ -174,6 +138,46 @@ query "oci_vcn_security_list_input" {
 EOQ
 }
 
+query "oci_vcn_security_list_overview" {
+  sql = <<-EOQ
+    select
+      display_name as "Name",
+      time_created as "Time Created",
+      region as "Region",
+      id as "OCID",
+      compartment_id as "Compartment ID"
+    from
+      oci_core_security_list
+    where
+      id = $1 and lifecycle_state <> 'TERMINATED';
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_vcn_security_list_tag" {
+  sql = <<-EOQ
+    with jsondata as (
+      select
+        tags::json as tags
+      from
+        oci_core_security_list
+      where
+        id = $1 and lifecycle_state <> 'TERMINATED'
+    )
+    select
+      key as "Key",
+      value as "Value"
+    from
+      jsondata,
+      json_each_text(tags)
+    order by
+      key;
+  EOQ
+
+  param "id" {}
+}
+
 query "oci_vcn_security_list_name" {
   sql = <<-EOQ
     select
@@ -211,7 +215,7 @@ query "oci_vcn_security_list_ingress_ssh" {
       group by id
       )
       select
-        case when non_compliant_rules.id is null then 'RESTRICTED' else 'UNRESTRICTED' end as value,
+        case when non_compliant_rules.id is null then 'Restricted' else 'Unrestricted' end as value,
         'Ingress RDP' as label,
         case when non_compliant_rules.id is null then 'ok' else 'alert' end as type
       from
@@ -248,7 +252,7 @@ query "oci_vcn_security_list_ingress_rdp" {
       group by id
       )
       select
-        case when non_compliant_rules.id is null then 'RESTRICTED' else 'UNRESTRICTED' end as value,
+        case when non_compliant_rules.id is null then 'Restricted' else 'Unrestricted' end as value,
         'Ingress RDP' as label,
         case when non_compliant_rules.id is null then 'ok' else 'alert' end as type
       from
