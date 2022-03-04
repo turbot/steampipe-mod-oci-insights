@@ -83,8 +83,11 @@ dashboard "oci_database_autonomous_db_dashboard" {
       width = 3
 
       series "count" {
-        point "AVAILABLE_NEEDS_ATTENTION" {
+        point "need_attention" {
           color = "alert"
+        }
+        point "ok" {
+          color = "ok"
         }
       }
     }
@@ -219,15 +222,29 @@ query "oci_database_autonomous_database_need_attention_count" {
 
 # Assessment Queries
 
+# query "oci_database_autonomous_db_by_state" {
+#   sql = <<-EOQ
+#     select
+#       lifecycle_state,
+#       count(lifecycle_state)
+#     from
+#       oci_database_autonomous_database
+#     group by
+#       lifecycle_state;
+#   EOQ
+# }
+
 query "oci_database_autonomous_db_by_state" {
   sql = <<-EOQ
     select
-      lifecycle_state,
-      count(lifecycle_state)
+      case when lifecycle_state = 'AVAILABLE_NEEDS_ATTENTION' then 'need_attention' else 'ok' end as status,
+      count(*)
     from
       oci_database_autonomous_database
+    where
+      lifecycle_state <> 'TERMINATED'
     group by
-      lifecycle_state;
+      status;
   EOQ
 }
 

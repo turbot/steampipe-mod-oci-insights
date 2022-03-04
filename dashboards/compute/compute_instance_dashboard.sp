@@ -30,13 +30,6 @@ dashboard "oci_compute_instance_dashboard" {
     title = "Assesments"
 
     chart {
-      title = "Lifecycle State"
-      sql   = query.oci_compute_instance_by_state.sql
-      type  = "donut"
-      width = 3
-    }
-
-    chart {
       title = "Public/Private"
       sql   = query.oci_compute_instance_by_public_ip.sql
       type  = "donut"
@@ -158,20 +151,6 @@ query "oci_compute_instance_public_instance_count" {
 }
 
 # Assesments Queries
-
-query "oci_compute_instance_by_state" {
-  sql = <<-EOQ
-    select
-      lifecycle_state,
-      count(lifecycle_state)
-    from
-      oci_core_instance
-    where
-      lifecycle_state <> 'TERMINATED'
-    group by
-      lifecycle_state;
-  EOQ
-}
 
 query "oci_compute_instance_by_public_ip" {
   sql = <<-EOQ

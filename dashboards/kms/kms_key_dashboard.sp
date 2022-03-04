@@ -35,9 +35,9 @@ dashboard "oci_kms_key_dashboard" {
       width = 3
 
       series "count" {
-        # point "enabled" {
-        #   color = "ok"
-        # }
+        point "ok" {
+          color = "ok"
+        }
         point "disabled" {
           color = "alert"
         }
@@ -79,7 +79,7 @@ dashboard "oci_kms_key_dashboard" {
     }
 
     chart {
-      title = "Keys By Protection Mode"
+      title = "Keys by Protection Mode"
       sql   = query.oci_database_autonomous_db_by_protection_mode.sql
       type  = "column"
       width = 3
@@ -122,14 +122,14 @@ query "oci_kms_hsm_key_count" {
 query "oci_kms_key_lifecycle_state" {
   sql = <<-EOQ
     select
-      lower(lifecycle_state),
-      count(lifecycle_state)
+      case when lifecycle_state = 'DISABLED' then 'disabled' else 'ok' end as status,
+      count(*)
     from
       oci_kms_key
     where
       lifecycle_state <> 'DELETED'
     group by
-      lifecycle_state;
+      status;
   EOQ
 }
 

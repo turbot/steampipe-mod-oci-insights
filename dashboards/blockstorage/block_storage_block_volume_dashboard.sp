@@ -40,21 +40,17 @@ dashboard "oci_block_storage_block_volume_dashboard" {
     title = "Assessments"
 
     chart {
-      title = "Encryption Status"
-      sql   = query.oci_block_storage_block_volume_by_encryption_status.sql
-      type  = "donut"
-      width = 3
-    }
-
-    chart {
       title = "Lifecycle State"
       sql   = query.oci_block_storage_block_volume_by_lifecycle_state.sql
       type  = "donut"
       width = 3
 
       series "count" {
-        point "FAULTY" {
+        point "faulty" {
           color = "alert"
+        }
+        point "ok" {
+          color = "ok"
         }
       }
 
@@ -106,6 +102,13 @@ dashboard "oci_block_storage_block_volume_dashboard" {
     chart {
       title = "Block Volume by Age"
       sql   = query.oci_block_storage_block_volume_by_creation_month.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Encryption Status by Type"
+      sql   = query.oci_block_storage_block_volume_by_encryption_status.sql
       type  = "column"
       width = 3
     }
@@ -221,40 +224,17 @@ query "oci_block_storage_block_volume_with_no_backups_count" {
 
 # Assessment Queries
 
-query "oci_block_storage_block_volume_by_encryption_status" {
-  sql = <<-EOQ
-    select
-      encryption_status,
-      count(*)
-    from (
-      select
-        id,
-        case
-          when kms_key_id is null then 'oci_managed'
-          else 'customer_managed'
-        end as encryption_status
-      from
-        oci_core_volume
-      where
-      lifecycle_state <> 'TERMINATED') as v
-    group by
-      encryption_status
-    order by
-      encryption_status desc;
-  EOQ
-}
-
 query "oci_block_storage_block_volume_by_lifecycle_state" {
   sql = <<-EOQ
     select
-      lifecycle_state,
-      count(lifecycle_state)
+      case when lifecycle_state = 'FAULTY' then 'faulty' else 'ok' end as status,
+      count(*)
     from
       oci_core_volume
     where
       lifecycle_state <> 'TERMINATED'
     group by
-      lifecycle_state;
+      status;
   EOQ
 }
 
@@ -499,5 +479,28 @@ query "oci_block_storage_block_volume_storage_by_creation_month" {
       left join volumes_by_month on months.month = volumes_by_month.creation_month
     order by
       months.month;
+  EOQ
+}
+
+query "oci_block_storage_block_volume_by_encryption_status" {
+  sql = <<-EOQ
+    select
+      encryption_status,
+      count(*)
+    from (
+      select
+        id,
+        case
+          when kms_key_id is null then 'oci_managed'
+          else 'customer_managed'
+        end as encryption_status
+      from
+        oci_core_volume
+      where
+      lifecycle_state <> 'TERMINATED') as v
+    group by
+      encryption_status
+    order by
+      encryption_status desc;
   EOQ
 }
