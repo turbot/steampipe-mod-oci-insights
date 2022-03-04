@@ -30,10 +30,10 @@ dashboard "oci_ons_subscription_dashboard" {
       width = 3
 
       series "count" {
-        point "ACTIVE" {
+        point "in_use" {
           color = "ok"
         }
-        point "PENDING" {
+        point "unused" {
           color = "alert"
         }
       }
@@ -102,14 +102,14 @@ query "oci_ons_subscription_unused_count" {
 query "oci_ons_subscription_by_lifecycle_state" {
   sql = <<-EOQ
     select
-      lifecycle_state,
+      case when lifecycle_state = 'PENDING' then 'unused' else 'in_use' end as status,
       count(lifecycle_state)
     from
       oci_ons_subscription
     where
       lifecycle_state <> 'DELETED'
     group by
-      lifecycle_state;
+      status;
   EOQ
 }
 

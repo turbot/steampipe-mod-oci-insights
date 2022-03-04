@@ -45,10 +45,10 @@ dashboard "oci_mysql_backup_dashboard" {
       type  = "donut"
 
       series "count" {
-        point "ACTIVE" {
+        point "not_failed" {
           color = "ok"
         }
-        point "FAILED" {
+        point "failed" {
           color = "alert"
         }
       }
@@ -192,14 +192,14 @@ query "oci_mysql_backup_failed_lifecycle_count" {
 query "oci_mysql_backup_by_lifecycle_state" {
   sql = <<-EOQ
     select
-      lifecycle_state,
-      count(lifecycle_state)
+      case when lifecycle_state = 'FAILED' then 'failed' else 'not_failed' end as status,
+      count(*)
     from
       oci_mysql_backup
     where
       lifecycle_state <> 'DELETED'
     group by
-      lifecycle_state;
+      status;
   EOQ
 }
 

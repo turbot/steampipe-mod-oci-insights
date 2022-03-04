@@ -30,6 +30,14 @@ dashboard "oci_core_vcn_dashboard" {
       type  = "donut"
       width = 3
 
+      series "count" {
+        point "has_subnet" {
+          color = "ok"
+        }
+        point "no_subnet" {
+          color = "alert"
+        }
+      }
     }
 
   }
@@ -96,14 +104,15 @@ query "oci_core_vcn_no_subnet_count" {
 query "oci_core_vcn_no_subnet" {
   sql = <<-EOQ
     select
-      display_name,
-      count(display_name)
+      case when s.id is null then 'no_subnet' else 'has_subnet' end as status,
+      count(*)
     from
-      oci_core_vcn as vcn
+      oci_core_vcn v
+      left join oci_core_subnet s on v.id = s.vcn_id
     where
-      vcn.id not in (select vcn_id from oci_core_subnet) and lifecycle_state <> 'TERMINATED'
+      v.lifecycle_state <> 'TERMINATED'
     group by
-      display_name;
+      status;
   EOQ
 }
 

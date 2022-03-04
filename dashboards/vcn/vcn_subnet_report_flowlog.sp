@@ -32,8 +32,8 @@ query "oci_vcn_subnet_flowlog_table" {
       select
         s.display_name as "Name",
         case
-          when l.is_enabled is null or not l.is_enabled then 'DISABLED'
-          else 'ENABLED'
+          when l.is_enabled is null or not l.is_enabled then 'Disabled'
+          else 'Enabled'
         end as "Flow Log Status",
         s.lifecycle_state as "Lifecycle State",
         coalesce(c.title, 'root') as "Compartment",

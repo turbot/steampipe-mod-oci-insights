@@ -44,13 +44,6 @@ dashboard "oci_objectstorage_bucket_dashboard" {
     title = "Assessments"
 
     chart {
-      title = "Encryption Status"
-      sql   = query.oci_objectstorage_bucket_encryption_status.sql
-      type  = "donut"
-      width = 3
-    }
-
-    chart {
       title = "Versioning Status"
       sql   = query.oci_objectstorage_bucket_versioning_status.sql
       type  = "donut"
@@ -68,7 +61,7 @@ dashboard "oci_objectstorage_bucket_dashboard" {
 
 
     chart {
-      title = "Public Access Type"
+      title = "Public Access"
       sql   = query.oci_objectstorage_bucket_public_access_status.sql
       type  = "donut"
       width = 3
@@ -185,27 +178,6 @@ query "oci_objectstorage_bucket_versioning_disabled_count" {
 }
 
 # Assessment Queries
-
-query "oci_objectstorage_bucket_encryption_status" {
-  sql = <<-EOQ
-    select
-      encryption_status,
-      count(*)
-    from (
-      select
-        id,
-        case
-         when kms_key_id is null then 'oci_managed'
-         else 'customer_managed'
-         end as encryption_status
-      from
-        oci_objectstorage_bucket) as b
-    group by
-      encryption_status
-    order by
-      encryption_status desc;
-  EOQ
-}
 
 query "oci_objectstorage_bucket_versioning_status" {
   sql = <<-EOQ

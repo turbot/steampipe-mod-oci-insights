@@ -41,7 +41,7 @@ dashboard "oci_vcn_subnet_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-        sql = <<-EOQ
+        sql   = <<-EOQ
           select
             display_name as "Name",
             time_created as "Time Created",
@@ -66,7 +66,7 @@ dashboard "oci_vcn_subnet_detail" {
       table {
         title = "Tags"
         width = 6
-        sql = <<-EOQ
+        sql   = <<-EOQ
           with jsondata as (
             select
               tags::json as tags
@@ -171,7 +171,7 @@ query "oci_vcn_subnet_name" {
 query "oci_vcn_subnet_flow_log" {
   sql = <<-EOQ
     select
-      case when is_enabled then 'ENABLED' else 'DISABLED' end as value,
+      case when is_enabled then 'Enabled' else 'Disabled' end as value,
       'Flow Log' as label,
       case when is_enabled then 'ok' else 'alert' end as type
     from
