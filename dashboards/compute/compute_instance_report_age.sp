@@ -14,7 +14,6 @@ dashboard "oci_compute_instance_age_report" {
       width = 2
     }
 
-
     card {
       sql   = query.oci_compute_instance_24_hrs.sql
       width = 2
