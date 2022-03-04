@@ -64,19 +64,7 @@ dashboard "oci_vcn_subnet_detail" {
 
       table {
         title = "IPv4 CIDR Block"
-        sql   = <<-EOQ
-          select
-            display_name as "Name",
-            time_created as "Time Created",
-            cidr_block as "CIDR Block"
-          from
-            oci_core_subnet
-          where
-           id  = $1 and lifecycle_state <> 'TERMINATED';
-        EOQ
-
-        param "id" {}
-
+        query = query.oci_vcn_subnet_ipv6_cidr_block
         args = {
           id = self.input.subnet_id.value
         }
@@ -84,19 +72,7 @@ dashboard "oci_vcn_subnet_detail" {
 
       table {
         title = "IPv6 CIDR Block"
-        sql   = <<-EOQ
-          select
-            display_name as "Name",
-            time_created as "Time Created",
-            ipv6_cidr_block as "IPv6 CIDR Block"
-          from
-            oci_core_subnet
-          where
-           id  = $1 and lifecycle_state <> 'TERMINATED';
-        EOQ
-
-        param "id" {}
-
+        query = query.oci_vcn_subnet_ipv6_cidr_block
         args = {
           id = self.input.subnet_id.value
         }
@@ -186,6 +162,36 @@ query "oci_vcn_subnet_flow_log" {
       on s.id = l.configuration -> 'source' ->> 'resource'
     where
       s.id = $1 and s.lifecycle_state <> 'TERMINATED';
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_vcn_subnet_ipv4_cidr_block" {
+  sql = <<-EOQ
+    select
+      display_name as "Name",
+      time_created as "Time Created",
+      cidr_block as "CIDR Block"
+    from
+      oci_core_subnet
+    where
+      id  = $1 and lifecycle_state <> 'TERMINATED';
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_vcn_subnet_ipv6_cidr_block" {
+  sql = <<-EOQ
+    select
+      display_name as "Name",
+      time_created as "Time Created",
+      ipv6_cidr_block as "IPv6 CIDR Block"
+    from
+      oci_core_subnet
+    where
+      id  = $1 and lifecycle_state <> 'TERMINATED';
   EOQ
 
   param "id" {}
