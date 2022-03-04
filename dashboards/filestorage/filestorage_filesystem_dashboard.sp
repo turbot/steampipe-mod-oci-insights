@@ -19,17 +19,7 @@ dashboard "oci_filestorage_filesystem_dashboard" {
     }
 
     card {
-      sql   = query.oci_filestorage_uncloned_filesystem_count.sql
-      width = 2
-    }
-
-    card {
       sql   = query.oci_filestorage_filesystem_snapshot_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_filestorage_cloned_snapshot_count.sql
       width = 2
     }
 
@@ -78,7 +68,12 @@ dashboard "oci_filestorage_filesystem_dashboard" {
       type  = "column"
       width = 3
     }
-
+    chart {
+      title = "File Systems by Type"
+      sql   = query.oci_filestorage_filesystem_type.sql
+      type  = "column"
+      width = 3
+    }
   }
 
 }
@@ -105,28 +100,6 @@ query "oci_filestorage_cloned_filesystem_count" {
       oci_file_storage_file_system
     where
       is_clone_parent and lifecycle_state <> 'DELETED';
-  EOQ
-}
-
-query "oci_filestorage_uncloned_filesystem_count" {
-  sql = <<-EOQ
-    select
-      count(*) as "Uncloned File Systems"
-    from
-      oci_file_storage_file_system
-    where
-      not is_clone_parent and lifecycle_state <> 'DELETED';
-  EOQ
-}
-
-query "oci_filestorage_cloned_snapshot_count" {
-  sql = <<-EOQ
-    select
-      count(*) as "Cloned Snapshots"
-    from
-      oci_file_storage_snapshot
-    where
-      is_clone_source and lifecycle_state <> 'DELETED';
   EOQ
 }
 
@@ -214,7 +187,6 @@ query "oci_filestorage_filesystem_by_region" {
   EOQ
 }
 
-
 query "oci_filestorage_filesystem_by_creation_month" {
   sql = <<-EOQ
     with filesystems as (
@@ -259,5 +231,17 @@ query "oci_filestorage_filesystem_by_creation_month" {
       left join filesystems_by_month on months.month = filesystems_by_month.creation_month
     order by
       months.month;
+  EOQ
+}
+
+query "oci_filestorage_filesystem_type" {
+  sql = <<-EOQ
+    select
+      case when not is_clone_parent then 'Uncloned' else 'Cloned' end as status,
+      count(*)
+    from
+      oci_file_storage_file_system
+    group by
+      status;
   EOQ
 }
