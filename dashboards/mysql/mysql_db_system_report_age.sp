@@ -45,15 +45,12 @@ dashboard "oci_mysql_db_system_age_report" {
     }
 
   }
-
-  container {
-
-
-    table {
-
-      sql = query.oci_mysql_db_system_age_table.sql
+  table {
+    column "OCID" {
+      display = "none"
     }
 
+    sql = query.oci_mysql_db_system_age_table.sql
   }
 
 }

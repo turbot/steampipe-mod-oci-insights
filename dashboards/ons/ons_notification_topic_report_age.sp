@@ -46,15 +46,12 @@ dashboard "oci_ons_notification_topic_age_report" {
 
   }
 
-  container {
-
-
-    table {
-
-      sql = query.oci_ons_notification_topic_age_table.sql
+  table {
+    column "OCID" {
+      display = "none"
     }
 
-
+    sql = query.oci_ons_notification_topic_age_table.sql
   }
 
 }

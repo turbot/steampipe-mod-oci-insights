@@ -46,14 +46,12 @@ dashboard "oci_block_storage_boot_volume_age_report" {
 
   }
 
-  container {
-
-
-    table {
-
-      sql = query.oci_block_storage_boot_volume_age_table.sql
+  table {
+    column "OCID" {
+      display = "none"
     }
 
+    sql = query.oci_block_storage_boot_volume_age_table.sql
   }
 
 }

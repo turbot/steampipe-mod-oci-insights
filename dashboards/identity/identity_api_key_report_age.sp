@@ -46,13 +46,12 @@ dashboard "oci_identity_api_key_age_report" {
 
   }
 
-  container {
-
-    table {
-
-      sql = query.oci_identity_api_key_age_table.sql
+  table {
+    column "OCID" {
+      display = "none"
     }
 
+    sql = query.oci_identity_api_key_age_table.sql
   }
 
 }
@@ -131,7 +130,7 @@ query "oci_identity_api_key_age_table" {
       k.time_created as "Create Time",
       k.lifecycle_state as "State",
       t.name as "Tenancy",
-      k.key_id as "Key OCID"
+      k.key_id as "OCID"
     from
       oci_identity_api_key as k,
       oci_identity_tenancy as t

@@ -46,14 +46,12 @@ dashboard "oci_filestorage_filesystem_age_report" {
 
   }
 
-  container {
-
-
-    table {
-
-      sql = query.oci_filestorage_filesystem_age_table.sql
+  table {
+    column "OCID" {
+      display = "none"
     }
 
+    sql = query.oci_filestorage_filesystem_age_table.sql
   }
 
 }
