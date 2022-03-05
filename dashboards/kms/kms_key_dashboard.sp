@@ -16,13 +16,6 @@ dashboard "oci_kms_key_dashboard" {
     card {
       sql   = query.oci_kms_hsm_key_count.sql
       width = 2
-      type  = "info"
-    }
-
-    card {
-      sql   = query.oci_kms_software_key_count.sql
-      width = 2
-      type  = "info"
     }
 
     card {
@@ -42,20 +35,13 @@ dashboard "oci_kms_key_dashboard" {
       width = 3
 
       series "count" {
-        point "ENABLED" {
+        point "ok" {
           color = "ok"
         }
-        point "DISABLED" {
+        point "disabled" {
           color = "alert"
         }
       }
-    }
-
-    chart {
-      title = "Protection Mode"
-      sql   = query.oci_database_autonomous_db_by_protection_mode.sql
-      type  = "donut"
-      width = 3
     }
 
   }
@@ -92,6 +78,13 @@ dashboard "oci_kms_key_dashboard" {
       width = 3
     }
 
+    chart {
+      title = "Keys by Protection Mode"
+      sql   = query.oci_database_autonomous_db_by_protection_mode.sql
+      type  = "column"
+      width = 3
+    }
+
   }
 
 }
@@ -124,37 +117,19 @@ query "oci_kms_hsm_key_count" {
   EOQ
 }
 
-query "oci_kms_software_key_count" {
-  sql = <<-EOQ
-    select count(*) as "Software Based Keys" from oci_kms_key where protection_mode = 'SOFTWARE' and lifecycle_state <> 'DELETED';
-  EOQ
-}
-
 # Assessment Queries
 
 query "oci_kms_key_lifecycle_state" {
   sql = <<-EOQ
     select
-      lifecycle_state,
-      count(lifecycle_state)
+      case when lifecycle_state = 'DISABLED' then 'disabled' else 'ok' end as status,
+      count(*)
     from
       oci_kms_key
     where
       lifecycle_state <> 'DELETED'
     group by
-      lifecycle_state;
-  EOQ
-}
-
-query "oci_database_autonomous_db_by_protection_mode" {
-  sql = <<-EOQ
-    select
-      protection_mode,
-      count(protection_mode)
-    from
-      oci_kms_key
-    group by
-      protection_mode;
+      status;
   EOQ
 }
 
@@ -268,3 +243,16 @@ query "oci_kms_key_by_creation_month" {
       months.month desc;
   EOQ
 }
+
+query "oci_database_autonomous_db_by_protection_mode" {
+  sql = <<-EOQ
+    select
+      protection_mode,
+      count(protection_mode)
+    from
+      oci_kms_key
+    group by
+      protection_mode;
+  EOQ
+}
+

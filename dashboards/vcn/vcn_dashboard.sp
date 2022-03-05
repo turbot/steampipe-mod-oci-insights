@@ -105,10 +105,10 @@ query "oci_core_vcn_no_subnet" {
   sql = <<-EOQ
     select
       case when s.id is null then 'no_subnet' else 'has_subnet' end as status,
-      count(*)
+      count(distinct v.id)
     from
-      oci_core_vcn v
-      left join oci_core_subnet s on v.id = s.vcn_id
+       oci_core_vcn v
+      left join oci_core_subnet s on s.vcn_id = v.id
     where
       v.lifecycle_state <> 'TERMINATED'
     group by

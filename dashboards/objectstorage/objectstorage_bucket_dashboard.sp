@@ -108,6 +108,13 @@ dashboard "oci_objectstorage_bucket_dashboard" {
       type  = "column"
       width = 3
     }
+
+    chart {
+      title = "Encryption by Type"
+      sql   = query.oci_objectstorage_bucket_encryption_status.sql
+      type  = "column"
+      width = 3
+    }
   }
 
 }
@@ -329,5 +336,26 @@ query "oci_objectstorage_bucket_by_creation_month" {
       left join buckets_by_month on months.month = buckets_by_month.creation_month
     order by
       months.month;
+  EOQ
+}
+
+query "oci_objectstorage_bucket_encryption_status" {
+  sql = <<-EOQ
+    select
+      encryption_status,
+      count(*)
+    from (
+      select
+        id,
+        case
+         when kms_key_id is null then 'oci_managed'
+         else 'customer_managed'
+         end as encryption_status
+      from
+        oci_objectstorage_bucket) as b
+    group by
+      encryption_status
+    order by
+      encryption_status desc;
   EOQ
 }

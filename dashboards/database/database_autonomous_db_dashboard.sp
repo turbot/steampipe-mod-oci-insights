@@ -24,15 +24,13 @@ dashboard "oci_database_autonomous_db_dashboard" {
     }
 
     card {
-      sql   = query.oci_database_autonomous_db_with_data_guard.sql
+      sql   = query.oci_database_autonomous_db_with_data_guard_count.sql
       width = 2
-      type  = "info"
     }
 
     card {
-      sql   = query.oci_database_autonomous_db_autoscaling_count.sql
+      sql   = query.oci_database_autonomous_db_by_operations_insights_count.sql
       width = 2
-      type  = "info"
     }
 
     card {
@@ -79,30 +77,17 @@ dashboard "oci_database_autonomous_db_dashboard" {
     }
 
     chart {
-      title = "Permission Level Status"
-      sql   = query.oci_database_autonomous_db_by_permission_level.sql
-      type  = "donut"
-      width = 3
-
-      series "count" {
-        point "restricted" {
-          color = "ok"
-        }
-        point "unrestricted" {
-          color = "alert"
-        }
-      }
-    }
-
-    chart {
       title = "Lifecycle State"
       sql   = query.oci_database_autonomous_db_by_state.sql
       type  = "donut"
       width = 3
 
       series "count" {
-        point "AVAILABLE_NEEDS_ATTENTION" {
+        point "need_attention" {
           color = "alert"
+        }
+        point "ok" {
+          color = "ok"
         }
       }
     }
@@ -195,20 +180,29 @@ query "oci_database_autonomous_db_total_size" {
   EOQ
 }
 
-query "oci_database_autonomous_db_with_data_guard" {
+query "oci_database_autonomous_db_with_data_guard_count" {
   sql = <<-EOQ
-    select count(*) as "Data Guard Enabled" from oci_database_autonomous_database where is_data_guard_enabled;
+    select
+      count(*) as value,
+      'Data Guard Disabled' as label,
+      case count(*) when 0 then 'ok' else 'alert' end as "type"
+    from
+      oci_database_autonomous_database
+    where
+      not is_data_guard_enabled;
   EOQ
 }
 
-# if auto scaling is enabled for the Autonomous Database OCPU core count. The default value is FALSE.
-query "oci_database_autonomous_db_autoscaling_count" {
+query "oci_database_autonomous_db_by_operations_insights_count" {
   sql = <<-EOQ
-    select count(*) as "Auto Scaling Enabled"
-      from
-        oci_database_autonomous_database
-      where
-        is_auto_scaling_enabled;
+    select
+      count(*) as value,
+      'Operations Insight Disabled' as label,
+      case count(*) when 0 then 'ok' else 'alert' end as "type"
+    from
+      oci_database_autonomous_database
+    where
+      operations_insights_status = 'NOT_ENABLED';
   EOQ
 }
 
@@ -228,15 +222,29 @@ query "oci_database_autonomous_database_need_attention_count" {
 
 # Assessment Queries
 
+# query "oci_database_autonomous_db_by_state" {
+#   sql = <<-EOQ
+#     select
+#       lifecycle_state,
+#       count(lifecycle_state)
+#     from
+#       oci_database_autonomous_database
+#     group by
+#       lifecycle_state;
+#   EOQ
+# }
+
 query "oci_database_autonomous_db_by_state" {
   sql = <<-EOQ
     select
-      lifecycle_state,
-      count(lifecycle_state)
+      case when lifecycle_state = 'AVAILABLE_NEEDS_ATTENTION' then 'need_attention' else 'ok' end as status,
+      count(*)
     from
       oci_database_autonomous_database
+    where
+      lifecycle_state <> 'TERMINATED'
     group by
-      lifecycle_state;
+      status;
   EOQ
 }
 
@@ -300,29 +308,6 @@ query "oci_database_autonomous_db_by_operations_insights_status" {
       insight_status
     order by
       insight_status desc;
-  EOQ
-}
-
-# permission_level is  RESTRICTED or UNRESTRICTED
-# The Autonomous Database permission level. Restricted mode allows access only to admin users. Default UNRESTRICTED
-query "oci_database_autonomous_db_by_permission_level" {
-  sql = <<-EOQ
-    select
-      permission_status,
-      count(*)
-    from (
-      select permission_level,
-        case when permission_level = 'RESTRICTED' then
-          'restricted'
-        else
-          'unrestricted'
-        end permission_status
-      from
-        oci_database_autonomous_database) as a
-    group by
-      permission_status
-    order by
-      permission_status desc;
   EOQ
 }
 

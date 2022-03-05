@@ -46,15 +46,13 @@ dashboard "oci_nosql_table_age_report" {
 
   }
 
-  container {
 
-
-    table {
-
-      sql = query.oci_nosql_table_age_table.sql
+  table {
+    column "OCID" {
+      display = "none"
     }
 
-
+    sql = query.oci_nosql_table_age_table.sql
   }
 
 }

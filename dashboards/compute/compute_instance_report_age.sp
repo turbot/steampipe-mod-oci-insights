@@ -14,7 +14,6 @@ dashboard "oci_compute_instance_age_report" {
       width = 2
     }
 
-
     card {
       sql   = query.oci_compute_instance_24_hrs.sql
       width = 2
@@ -47,11 +46,12 @@ dashboard "oci_compute_instance_age_report" {
 
   }
 
-  container {
-
-    table {
-      sql = query.oci_compute_instance_age_table.sql
+  table {
+    column "OCID" {
+      display = "none"
     }
+
+    sql = query.oci_compute_instance_age_table.sql
   }
 
 }

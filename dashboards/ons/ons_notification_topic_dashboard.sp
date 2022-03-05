@@ -103,7 +103,7 @@ query "oci_ons_notification_topic_by_subscription" {
   sql = <<-EOQ
     select
       case when s.id is null then 'no_subscription' else 'has_subscription' end as status,
-      count(*)
+      count(distinct t.topic_id)
     from
       oci_ons_notification_topic t
       left join oci_ons_subscription s on t.topic_id = s.topic_id

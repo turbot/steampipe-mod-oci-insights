@@ -106,7 +106,7 @@ query "oci_vcn_subnet_by_flowlog" {
   sql = <<-EOQ
     with subnet_logs as (
       select
-        s.id,
+        s.id as subnet_id,
         case
           when l.is_enabled is null or not l.is_enabled then 'disabled'
           else 'enabled'
@@ -120,7 +120,7 @@ query "oci_vcn_subnet_by_flowlog" {
     )
     select
       flow_logs_configured,
-      count(*)
+      count(distinct subnet_id)
     from
       subnet_logs
     group by
