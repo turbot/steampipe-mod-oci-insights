@@ -48,7 +48,9 @@ dashboard "oci_ons_subscription_age_report" {
 
 
   table {
-
+    column "OCID" {
+      display = "none"
+    }
     sql = query.oci_ons_subscription_age_table.sql
   }
 
@@ -117,13 +119,14 @@ query "oci_ons_subscription_1_year" {
 query "oci_ons_subscription_age_table" {
   sql = <<-EOQ
     select
-      s.id as "OCID",
+      s.title as "Title",
       now()::date - s.created_time::date as "Age in Days",
       s.created_time as "Create Time",
       s.lifecycle_state as "Lifecycle State",
       coalesce(c.title, 'root') as "Compartment",
       t.title as "Tenancy",
-      s.region as "Region"
+      s.region as "Region",
+      s.id as "OCID"
     from
       oci_ons_subscription as s
       left join oci_identity_compartment as c on s.compartment_id = c.id
