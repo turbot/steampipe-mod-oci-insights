@@ -46,15 +46,12 @@ dashboard "oci_objectstorage_bucket_age_report" {
 
   }
 
-  container {
-
-
-    table {
-
-      sql = query.oci_objectstorage_bucket_age_table.sql
+  table {
+    column "OCID" {
+      display = "none"
     }
 
-
+    sql = query.oci_objectstorage_bucket_age_table.sql
   }
 
 }

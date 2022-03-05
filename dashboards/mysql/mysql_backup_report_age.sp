@@ -46,15 +46,12 @@ dashboard "oci_mysql_backup_age_report" {
 
   }
 
-  container {
-
-
-    table {
-
-      sql = query.oci_mysql_backup_age_table.sql
+  table {
+    column "OCID" {
+      display = "none"
     }
 
-
+    sql = query.oci_mysql_backup_age_table.sql
   }
 
 }

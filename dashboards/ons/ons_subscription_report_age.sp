@@ -46,13 +46,10 @@ dashboard "oci_ons_subscription_age_report" {
 
   }
 
-  container {
 
-    table {
+  table {
 
-      sql = query.oci_ons_subscription_age_table.sql
-    }
-
+    sql = query.oci_ons_subscription_age_table.sql
   }
 
 }

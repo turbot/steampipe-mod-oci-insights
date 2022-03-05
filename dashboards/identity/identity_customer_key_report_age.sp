@@ -46,14 +46,12 @@ dashboard "oci_identity_customer_key_age_report" {
 
   }
 
-  container {
-
-    table {
-
-      sql = query.oci_identity_customer_secret_key_age_table.sql
+  table {
+    column "OCID" {
+      display = "none"
     }
 
-
+    sql = query.oci_identity_customer_secret_key_age_table.sql
   }
 
 }
@@ -134,7 +132,7 @@ query "oci_identity_customer_secret_key_age_table" {
       k.time_expires as "Expiry Time",
       k.lifecycle_state as "State",
       t.name as "Tenancy",
-      k.id as "Key OCID"
+      k.id as "OCID"
     from
       oci_identity_customer_secret_key as k,
       oci_identity_tenancy as t

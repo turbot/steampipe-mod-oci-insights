@@ -46,15 +46,13 @@ dashboard "oci_database_autonomous_database_age_report" {
 
   }
 
-  container {
-
-
     table {
+    column "OCID" {
+      display = "none"
+    }
 
       sql = query.oci_database_autonomous_database_age_table.sql
     }
-
-  }
 
 }
 
