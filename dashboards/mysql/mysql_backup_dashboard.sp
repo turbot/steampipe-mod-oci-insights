@@ -40,15 +40,15 @@ dashboard "oci_mysql_backup_dashboard" {
     width = 3
 
     chart {
-      title = "Lifecycle State"
+      title = "Lifecycle State Failed Count"
       sql   = query.oci_mysql_backup_by_lifecycle_state.sql
       type  = "donut"
 
       series "count" {
-        point "not_failed" {
+        point "0" {
           color = "ok"
         }
-        point "failed" {
+        point "1+" {
           color = "alert"
         }
       }
@@ -83,6 +83,20 @@ dashboard "oci_mysql_backup_dashboard" {
     chart {
       title = "Backups by Age"
       sql   = query.oci_mysql_backup_by_creation_month.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Backups by Creation Type"
+      sql   = query.oci_mysql_backup_by_creation_type.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Backups by Backup Type"
+      sql   = query.oci_mysql_backup_by_backup_type.sql
       type  = "column"
       width = 3
     }
@@ -203,7 +217,7 @@ query "oci_mysql_backup_failed_lifecycle_count" {
 query "oci_mysql_backup_by_lifecycle_state" {
   sql = <<-EOQ
     select
-      case when lifecycle_state = 'FAILED' then 'failed' else 'not_failed' end as status,
+      case when lifecycle_state = 'FAILED' then '1+' else '0' end as status,
       count(*)
     from
       oci_mysql_backup
@@ -328,6 +342,38 @@ query "oci_mysql_backup_by_creation_month" {
       left join backups_by_month on months.month = backups_by_month.creation_month
     order by
       months.month;
+  EOQ
+}
+
+query "oci_mysql_backup_by_creation_type" {
+  sql = <<-EOQ
+   select
+      creation_type,
+      count(*) as "MySQL Backups"
+    from
+      oci_mysql_backup
+    where
+      lifecycle_state <> 'DELETED'
+    group by
+      creation_type
+    order by
+      creation_type;
+  EOQ
+}
+
+query "oci_mysql_backup_by_backup_type" {
+  sql = <<-EOQ
+    select
+      backup_type,
+      count(*) as "MySQL Backups"
+    from
+      oci_mysql_backup
+    where
+      lifecycle_state <> 'DELETED'
+    group by
+      backup_type
+    order by
+      backup_type;
   EOQ
 }
 
