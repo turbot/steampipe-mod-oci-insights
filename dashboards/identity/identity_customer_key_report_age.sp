@@ -130,7 +130,7 @@ query "oci_identity_customer_secret_key_age_table" {
       now()::date - k.time_created::date as "Age in Days",
       k.time_created as "Create Time",
       k.time_expires as "Expiry Time",
-      k.lifecycle_state as "State",
+      k.lifecycle_state as "Lifecycle State",
       t.name as "Tenancy",
       k.id as "OCID"
     from
