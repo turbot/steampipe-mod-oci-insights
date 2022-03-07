@@ -212,7 +212,7 @@ query "oci_block_storage_block_volume_with_no_backups_count" {
   sql = <<-EOQ
     select
       count(v.*) as value,
-      'Without Backups' as label,
+      'Backups Disabled' as label,
       case count(v.*) when 0 then 'ok' else 'alert' end as type
     from
       oci_core_volume as v

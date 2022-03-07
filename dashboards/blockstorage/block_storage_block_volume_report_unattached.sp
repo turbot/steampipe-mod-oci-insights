@@ -16,6 +16,10 @@ dashboard "oci_block_storage_block_volume_unattached_report" {
   }
 
   table {
+    column "OCID" {
+      display = "none"
+    }
+
     sql = query.oci_block_storage_block_volume_unattached_table.sql
   }
 
