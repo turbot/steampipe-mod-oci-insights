@@ -30,7 +30,7 @@ dashboard "oci_ons_subscription_unused_report" {
 query "oci_ons_subscription_unused_table" {
   sql = <<-EOQ
       select
-        s.id as "OCID",
+        s.endpoint as "Endpoint",
         s.lifecycle_state as "Lifecycle State",
         coalesce(c.title, 'root') as "Compartment",
         t.title as "Tenancy",
@@ -40,6 +40,6 @@ query "oci_ons_subscription_unused_table" {
         left join oci_identity_compartment as c on s.compartment_id = c.id
         left join oci_identity_tenancy as t on s.tenant_id = t.id
       order by
-        s.title;
+        s.endpoint;
   EOQ
 }
