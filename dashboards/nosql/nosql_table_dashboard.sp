@@ -18,32 +18,6 @@ dashboard "oci_nosql_table_dashboard" {
       width = 2
     }
 
-    card {
-      sql   = query.oci_nosql_table_stalled_more_than_90_days_count.sql
-      width = 2
-    }
-  }
-
-  container {
-
-    title = "Assessments"
-
-    chart {
-      title = "Stalled More Than 90 Days"
-      sql   = query.oci_nosql_table_stalled_more_than_90_days.sql
-      type  = "donut"
-      width = 3
-
-      series "count" {
-        point "<=90days" {
-          color = "ok"
-        }
-        point ">90days" {
-          color = "alert"
-        }
-      }
-    }
-
   }
 
   container {
@@ -121,37 +95,6 @@ query "oci_nosql_table_auto_reclaimable_count" {
       oci_nosql_table
     where
       is_auto_reclaimable and lifecycle_state <> 'DELETED';
-  EOQ
-}
-
-query "oci_nosql_table_stalled_more_than_90_days_count" {
-  sql = <<-EOQ
-   select
-      count(*) as value,
-      'Stalled > 90 Days' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as type
-    from
-      oci_nosql_table
-    where
-      date_part('day', now()-(time_updated::timestamptz)) > 90 and lifecycle_state <> 'DELETED';
-  EOQ
-}
-
-# Assessment Queries
-
-query "oci_nosql_table_stalled_more_than_90_days" {
-  sql = <<-EOQ
-    select
-      case when date_part('day', now()-(time_updated::timestamptz)) > 90 then '>90days'
-        else '<=90days'
-      end as status,
-      count(name)
-    from
-      oci_nosql_table
-    where
-      lifecycle_state <> 'DELETED'
-    group by
-      status;
   EOQ
 }
 
