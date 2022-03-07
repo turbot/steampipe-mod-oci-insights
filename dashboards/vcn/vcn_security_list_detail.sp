@@ -101,14 +101,21 @@ dashboard "oci_vcn_security_list_detail" {
 query "oci_vcn_security_list_input" {
   sql = <<EOQ
     select
-      id as label,
-      id as value
+      l.display_name as label,
+      l.id as value,
+      json_build_object(
+        'c.name', coalesce(c.title, 'root'),
+        'l.region', region,
+        't.name', t.name
+      ) as tags
     from
-      oci_core_security_list
+      oci_core_security_list as l
+      left join oci_identity_compartment as c on l.compartment_id = c.id
+      left join oci_identity_tenancy as t on l.tenant_id = t.id
     where
-      lifecycle_state <> 'TERMINATED'
+      l.lifecycle_state <> 'TERMINATED'
     order by
-      id;
+      l.display_name;
 EOQ
 }
 

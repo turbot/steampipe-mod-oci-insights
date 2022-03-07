@@ -85,14 +85,21 @@ dashboard "oci_vcn_subnet_detail" {
 query "oci_vcn_subnet_input" {
   sql = <<EOQ
     select
-      id as label,
-      id as value
+      s.display_name as label,
+      s.id as value,
+      json_build_object(
+        'c.name', coalesce(c.title, 'root'),
+        's.region', region,
+        't.name', t.name
+      ) as tags
     from
-      oci_core_subnet
+      oci_core_subnet as s
+      left join oci_identity_compartment as c on s.compartment_id = c.id
+      left join oci_identity_tenancy as t on s.tenant_id = t.id
     where
-      lifecycle_state <> 'TERMINATED'
+      s.lifecycle_state <> 'TERMINATED'
     order by
-      id;
+      s.display_name;
 EOQ
 }
 
