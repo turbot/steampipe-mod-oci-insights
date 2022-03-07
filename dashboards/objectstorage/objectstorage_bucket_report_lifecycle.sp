@@ -22,6 +22,10 @@ dashboard "oci_objectstorage_bucket_lifecycle_report" {
   }
 
   table {
+    column "OCID" {
+      display = "none"
+    }
+
     sql = query.oci_objectstorage_bucket_lifecycle_table.sql
   }
 
