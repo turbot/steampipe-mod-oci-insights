@@ -15,14 +15,15 @@ dashboard "oci_block_storage_block_volume_encryption_report" {
     }
 
     card {
-      sql   = query.oci_block_storage_block_volume_customer_managed_encryption_count.sql
+      sql   = query.oci_block_storage_block_volume_default_encrypted_volumes_count.sql
       width = 2
     }
 
     card {
-      sql   = query.oci_block_storage_block_volume_default_encrypted_volumes_count.sql
+      sql   = query.oci_block_storage_block_volume_customer_managed_encryption_count.sql
       width = 2
     }
+
   }
 
   table {
@@ -33,17 +34,6 @@ dashboard "oci_block_storage_block_volume_encryption_report" {
     sql = query.oci_block_storage_block_volume_encryption_table.sql
   }
 
-}
-
-query "oci_block_storage_block_volume_customer_managed_encryption_count" {
-  sql = <<-EOQ
-    select
-      count(*) as "Customer Managed Encryption"
-    from
-      oci_core_volume
-    where
-      kms_key_id is not null and lifecycle_state <> 'TERMINATED';
-  EOQ
 }
 
 query "oci_block_storage_block_volume_encryption_table" {

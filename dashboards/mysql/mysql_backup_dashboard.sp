@@ -28,32 +28,6 @@ dashboard "oci_mysql_backup_dashboard" {
       width = 2
     }
 
-    card {
-      sql   = query.oci_mysql_backup_failed_lifecycle_count.sql
-      width = 2
-    }
-
-  }
-
-  container {
-    title = "Assessments"
-    width = 3
-
-    chart {
-      title = "Lifecycle State Failed Count"
-      sql   = query.oci_mysql_backup_by_lifecycle_state.sql
-      type  = "donut"
-
-      series "count" {
-        point "0" {
-          color = "ok"
-        }
-        point "1+" {
-          color = "alert"
-        }
-      }
-    }
-
   }
 
   container {
@@ -196,35 +170,6 @@ query "oci_mysql_full_backup_count" {
       oci_mysql_backup
     where
       backup_type = 'FULL' and lifecycle_state <> 'DELETED';
-  EOQ
-}
-
-query "oci_mysql_backup_failed_lifecycle_count" {
-  sql = <<-EOQ
-    select
-      count(*) as value,
-      'Failed' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as type
-    from
-      oci_mysql_backup
-    where
-      lifecycle_state = 'FAILED';
-  EOQ
-}
-
-# Assessment Queries
-
-query "oci_mysql_backup_by_lifecycle_state" {
-  sql = <<-EOQ
-    select
-      case when lifecycle_state = 'FAILED' then '1+' else '0' end as status,
-      count(*)
-    from
-      oci_mysql_backup
-    where
-      lifecycle_state <> 'DELETED'
-    group by
-      status;
   EOQ
 }
 

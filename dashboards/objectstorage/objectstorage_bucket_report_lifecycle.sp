@@ -4,7 +4,7 @@ dashboard "oci_objectstorage_bucket_lifecycle_report" {
 
   tags = merge(local.objectstorage_common_tags, {
     type     = "Report"
-    category = "LifeCycle"
+    category = "Lifecycle"
   })
 
   container {

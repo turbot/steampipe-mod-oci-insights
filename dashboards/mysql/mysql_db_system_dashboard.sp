@@ -29,11 +29,6 @@ dashboard "oci_mysql_db_system_dashboard" {
     }
 
     card {
-      sql   = query.oci_mysql_db_system_failed_lifecycle_count.sql
-      width = 2
-    }
-
-    card {
       sql   = query.oci_mysql_db_system_backup_disabled_count.sql
       width = 2
     }
@@ -42,23 +37,6 @@ dashboard "oci_mysql_db_system_dashboard" {
 
   container {
     title = "Assessments"
-
-    chart {
-      title = "Lifecycle State"
-      sql   = query.oci_mysql_db_system_by_lifecycle_state.sql
-      type  = "donut"
-      width = 3
-
-      series "count" {
-        point "not_failed" {
-          color = "ok"
-        }
-        point "failed" {
-          color = "alert"
-        }
-      }
-
-    }
 
     chart {
       title = "Backup Status"
@@ -225,19 +203,6 @@ query "oci_mysql_db_system_heat_wave_cluster_attached_count" {
   EOQ
 }
 
-query "oci_mysql_db_system_failed_lifecycle_count" {
-  sql = <<-EOQ
-    select
-      count(*) as value,
-      'Failed' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as type
-    from
-      oci_mysql_db_system
-    where
-      lifecycle_state = 'FAILED';
-  EOQ
-}
-
 query "oci_mysql_db_system_backup_disabled_count" {
   sql = <<-EOQ
    select
@@ -253,20 +218,6 @@ query "oci_mysql_db_system_backup_disabled_count" {
 }
 
 # Assessment Queries
-
-query "oci_mysql_db_system_by_lifecycle_state" {
-  sql = <<-EOQ
-    select
-      case when lifecycle_state = 'FAILED' then 'failed' else 'not_failed' end as status,
-      count(*)
-    from
-      oci_mysql_db_system
-    where
-      lifecycle_state <> 'DELETED'
-    group by
-      status;
-  EOQ
-}
 
 query "oci_mysql_db_system_with_backups" {
   sql = <<-EOQ

@@ -4,7 +4,7 @@ dashboard "oci_objectstorage_bucket_public_access_report" {
 
   tags = merge(local.objectstorage_common_tags, {
     type     = "Report"
-    category = "PublicAccess"
+    category = "Public Access"
   })
 
   container {
