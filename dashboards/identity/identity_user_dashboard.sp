@@ -168,7 +168,7 @@ query "oci_identity_user_not_attached_to_groups" {
   from
     oci_identity_user,
     jsonb_array_elements(user_groups) as user_group
-    inner join oci_identity_group ON (oci_identity_group.id = user_group ->> 'groupId' );
+    inner join oci_identity_group ON (oci_identity_group.id = user_group ->> 'groupId');
   EOQ
 }
 

@@ -128,7 +128,7 @@ query "oci_identity_api_key_age_table" {
       k.user_name as "User",
       now()::date - k.time_created::date as "Age in Days",
       k.time_created as "Create Time",
-      k.lifecycle_state as "State",
+      k.lifecycle_state as "Lifecycle State",
       t.name as "Tenancy",
       k.key_id as "OCID"
     from

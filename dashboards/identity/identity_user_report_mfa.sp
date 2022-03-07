@@ -23,6 +23,10 @@ dashboard "oci_identity_user_mfa_report" {
   container {
 
     table {
+      column "OCID" {
+        display = "none"
+      }
+
       sql = query.oci_identity_user_mfa_table.sql
     }
   }
@@ -32,9 +36,10 @@ query "oci_identity_user_mfa_table" {
   sql = <<-EOQ
       select
         u.name as "User",
-        u.is_mfa_activated as "mfa status",
+        u.is_mfa_activated as "MFA Status",
+        u.lifecycle_state as "Lifecycle State",
         t.name as "Tenancy",
-        u.id as "ID"
+        u.id as "OCID"
       from
         oci_identity_user as u,
         oci_identity_tenancy as t
