@@ -22,6 +22,10 @@ dashboard "oci_ons_notification_topic_unused_report" {
   }
 
   table {
+    column "OCID" {
+      display = "none"
+    }
+
     sql = query.oci_ons_notification_topic_unused_table.sql
   }
 

@@ -24,16 +24,16 @@ dashboard "oci_ons_notification_topic_dashboard" {
     title = "Assessments"
 
     chart {
-      title = "Subscription Status"
+      title = "Subscription Count"
       sql   = query.oci_ons_notification_topic_by_subscription.sql
       type  = "donut"
       width = 4
 
       series "count" {
-        point "has_subscription" {
+        point "1+" {
           color = "ok"
         }
-        point "no_subscription" {
+        point "0" {
           color = "alert"
         }
       }
@@ -87,7 +87,7 @@ query "oci_ons_notification_topic_unused_count" {
   sql = <<-EOQ
     select
       count(*) as value,
-      'No Subscription' as label,
+      'No Subscriptions' as label,
       case count(*) when 0 then 'ok' else 'alert' end as type
     from
       oci_ons_notification_topic t
@@ -102,7 +102,7 @@ query "oci_ons_notification_topic_unused_count" {
 query "oci_ons_notification_topic_by_subscription" {
   sql = <<-EOQ
     select
-      case when s.id is null then 'no_subscription' else 'has_subscription' end as status,
+      case when s.id is null then '0' else '1+' end as status,
       count(distinct t.topic_id)
     from
       oci_ons_notification_topic t
