@@ -63,20 +63,13 @@ dashboard "oci_vcn_subnet_detail" {
       width = 6
 
       table {
-        title = "IPv4 CIDR Block"
-        query = query.oci_vcn_subnet_ipv6_cidr_block
+        title = "CIDR Block"
+        query = query.oci_vcn_subnet_cidr_block
         args = {
           id = self.input.subnet_id.value
         }
       }
 
-      table {
-        title = "IPv6 CIDR Block"
-        query = query.oci_vcn_subnet_ipv6_cidr_block
-        args = {
-          id = self.input.subnet_id.value
-        }
-      }
     }
 
   }
@@ -85,14 +78,21 @@ dashboard "oci_vcn_subnet_detail" {
 query "oci_vcn_subnet_input" {
   sql = <<EOQ
     select
-      id as label,
-      id as value
+      s.display_name as label,
+      s.id as value,
+      json_build_object(
+        'c.name', coalesce(c.title, 'root'),
+        's.region', region,
+        't.name', t.name
+      ) as tags
     from
-      oci_core_subnet
+      oci_core_subnet as s
+      left join oci_identity_compartment as c on s.compartment_id = c.id
+      left join oci_identity_tenancy as t on s.tenant_id = t.id
     where
-      lifecycle_state <> 'TERMINATED'
+      s.lifecycle_state <> 'TERMINATED'
     order by
-      id;
+      s.display_name;
 EOQ
 }
 
@@ -167,26 +167,10 @@ query "oci_vcn_subnet_flow_log" {
   param "id" {}
 }
 
-query "oci_vcn_subnet_ipv4_cidr_block" {
+query "oci_vcn_subnet_cidr_block" {
   sql = <<-EOQ
     select
-      display_name as "Name",
-      time_created as "Time Created",
-      cidr_block as "CIDR Block"
-    from
-      oci_core_subnet
-    where
-      id  = $1 and lifecycle_state <> 'TERMINATED';
-  EOQ
-
-  param "id" {}
-}
-
-query "oci_vcn_subnet_ipv6_cidr_block" {
-  sql = <<-EOQ
-    select
-      display_name as "Name",
-      time_created as "Time Created",
+      cidr_block as "IPv4 CIDR Block",
       ipv6_cidr_block as "IPv6 CIDR Block"
     from
       oci_core_subnet

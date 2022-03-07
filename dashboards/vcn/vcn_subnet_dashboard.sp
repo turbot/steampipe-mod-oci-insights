@@ -47,28 +47,28 @@ dashboard "oci_vcn_subnet_dashboard" {
 
     chart {
       title = "Subnets by Tenancy"
-      sql   = query.oci_vcn_subnets_by_tenancy.sql
+      sql   = query.oci_vcn_subnet_by_tenancy.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Subnets by Compartment"
-      sql   = query.oci_vcn_subnets_by_compartment.sql
+      sql   = query.oci_vcn_subnet_by_compartment.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Subnets by Region"
-      sql   = query.oci_vcn_subnets_by_region.sql
+      sql   = query.oci_vcn_subnet_by_region.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Subnets by VCN"
-      sql   = query.oci_vcn_subnets_by_vcn.sql
+      sql   = query.oci_vcn_subnet_by_vcn.sql
       type  = "column"
       width = 3
     }
@@ -130,7 +130,7 @@ query "oci_vcn_subnet_by_flowlog" {
 
 # Analysis Queries
 
-query "oci_vcn_subnets_by_tenancy" {
+query "oci_vcn_subnet_by_tenancy" {
   sql = <<-EOQ
     select
       c.title as "Tenancy",
@@ -147,7 +147,7 @@ query "oci_vcn_subnets_by_tenancy" {
   EOQ
 }
 
-query "oci_vcn_subnets_by_compartment" {
+query "oci_vcn_subnet_by_compartment" {
   sql = <<-EOQ
     with compartments as (
       select
@@ -182,7 +182,7 @@ query "oci_vcn_subnets_by_compartment" {
   EOQ
 }
 
-query "oci_vcn_subnets_by_region" {
+query "oci_vcn_subnet_by_region" {
   sql = <<-EOQ
     select
       region as "Region",
@@ -198,7 +198,7 @@ query "oci_vcn_subnets_by_region" {
   EOQ
 }
 
-query "oci_vcn_subnets_by_vcn" {
+query "oci_vcn_subnet_by_vcn" {
   sql = <<-EOQ
     select
       v.display_name as "VCN",

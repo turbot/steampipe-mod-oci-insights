@@ -22,6 +22,14 @@ dashboard "oci_vcn_subnet_flowlog_report" {
   }
 
   table {
+    column "OCID" {
+      display = "none"
+    }
+
+    column "Name" {
+      href = "/oci_insights.dashboard.oci_vcn_subnet_detail?input.subnet_id={{.row.OCID|@uri}}"
+    }
+
     sql = query.oci_vcn_subnet_flowlog_table.sql
   }
 

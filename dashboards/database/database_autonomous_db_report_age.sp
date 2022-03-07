@@ -1,6 +1,6 @@
 dashboard "oci_database_autonomous_database_age_report" {
 
-  title = "OCI Autonomous Database Age Report"
+  title = "OCI Database Autonomous DB Age Report"
 
   tags = merge(local.database_common_tags, {
     type     = "Report"
@@ -10,53 +10,53 @@ dashboard "oci_database_autonomous_database_age_report" {
   container {
 
     card {
-      sql   = query.oci_database_autonomous_database_count.sql
+      sql   = query.oci_database_autonomous_db_count.sql
       width = 2
     }
 
     card {
-      sql   = query.oci_database_autonomous_database_24_hrs.sql
-      width = 2
-      type  = "info"
-    }
-
-    card {
-      sql   = query.oci_database_autonomous_database_30_days.sql
+      sql   = query.oci_database_autonomous_db_24_hrs.sql
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_database_autonomous_database_90_days.sql
+      sql   = query.oci_database_autonomous_db_30_days.sql
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_database_autonomous_database_365_days.sql
+      sql   = query.oci_database_autonomous_db_90_days.sql
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_database_autonomous_database_1_year.sql
+      sql   = query.oci_database_autonomous_db_365_days.sql
+      width = 2
+      type  = "info"
+    }
+
+    card {
+      sql   = query.oci_database_autonomous_db_1_year.sql
       width = 2
       type  = "info"
     }
 
   }
 
-    table {
+  table {
     column "OCID" {
       display = "none"
     }
 
-      sql = query.oci_database_autonomous_database_age_table.sql
-    }
+    sql = query.oci_database_autonomous_db_age_table.sql
+  }
 
 }
 
-query "oci_database_autonomous_database_24_hrs" {
+query "oci_database_autonomous_db_24_hrs" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -68,7 +68,7 @@ query "oci_database_autonomous_database_24_hrs" {
   EOQ
 }
 
-query "oci_database_autonomous_database_30_days" {
+query "oci_database_autonomous_db_30_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -80,7 +80,7 @@ query "oci_database_autonomous_database_30_days" {
   EOQ
 }
 
-query "oci_database_autonomous_database_90_days" {
+query "oci_database_autonomous_db_90_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -92,7 +92,7 @@ query "oci_database_autonomous_database_90_days" {
   EOQ
 }
 
-query "oci_database_autonomous_database_365_days" {
+query "oci_database_autonomous_db_365_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -104,7 +104,7 @@ query "oci_database_autonomous_database_365_days" {
   EOQ
 }
 
-query "oci_database_autonomous_database_1_year" {
+query "oci_database_autonomous_db_1_year" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -116,7 +116,7 @@ query "oci_database_autonomous_database_1_year" {
   EOQ
 }
 
-query "oci_database_autonomous_database_age_table" {
+query "oci_database_autonomous_db_age_table" {
   sql = <<-EOQ
     select
       d.display_name as "Name",
