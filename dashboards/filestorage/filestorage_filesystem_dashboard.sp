@@ -26,19 +26,6 @@ dashboard "oci_filestorage_filesystem_dashboard" {
   }
 
   container {
-
-    title = "Assessments"
-
-    chart {
-      title = "Lifecycle State"
-      sql   = query.oci_filestorage_filesystem_by_state.sql
-      type  = "donut"
-      width = 3
-    }
-
-  }
-
-  container {
     title = "Analysis"
 
     chart {
@@ -100,22 +87,6 @@ query "oci_filestorage_cloned_filesystem_count" {
       oci_file_storage_file_system
     where
       is_clone_parent and lifecycle_state <> 'DELETED';
-  EOQ
-}
-
-# Assessment Queries
-
-query "oci_filestorage_filesystem_by_state" {
-  sql = <<-EOQ
-    select
-      lifecycle_state,
-      count(lifecycle_state)
-    from
-      oci_file_storage_file_system
-    where
-      lifecycle_state <> 'DELETED'
-    group by
-      lifecycle_state;
   EOQ
 }
 
