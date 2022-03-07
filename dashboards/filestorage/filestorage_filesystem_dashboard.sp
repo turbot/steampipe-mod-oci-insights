@@ -14,7 +14,7 @@ dashboard "oci_filestorage_filesystem_dashboard" {
     }
 
     card {
-      sql   = query.oci_filestorage_cloned_filesystem_count.sql
+      sql   = query.oci_filestorage_filesystem_cloned_count.sql
       width = 2
     }
 
@@ -79,7 +79,7 @@ query "oci_filestorage_filesystem_snapshot_count" {
   EOQ
 }
 
-query "oci_filestorage_cloned_filesystem_count" {
+query "oci_filestorage_filesystem_cloned_count" {
   sql = <<-EOQ
     select
       count(*) as "Cloned File Systems"

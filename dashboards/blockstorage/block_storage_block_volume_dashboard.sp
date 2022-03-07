@@ -24,11 +24,6 @@ dashboard "oci_block_storage_block_volume_dashboard" {
     }
 
     card {
-      sql   = query.oci_block_storage_block_volume_faulty_volumes_count.sql
-      width = 2
-    }
-
-    card {
       sql   = query.oci_block_storage_block_volume_with_no_backups_count.sql
       width = 2
     }
@@ -38,23 +33,6 @@ dashboard "oci_block_storage_block_volume_dashboard" {
   container {
 
     title = "Assessments"
-
-    chart {
-      title = "Lifecycle State"
-      sql   = query.oci_block_storage_block_volume_by_lifecycle_state.sql
-      type  = "donut"
-      width = 3
-
-      series "count" {
-        point "faulty" {
-          color = "alert"
-        }
-        point "ok" {
-          color = "ok"
-        }
-      }
-
-    }
 
     chart {
       title = "Backup Status"
@@ -195,19 +173,6 @@ query "oci_block_storage_block_volume_default_encrypted_volumes_count" {
   EOQ
 }
 
-query "oci_block_storage_block_volume_faulty_volumes_count" {
-  sql = <<-EOQ
-   select
-      count(*) as value,
-      'Faulty' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as type
-    from
-      oci_core_volume
-    where
-      lifecycle_state = 'FAULTY';
-  EOQ
-}
-
 query "oci_block_storage_block_volume_with_no_backups_count" {
   sql = <<-EOQ
     select
@@ -223,20 +188,6 @@ query "oci_block_storage_block_volume_with_no_backups_count" {
 }
 
 # Assessment Queries
-
-query "oci_block_storage_block_volume_by_lifecycle_state" {
-  sql = <<-EOQ
-    select
-      case when lifecycle_state = 'FAULTY' then 'faulty' else 'ok' end as status,
-      count(*)
-    from
-      oci_core_volume
-    where
-      lifecycle_state <> 'TERMINATED'
-    group by
-      status;
-  EOQ
-}
 
 query "oci_block_storage_block_volume_with_backups" {
   sql = <<-EOQ

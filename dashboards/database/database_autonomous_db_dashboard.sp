@@ -1,6 +1,6 @@
 dashboard "oci_database_autonomous_db_dashboard" {
 
-  title = "OCI Autonomous Database Dashboard"
+  title = "OCI Database Autonomous DB Dashboard"
 
   tags = merge(local.database_common_tags, {
     type = "Dashboard"
@@ -9,7 +9,7 @@ dashboard "oci_database_autonomous_db_dashboard" {
   container {
 
     card {
-      sql   = query.oci_database_autonomous_database_count.sql
+      sql   = query.oci_database_autonomous_db_count.sql
       width = 2
     }
 
@@ -133,7 +133,7 @@ dashboard "oci_database_autonomous_db_dashboard" {
 
 # Card Queries
 
-query "oci_database_autonomous_database_count" {
+query "oci_database_autonomous_db_count" {
   sql = <<-EOQ
     select count(*) as "Autonomous DBs" from oci_database_autonomous_database where lifecycle_state <> 'TERMINATED';
   EOQ

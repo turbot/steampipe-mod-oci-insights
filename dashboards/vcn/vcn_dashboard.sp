@@ -1,4 +1,4 @@
-dashboard "oci_core_vcn_dashboard" {
+dashboard "oci_vcn_dashboard" {
 
   title = "OCI VCN Dashboard"
 
@@ -9,12 +9,12 @@ dashboard "oci_core_vcn_dashboard" {
   container {
 
     card {
-      sql   = query.oci_core_vcn_count.sql
+      sql   = query.oci_vcn_count.sql
       width = 2
     }
 
     card {
-      sql   = query.oci_core_vcn_no_subnet_count.sql
+      sql   = query.oci_vcn_no_subnet_count.sql
       width = 2
     }
 
@@ -26,7 +26,7 @@ dashboard "oci_core_vcn_dashboard" {
 
     chart {
       title = "Subnet Count"
-      sql   = query.oci_core_vcn_no_subnet.sql
+      sql   = query.oci_vcn_no_subnet.sql
       type  = "donut"
       width = 3
 
@@ -48,21 +48,21 @@ dashboard "oci_core_vcn_dashboard" {
 
     chart {
       title = "VCNs by Tenancy"
-      sql   = query.oci_core_vcn_by_tenancy.sql
+      sql   = query.oci_vcn_by_tenancy.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "VCNs by Compartment"
-      sql   = query.oci_core_vcn_by_compartment.sql
+      sql   = query.oci_vcn_by_compartment.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "VCNs by Region"
-      sql   = query.oci_core_vcn_by_region.sql
+      sql   = query.oci_vcn_by_region.sql
       type  = "column"
       width = 3
     }
@@ -80,13 +80,13 @@ dashboard "oci_core_vcn_dashboard" {
 
 # Card Queries
 
-query "oci_core_vcn_count" {
+query "oci_vcn_count" {
   sql = <<-EOQ
     select count(*) as "VCNs" from oci_core_vcn where lifecycle_state <> 'TERMINATED';
   EOQ
 }
 
-query "oci_core_vcn_no_subnet_count" {
+query "oci_vcn_no_subnet_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -101,7 +101,7 @@ query "oci_core_vcn_no_subnet_count" {
 
 # Assessment Queries
 
-query "oci_core_vcn_no_subnet" {
+query "oci_vcn_no_subnet" {
   sql = <<-EOQ
     select
       case when s.id is null then '0' else '1+' end as status,
@@ -118,7 +118,7 @@ query "oci_core_vcn_no_subnet" {
 
 # Analysis Queries
 
-query "oci_core_vcn_by_tenancy" {
+query "oci_vcn_by_tenancy" {
   sql = <<-EOQ
     select
       c.title as "Compartment",
@@ -135,7 +135,7 @@ query "oci_core_vcn_by_tenancy" {
   EOQ
 }
 
-query "oci_core_vcn_by_compartment" {
+query "oci_vcn_by_compartment" {
   sql = <<-EOQ
     with compartments as (
       select
@@ -170,7 +170,7 @@ query "oci_core_vcn_by_compartment" {
   EOQ
 }
 
-query "oci_core_vcn_by_region" {
+query "oci_vcn_by_region" {
   sql = <<-EOQ
     select
       region as "region",
