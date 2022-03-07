@@ -21,6 +21,10 @@ dashboard "oci_objectstorage_bucket_logging_report" {
   }
 
   table {
+    column "OCID" {
+      display = "none"
+    }
+
     sql = query.oci_objectstorage_bucket_logging_table.sql
   }
 

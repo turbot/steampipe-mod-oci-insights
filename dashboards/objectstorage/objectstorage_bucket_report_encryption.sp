@@ -27,6 +27,10 @@ dashboard "oci_objectstorage_bucket_encryption_report" {
   }
 
   table {
+    column "OCID" {
+      display = "none"
+    }
+
     sql = query.oci_objectstorage_bucket_encryption_table.sql
   }
 
