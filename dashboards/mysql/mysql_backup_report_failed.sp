@@ -21,6 +21,10 @@ dashboard "oci_mysql_backup_failed_report" {
   }
 
   table {
+    column "OCID" {
+      display = "none"
+    }
+
     sql = query.oci_mysql_backup_failed_table.sql
   }
 

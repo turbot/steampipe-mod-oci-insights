@@ -124,6 +124,17 @@ dashboard "oci_mysql_backup_dashboard" {
       }
     }
 
+    chart {
+      title = "Storage by Age (GB)"
+      sql   = query.oci_mysql_backup_storage_by_creation_month.sql
+      type  = "column"
+      width = 3
+
+      series "GB" {
+        color = "tan"
+      }
+    }
+
   }
 
 }
@@ -385,5 +396,53 @@ query "oci_mysql_backup_storage_by_region" {
       region
     order by
       region;
+  EOQ
+}
+
+query "oci_mysql_backup_storage_by_creation_month" {
+  sql = <<-EOQ
+    with backups as (
+      select
+        title,
+        backup_size_in_gbs,
+        time_created,
+        to_char(time_created,
+          'YYYY-MM') as creation_month
+      from
+        oci_mysql_backup
+      where
+      lifecycle_state <> 'DELETED'
+    ),
+    months as (
+      select
+        to_char(d,
+          'YYYY-MM') as month
+      from
+        generate_series(date_trunc('month',
+            (
+              select
+                min(time_created)
+                from backups)),
+            date_trunc('month',
+              current_date),
+            interval '1 month') as d
+    ),
+    backups_by_month as (
+      select
+        creation_month,
+        sum(backup_size_in_gbs) as size
+      from
+        backups
+      group by
+        creation_month
+    )
+    select
+      months.month,
+      backups_by_month.size as "GB"
+    from
+      months
+      left join backups_by_month on months.month = backups_by_month.creation_month
+    order by
+      months.month;
   EOQ
 }
