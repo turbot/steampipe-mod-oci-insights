@@ -137,6 +137,6 @@ query "oci_identity_api_key_age_table" {
     where
       t.id = k.tenant_id
       order by
-      k.title;
+      k.user_name;
   EOQ
 }
