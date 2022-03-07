@@ -14,6 +14,11 @@ dashboard "oci_identity_user_dashboard" {
     }
 
     card {
+      sql   = query.oci_identity_user_not_attached_to_groups.sql
+      width = 2
+    }
+
+    card {
       sql   = query.oci_identity_user_mfa_disabled_count.sql
       width = 2
     }
@@ -25,16 +30,6 @@ dashboard "oci_identity_user_dashboard" {
 
     card {
       sql   = query.oci_identity_user_inactive_customer_key_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_identity_user_not_attached_to_groups.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_identity_user_access_key_age_gt_90_days.sql
       width = 2
     }
 
@@ -54,22 +49,6 @@ dashboard "oci_identity_user_dashboard" {
           color = "ok"
         }
         point "disabled" {
-          color = "alert"
-        }
-      }
-    }
-
-    chart {
-      title = "Email Verification Status"
-      sql   = query.oci_identity_user_by_verified_email.sql
-      type  = "donut"
-      width = 3
-
-      series "count" {
-        point "verified" {
-          color = "ok"
-        }
-        point "unverified" {
           color = "alert"
         }
       }
@@ -108,6 +87,13 @@ dashboard "oci_identity_user_dashboard" {
       width = 3
     }
 
+    chart {
+      title = "User by Email Verification"
+      sql   = query.oci_identity_user_by_verified_email.sql
+      type  = "column"
+      width = 3
+    }
+
   }
 
 }
@@ -117,6 +103,18 @@ dashboard "oci_identity_user_dashboard" {
 query "oci_identity_user_count" {
   sql = <<-EOQ
     select count(*) as "Users" from oci_identity_user;
+  EOQ
+}
+
+query "oci_identity_user_not_attached_to_groups" {
+  sql = <<-EOQ
+  select
+    count(oci_identity_user.name) as value,
+    'Users Without Group' as label
+  from
+    oci_identity_user,
+    jsonb_array_elements(user_groups) as user_group
+    inner join oci_identity_group ON (oci_identity_group.id = user_group ->> 'groupId');
   EOQ
 }
 
@@ -159,33 +157,6 @@ query "oci_identity_user_inactive_customer_key_count" {
   EOQ
 }
 
-query "oci_identity_user_not_attached_to_groups" {
-  sql = <<-EOQ
-  select
-    count(oci_identity_user.name) as  value,
-    'Users Without Group' as label,
-    case count(*) when 0 then 'ok' else 'alert' end as type
-  from
-    oci_identity_user,
-    jsonb_array_elements(user_groups) as user_group
-    inner join oci_identity_group ON (oci_identity_group.id = user_group ->> 'groupId');
-  EOQ
-}
-
-query "oci_identity_user_access_key_age_gt_90_days" {
-  sql = <<-EOQ
-  select
-    count(distinct user_name) as value,
-    'Active API Key Age > 90 Days' as label,
-    case count(*) when 0 then 'ok' else 'alert' end as type
-  from
-    oci_identity_api_key
-  where
-    time_created > now() - interval '90 days' and
-    lifecycle_state = 'ACTIVE';
-  EOQ
-}
-
 # Assesment Queries
 
 query "oci_identity_user_mfa_enabled" {
@@ -206,26 +177,6 @@ query "oci_identity_user_mfa_enabled" {
       mfa_stat
     group by
       mfa_stat
-  EOQ
-}
-
-query "oci_identity_user_by_verified_email" {
-  sql = <<-EOQ
-    with email_stat as (
-      select
-        case
-          when email_verified then 'verified' else 'unverified'
-        end as email_stat
-      from
-        oci_identity_user
-    )
-      select
-        email_stat,
-        count(*)
-      from
-        email_stat
-      group by
-        email_stat
   EOQ
 }
 
@@ -345,5 +296,25 @@ query "oci_identity_user_by_groups" {
       group_name
     order by
       group_name;
+  EOQ
+}
+
+query "oci_identity_user_by_verified_email" {
+  sql = <<-EOQ
+    with email_stat as (
+      select
+        case
+          when email_verified then 'Verified' else 'Unverified'
+        end as email_stat
+      from
+        oci_identity_user
+    )
+      select
+        email_stat,
+        count(*)
+      from
+        email_stat
+      group by
+        email_stat
   EOQ
 }
