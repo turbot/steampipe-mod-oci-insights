@@ -182,7 +182,7 @@ query "oci_block_storage_block_volume_storage_total" {
 query "oci_block_storage_block_volume_default_encrypted_volumes_count" {
   sql = <<-EOQ
     select
-      count(*) as "OCI Managed Encryption"
+      count(*) as "Oracle-Managed Encryption"
     from
       oci_core_volume
     where
@@ -193,7 +193,7 @@ query "oci_block_storage_block_volume_default_encrypted_volumes_count" {
 query "oci_block_storage_block_volume_customer_managed_encryption_count" {
   sql = <<-EOQ
     select
-      count(*) as "Customer Managed Encryption"
+      count(*) as "Customer-Managed Encryption"
     from
       oci_core_volume
     where
@@ -465,8 +465,8 @@ query "oci_block_storage_block_volume_storage_by_encryption_type" {
   sql = <<-EOQ
     select
         case
-          when kms_key_id is null then 'oci managed'
-          else 'customer managed'
+          when kms_key_id is null then 'oracle-managed'
+          else 'customer-managed'
         end as encryption_type,
       sum(size_in_gbs) as "GB"
     from
@@ -487,8 +487,8 @@ query "oci_block_storage_block_volume_by_encryption_type" {
       select
         id,
         case
-          when kms_key_id is null then 'oci managed'
-          else 'customer managed'
+          when kms_key_id is null then 'oracle-managed'
+          else 'customer-managed'
         end as encryption_type
       from
         oci_core_volume
