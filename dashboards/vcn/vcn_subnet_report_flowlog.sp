@@ -22,6 +22,10 @@ dashboard "oci_vcn_subnet_flowlog_report" {
   }
 
   table {
+    column "OCID" {
+      display = "none"
+    }
+
     sql = query.oci_vcn_subnet_flowlog_table.sql
   }
 

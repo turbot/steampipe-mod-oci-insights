@@ -25,16 +25,16 @@ dashboard "oci_core_vcn_dashboard" {
     title = "Assessments"
 
     chart {
-      title = "Empty VCN (No Subnets)"
+      title = "Subnet Count"
       sql   = query.oci_core_vcn_no_subnet.sql
       type  = "donut"
       width = 3
 
       series "count" {
-        point "has_subnet" {
+        point "1+" {
           color = "ok"
         }
-        point "no_subnet" {
+        point "0" {
           color = "alert"
         }
       }
@@ -104,7 +104,7 @@ query "oci_core_vcn_no_subnet_count" {
 query "oci_core_vcn_no_subnet" {
   sql = <<-EOQ
     select
-      case when s.id is null then 'no_subnet' else 'has_subnet' end as status,
+      case when s.id is null then '0' else '1+' end as status,
       count(distinct v.id)
     from
        oci_core_vcn v
