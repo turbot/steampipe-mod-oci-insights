@@ -13,11 +13,6 @@ dashboard "oci_nosql_table_dashboard" {
       width = 2
     }
 
-    card {
-      sql   = query.oci_nosql_table_auto_reclaimable_count.sql
-      width = 2
-    }
-
   }
 
   container {
@@ -84,17 +79,6 @@ query "oci_nosql_table_count" {
     oci_nosql_table
   where
     lifecycle_state <> 'DELETED';
-  EOQ
-}
-
-query "oci_nosql_table_auto_reclaimable_count" {
-  sql = <<-EOQ
-   select
-      count(*) as "Auto Reclaimable Tables"
-    from
-      oci_nosql_table
-    where
-      is_auto_reclaimable and lifecycle_state <> 'DELETED';
   EOQ
 }
 
