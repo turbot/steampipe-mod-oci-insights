@@ -21,27 +21,6 @@ dashboard "oci_ons_subscription_dashboard" {
   }
 
   container {
-    title = "Assessments"
-
-    chart {
-      title = "Lifecycle State"
-      sql   = query.oci_ons_subscription_by_lifecycle_state.sql
-      type  = "donut"
-      width = 3
-
-      series "count" {
-        point "in_use" {
-          color = "ok"
-        }
-        point "unused" {
-          color = "alert"
-        }
-      }
-    }
-
-  }
-
-  container {
     title = "Analysis"
 
     chart {
@@ -88,8 +67,7 @@ query "oci_ons_subscription_unused_count" {
   sql = <<-EOQ
     select
       count(*) as value,
-      'Unused' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as type
+      'Pending' as label
     from
       oci_ons_subscription
     where
