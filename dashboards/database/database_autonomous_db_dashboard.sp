@@ -32,12 +32,6 @@ dashboard "oci_database_autonomous_db_dashboard" {
       sql   = query.oci_database_autonomous_db_by_operations_insights_count.sql
       width = 2
     }
-
-    card {
-      sql   = query.oci_database_autonomous_database_need_attention_count.sql
-      width = 2
-    }
-
   }
 
   container {
@@ -75,23 +69,6 @@ dashboard "oci_database_autonomous_db_dashboard" {
         }
       }
     }
-
-    chart {
-      title = "Lifecycle State"
-      sql   = query.oci_database_autonomous_db_by_state.sql
-      type  = "donut"
-      width = 3
-
-      series "count" {
-        point "need_attention" {
-          color = "alert"
-        }
-        point "ok" {
-          color = "ok"
-        }
-      }
-    }
-
   }
 
   container {
@@ -206,69 +183,7 @@ query "oci_database_autonomous_db_by_operations_insights_count" {
   EOQ
 }
 
-query "oci_database_autonomous_database_need_attention_count" {
-  sql = <<-EOQ
-    select
-      count(*) as  value,
-      'Need Attention' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as type
-    from
-      oci_database_autonomous_database
-    where
-      lifecycle_state = 'AVAILABLE_NEEDS_ATTENTION';
-  EOQ
-}
-
-
 # Assessment Queries
-
-# query "oci_database_autonomous_db_by_state" {
-#   sql = <<-EOQ
-#     select
-#       lifecycle_state,
-#       count(lifecycle_state)
-#     from
-#       oci_database_autonomous_database
-#     group by
-#       lifecycle_state;
-#   EOQ
-# }
-
-query "oci_database_autonomous_db_by_state" {
-  sql = <<-EOQ
-    select
-      case when lifecycle_state = 'AVAILABLE_NEEDS_ATTENTION' then 'need_attention' else 'ok' end as status,
-      count(*)
-    from
-      oci_database_autonomous_database
-    where
-      lifecycle_state <> 'TERMINATED'
-    group by
-      status;
-  EOQ
-}
-
-query "oci_database_autonomous_db_by_workload_type" {
-  sql = <<-EOQ
-    select
-      db_workload as "Workload Type",
-      count(*) as "databases"
-    from
-      oci_database_autonomous_database
-      group by db_workload order by db_workload;
-  EOQ
-}
-
-query "oci_database_autonomous_db_by_license_model" {
-  sql = <<-EOQ
-    select
-      license_model as "License Model",
-      count(*) as "databases"
-    from
-      oci_database_autonomous_database
-      group by db_workload order by db_workload;
-  EOQ
-}
 
 query "oci_database_autonomous_db_data_guard_status" {
   sql = <<-EOQ
@@ -419,6 +334,17 @@ query "oci_database_autonomous_db_by_creation_month" {
       left join databases_by_month on months.month = databases_by_month.creation_month
     order by
       months.month desc;
+  EOQ
+}
+
+query "oci_database_autonomous_db_by_workload_type" {
+  sql = <<-EOQ
+    select
+      db_workload as "Workload Type",
+      count(*) as "databases"
+    from
+      oci_database_autonomous_database
+      group by db_workload order by db_workload;
   EOQ
 }
 
