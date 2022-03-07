@@ -20,6 +20,10 @@ dashboard "oci_mysql_db_system_failed_report" {
   }
 
   table {
+    column "OCID" {
+      display = "none"
+    }
+
     sql = query.oci_mysql_db_system_failed_table.sql
   }
 

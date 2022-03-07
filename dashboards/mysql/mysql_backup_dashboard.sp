@@ -40,15 +40,15 @@ dashboard "oci_mysql_backup_dashboard" {
     width = 3
 
     chart {
-      title = "Lifecycle State"
+      title = "Lifecycle State Failed Count"
       sql   = query.oci_mysql_backup_by_lifecycle_state.sql
       type  = "donut"
 
       series "count" {
-        point "not_failed" {
+        point "0" {
           color = "ok"
         }
-        point "failed" {
+        point "1+" {
           color = "alert"
         }
       }
@@ -87,6 +87,20 @@ dashboard "oci_mysql_backup_dashboard" {
       width = 3
     }
 
+    chart {
+      title = "Backups by Creation Type"
+      sql   = query.oci_mysql_backup_by_creation_type.sql
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Backups by Backup Type"
+      sql   = query.oci_mysql_backup_by_backup_type.sql
+      type  = "column"
+      width = 3
+    }
+
   }
 
   container {
@@ -116,6 +130,17 @@ dashboard "oci_mysql_backup_dashboard" {
     chart {
       title = "Storage by Region (GB)"
       sql   = query.oci_mysql_backup_storage_by_region.sql
+      type  = "column"
+      width = 3
+
+      series "GB" {
+        color = "tan"
+      }
+    }
+
+    chart {
+      title = "Storage by Age (GB)"
+      sql   = query.oci_mysql_backup_storage_by_creation_month.sql
       type  = "column"
       width = 3
 
@@ -192,7 +217,7 @@ query "oci_mysql_backup_failed_lifecycle_count" {
 query "oci_mysql_backup_by_lifecycle_state" {
   sql = <<-EOQ
     select
-      case when lifecycle_state = 'FAILED' then 'failed' else 'not_failed' end as status,
+      case when lifecycle_state = 'FAILED' then '1+' else '0' end as status,
       count(*)
     from
       oci_mysql_backup
@@ -320,6 +345,38 @@ query "oci_mysql_backup_by_creation_month" {
   EOQ
 }
 
+query "oci_mysql_backup_by_creation_type" {
+  sql = <<-EOQ
+   select
+      creation_type,
+      count(*) as "MySQL Backups"
+    from
+      oci_mysql_backup
+    where
+      lifecycle_state <> 'DELETED'
+    group by
+      creation_type
+    order by
+      creation_type;
+  EOQ
+}
+
+query "oci_mysql_backup_by_backup_type" {
+  sql = <<-EOQ
+    select
+      backup_type,
+      count(*) as "MySQL Backups"
+    from
+      oci_mysql_backup
+    where
+      lifecycle_state <> 'DELETED'
+    group by
+      backup_type
+    order by
+      backup_type;
+  EOQ
+}
+
 query "oci_mysql_backup_storage_by_tenancy" {
   sql = <<-EOQ
     select
@@ -385,5 +442,53 @@ query "oci_mysql_backup_storage_by_region" {
       region
     order by
       region;
+  EOQ
+}
+
+query "oci_mysql_backup_storage_by_creation_month" {
+  sql = <<-EOQ
+    with backups as (
+      select
+        title,
+        backup_size_in_gbs,
+        time_created,
+        to_char(time_created,
+          'YYYY-MM') as creation_month
+      from
+        oci_mysql_backup
+      where
+      lifecycle_state <> 'DELETED'
+    ),
+    months as (
+      select
+        to_char(d,
+          'YYYY-MM') as month
+      from
+        generate_series(date_trunc('month',
+            (
+              select
+                min(time_created)
+                from backups)),
+            date_trunc('month',
+              current_date),
+            interval '1 month') as d
+    ),
+    backups_by_month as (
+      select
+        creation_month,
+        sum(backup_size_in_gbs) as size
+      from
+        backups
+      group by
+        creation_month
+    )
+    select
+      months.month,
+      backups_by_month.size as "GB"
+    from
+      months
+      left join backups_by_month on months.month = backups_by_month.creation_month
+    order by
+      months.month;
   EOQ
 }
