@@ -1,6 +1,7 @@
 dashboard "oci_objectstorage_bucket_dashboard" {
 
-  title = "OCI Object Storage Bucket Dashboard"
+  title         = "OCI Object Storage Bucket Dashboard"
+  documentation = file("./dashboards/objectstorage/docs/objectstorage_bucket_dashboard.md")
 
   tags = merge(local.objectstorage_common_tags, {
     type = "Dashboard"

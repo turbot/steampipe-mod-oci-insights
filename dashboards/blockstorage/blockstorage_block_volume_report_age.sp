@@ -1,6 +1,7 @@
 dashboard "oci_block_storage_block_volume_age_report" {
 
-  title = "OCI Block Storage Block Volume Age Report"
+  title         = "OCI Block Storage Block Volume Age Report"
+  documentation = file("./dashboards/blockstorage/docs/block_storage_block_volume_age_report.md")
 
   tags = merge(local.blockstorage_common_tags, {
     type     = "Report"

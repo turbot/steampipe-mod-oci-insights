@@ -1,6 +1,7 @@
 dashboard "oci_identity_user_mfa_report" {
 
-  title = "OCI Identity User MFA Report"
+  title         = "OCI Identity User MFA Report"
+  documentation = file("./dashboards/identity/docs/identity_user_mfa_report.md")
 
   tags = merge(local.identity_common_tags, {
     type = "Report"

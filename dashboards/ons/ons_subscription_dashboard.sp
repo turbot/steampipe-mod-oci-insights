@@ -1,6 +1,7 @@
 dashboard "oci_ons_subscription_dashboard" {
 
-  title = "OCI ONS Subscription Dashboard"
+  title         = "OCI ONS Subscription Dashboard"
+  documentation = file("./dashboards/ons/docs/ons_subscription_dashboard.md")
 
   tags = merge(local.ons_common_tags, {
     type = "Dashboard"

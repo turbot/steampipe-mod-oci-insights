@@ -1,6 +1,7 @@
 dashboard "oci_database_autonomous_database_age_report" {
 
   title = "OCI Database Autonomous DB Age Report"
+  documentation = file("./dashboards/database/docs/database_autonomous_database_age_report.md")
 
   tags = merge(local.database_common_tags, {
     type     = "Report"

@@ -1,6 +1,7 @@
 dashboard "oci_mysql_db_system_age_report" {
 
   title = "OCI MySQL DB System Age Report"
+  documentation = file("./dashboards/mysql/docs/mysql_db_system_age_report.md")
 
   tags = merge(local.mysql_common_tags, {
     type     = "Report"

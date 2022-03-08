@@ -1,6 +1,7 @@
 dashboard "oci_mysql_db_system_dashboard" {
 
-  title = "OCI MySQL DB System Dashboard"
+  title         = "OCI MySQL DB System Dashboard"
+  documentation = file("./dashboards/mysql/docs/mysql_db_system_dashboard.md")
 
   tags = merge(local.mysql_common_tags, {
     type = "Dashboard"

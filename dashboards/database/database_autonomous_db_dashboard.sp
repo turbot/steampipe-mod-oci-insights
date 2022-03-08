@@ -1,6 +1,7 @@
 dashboard "oci_database_autonomous_db_dashboard" {
 
-  title = "OCI Database Autonomous DB Dashboard"
+  title         = "OCI Database Autonomous DB Dashboard"
+  documentation = file("./dashboards/database/docs/database_autonomous_db_dashboard.md")
 
   tags = merge(local.database_common_tags, {
     type = "Dashboard"

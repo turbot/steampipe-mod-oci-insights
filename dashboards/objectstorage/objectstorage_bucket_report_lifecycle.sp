@@ -1,6 +1,7 @@
 dashboard "oci_objectstorage_bucket_lifecycle_report" {
 
-  title = "OCI Object Storage Bucket Lifecycle Report"
+  title         = "OCI Object Storage Bucket Lifecycle Report"
+  documentation = file("./dashboards/objectstorage/docs/objectstorage_bucket_lifecycle_report.md")
 
   tags = merge(local.objectstorage_common_tags, {
     type     = "Report"

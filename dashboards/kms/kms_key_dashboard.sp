@@ -1,6 +1,7 @@
 dashboard "oci_kms_key_dashboard" {
 
   title = "OCI KMS Key Dashboard"
+  documentation = file("./dashboards/kms/docs/kms_key_dashboard.md")
 
   tags = merge(local.kms_common_tags, {
     type = "Dashboard"

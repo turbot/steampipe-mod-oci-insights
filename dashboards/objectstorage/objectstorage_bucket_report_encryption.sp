@@ -1,6 +1,7 @@
 dashboard "oci_objectstorage_bucket_encryption_report" {
 
-  title = "OCI Object Storage Bucket Encryption Report"
+  title         = "OCI Object Storage Bucket Encryption Report"
+  documentation = file("./dashboards/objectstorage/docs/objectstorage_bucket_encryption_report.md")
 
   tags = merge(local.objectstorage_common_tags, {
     type     = "Report"
