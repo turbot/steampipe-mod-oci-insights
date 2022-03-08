@@ -1,7 +1,7 @@
-dashboard "oci_identity_customer_key_age_report" {
+dashboard "oci_identity_customer_secret_key_age_report" {
 
-  title         = "OCI Identity Customer Key Age Report"
-  documentation = file("./dashboards/identity/docs/identity_customer_key_report_age.md")
+  title         = "OCI Identity Customer Secret Key Age Report"
+  documentation = file("./dashboards/identity/docs/identity_customer_secret_key_report_age.md")
 
   tags = merge(local.identity_common_tags, {
     type     = "Report"
@@ -126,11 +126,11 @@ query "oci_identity_customer_secret_key_1_year" {
 query "oci_identity_customer_secret_key_age_table" {
   sql = <<-EOQ
     select
-      k.title as "Customer Secret Key",
-      k.user_name as "User",
+      k.display_name as "Customer Secret Key",
+      k.user_name as "User Name",
       now()::date - k.time_created::date as "Age in Days",
       k.time_created as "Create Time",
-      k.time_expires as "Expiry Time",
+      k.time_expires as "Expiration Time",
       k.lifecycle_state as "Lifecycle State",
       t.name as "Tenancy",
       k.id as "OCID"
@@ -140,6 +140,6 @@ query "oci_identity_customer_secret_key_age_table" {
     where
       t.id = k.tenant_id
     order by
-      k.title;
+      k.display_name;
   EOQ
 }

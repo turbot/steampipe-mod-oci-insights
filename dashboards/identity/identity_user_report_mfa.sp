@@ -36,8 +36,8 @@ dashboard "oci_identity_user_mfa_report" {
 query "oci_identity_user_mfa_table" {
   sql = <<-EOQ
       select
-        u.name as "User",
-        u.is_mfa_activated as "MFA Status",
+        u.name as "User Name",
+        case when u.is_mfa_activated then 'Enabled' else null end as "MFA Status",
         t.name as "Tenancy",
         u.id as "OCID"
       from

@@ -24,16 +24,6 @@ dashboard "oci_identity_user_dashboard" {
       width = 2
     }
 
-    card {
-      sql   = query.oci_identity_user_inactive_api_key_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_identity_user_inactive_customer_key_count.sql
-      width = 2
-    }
-
   }
 
   container {
@@ -89,7 +79,7 @@ dashboard "oci_identity_user_dashboard" {
     }
 
     chart {
-      title = "User by Email Verification"
+      title = "Users by Email Verification"
       sql   = query.oci_identity_user_by_verified_email.sql
       type  = "column"
       width = 2
@@ -129,32 +119,6 @@ query "oci_identity_user_mfa_disabled_count" {
       oci_identity_user
     where
       not is_mfa_activated;
-  EOQ
-}
-
-query "oci_identity_user_inactive_api_key_count" {
-  sql = <<-EOQ
-    select
-      count(*) as  value,
-      'Inactive API Keys' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as type
-    from
-      oci_identity_api_key
-    where
-      lifecycle_state = 'INACTIVE';
-  EOQ
-}
-
-query "oci_identity_user_inactive_customer_key_count" {
-  sql = <<-EOQ
-    select
-      count(*) as value,
-      'Inactive Customer Keys' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as type
-    from
-      oci_identity_customer_secret_key
-    where
-      lifecycle_state = 'INACTIVE';
   EOQ
 }
 
