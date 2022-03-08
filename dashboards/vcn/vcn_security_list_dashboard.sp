@@ -74,28 +74,28 @@ dashboard "oci_vcn_network_security_list_dashboard" {
       title = "Security Lists by Tenancy"
       sql   = query.oci_vcn_security_list_by_tenancy.sql
       type  = "column"
-      width = 2
+      width = 3
     }
 
     chart {
       title = "Security Lists by Compartment"
       sql   = query.oci_vcn_security_list_by_compartment.sql
       type  = "column"
-      width = 2
+      width = 3
     }
 
     chart {
       title = "Security Lists by Region"
       sql   = query.oci_vcn_security_list_by_region.sql
       type  = "column"
-      width = 2
+      width = 3
     }
 
     chart {
       title = "Network Security Lists by VCN"
       sql   = query.oci_vcn_security_list_by_vcn.sql
       type  = "column"
-      width = 2
+      width = 3
     }
   }
 

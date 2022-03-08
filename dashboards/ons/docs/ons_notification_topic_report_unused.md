@@ -1,3 +1,3 @@
 This report answers the following questions:
 
-- Which topics does not have any subscription?
+- Which topics do not have a subscription?

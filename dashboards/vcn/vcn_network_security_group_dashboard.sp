@@ -72,28 +72,28 @@ dashboard "oci_vcn_network_security_group_dashboard" {
       title = "Security Groups by Tenancy"
       sql   = query.oci_vcn_security_groups_by_tenancy.sql
       type  = "column"
-      width = 2
+      width = 3
     }
 
     chart {
       title = "Security Groups by Compartment"
       sql   = query.oci_vcn_security_groups_by_compartment.sql
       type  = "column"
-      width = 2
+      width = 3
     }
 
     chart {
       title = "Security Groups by Region"
       sql   = query.oci_vcn_security_groups_by_region.sql
       type  = "column"
-      width = 2
+      width = 3
     }
 
     chart {
       title = "Security Groups by VCN"
       sql   = query.oci_vcn_security_groups_by_vcn.sql
       type  = "column"
-      width = 2
+      width = 3
     }
 
   }

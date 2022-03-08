@@ -38,7 +38,6 @@ query "oci_identity_user_mfa_table" {
       select
         u.name as "User",
         u.is_mfa_activated as "MFA Status",
-        u.lifecycle_state as "Lifecycle State",
         t.name as "Tenancy",
         u.id as "OCID"
       from

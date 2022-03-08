@@ -49,7 +49,6 @@ query "oci_block_storage_block_volume_unattached_table" {
       select
         v.display_name as "Name",
         a.lifecycle_state as "Attachment Status",
-        v.lifecycle_state as "Lifecycle State",
         coalesce(c.title, 'root') as "Compartment",
         t.title as "Tenancy",
         v.region as "Region",

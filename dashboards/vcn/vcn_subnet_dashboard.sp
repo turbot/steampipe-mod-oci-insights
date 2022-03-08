@@ -50,28 +50,28 @@ dashboard "oci_vcn_subnet_dashboard" {
       title = "Subnets by Tenancy"
       sql   = query.oci_vcn_subnet_by_tenancy.sql
       type  = "column"
-      width = 2
+      width = 3
     }
 
     chart {
       title = "Subnets by Compartment"
       sql   = query.oci_vcn_subnet_by_compartment.sql
       type  = "column"
-      width = 2
+      width = 3
     }
 
     chart {
       title = "Subnets by Region"
       sql   = query.oci_vcn_subnet_by_region.sql
       type  = "column"
-      width = 2
+      width = 3
     }
 
     chart {
       title = "Subnets by VCN"
       sql   = query.oci_vcn_subnet_by_vcn.sql
       type  = "column"
-      width = 2
+      width = 3
     }
 
   }
