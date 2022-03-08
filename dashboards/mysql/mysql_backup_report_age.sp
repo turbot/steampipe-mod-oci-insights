@@ -1,7 +1,7 @@
 dashboard "oci_mysql_backup_age_report" {
 
-  title = "OCI MySQL Backup Age Report"
-  documentation = file("./dashboards/mysql/docs/mysql_backup_age_report.md")
+  title         = "OCI MySQL Backup Age Report"
+  documentation = file("./dashboards/mysql/docs/mysql_backup_report_age.md")
 
   tags = merge(local.mysql_common_tags, {
     type     = "Report"

@@ -1,6 +1,7 @@
 dashboard "oci_nosql_table_dashboard" {
 
   title = "OCI NoSQL Table Dashboard"
+  documentation = file("./dashboards/nosql/docs/nosql_table_dashboard.md")
 
   tags = merge(local.nosql_common_tags, {
     type = "Dashboard"

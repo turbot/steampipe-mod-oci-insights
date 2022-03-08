@@ -1,6 +1,7 @@
 dashboard "oci_vcn_subnet_flowlog_report" {
 
-  title = "OCI VCN Subnet Flow Log Report"
+  title         = "OCI VCN Subnet Flow Log Report"
+  documentation = file("./dashboards/vcn/docs/vcn_subnet_report_flowlog.md")
 
   tags = merge(local.vcn_common_tags, {
     type     = "Report"

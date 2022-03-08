@@ -1,7 +1,7 @@
 dashboard "oci_identity_customer_key_age_report" {
 
   title         = "OCI Identity Customer Key Age Report"
-  documentation = file("./dashboards/identity/docs/identity_customer_key_age_report.md")
+  documentation = file("./dashboards/identity/docs/identity_customer_key_report_age.md")
 
   tags = merge(local.identity_common_tags, {
     type     = "Report"

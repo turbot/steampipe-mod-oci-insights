@@ -1,7 +1,7 @@
 dashboard "oci_block_storage_block_volume_dashboard" {
 
   title         = "OCI Block Storage Block Volume Dashboard"
-  documentation = file("./dashboards/blockstorage/docs/block_storage_block_volume_dashboard.md")
+  documentation = file("./dashboards/blockstorage/docs/blockstorage_block_volume_dashboard.md")
 
   tags = merge(local.blockstorage_common_tags, {
     type = "Dashboard"

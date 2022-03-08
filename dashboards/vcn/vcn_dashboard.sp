@@ -1,6 +1,7 @@
 dashboard "oci_vcn_dashboard" {
 
-  title = "OCI VCN Dashboard"
+  title         = "OCI VCN Dashboard"
+  documentation = file("./dashboards/vcn/docs/vcn_dashboard.md")
 
   tags = merge(local.vcn_common_tags, {
     type = "Dashboard"

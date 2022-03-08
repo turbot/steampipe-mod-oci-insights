@@ -1,7 +1,7 @@
 dashboard "oci_ons_subscription_age_report" {
 
-  title = "OCI ONS Subscription Age Report"
-  documentation = file("./dashboards/ons/docs/ons_subscription_age_report.md")
+  title         = "OCI ONS Subscription Age Report"
+  documentation = file("./dashboards/ons/docs/ons_subscription_report_age.md")
 
   tags = merge(local.ons_common_tags, {
     type     = "Report"

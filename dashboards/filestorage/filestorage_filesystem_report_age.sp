@@ -1,7 +1,7 @@
 dashboard "oci_filestorage_filesystem_age_report" {
 
   title         = "OCI File Storage File System Age Report"
-  documentation = file("./dashboards/filestorage/docs/filestorage_filesystem_age_report.md")
+  documentation = file("./dashboards/filestorage/docs/filestorage_filesystem_report_age.md")
 
   tags = merge(local.filestorage_common_tags, {
     type     = "Report"

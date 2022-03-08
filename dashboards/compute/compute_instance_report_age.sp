@@ -1,7 +1,7 @@
 dashboard "oci_compute_instance_age_report" {
 
-  title = "OCI Compute Instance Age Report"
-  documentation = file("./dashboards/compute/docs/compute_instance_age_report.md")
+  title         = "OCI Compute Instance Age Report"
+  documentation = file("./dashboards/compute/docs/compute_instance_report_age.md")
 
   tags = merge(local.compute_common_tags, {
     type     = "Report"

@@ -1,6 +1,7 @@
 dashboard "oci_nosql_table_age_report" {
 
-  title = "OCI NoSQL Table Age Report"
+  title         = "OCI NoSQL Table Age Report"
+  documentation = file("./dashboards/nosql/docs/nosql_table_report_age.md")
 
   tags = merge(local.nosql_common_tags, {
     type     = "Report"

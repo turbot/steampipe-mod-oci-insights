@@ -1,7 +1,7 @@
 dashboard "oci_block_storage_boot_volume_encryption_report" {
 
   title         = "OCI Block Storage Boot Volume Encryption Report"
-  documentation = file("./dashboards/blockstorage/docs/block_storage_boot_volume_encryption_report.md")
+  documentation = file("./dashboards/blockstorage/docs/blockstorage_boot_volume_report_encryption.md")
 
   tags = merge(local.blockstorage_common_tags, {
     type     = "Report"

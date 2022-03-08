@@ -1,7 +1,7 @@
 dashboard "oci_block_storage_boot_volume_unattached_report" {
 
-  title = "OCI Block Storage Boot Volume Unattached Report"
-  documentation = file("./dashboards/blockstorage/docs/block_storage_boot_volume_unattached_report.md")
+  title         = "OCI Block Storage Boot Volume Unattached Report"
+  documentation = file("./dashboards/blockstorage/docs/blockstorage_boot_volume_report_unattached.md")
 
   tags = merge(local.blockstorage_common_tags, {
     type     = "Report"

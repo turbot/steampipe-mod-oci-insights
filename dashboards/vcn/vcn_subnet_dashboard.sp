@@ -1,6 +1,7 @@
 dashboard "oci_vcn_subnet_dashboard" {
 
-  title = "OCI VCN Subnet Dashboard"
+  title         = "OCI VCN Subnet Dashboard"
+  documentation = file("./dashboards/vcn/docs/vcn_subnet_dashboard.md")
 
   tags = merge(local.vcn_common_tags, {
     type = "Dashboard"

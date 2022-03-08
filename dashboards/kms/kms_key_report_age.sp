@@ -1,7 +1,7 @@
 dashboard "oci_kms_key_age_report" {
 
   title         = "OCI KMS Key Age Report"
-  documentation = file("./dashboards/kms/docs/kms_key_age_report.md")
+  documentation = file("./dashboards/kms/docs/kms_key_report_age.md")
 
   tags = merge(local.kms_common_tags, {
     type     = "Report"
