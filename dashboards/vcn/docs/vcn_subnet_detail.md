@@ -1,5 +1,5 @@
-This detail answers the following questions:
+This dashboard answers the following questions for each subnet:
 
 - How is the subnet configured?
 - What tags are applied?
-- What are the CIDR block details?
+- What are the CIDR blocks assigned?

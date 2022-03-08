@@ -1,4 +1,4 @@
-This detail answers the following questions:
+This dashboard answers the following questions for each security list:
 
 - How is the security list configured?
 - What tags are applied?
