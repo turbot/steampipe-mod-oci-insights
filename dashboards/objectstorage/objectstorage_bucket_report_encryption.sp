@@ -1,6 +1,7 @@
 dashboard "oci_objectstorage_bucket_encryption_report" {
 
-  title = "OCI Object Storage Bucket Encryption Report"
+  title         = "OCI Object Storage Bucket Encryption Report"
+  documentation = file("./dashboards/objectstorage/docs/objectstorage_bucket_report_encryption.md")
 
   tags = merge(local.objectstorage_common_tags, {
     type     = "Report"
@@ -51,6 +52,7 @@ query "oci_objectstorage_bucket_encryption_table" {
       select
         b.name as "Name",
         case when b.kms_key_id is not null then 'Customer-Managed' else 'Oracle-Managed' end as "Encryption Status",
+        b.kms_key_id as "KMS Key ID",
         coalesce(c.title, 'root') as "Compartment",
         t.title as "Tenancy",
         b.region as "Region",

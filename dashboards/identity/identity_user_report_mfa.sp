@@ -1,6 +1,7 @@
 dashboard "oci_identity_user_mfa_report" {
 
-  title = "OCI Identity User MFA Report"
+  title         = "OCI Identity User MFA Report"
+  documentation = file("./dashboards/identity/docs/identity_user_report_mfa.md")
 
   tags = merge(local.identity_common_tags, {
     type = "Report"
@@ -37,7 +38,6 @@ query "oci_identity_user_mfa_table" {
       select
         u.name as "User",
         u.is_mfa_activated as "MFA Status",
-        u.lifecycle_state as "Lifecycle State",
         t.name as "Tenancy",
         u.id as "OCID"
       from

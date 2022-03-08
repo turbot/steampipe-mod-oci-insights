@@ -1,6 +1,7 @@
 dashboard "oci_vcn_security_list_detail" {
 
   title = "OCI VCN Security List Detail"
+  documentation = file("./dashboards/vcn/docs/vcn_security_list_detail.md")
 
   tags = merge(local.vcn_common_tags, {
     type = "Detail"

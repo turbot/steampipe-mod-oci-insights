@@ -1,6 +1,7 @@
 dashboard "oci_block_storage_boot_volume_dashboard" {
 
-  title = "OCI Block Storage Boot Volume Dashboard"
+  title         = "OCI Block Storage Boot Volume Dashboard"
+  documentation = file("./dashboards/blockstorage/docs/blockstorage_boot_volume_dashboard.md")
 
   tags = merge(local.blockstorage_common_tags, {
     type = "Dashboard"

@@ -1,6 +1,7 @@
 dashboard "oci_objectstorage_bucket_dashboard" {
 
-  title = "OCI Object Storage Bucket Dashboard"
+  title         = "OCI Object Storage Bucket Dashboard"
+  documentation = file("./dashboards/objectstorage/docs/objectstorage_bucket_dashboard.md")
 
   tags = merge(local.objectstorage_common_tags, {
     type = "Dashboard"
@@ -15,11 +16,6 @@ dashboard "oci_objectstorage_bucket_dashboard" {
 
     card {
       sql   = query.oci_objectstorage_bucket_read_only_access_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_objectstorage_bucket_default_encryption_count.sql
       width = 2
     }
 

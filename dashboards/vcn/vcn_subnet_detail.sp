@@ -1,6 +1,7 @@
 dashboard "oci_vcn_subnet_detail" {
 
   title = "OCI VCN Subnet Detail"
+  documentation = file("./dashboards/vcn/docs/vcn_subnet_detail.md")
 
   tags = merge(local.vcn_common_tags, {
     type = "Detail"

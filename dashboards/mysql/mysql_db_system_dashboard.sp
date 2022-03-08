@@ -1,6 +1,7 @@
 dashboard "oci_mysql_db_system_dashboard" {
 
-  title = "OCI MySQL DB System Dashboard"
+  title         = "OCI MySQL DB System Dashboard"
+  documentation = file("./dashboards/mysql/docs/mysql_db_system_dashboard.md")
 
   tags = merge(local.mysql_common_tags, {
     type = "Dashboard"
@@ -63,28 +64,28 @@ dashboard "oci_mysql_db_system_dashboard" {
       title = "DB Systems by Tenancy"
       sql   = query.oci_mysql_db_system_by_tenancy.sql
       type  = "column"
-      width = 2
+      width = 3
     }
 
     chart {
       title = "DB Systems by Compartment"
       sql   = query.oci_mysql_db_system_by_compartment.sql
       type  = "column"
-      width = 2
+      width = 3
     }
 
     chart {
       title = "DB Systems by Region"
       sql   = query.oci_mysql_db_system_by_region.sql
       type  = "column"
-      width = 2
+      width = 3
     }
 
     chart {
       title = "DB Systems by Age"
       sql   = query.oci_mysql_db_system_by_creation_month.sql
       type  = "column"
-      width = 2
+      width = 3
     }
 
   }
@@ -94,7 +95,7 @@ dashboard "oci_mysql_db_system_dashboard" {
       title = "Storage by Tenancy (GB)"
       sql   = query.oci_mysql_db_system_storage_by_tenancy.sql
       type  = "column"
-      width = 2
+      width = 3
 
       series "GB" {
         color = "tan"
@@ -105,7 +106,7 @@ dashboard "oci_mysql_db_system_dashboard" {
       title = "Storage by Compartment (GB)"
       sql   = query.oci_mysql_db_system_storage_by_compartment.sql
       type  = "column"
-      width = 2
+      width = 3
 
       series "GB" {
         color = "tan"
@@ -116,7 +117,7 @@ dashboard "oci_mysql_db_system_dashboard" {
       title = "Storage by Region (GB)"
       sql   = query.oci_mysql_db_system_storage_by_region.sql
       type  = "column"
-      width = 2
+      width = 3
 
       series "GB" {
         color = "tan"
@@ -127,7 +128,7 @@ dashboard "oci_mysql_db_system_dashboard" {
       title = "Storage by Age (GB)"
       sql   = query.oci_mysql_db_system_storage_by_creation_month.sql
       type  = "column"
-      width = 2
+      width = 3
 
       series "GB" {
         color = "tan"
@@ -195,7 +196,7 @@ query "oci_mysql_db_system_analytics_cluster_attached_count" {
 query "oci_mysql_db_system_heat_wave_cluster_attached_count" {
   sql = <<-EOQ
    select
-      count(*) as "Heat Wave Cluster Attached"
+      count(*) as "HeatWave Cluster Attached"
     from
       oci_mysql_db_system
     where

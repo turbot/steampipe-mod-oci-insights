@@ -1,6 +1,7 @@
 dashboard "oci_filestorage_filesystem_dashboard" {
 
   title = "OCI File Storage File System Dashboard"
+  documentation = file("./dashboards/filestorage/docs/filestorage_filesystem_dashboard.md")
 
   tags = merge(local.filestorage_common_tags, {
     type = "Dashboard"

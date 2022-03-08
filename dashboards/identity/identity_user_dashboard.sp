@@ -1,6 +1,7 @@
 dashboard "oci_identity_user_dashboard" {
 
   title = "OCI Identity User Dashboard"
+  documentation = file("./dashboards/identity/docs/identity_user_dashboard.md")
 
   tags = merge(local.identity_common_tags, {
     type = "Dashboard"

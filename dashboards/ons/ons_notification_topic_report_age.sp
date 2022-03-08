@@ -1,6 +1,7 @@
 dashboard "oci_ons_notification_topic_age_report" {
 
-  title = "OCI ONS Notification Topic Age Report"
+  title         = "OCI ONS Notification Topic Age Report"
+  documentation = file("./dashboards/ons/docs/ons_notification_topic_report_age.md")
 
   tags = merge(local.ons_common_tags, {
     type     = "Report"

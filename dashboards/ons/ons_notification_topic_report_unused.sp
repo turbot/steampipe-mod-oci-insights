@@ -1,6 +1,7 @@
 dashboard "oci_ons_notification_topic_unused_report" {
 
-  title = "OCI ONS Notification Topic Unused Report"
+  title         = "OCI ONS Notification Topic Unused Report"
+  documentation = file("./dashboards/ons/docs/ons_notification_topic_report_unused.md")
 
   tags = merge(local.ons_common_tags, {
     type     = "Report"

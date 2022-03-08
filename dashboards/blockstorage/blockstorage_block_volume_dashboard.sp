@@ -1,6 +1,7 @@
 dashboard "oci_block_storage_block_volume_dashboard" {
 
-  title = "OCI Block Storage Block Volume Dashboard"
+  title         = "OCI Block Storage Block Volume Dashboard"
+  documentation = file("./dashboards/blockstorage/docs/blockstorage_block_volume_dashboard.md")
 
   tags = merge(local.blockstorage_common_tags, {
     type = "Dashboard"
@@ -205,7 +206,7 @@ query "oci_block_storage_block_volume_with_no_backups_count" {
   sql = <<-EOQ
     select
       count(v.*) as value,
-      'Backups Disabled' as label,
+      'Without Backups' as label,
       case count(v.*) when 0 then 'ok' else 'alert' end as type
     from
       oci_core_volume as v

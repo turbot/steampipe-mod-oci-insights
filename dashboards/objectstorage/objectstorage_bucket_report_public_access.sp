@@ -1,6 +1,7 @@
 dashboard "oci_objectstorage_bucket_public_access_report" {
 
-  title = "OCI Object Storage Bucket Public Access Report"
+  title         = "OCI Object Storage Bucket Public Access Report"
+  documentation = file("./dashboards/objectstorage/docs/objectstorage_bucket_report_public_access.md")
 
   tags = merge(local.objectstorage_common_tags, {
     type     = "Report"

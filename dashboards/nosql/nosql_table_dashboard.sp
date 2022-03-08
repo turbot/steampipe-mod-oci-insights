@@ -1,6 +1,7 @@
 dashboard "oci_nosql_table_dashboard" {
 
-  title = "OCI NoSQL Table Dashboard"
+  title         = "OCI NoSQL Table Dashboard"
+  documentation = file("./dashboards/nosql/docs/nosql_table_dashboard.md")
 
   tags = merge(local.nosql_common_tags, {
     type = "Dashboard"
@@ -22,28 +23,28 @@ dashboard "oci_nosql_table_dashboard" {
       title = "Tables by Tenancy"
       sql   = query.oci_nosql_table_by_tenancy.sql
       type  = "column"
-      width = 2
+      width = 3
     }
 
     chart {
       title = "Tables by Compartment"
       sql   = query.oci_nosql_table_by_compartment.sql
       type  = "column"
-      width = 2
+      width = 3
     }
 
     chart {
       title = "Tables by Region"
       sql   = query.oci_nosql_table_by_region.sql
       type  = "column"
-      width = 2
+      width = 3
     }
 
     chart {
       title = "Tables by Age"
       sql   = query.oci_nosql_table_by_creation_month.sql
       type  = "column"
-      width = 2
+      width = 3
     }
 
   }

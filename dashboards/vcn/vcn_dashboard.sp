@@ -1,6 +1,7 @@
 dashboard "oci_vcn_dashboard" {
 
-  title = "OCI VCN Dashboard"
+  title         = "OCI VCN Dashboard"
+  documentation = file("./dashboards/vcn/docs/vcn_dashboard.md")
 
   tags = merge(local.vcn_common_tags, {
     type = "Dashboard"
@@ -50,28 +51,28 @@ dashboard "oci_vcn_dashboard" {
       title = "VCNs by Tenancy"
       sql   = query.oci_vcn_by_tenancy.sql
       type  = "column"
-      width = 2
+      width = 3
     }
 
     chart {
       title = "VCNs by Compartment"
       sql   = query.oci_vcn_by_compartment.sql
       type  = "column"
-      width = 2
+      width = 3
     }
 
     chart {
       title = "VCNs by Region"
       sql   = query.oci_vcn_by_region.sql
       type  = "column"
-      width = 2
+      width = 3
     }
 
     chart {
       title = "VCNs by RFC1918 Range"
       sql   = query.oci_vcn_by_rfc1918_range.sql
       type  = "column"
-      width = 2
+      width = 3
     }
 
   }

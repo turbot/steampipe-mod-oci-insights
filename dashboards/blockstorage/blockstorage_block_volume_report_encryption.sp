@@ -1,6 +1,7 @@
 dashboard "oci_block_storage_block_volume_encryption_report" {
 
-  title = "OCI Block Storage Block Volume Encryption Report"
+  title         = "OCI Block Storage Block Volume Encryption Report"
+  documentation = file("./dashboards/blockstorage/docs/blockstorage_block_volume_report_encryption.md")
 
   tags = merge(local.blockstorage_common_tags, {
     type     = "Report"
@@ -41,7 +42,7 @@ query "oci_block_storage_block_volume_encryption_table" {
       select
         v.display_name as "Name",
         case when v.kms_key_id is not null then 'Customer-Managed' else 'Oracle-Managed' end as "Encryption Status",
-        v.lifecycle_state as "Lifecycle State",
+        v.kms_key_id as "KMS Key ID",
         coalesce(c.title, 'root') as "Compartment",
         t.title as "Tenancy",
         v.region as "Region",

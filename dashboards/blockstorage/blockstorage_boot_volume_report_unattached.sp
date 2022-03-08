@@ -1,6 +1,7 @@
 dashboard "oci_block_storage_boot_volume_unattached_report" {
 
-  title = "OCI Block Storage Boot Volume Unattached Report"
+  title         = "OCI Block Storage Boot Volume Unattached Report"
+  documentation = file("./dashboards/blockstorage/docs/blockstorage_boot_volume_report_unattached.md")
 
   tags = merge(local.blockstorage_common_tags, {
     type     = "Report"
@@ -53,7 +54,6 @@ query "oci_block_storage_boot_volume_unattached_table" {
       select
         v.display_name as "Name",
         a.lifecycle_state as "Attachment Status",
-        v.lifecycle_state as "Lifecycle State",
         coalesce(c.title, 'root') as "Compartment",
         t.title as "Tenancy",
         v.region as "Region",

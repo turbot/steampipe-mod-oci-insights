@@ -1,6 +1,7 @@
 dashboard "oci_vcn_subnet_flowlog_report" {
 
-  title = "OCI VCN Subnet Flow Log Report"
+  title         = "OCI VCN Subnet Flow Log Report"
+  documentation = file("./dashboards/vcn/docs/vcn_subnet_report_flowlog.md")
 
   tags = merge(local.vcn_common_tags, {
     type     = "Report"
@@ -27,7 +28,7 @@ dashboard "oci_vcn_subnet_flowlog_report" {
     }
 
     column "Name" {
-      href = "/oci_insights.dashboard.oci_vcn_subnet_detail?input.subnet_id={{.OCID|@uri}}"
+      href = "${dashboard.oci_vcn_subnet_detail.path}?input.subnet_id={{.OCID|@uri}}"
     }
 
     sql = query.oci_vcn_subnet_flowlog_table.sql
@@ -43,7 +44,6 @@ query "oci_vcn_subnet_flowlog_table" {
           when l.is_enabled is null or not l.is_enabled then null
           else 'Enabled'
         end as "Flow Log Status",
-        s.lifecycle_state as "Lifecycle State",
         coalesce(c.title, 'root') as "Compartment",
         t.title as "Tenancy",
         s.region as "Region",

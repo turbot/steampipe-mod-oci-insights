@@ -1,6 +1,7 @@
 dashboard "oci_ons_notification_topic_dashboard" {
 
-  title = "OCI ONS Notification Topic Dashboard"
+  title         = "OCI ONS Notification Topic Dashboard"
+  documentation = file("./dashboards/ons/docs/ons_notification_topic_dashboard.md")
 
   tags = merge(local.ons_common_tags, {
     type = "Dashboard"
@@ -48,28 +49,28 @@ dashboard "oci_ons_notification_topic_dashboard" {
       title = "Topics by Tenancy"
       sql   = query.oci_ons_notification_topic_by_tenancy.sql
       type  = "column"
-      width = 2
+      width = 3
     }
 
     chart {
       title = "Topics by Compartment"
       sql   = query.oci_ons_notification_topic_by_compartment.sql
       type  = "column"
-      width = 2
+      width = 3
     }
 
     chart {
       title = "Topics by Region"
       sql   = query.oci_ons_notification_topic_by_region.sql
       type  = "column"
-      width = 2
+      width = 3
     }
 
     chart {
       title = "Topics by Age"
       sql   = query.oci_ons_notification_topic_by_creation_month.sql
       type  = "column"
-      width = 2
+      width = 3
     }
   }
 
