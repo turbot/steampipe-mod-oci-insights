@@ -60,35 +60,35 @@ dashboard "oci_block_storage_boot_volume_dashboard" {
       title = "Boot Volumes by Tenancy"
       sql   = query.oci_block_storage_boot_volume_by_tenancy.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Boot Volumes by Compartment"
       sql   = query.oci_block_storage_boot_volume_by_compartment.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Boot Volumes by Region"
       sql   = query.oci_block_storage_boot_volume_by_region.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Boot Volume by Age"
       sql   = query.oci_block_storage_boot_volume_by_creation_month.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Encryption Status by Type"
       sql   = query.oci_block_storage_boot_volume_by_encryption_status.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
   }
@@ -99,7 +99,7 @@ dashboard "oci_block_storage_boot_volume_dashboard" {
       title = "Storage by Tenancy (GB)"
       sql   = query.oci_block_storage_boot_volume_storage_by_tenancy.sql
       type  = "column"
-      width = 3
+      width = 2
 
       series "GB" {
         color = "tan"
@@ -110,7 +110,7 @@ dashboard "oci_block_storage_boot_volume_dashboard" {
       title = "Storage by Compartment (GB)"
       sql   = query.oci_block_storage_boot_volume_storage_by_compartment.sql
       type  = "column"
-      width = 3
+      width = 2
 
       series "GB" {
         color = "tan"
@@ -121,7 +121,7 @@ dashboard "oci_block_storage_boot_volume_dashboard" {
       title = "Storage by Region (GB)"
       sql   = query.oci_block_storage_boot_volume_storage_by_region.sql
       type  = "column"
-      width = 3
+      width = 2
 
       series "GB" {
         color = "tan"
@@ -132,12 +132,24 @@ dashboard "oci_block_storage_boot_volume_dashboard" {
       title = "Storage by Age (GB)"
       sql   = query.oci_block_storage_boot_volume_storage_by_creation_month.sql
       type  = "column"
-      width = 3
+      width = 2
 
       series "GB" {
         color = "tan"
       }
     }
+
+    chart {
+      title = "Storage by Encryption Type (GB)"
+      sql   = query.oci_block_storage_boot_volume_storage_by_encryption_type.sql
+      type  = "column"
+      width = 2
+
+      series "GB" {
+        color = "tan"
+      }
+    }
+
   }
 
 }
@@ -164,7 +176,7 @@ query "oci_block_storage_boot_volume_storage_total" {
 query "oci_block_storage_boot_volume_default_encrypted_volumes_count" {
   sql = <<-EOQ
     select
-      count(*) as "OCI Managed Encryption"
+      count(*) as "Oracle-Managed Encryption"
     from
       oci_core_boot_volume
     where
@@ -176,7 +188,7 @@ query "oci_block_storage_boot_volume_with_no_backups_count" {
   sql = <<-EOQ
     select
       count(v.*) as value,
-      'Without Backups' as label,
+      'Backups Disabled' as label,
       case count(v.*) when 0 then 'ok' else 'alert' end as type
     from
       oci_core_boot_volume as v
@@ -318,6 +330,29 @@ query "oci_block_storage_boot_volume_by_creation_month" {
   EOQ
 }
 
+query "oci_block_storage_boot_volume_by_encryption_status" {
+  sql = <<-EOQ
+    select
+      encryption_status,
+      count(*)
+    from (
+      select
+        id,
+        case
+          when kms_key_id is null then 'oracle-managed'
+          else 'customer-managed'
+        end as encryption_status
+      from
+        oci_core_boot_volume
+      where
+        lifecycle_state <> 'TERMINATED') as v
+      group by
+        encryption_status
+      order by
+        encryption_status desc;
+  EOQ
+}
+
 query "oci_block_storage_boot_volume_storage_by_tenancy" {
   sql = <<-EOQ
    select
@@ -432,25 +467,19 @@ query "oci_block_storage_boot_volume_storage_by_creation_month" {
   EOQ
 }
 
-query "oci_block_storage_boot_volume_by_encryption_status" {
+query "oci_block_storage_boot_volume_storage_by_encryption_type" {
   sql = <<-EOQ
     select
-      encryption_status,
-      count(*)
-    from (
-      select
-        id,
         case
           when kms_key_id is null then 'oracle-managed'
           else 'customer-managed'
-        end as encryption_status
-      from
-        oci_core_boot_volume
-      where
-        lifecycle_state <> 'TERMINATED') as v
-      group by
-        encryption_status
-      order by
-        encryption_status desc;
+        end as encryption_type,
+      sum(size_in_gbs) as "GB"
+    from
+      oci_core_boot_volume
+    where
+      lifecycle_state <> 'TERMINATED'
+    group by
+      encryption_type;
   EOQ
 }

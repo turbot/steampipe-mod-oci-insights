@@ -53,14 +53,14 @@ dashboard "oci_kms_key_dashboard" {
       title = "Keys by Tenancy"
       sql   = query.oci_kms_key_by_tenancy.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Keys by Compartment"
       sql   = query.oci_kms_key_by_compartment.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
 
@@ -68,21 +68,21 @@ dashboard "oci_kms_key_dashboard" {
       title = "Keys by Region"
       sql   = query.oci_kms_key_by_region.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Keys by Age"
       sql   = query.oci_kms_key_by_creation_month.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Keys by Protection Mode"
       sql   = query.oci_database_autonomous_db_by_protection_mode.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
   }

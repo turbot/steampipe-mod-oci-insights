@@ -27,28 +27,28 @@ dashboard "oci_ons_subscription_dashboard" {
       title = "Subscriptions by Tenancy"
       sql   = query.oci_ons_subscription_by_tenancy.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Subscriptions by Compartment"
       sql   = query.oci_ons_subscription_by_compartment.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Subscriptions by Region"
       sql   = query.oci_ons_subscription_by_region.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Subscriptions by Age"
       sql   = query.oci_ons_subscription_by_creation_month.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
   }

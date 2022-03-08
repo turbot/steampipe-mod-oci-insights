@@ -56,35 +56,35 @@ dashboard "oci_compute_instance_dashboard" {
       title = "Instances by Tenancy"
       sql   = query.oci_compute_instance_by_tenancy.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Instances by Compartment"
       sql   = query.oci_compute_instance_by_compartment.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Instances by Region"
       sql   = query.oci_compute_instance_by_region.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Instances by Age"
       sql   = query.oci_compute_instance_by_creation_month.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Instances by Shape"
       sql   = query.oci_compute_instance_by_type.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
   }

@@ -38,7 +38,7 @@ dashboard "oci_block_storage_boot_volume_encryption_report" {
 query "oci_block_storage_boot_volume_customer_managed_encryption_count" {
   sql = <<-EOQ
     select
-      count(*) as "Customer Managed Encryption"
+      count(*) as "Customer-Managed Encryption"
     from
       oci_core_boot_volume
     where
@@ -50,7 +50,7 @@ query "oci_block_storage_boot_volume_encryption_table" {
   sql = <<-EOQ
       select
         v.display_name as "Name",
-        case when v.kms_key_id is not null then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
+        case when v.kms_key_id is not null then 'Customer-Managed' else 'Oracle-Managed' end as "Encryption Status",
         v.lifecycle_state as "Lifecycle State",
         coalesce(c.title, 'root') as "Compartment",
         t.title as "Tenancy",

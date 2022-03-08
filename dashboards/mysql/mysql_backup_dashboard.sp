@@ -37,42 +37,42 @@ dashboard "oci_mysql_backup_dashboard" {
       title = "Backups by Tenancy"
       sql   = query.oci_mysql_backup_by_tenancy.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Backups by Compartment"
       sql   = query.oci_mysql_backup_by_compartment.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Backups by Region"
       sql   = query.oci_mysql_backup_by_region.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Backups by Age"
       sql   = query.oci_mysql_backup_by_creation_month.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Backups by Creation Type"
       sql   = query.oci_mysql_backup_by_creation_type.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Backups by Backup Type"
       sql   = query.oci_mysql_backup_by_backup_type.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
   }
@@ -83,7 +83,7 @@ dashboard "oci_mysql_backup_dashboard" {
       title = "Storage by Tenancy (GB)"
       sql   = query.oci_mysql_backup_storage_by_tenancy.sql
       type  = "column"
-      width = 3
+      width = 2
 
       series "GB" {
         color = "tan"
@@ -94,7 +94,7 @@ dashboard "oci_mysql_backup_dashboard" {
       title = "Storage by Compartment (GB)"
       sql   = query.oci_mysql_backup_storage_by_compartment.sql
       type  = "column"
-      width = 3
+      width = 2
 
       series "GB" {
         color = "tan"
@@ -105,7 +105,7 @@ dashboard "oci_mysql_backup_dashboard" {
       title = "Storage by Region (GB)"
       sql   = query.oci_mysql_backup_storage_by_region.sql
       type  = "column"
-      width = 3
+      width = 2
 
       series "GB" {
         color = "tan"
@@ -116,7 +116,29 @@ dashboard "oci_mysql_backup_dashboard" {
       title = "Storage by Age (GB)"
       sql   = query.oci_mysql_backup_storage_by_creation_month.sql
       type  = "column"
-      width = 3
+      width = 2
+
+      series "GB" {
+        color = "tan"
+      }
+    }
+
+    chart {
+      title = "Storage by Creation Type"
+      sql   = query.oci_mysql_backup_storage_by_creation_type.sql
+      type  = "column"
+      width = 2
+
+      series "GB" {
+        color = "tan"
+      }
+    }
+
+    chart {
+      title = "Storage by Backup Type"
+      sql   = query.oci_mysql_backup_storage_by_backup_type.sql
+      type  = "column"
+      width = 2
 
       series "GB" {
         color = "tan"
@@ -435,5 +457,37 @@ query "oci_mysql_backup_storage_by_creation_month" {
       left join backups_by_month on months.month = backups_by_month.creation_month
     order by
       months.month;
+  EOQ
+}
+
+query "oci_mysql_backup_storage_by_creation_type" {
+  sql = <<-EOQ
+   select
+      creation_type,
+      sum(backup_size_in_gbs) as "GB"
+    from
+      oci_mysql_backup
+    where
+      lifecycle_state <> 'DELETED'
+    group by
+      creation_type
+    order by
+      creation_type;
+  EOQ
+}
+
+query "oci_mysql_backup_storage_by_backup_type" {
+  sql = <<-EOQ
+    select
+      backup_type,
+      sum(backup_size_in_gbs) as "GB"
+    from
+      oci_mysql_backup
+    where
+      lifecycle_state <> 'DELETED'
+    group by
+      backup_type
+    order by
+      backup_type;
   EOQ
 }

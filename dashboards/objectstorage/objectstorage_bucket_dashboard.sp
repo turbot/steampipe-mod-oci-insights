@@ -85,35 +85,35 @@ dashboard "oci_objectstorage_bucket_dashboard" {
       title = "Buckets by Tenancy"
       sql   = query.oci_objectstorage_bucket_by_tenancy.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Buckets by Compartment"
       sql   = query.oci_objectstorage_bucket_by_compartment.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Buckets by Region"
       sql   = query.oci_objectstorage_bucket_by_region.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Buckets by Age"
       sql   = query.oci_objectstorage_bucket_by_creation_month.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Encryption by Type"
       sql   = query.oci_objectstorage_bucket_encryption_status.sql
       type  = "column"
-      width = 3
+      width = 2
     }
   }
 
@@ -140,7 +140,7 @@ query "oci_objectstorage_bucket_read_only_access_count" {
 
 query "oci_objectstorage_bucket_default_encryption_count" {
   sql = <<-EOQ
-    select count(*) as "OCI Managed Encryption"
+    select count(*) as "Oracle-Managed Encryption"
     from
       oci_objectstorage_bucket
     where
