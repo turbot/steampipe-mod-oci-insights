@@ -17,7 +17,7 @@ dashboard "oci_vcn_subnet_detail" {
 
     card {
       width = 2
-      query = query.oci_vcn_subnet_flow_log
+      query = query.oci_vcn_subnet_flow_logs
       args = {
         id = self.input.subnet_id.value
       }
@@ -130,11 +130,11 @@ query "oci_vcn_subnet_tag" {
   param "id" {}
 }
 
-query "oci_vcn_subnet_flow_log" {
+query "oci_vcn_subnet_flow_logs" {
   sql = <<-EOQ
     select
       case when is_enabled then 'Enabled' else 'Disabled' end as value,
-      'Flow Log' as label,
+      'Flow Logs' as label,
       case when is_enabled then 'ok' else 'alert' end as type
     from
       oci_core_subnet as s

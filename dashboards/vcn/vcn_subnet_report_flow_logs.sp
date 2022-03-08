@@ -1,7 +1,7 @@
-dashboard "oci_vcn_subnet_flowlog_report" {
+dashboard "oci_vcn_subnet_flow_logs_report" {
 
-  title         = "OCI VCN Subnet Flow Log Report"
-  documentation = file("./dashboards/vcn/docs/vcn_subnet_report_flowlog.md")
+  title         = "OCI VCN Subnet Flow Logs Report"
+  documentation = file("./dashboards/vcn/docs/vcn_subnet_report_flow_logs.md")
 
   tags = merge(local.vcn_common_tags, {
     type     = "Report"
@@ -16,7 +16,7 @@ dashboard "oci_vcn_subnet_flowlog_report" {
     }
 
     card {
-      sql   = query.oci_vcn_subnet_flowlog_not_configured_count.sql
+      sql   = query.oci_vcn_subnet_flow_logs_not_configured_count.sql
       width = 2
     }
 
@@ -28,22 +28,22 @@ dashboard "oci_vcn_subnet_flowlog_report" {
     }
 
     column "Name" {
-      href = "${dashboard.oci_vcn_subnet_detail.path}?input.subnet_id={{.OCID|@uri}}"
+      href = "/oci_insights.dashboard.oci_vcn_subnet_detail?input.subnet_id={{.OCID | @uri}}"
     }
 
-    sql = query.oci_vcn_subnet_flowlog_table.sql
+    sql = query.oci_vcn_subnet_flow_logs_table.sql
   }
 
 }
 
-query "oci_vcn_subnet_flowlog_table" {
+query "oci_vcn_subnet_flow_logs_table" {
   sql = <<-EOQ
       select
         s.display_name as "Name",
         case
           when l.is_enabled is null or not l.is_enabled then null
           else 'Enabled'
-        end as "Flow Log Status",
+        end as "Flow Logs Status",
         coalesce(c.title, 'root') as "Compartment",
         t.title as "Tenancy",
         s.region as "Region",

@@ -16,7 +16,7 @@ dashboard "oci_vcn_subnet_dashboard" {
 
     card {
       width = 2
-      sql   = query.oci_vcn_subnet_flowlog_not_configured_count.sql
+      sql   = query.oci_vcn_subnet_flow_logs_not_configured_count.sql
     }
 
   }
@@ -26,10 +26,10 @@ dashboard "oci_vcn_subnet_dashboard" {
     title = "Assessments"
 
     chart {
-      title = "Flow Log Status"
+      title = "Flow Logs Status"
       type  = "donut"
       width = 3
-      sql   = query.oci_vcn_subnet_by_flowlog.sql
+      sql   = query.oci_vcn_subnet_by_flow_logs.sql
 
       series "count" {
         point "enabled" {
@@ -86,11 +86,11 @@ query "oci_vcn_subnet_count" {
   EOQ
 }
 
-query "oci_vcn_subnet_flowlog_not_configured_count" {
+query "oci_vcn_subnet_flow_logs_not_configured_count" {
   sql = <<-EOQ
     select
       count(s.*) as value,
-      'Flow Log Disabled' as label,
+      'Flow Logs Disabled' as label,
       case count(s.*) when 0 then 'ok' else 'alert' end as type
     from
       oci_core_subnet as s
@@ -103,7 +103,7 @@ query "oci_vcn_subnet_flowlog_not_configured_count" {
 
 # Assessment Queries
 
-query "oci_vcn_subnet_by_flowlog" {
+query "oci_vcn_subnet_by_flow_logs" {
   sql = <<-EOQ
     with subnet_logs as (
       select
