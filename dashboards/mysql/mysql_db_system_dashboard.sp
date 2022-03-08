@@ -63,28 +63,28 @@ dashboard "oci_mysql_db_system_dashboard" {
       title = "DB Systems by Tenancy"
       sql   = query.oci_mysql_db_system_by_tenancy.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "DB Systems by Compartment"
       sql   = query.oci_mysql_db_system_by_compartment.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "DB Systems by Region"
       sql   = query.oci_mysql_db_system_by_region.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "DB Systems by Age"
       sql   = query.oci_mysql_db_system_by_creation_month.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
   }
@@ -94,7 +94,7 @@ dashboard "oci_mysql_db_system_dashboard" {
       title = "Storage by Tenancy (GB)"
       sql   = query.oci_mysql_db_system_storage_by_tenancy.sql
       type  = "column"
-      width = 3
+      width = 2
 
       series "GB" {
         color = "tan"
@@ -105,7 +105,7 @@ dashboard "oci_mysql_db_system_dashboard" {
       title = "Storage by Compartment (GB)"
       sql   = query.oci_mysql_db_system_storage_by_compartment.sql
       type  = "column"
-      width = 3
+      width = 2
 
       series "GB" {
         color = "tan"
@@ -116,7 +116,7 @@ dashboard "oci_mysql_db_system_dashboard" {
       title = "Storage by Region (GB)"
       sql   = query.oci_mysql_db_system_storage_by_region.sql
       type  = "column"
-      width = 3
+      width = 2
 
       series "GB" {
         color = "tan"
@@ -127,7 +127,7 @@ dashboard "oci_mysql_db_system_dashboard" {
       title = "Storage by Age (GB)"
       sql   = query.oci_mysql_db_system_storage_by_creation_month.sql
       type  = "column"
-      width = 3
+      width = 2
 
       series "GB" {
         color = "tan"

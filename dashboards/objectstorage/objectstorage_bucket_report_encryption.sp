@@ -38,7 +38,7 @@ dashboard "oci_objectstorage_bucket_encryption_report" {
 
 query "oci_objectstorage_bucket_report_customer_managed_encryption_count" {
   sql = <<-EOQ
-    select count(*) as "Customer Managed Encryption"
+    select count(*) as "Customer-Managed Encryption"
       from
     oci_objectstorage_bucket
     where
@@ -50,7 +50,7 @@ query "oci_objectstorage_bucket_encryption_table" {
   sql = <<-EOQ
       select
         b.name as "Name",
-        case when b.kms_key_id is not null then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
+        case when b.kms_key_id is not null then 'Customer-Managed' else 'Oracle-Managed' end as "Encryption Status",
         coalesce(c.title, 'root') as "Compartment",
         t.title as "Tenancy",
         b.region as "Region",

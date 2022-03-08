@@ -32,34 +32,34 @@ dashboard "oci_filestorage_filesystem_dashboard" {
       title = "File Systems by Tenancy"
       sql   = query.oci_filestorage_filesystem_by_tenancy.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "File Systems by Compartment"
       sql   = query.oci_filestorage_filesystem_by_compartment.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "File Systems by Region"
       sql   = query.oci_filestorage_filesystem_by_region.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "File Systems Age"
       sql   = query.oci_filestorage_filesystem_by_creation_month.sql
       type  = "column"
-      width = 3
+      width = 2
     }
     chart {
       title = "File Systems by Type"
       sql   = query.oci_filestorage_filesystem_type.sql
       type  = "column"
-      width = 3
+      width = 2
     }
   }
 

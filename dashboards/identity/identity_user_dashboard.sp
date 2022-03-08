@@ -63,35 +63,35 @@ dashboard "oci_identity_user_dashboard" {
       title = "Users by Tenancy"
       sql   = query.oci_identity_users_by_tenancy.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Users by Type"
       sql   = query.oci_identity_user_by_type.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Users by Group"
       sql   = query.oci_identity_user_by_groups.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Users by Age"
       sql   = query.oci_identity_users_by_creation_month.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "User by Email Verification"
       sql   = query.oci_identity_user_by_verified_email.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
   }

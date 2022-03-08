@@ -22,28 +22,28 @@ dashboard "oci_nosql_table_dashboard" {
       title = "Tables by Tenancy"
       sql   = query.oci_nosql_table_by_tenancy.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Tables by Compartment"
       sql   = query.oci_nosql_table_by_compartment.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Tables by Region"
       sql   = query.oci_nosql_table_by_region.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Tables by Age"
       sql   = query.oci_nosql_table_by_creation_month.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
   }

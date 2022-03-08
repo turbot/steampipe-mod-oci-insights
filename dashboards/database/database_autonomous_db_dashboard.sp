@@ -78,35 +78,35 @@ dashboard "oci_database_autonomous_db_dashboard" {
       title = "Autonomous Databases by Tenancy"
       sql   = query.oci_database_autonomous_db_by_tenancy.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Autonomous Databases by Compartment"
       sql   = query.oci_database_autonomous_db_by_compartment.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Autonomous Databases by Region"
       sql   = query.oci_database_autonomous_db_by_region.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Autonomous Databases by Age"
       sql   = query.oci_database_autonomous_db_by_creation_month.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
     chart {
       title = "Autonomous Databases by Workload Type"
       sql   = query.oci_database_autonomous_db_by_workload_type.sql
       type  = "column"
-      width = 3
+      width = 2
     }
 
   }
