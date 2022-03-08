@@ -17,15 +17,6 @@ dashboard "oci_vcn_security_list_detail" {
     card {
       width = 2
 
-      query = query.oci_vcn_security_list_name
-      args = {
-        id = self.input.security_list_id.value
-      }
-    }
-
-    card {
-      width = 2
-
       query = query.oci_vcn_security_list_ingress_ssh
       args = {
         id = self.input.security_list_id.value
@@ -117,19 +108,6 @@ query "oci_vcn_security_list_input" {
     order by
       l.display_name;
 EOQ
-}
-
-query "oci_vcn_security_list_name" {
-  sql = <<-EOQ
-    select
-      display_name as "Security List"
-    from
-      oci_core_security_list
-    where
-      id = $1 and lifecycle_state <> 'TERMINATED';
-  EOQ
-
-  param "id" {}
 }
 
 query "oci_vcn_security_list_ingress_ssh" {

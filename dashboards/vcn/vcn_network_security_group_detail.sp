@@ -17,15 +17,6 @@ dashboard "oci_vcn_network_security_group_detail" {
     card {
       width = 2
 
-      query = query.oci_vcn_network_security_group_name
-      args = {
-        id = self.input.security_group_id.value
-      }
-    }
-
-    card {
-      width = 2
-
       query = query.oci_vcn_network_security_group_ingress_ssh
       args = {
         id = self.input.security_group_id.value
@@ -117,19 +108,6 @@ query "oci_vcn_network_security_group_input" {
     order by
       g.display_name;
   EOQ
-}
-
-query "oci_vcn_network_security_group_name" {
-  sql = <<-EOQ
-    select
-      display_name as "Security Group"
-    from
-      oci_core_network_security_group
-    where
-      id = $1 and lifecycle_state <> 'TERMINATED';
-  EOQ
-
-  param "id" {}
 }
 
 query "oci_vcn_network_security_group_ingress_ssh" {

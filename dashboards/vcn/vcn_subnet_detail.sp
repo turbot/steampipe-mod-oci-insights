@@ -16,14 +16,6 @@ dashboard "oci_vcn_subnet_detail" {
 
     card {
       width = 2
-      query = query.oci_vcn_subnet_name
-      args = {
-        id = self.input.subnet_id.value
-      }
-    }
-
-    card {
-      width = 2
       query = query.oci_vcn_subnet_flow_log
       args = {
         id = self.input.subnet_id.value
@@ -132,19 +124,6 @@ query "oci_vcn_subnet_tag" {
       json_each_text(tags)
     order by
       key;
-  EOQ
-
-  param "id" {}
-}
-
-query "oci_vcn_subnet_name" {
-  sql = <<-EOQ
-    select
-      display_name as "Subnet"
-    from
-      oci_core_subnet
-    where
-      id = $1 and lifecycle_state <> 'TERMINATED';
   EOQ
 
   param "id" {}
