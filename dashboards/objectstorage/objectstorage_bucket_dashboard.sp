@@ -20,11 +20,6 @@ dashboard "oci_objectstorage_bucket_dashboard" {
     }
 
     card {
-      sql   = query.oci_objectstorage_bucket_default_encryption_count.sql
-      width = 2
-    }
-
-    card {
       sql   = query.oci_objectstorage_bucket_archived_count.sql
       width = 2
     }
@@ -136,16 +131,6 @@ query "oci_objectstorage_bucket_read_only_access_count" {
       oci_objectstorage_bucket
     where
       is_read_only;
-  EOQ
-}
-
-query "oci_objectstorage_bucket_default_encryption_count" {
-  sql = <<-EOQ
-    select count(*) as "Oracle-Managed Encryption"
-    from
-      oci_objectstorage_bucket
-    where
-    kms_key_id is null;
   EOQ
 }
 
