@@ -134,6 +134,16 @@ query "oci_objectstorage_bucket_read_only_access_count" {
   EOQ
 }
 
+query "oci_objectstorage_bucket_default_encryption_count" {
+  sql = <<-EOQ
+    select count(*) as "Oracle-Managed Encryption"
+    from
+      oci_objectstorage_bucket
+    where
+    kms_key_id is null;
+  EOQ
+}
+
 query "oci_objectstorage_bucket_archived_count" {
   sql = <<-EOQ
     select count(*) as "Archived"
