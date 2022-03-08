@@ -28,7 +28,8 @@ dashboard "oci_vcn_subnet_flowlog_report" {
     }
 
     column "Name" {
-      href = "/oci_insights.dashboard.oci_vcn_subnet_detail?input.subnet_id={{.OCID|@uri}}"
+
+      href = "${dashboard.oci_vcn_subnet_detail.url_path}?input.subnet_id={{.'OCID'|@uri}}"
     }
 
     sql = query.oci_vcn_subnet_flowlog_table.sql
