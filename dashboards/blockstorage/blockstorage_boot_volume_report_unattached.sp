@@ -54,6 +54,7 @@ query "oci_block_storage_boot_volume_unattached_table" {
       select
         v.display_name as "Name",
         a.lifecycle_state as "Attachment Status",
+        i.display_name as "Instance Name",
         coalesce(c.title, 'root') as "Compartment",
         t.title as "Tenancy",
         v.region as "Region",
@@ -61,6 +62,7 @@ query "oci_block_storage_boot_volume_unattached_table" {
       from
         oci_core_boot_volume as v
         left join oci_core_boot_volume_attachment as a on a.boot_volume_id = v.id
+        left join oci_core_instance as i on a.instance_id = i.id
         left join oci_identity_compartment as c on v.compartment_id = c.id
         left join oci_identity_tenancy as t on v.tenant_id = t.id
       where
