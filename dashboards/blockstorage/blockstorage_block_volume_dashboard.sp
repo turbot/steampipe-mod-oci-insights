@@ -20,16 +20,6 @@ dashboard "oci_block_storage_block_volume_dashboard" {
     }
 
     card {
-      sql   = query.oci_block_storage_block_volume_default_encrypted_volumes_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_block_storage_block_volume_customer_managed_encryption_count.sql
-      width = 2
-    }
-
-    card {
       sql   = query.oci_block_storage_block_volume_with_no_backups_count.sql
       width = 2
     }
@@ -41,16 +31,16 @@ dashboard "oci_block_storage_block_volume_dashboard" {
     title = "Assessments"
 
     chart {
-      title = "Backup Status"
+      title = "Backup Policy Count"
       sql   = query.oci_block_storage_block_volume_with_backups.sql
       type  = "donut"
       width = 3
 
       series "count" {
-        point "enabled" {
+        point "1+" {
           color = "ok"
         }
-        point "disabled" {
+        point "0" {
           color = "alert"
         }
       }
@@ -205,14 +195,13 @@ query "oci_block_storage_block_volume_customer_managed_encryption_count" {
 query "oci_block_storage_block_volume_with_no_backups_count" {
   sql = <<-EOQ
     select
-      count(v.*) as value,
-      'Without Backups' as label,
-      case count(v.*) when 0 then 'ok' else 'alert' end as type
+      count(*) as value,
+      'Without Backup Policy' as label,
+      case count(*) when 0 then 'ok' else 'alert' end as type
     from
-      oci_core_volume as v
-      left join oci_core_volume_backup as b on v.id = b.volume_id
+      oci_core_volume
     where
-      b.id is null and v.lifecycle_state <> 'TERMINATED';
+      volume_backup_policy_assignment_id is null and lifecycle_state <> 'TERMINATED';
   EOQ
 }
 
@@ -221,13 +210,12 @@ query "oci_block_storage_block_volume_with_no_backups_count" {
 query "oci_block_storage_block_volume_with_backups" {
   sql = <<-EOQ
     select
-      case when b.id is null then 'disabled' else 'enabled' end as status,
-      count(distinct v.id)
+      case when volume_backup_policy_assignment_id is null then '0' else '1+' end as status,
+      count(*)
     from
-      oci_core_volume as v
-      left join oci_core_volume_backup as b on v.id = b.volume_id
+      oci_core_volume
     where
-      v.lifecycle_state <> 'TERMINATED'
+      lifecycle_state <> 'TERMINATED'
     group by
       status;
   EOQ
