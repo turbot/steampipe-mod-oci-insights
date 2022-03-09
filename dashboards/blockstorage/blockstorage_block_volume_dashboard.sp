@@ -31,16 +31,16 @@ dashboard "oci_block_storage_block_volume_dashboard" {
     title = "Assessments"
 
     chart {
-      title = "Backup Policy Count"
+      title = "Backup Policy Status"
       sql   = query.oci_block_storage_block_volume_with_backups.sql
       type  = "donut"
       width = 3
 
       series "count" {
-        point "1+" {
+        point "assigned" {
           color = "ok"
         }
-        point "0" {
+        point "not assigned" {
           color = "alert"
         }
       }
@@ -210,7 +210,7 @@ query "oci_block_storage_block_volume_with_no_backups_count" {
 query "oci_block_storage_block_volume_with_backups" {
   sql = <<-EOQ
     select
-      case when volume_backup_policy_assignment_id is null then '0' else '1+' end as status,
+      case when volume_backup_policy_assignment_id is null then 'not assigned' else 'assigned' end as status,
       count(*)
     from
       oci_core_volume
