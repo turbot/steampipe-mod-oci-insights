@@ -81,7 +81,7 @@ dashboard "oci_kms_key_dashboard" {
 
     chart {
       title = "Keys by Protection Mode"
-      sql   = query.oci_database_autonomous_db_by_protection_mode.sql
+      sql   = query.oci_kms_key_by_protection_mode.sql
       type  = "column"
       width = 2
     }
@@ -245,7 +245,7 @@ query "oci_kms_key_by_creation_month" {
   EOQ
 }
 
-query "oci_database_autonomous_db_by_protection_mode" {
+query "oci_kms_key_by_protection_mode" {
   sql = <<-EOQ
     select
       protection_mode,

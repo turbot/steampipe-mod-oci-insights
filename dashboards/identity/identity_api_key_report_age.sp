@@ -1,6 +1,6 @@
 dashboard "oci_identity_api_key_age_report" {
 
-  title = "OCI Identity API Key Age Report"
+  title         = "OCI Identity API Key Age Report"
   documentation = file("./dashboards/identity/docs/identity_api_key_report_age.md")
 
   tags = merge(local.identity_common_tags, {
@@ -126,7 +126,6 @@ query "oci_identity_api_key_1_year" {
 query "oci_identity_api_key_age_table" {
   sql = <<-EOQ
     select
-      k.fingerprint as "Fingerprint",
       k.user_name as "User Name",
       now()::date - k.time_created::date as "Age in Days",
       k.time_created as "Create Time",
@@ -139,6 +138,6 @@ query "oci_identity_api_key_age_table" {
     where
       t.id = k.tenant_id
     order by
-      k.fingerprint;
+      k.user_name;
   EOQ
 }

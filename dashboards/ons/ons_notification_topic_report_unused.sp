@@ -35,7 +35,7 @@ dashboard "oci_ons_notification_topic_unused_report" {
 query "oci_ons_notification_topic_unused_table" {
   sql = <<-EOQ
       select
-        n.name,
+        n.name as "Name",
         n.lifecycle_state as "Lifecycle State",
         coalesce(c.title, 'root') as "Compartment",
         t.title as "Tenancy",
