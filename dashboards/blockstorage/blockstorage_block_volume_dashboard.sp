@@ -56,35 +56,35 @@ dashboard "oci_block_storage_block_volume_dashboard" {
       title = "Block Volumes by Tenancy"
       sql   = query.oci_block_storage_block_volume_by_tenancy.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
     chart {
       title = "Block Volumes by Compartment"
       sql   = query.oci_block_storage_block_volume_by_compartment.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
     chart {
       title = "Block Volumes by Region"
       sql   = query.oci_block_storage_block_volume_by_region.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
     chart {
-      title = "Block Volume by Age"
+      title = "Block Volumes by Age"
       sql   = query.oci_block_storage_block_volume_by_creation_month.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
     chart {
-      title = "Block Volume by Encryption Type"
+      title = "Block Volumes by Encryption Type"
       sql   = query.oci_block_storage_block_volume_by_encryption_type.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
   }
@@ -95,7 +95,7 @@ dashboard "oci_block_storage_block_volume_dashboard" {
       title = "Storage by Tenancy (GB)"
       sql   = query.oci_block_storage_block_volume_storage_by_tenancy.sql
       type  = "column"
-      width = 2
+      width = 4
 
       series "GB" {
         color = "tan"
@@ -106,7 +106,7 @@ dashboard "oci_block_storage_block_volume_dashboard" {
       title = "Storage by Compartment (GB)"
       sql   = query.oci_block_storage_block_volume_storage_by_compartment.sql
       type  = "column"
-      width = 2
+      width = 4
 
       series "GB" {
         color = "tan"
@@ -117,7 +117,7 @@ dashboard "oci_block_storage_block_volume_dashboard" {
       title = "Storage by Region (GB)"
       sql   = query.oci_block_storage_block_volume_storage_by_region.sql
       type  = "column"
-      width = 2
+      width = 4
 
       series "GB" {
         color = "tan"
@@ -128,7 +128,7 @@ dashboard "oci_block_storage_block_volume_dashboard" {
       title = "Storage by Age (GB)"
       sql   = query.oci_block_storage_block_volume_storage_by_creation_month.sql
       type  = "column"
-      width = 2
+      width = 4
 
       series "GB" {
         color = "tan"
@@ -139,13 +139,12 @@ dashboard "oci_block_storage_block_volume_dashboard" {
       title = "Storage by Encryption Type (GB)"
       sql   = query.oci_block_storage_block_volume_storage_by_encryption_type.sql
       type  = "column"
-      width = 2
+      width = 4
 
       series "GB" {
         color = "tan"
       }
     }
-
 
   }
 
