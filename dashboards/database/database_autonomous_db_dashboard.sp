@@ -56,7 +56,7 @@ dashboard "oci_database_autonomous_db_dashboard" {
     }
 
     chart {
-      title = "Operations Insight Status"
+      title = "Operations Insights Status"
       sql   = query.oci_database_autonomous_db_by_operations_insights_status.sql
       type  = "donut"
       width = 3

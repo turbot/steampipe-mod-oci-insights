@@ -1,6 +1,7 @@
 This dashboard answers the following questions:
 
-- How many autonomous DBs are in each tenancy, compartment, and region?
-- How many autonomous DBs are with data guard disabled?
-- How many autonomous DBs are with operations insight disabled?
-- What are my most used autonomous DBs by CPU and storage utilization?
+- How many autonomous databases are in each tenancy, compartment, and region?
+- How many cores are allocated across all autonomous databases? 
+- What is the total size of all autonomous databases?
+- How many autonomous databases have data guard and operations insights disabled?
+- What are my most used autonomous databases by CPU and storage utilization?

@@ -121,6 +121,7 @@ query "oci_kms_key_age_table" {
   sql = <<-EOQ
     select
       k.name as "Name",
+      k.vault_name as "Vault Name",
       now()::date - k.time_created::date as "Age in Days",
       k.time_created as "Create Time",
       k.lifecycle_state as "Lifecycle State",

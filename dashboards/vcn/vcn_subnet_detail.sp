@@ -69,7 +69,7 @@ dashboard "oci_vcn_subnet_detail" {
 }
 
 query "oci_vcn_subnet_input" {
-  sql = <<EOQ
+  sql = <<-EOQ
     select
       s.display_name as label,
       s.id as value,

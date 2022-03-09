@@ -1,6 +1,6 @@
 dashboard "oci_identity_user_dashboard" {
 
-  title = "OCI Identity User Dashboard"
+  title         = "OCI Identity User Dashboard"
   documentation = file("./dashboards/identity/docs/identity_user_dashboard.md")
 
   tags = merge(local.identity_common_tags, {
@@ -15,7 +15,7 @@ dashboard "oci_identity_user_dashboard" {
     }
 
     card {
-      sql   = query.oci_identity_user_not_attached_to_groups.sql
+      sql   = query.oci_identity_user_not_attached_to_group.sql
       width = 2
     }
 
@@ -58,15 +58,15 @@ dashboard "oci_identity_user_dashboard" {
     }
 
     chart {
-      title = "Users by Type"
-      sql   = query.oci_identity_user_by_type.sql
+      title = "Users by Group"
+      sql   = query.oci_identity_user_by_groups.sql
       type  = "column"
       width = 2
     }
 
     chart {
-      title = "Users by Group"
-      sql   = query.oci_identity_user_by_groups.sql
+      title = "Users by Type"
+      sql   = query.oci_identity_user_by_type.sql
       type  = "column"
       width = 2
     }
@@ -97,7 +97,7 @@ query "oci_identity_user_count" {
   EOQ
 }
 
-query "oci_identity_user_not_attached_to_groups" {
+query "oci_identity_user_not_attached_to_group" {
   sql = <<-EOQ
   select
     count(oci_identity_user.name) as value,
@@ -207,24 +207,6 @@ query "oci_identity_users_by_creation_month" {
       months.month;
   EOQ
 }
-
-query "oci_identity_user_mfa_enabled_by_tenancy" {
-  sql = <<-EOQ
-    select
-       t.name as "tenancy",
-       count(u.name)::numeric as "MFA Enabled"
-    from
-      oci_identity_user as u,
-      oci_identity_tenancy as t
-    where
-      t.id = u.tenant_id and is_mfa_activated
-    group by
-      tenancy
-    order by
-      tenancy;
-  EOQ
-}
-
 
 query "oci_identity_user_by_type" {
   sql = <<-EOQ

@@ -1,3 +1,3 @@
 This report answers the following questions:
 
-- Is MFA enabled on my users?
+- Which users have MFA enabled?

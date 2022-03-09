@@ -1,3 +1,3 @@
 This report answers the following questions:
 
-- How many unattached boot volumes are there?
+- Which block volumes are attached to an instance?
