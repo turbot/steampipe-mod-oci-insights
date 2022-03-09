@@ -91,7 +91,7 @@ dashboard "oci_vcn_network_security_group_detail" {
 }
 
 query "oci_vcn_network_security_group_input" {
-  sql = <<EOQ
+  sql = <<-EOQ
     select
       g.display_name as label,
       g.id as value,

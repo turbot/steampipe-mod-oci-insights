@@ -127,6 +127,7 @@ query "oci_identity_api_key_age_table" {
   sql = <<-EOQ
     select
       k.user_name as "User Name",
+      k.fingerprint as "Fingerprint",
       now()::date - k.time_created::date as "Age in Days",
       k.time_created as "Create Time",
       k.lifecycle_state as "Lifecycle State",
