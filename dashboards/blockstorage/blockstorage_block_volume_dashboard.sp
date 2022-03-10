@@ -37,10 +37,10 @@ dashboard "oci_block_storage_block_volume_dashboard" {
       width = 3
 
       series "count" {
-        point "assigned" {
+        point "with backup policy" {
           color = "ok"
         }
-        point "not assigned" {
+        point "no backup policy" {
           color = "alert"
         }
       }
@@ -209,7 +209,7 @@ query "oci_block_storage_block_volume_with_no_backups_count" {
 query "oci_block_storage_block_volume_with_backups" {
   sql = <<-EOQ
     select
-      case when volume_backup_policy_assignment_id is null then 'not assigned' else 'assigned' end as status,
+      case when volume_backup_policy_assignment_id is null then 'no backup policy' else 'with backup policy' end as status,
       count(*)
     from
       oci_core_volume
@@ -243,33 +243,32 @@ query "oci_block_storage_block_volume_by_compartment" {
   sql = <<-EOQ
     with compartments as (
       select
-        id, title
+        id,
+        'root [' || title || ']' as title
       from
         oci_identity_tenancy
       union (
       select
-        id,title
+        c.id,
+        c.title || ' [' || t.title || ']' as title
       from
-        oci_identity_compartment
+        oci_identity_compartment c,
+        oci_identity_tenancy t
       where
-        lifecycle_state = 'ACTIVE'
-        )
+        c.tenant_id = t.id and c.lifecycle_state = 'ACTIVE'
       )
+    )
     select
-      t.title as "Tenancy",
-      case when t.title = c.title then 'root' else c.title end as "Compartment",
+      c.title as "Title",
       count(v.*) as "Volumes"
     from
       oci_core_volume as v,
-      oci_identity_tenancy as t,
       compartments as c
     where
-      c.id = v.compartment_id and v.tenant_id = t.id and v.lifecycle_state <> 'TERMINATED'
+      c.id = v.compartment_id and v.lifecycle_state <> 'TERMINATED'
     group by
-      t.title,
       c.title
     order by
-      t.title,
       c.title;
   EOQ
 }
@@ -356,33 +355,32 @@ query "oci_block_storage_block_volume_storage_by_compartment" {
   sql = <<-EOQ
     with compartments as (
       select
-        id, title
+        id,
+        'root [' || title || ']' as title
       from
         oci_identity_tenancy
       union (
       select
-        id,title
+        c.id,
+        c.title || ' [' || t.title || ']' as title
       from
-        oci_identity_compartment
+        oci_identity_compartment c,
+        oci_identity_tenancy t
       where
-        lifecycle_state = 'ACTIVE'
-        )
+        c.tenant_id = t.id and c.lifecycle_state = 'ACTIVE'
       )
+    )
     select
-      t.title as "Tenancy",
-      case when t.title = c.title then 'root' else c.title end as "Compartment",
-      sum(v.size_in_gbs) as "GB"
+      c.title as "Title",
+      count(v.size_in_gbs) as "GB"
     from
       oci_core_volume as v,
-      oci_identity_tenancy as t,
       compartments as c
     where
-      c.id = v.compartment_id and v.tenant_id = t.id and v.lifecycle_state <> 'TERMINATED'
+      c.id = v.compartment_id and v.lifecycle_state <> 'TERMINATED'
     group by
-      t.title,
       c.title
     order by
-      t.title,
       c.title;
   EOQ
 }

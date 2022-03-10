@@ -152,33 +152,32 @@ query "oci_vcn_subnet_by_compartment" {
   sql = <<-EOQ
     with compartments as (
       select
-        id, title
+        id,
+        'root [' || title || ']' as title
       from
         oci_identity_tenancy
       union (
       select
-        id,title
+        c.id,
+        c.title || ' [' || t.title || ']' as title
       from
-        oci_identity_compartment
+        oci_identity_compartment c,
+        oci_identity_tenancy t
       where
-        lifecycle_state = 'ACTIVE'
-        )
-       )
+        c.tenant_id = t.id and c.lifecycle_state = 'ACTIVE'
+      )
+    )
     select
-      t.title as "Tenancy",
-      case when t.title = c.title then 'root' else c.title end as "Compartment",
+      c.title as "Title",
       count(s.*) as "Subnets"
     from
       oci_core_subnet as s,
-      oci_identity_tenancy as t,
       compartments as c
     where
-      c.id = s.compartment_id and s.tenant_id = t.id and s.lifecycle_state <> 'DELETED'
+      c.id = s.compartment_id and s.lifecycle_state <> 'DELETED'
     group by
-      t.title,
       c.title
     order by
-      t.title,
       c.title;
   EOQ
 }

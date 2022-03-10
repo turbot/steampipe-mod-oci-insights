@@ -79,35 +79,35 @@ dashboard "oci_database_autonomous_db_dashboard" {
       title = "Autonomous DBs by Tenancy"
       sql   = query.oci_database_autonomous_db_by_tenancy.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
     chart {
       title = "Autonomous DBs by Compartment"
       sql   = query.oci_database_autonomous_db_by_compartment.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
     chart {
       title = "Autonomous DBs by Region"
       sql   = query.oci_database_autonomous_db_by_region.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
     chart {
       title = "Autonomous DBs by Age"
       sql   = query.oci_database_autonomous_db_by_creation_month.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
     chart {
       title = "Autonomous DBs by Workload Type"
       sql   = query.oci_database_autonomous_db_by_workload_type.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
   }
@@ -250,33 +250,32 @@ query "oci_database_autonomous_db_by_compartment" {
   sql = <<-EOQ
     with compartments as (
       select
-        id, title
+        id,
+        'root [' || title || ']' as title
       from
         oci_identity_tenancy
       union (
       select
-        id,title
+        c.id,
+        c.title || ' [' || t.title || ']' as title
       from
-        oci_identity_compartment
+        oci_identity_compartment c,
+        oci_identity_tenancy t
       where
-        lifecycle_state = 'ACTIVE'
-        )
-       )
+        c.tenant_id = t.id and c.lifecycle_state = 'ACTIVE'
+      )
+    )
     select
-      t.title as "Tenancy",
-      case when t.title = c.title then 'root' else c.title end as "Compartment",
+      c.title as "Title",
       count(a.*) as "Autonomous DBs"
     from
       oci_database_autonomous_database as a,
-      oci_identity_tenancy as t,
       compartments as c
     where
-      c.id = a.compartment_id and a.tenant_id = t.id
+      c.id = a.compartment_id
     group by
-      t.title,
       c.title
     order by
-      t.title,
       c.title;
   EOQ
 }

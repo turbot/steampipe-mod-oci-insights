@@ -25,16 +25,16 @@ dashboard "oci_ons_notification_topic_dashboard" {
     title = "Assessments"
 
     chart {
-      title = "Subscription Count"
+      title = "Subscriptions Status"
       sql   = query.oci_ons_notification_topic_by_subscription.sql
       type  = "donut"
       width = 4
 
       series "count" {
-        point "1+" {
+        point "with subscriptions" {
           color = "ok"
         }
-        point "0" {
+        point "no subscriptions" {
           color = "alert"
         }
       }
@@ -103,7 +103,7 @@ query "oci_ons_notification_topic_unused_count" {
 query "oci_ons_notification_topic_by_subscription" {
   sql = <<-EOQ
     select
-      case when s.id is null then '0' else '1+' end as status,
+      case when s.id is null then 'no subscriptions' else 'with subscriptions' end as status,
       count(distinct t.topic_id)
     from
       oci_ons_notification_topic t
@@ -136,33 +136,32 @@ query "oci_ons_notification_topic_by_compartment" {
   sql = <<-EOQ
     with compartments as (
       select
-        id, title
+        id,
+        'root [' || title || ']' as title
       from
         oci_identity_tenancy
       union (
       select
-        id,title
+        c.id,
+        c.title || ' [' || t.title || ']' as title
       from
-        oci_identity_compartment
+        oci_identity_compartment c,
+        oci_identity_tenancy t
       where
-        lifecycle_state = 'ACTIVE'
-        )
+        c.tenant_id = t.id and c.lifecycle_state = 'ACTIVE'
       )
+    )
     select
-      t.title as "Tenancy",
-      case when t.title = c.title then 'root' else c.title end as "Compartment",
-      count(n.*) as "Topics"
+      c.title as "Title",
+      count(t.*) as "Topics"
     from
-      oci_ons_notification_topic as n,
-      oci_identity_tenancy as t,
+      oci_ons_notification_topic as t,
       compartments as c
     where
-      c.id = n.compartment_id and n.tenant_id = t.id
+      c.id = t.compartment_id
     group by
-      t.title,
       c.title
     order by
-      t.title,
       c.title;
   EOQ
 }

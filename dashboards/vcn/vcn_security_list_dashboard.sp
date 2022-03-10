@@ -334,33 +334,32 @@ query "oci_vcn_security_list_by_compartment" {
   sql = <<-EOQ
     with compartments as (
       select
-        id, title
+        id,
+        'root [' || title || ']' as title
       from
         oci_identity_tenancy
       union (
       select
-        id,title
+        c.id,
+        c.title || ' [' || t.title || ']' as title
       from
-        oci_identity_compartment
+        oci_identity_compartment c,
+        oci_identity_tenancy t
       where
-        lifecycle_state = 'ACTIVE'
-        )
-       )
+        c.tenant_id = t.id and c.lifecycle_state = 'ACTIVE'
+      )
+    )
     select
-      t.title as "Tenancy",
-      case when t.title = c.title then 'root' else c.title end as "Compartment",
-      count(l.*) as "NoSQL Table"
+      c.title as "Title",
+      count(l.*) as "Security Lists"
     from
       oci_core_security_list as l,
-      oci_identity_tenancy as t,
       compartments as c
     where
-      c.id = l.compartment_id and l.tenant_id = t.id and lifecycle_state <> 'TERMINATED'
+      c.id = l.compartment_id and l.lifecycle_state <> 'TERMINATED'
     group by
-      t.title,
       c.title
     order by
-      t.title,
       c.title;
   EOQ
 }

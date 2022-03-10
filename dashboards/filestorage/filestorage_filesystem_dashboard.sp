@@ -33,34 +33,34 @@ dashboard "oci_filestorage_filesystem_dashboard" {
       title = "File Systems by Tenancy"
       sql   = query.oci_filestorage_filesystem_by_tenancy.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
     chart {
       title = "File Systems by Compartment"
       sql   = query.oci_filestorage_filesystem_by_compartment.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
     chart {
       title = "File Systems by Region"
       sql   = query.oci_filestorage_filesystem_by_region.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
     chart {
       title = "File Systems Age"
       sql   = query.oci_filestorage_filesystem_by_creation_month.sql
       type  = "column"
-      width = 2
+      width = 4
     }
     chart {
       title = "File Systems by Type"
       sql   = query.oci_filestorage_filesystem_type.sql
       type  = "column"
-      width = 2
+      width = 4
     }
   }
 
@@ -114,33 +114,32 @@ query "oci_filestorage_filesystem_by_compartment" {
   sql = <<-EOQ
     with compartments as (
       select
-        id, title
+        id,
+        'root [' || title || ']' as title
       from
         oci_identity_tenancy
       union (
       select
-        id,title
+        c.id,
+        c.title || ' [' || t.title || ']' as title
       from
-        oci_identity_compartment
+        oci_identity_compartment c,
+        oci_identity_tenancy t
       where
-        lifecycle_state = 'ACTIVE'
-        )
-       )
+        c.tenant_id = t.id and c.lifecycle_state = 'ACTIVE'
+      )
+    )
     select
-      t.title as "Tenancy",
-      case when t.title = c.title then 'root' else c.title end as "Compartment",
+      c.title as "Title",
       count(f.*) as "File Systems"
     from
       oci_file_storage_file_system as f,
-      oci_identity_tenancy as t,
       compartments as c
     where
-      c.id = f.compartment_id and f.tenant_id = t.id and f.lifecycle_state <> 'DELETED'
+      c.id = f.compartment_id and f.lifecycle_state <> 'DELETED'
     group by
-      t.title,
       c.title
     order by
-      t.title,
       c.title;
   EOQ
 }

@@ -122,33 +122,32 @@ query "oci_nosql_table_by_compartment" {
   sql = <<-EOQ
     with compartments as (
       select
-        id, title
+        id,
+        'root [' || title || ']' as title
       from
         oci_identity_tenancy
       union (
       select
-        id,title
+        c.id,
+        c.title || ' [' || t.title || ']' as title
       from
-        oci_identity_compartment
+        oci_identity_compartment c,
+        oci_identity_tenancy t
       where
-        lifecycle_state = 'ACTIVE'
-        )
-       )
+        c.tenant_id = t.id and c.lifecycle_state = 'ACTIVE'
+      )
+    )
     select
-      t.title as "Tenancy",
-      case when t.title = c.title then 'root' else c.title end as "Compartment",
+      c.title as "Title",
       count(n.*) as "NoSQL Tables"
     from
       oci_nosql_table as n,
-      oci_identity_tenancy as t,
       compartments as c
     where
-      c.id = n.compartment_id and n.tenant_id = t.id and lifecycle_state <> 'DELETED'
+      c.id = n.compartment_id and n.lifecycle_state <> 'DELETED'
     group by
-      t.title,
       c.title
     order by
-      t.title,
       c.title;
   EOQ
 }

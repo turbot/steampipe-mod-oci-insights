@@ -321,33 +321,32 @@ query "oci_objectstorage_bucket_by_compartment" {
   sql = <<-EOQ
     with compartments as (
       select
-        id, title
+        id,
+        'root [' || title || ']' as title
       from
         oci_identity_tenancy
       union (
       select
-        id,title
+        c.id,
+        c.title || ' [' || t.title || ']' as title
       from
-        oci_identity_compartment
+        oci_identity_compartment c,
+        oci_identity_tenancy t
       where
-        lifecycle_state = 'ACTIVE'
-        )
-       )
+        c.tenant_id = t.id and c.lifecycle_state = 'ACTIVE'
+      )
+    )
     select
-      t.title as "Tenancy",
-      case when t.title = c.title then 'root' else c.title end as "Compartment",
+      c.title as "Title",
       count(b.*) as "Buckets"
     from
       oci_objectstorage_bucket as b,
-      oci_identity_tenancy as t,
       compartments as c
     where
-      c.id = b.compartment_id and b.tenant_id = t.id
+      c.id = b.compartment_id
     group by
-      t.title,
       c.title
     order by
-      t.title,
       c.title;
   EOQ
 }

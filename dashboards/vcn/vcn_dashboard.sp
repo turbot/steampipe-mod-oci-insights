@@ -26,16 +26,16 @@ dashboard "oci_vcn_dashboard" {
     title = "Assessments"
 
     chart {
-      title = "Subnet Count"
+      title = "Subnets Status"
       sql   = query.oci_vcn_no_subnet.sql
       type  = "donut"
       width = 3
 
       series "count" {
-        point "1+" {
+        point "with subnets" {
           color = "ok"
         }
-        point "0" {
+        point "no subnets" {
           color = "alert"
         }
       }
@@ -105,7 +105,7 @@ query "oci_vcn_no_subnet_count" {
 query "oci_vcn_no_subnet" {
   sql = <<-EOQ
     select
-      case when s.id is null then '0' else '1+' end as status,
+      case when s.id is null then 'no subnets' else 'with subnets' end as status,
       count(distinct v.id)
     from
        oci_core_vcn v
@@ -140,33 +140,32 @@ query "oci_vcn_by_compartment" {
   sql = <<-EOQ
     with compartments as (
       select
-        id, title
+        id,
+        'root [' || title || ']' as title
       from
         oci_identity_tenancy
       union (
       select
-        id,title
+        c.id,
+        c.title || ' [' || t.title || ']' as title
       from
-        oci_identity_compartment
+        oci_identity_compartment c,
+        oci_identity_tenancy t
       where
-        lifecycle_state = 'ACTIVE'
-        )
-       )
+        c.tenant_id = t.id and c.lifecycle_state = 'ACTIVE'
+      )
+    )
     select
-      t.title as "Tenancy",
-      case when t.title = c.title then 'root' else c.title end as "Compartment",
-      count(v.*) as "File Systems"
+      c.title as "Title",
+      count(v.*) as "VCNs"
     from
       oci_core_vcn as v,
-      oci_identity_tenancy as t,
       compartments as c
     where
-      c.id = v.compartment_id and v.tenant_id = t.id and v.lifecycle_state <> 'DELETED'
+      c.id = v.compartment_id and v.lifecycle_state <> 'TERMINATED'
     group by
-      t.title,
       c.title
     order by
-      t.title,
       c.title;
   EOQ
 }

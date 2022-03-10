@@ -38,42 +38,42 @@ dashboard "oci_mysql_backup_dashboard" {
       title = "Backups by Tenancy"
       sql   = query.oci_mysql_backup_by_tenancy.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
     chart {
       title = "Backups by Compartment"
       sql   = query.oci_mysql_backup_by_compartment.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
     chart {
       title = "Backups by Region"
       sql   = query.oci_mysql_backup_by_region.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
     chart {
       title = "Backups by Age"
       sql   = query.oci_mysql_backup_by_creation_month.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
     chart {
       title = "Backups by Creation Type"
       sql   = query.oci_mysql_backup_by_creation_type.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
     chart {
       title = "Backups by Backup Type"
       sql   = query.oci_mysql_backup_by_backup_type.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
   }
@@ -219,33 +219,32 @@ query "oci_mysql_backup_by_compartment" {
   sql = <<-EOQ
     with compartments as (
       select
-        id, title
+        id,
+        'root [' || title || ']' as title
       from
         oci_identity_tenancy
       union (
       select
-        id,title
+        c.id,
+        c.title || ' [' || t.title || ']' as title
       from
-        oci_identity_compartment
+        oci_identity_compartment c,
+        oci_identity_tenancy t
       where
-        lifecycle_state = 'ACTIVE'
-        )
-       )
+        c.tenant_id = t.id and c.lifecycle_state = 'ACTIVE'
+      )
+    )
     select
-      t.title as "Tenancy",
-      case when t.title = c.title then 'root' else c.title end as "Compartment",
+      c.title as "Title",
       count(b.*) as "MySQL Backups"
     from
       oci_mysql_backup as b,
-      oci_identity_tenancy as t,
       compartments as c
     where
-      c.id = b.compartment_id and b.tenant_id = t.id and lifecycle_state <> 'DELETED'
+      c.id = b.compartment_id and b.lifecycle_state <> 'DELETED'
     group by
-      t.title,
       c.title
     order by
-      t.title,
       c.title;
   EOQ
 }
@@ -366,33 +365,32 @@ query "oci_mysql_backup_storage_by_compartment" {
   sql = <<-EOQ
     with compartments as (
       select
-        id, title
+        id,
+        'root [' || title || ']' as title
       from
         oci_identity_tenancy
       union (
       select
-        id,title
+        c.id,
+        c.title || ' [' || t.title || ']' as title
       from
-        oci_identity_compartment
+        oci_identity_compartment c,
+        oci_identity_tenancy t
       where
-        lifecycle_state <> 'DELETED'
-        )
+        c.tenant_id = t.id and c.lifecycle_state = 'ACTIVE'
       )
+    )
     select
-      t.title as "Tenancy",
-      case when t.title = c.title then 'root' else c.title end as "Compartment",
-      sum(b.backup_size_in_gbs) as "GB"
+      c.title as "Title",
+      count(b.backup_size_in_gbs) as "GB"
     from
       oci_mysql_backup as b,
-      oci_identity_tenancy as t,
       compartments as c
     where
-      c.id = b.compartment_id and b.tenant_id = t.id and b.lifecycle_state <> 'DELETED'
+      c.id = b.compartment_id and b.lifecycle_state <> 'DELETED'
     group by
-      t.title,
       c.title
     order by
-      t.title,
       c.title;
   EOQ
 }

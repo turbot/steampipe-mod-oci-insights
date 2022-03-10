@@ -57,35 +57,35 @@ dashboard "oci_compute_instance_dashboard" {
       title = "Instances by Tenancy"
       sql   = query.oci_compute_instance_by_tenancy.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
     chart {
       title = "Instances by Compartment"
       sql   = query.oci_compute_instance_by_compartment.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
     chart {
       title = "Instances by Region"
       sql   = query.oci_compute_instance_by_region.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
     chart {
       title = "Instances by Age"
       sql   = query.oci_compute_instance_by_creation_month.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
     chart {
       title = "Instances by Shape"
       sql   = query.oci_compute_instance_by_type.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
   }
@@ -200,33 +200,32 @@ query "oci_compute_instance_by_compartment" {
   sql = <<-EOQ
     with compartments as (
       select
-        id, title
+        id,
+        'root [' || title || ']' as title
       from
         oci_identity_tenancy
       union (
       select
-        id,title
+        c.id,
+        c.title || ' [' || t.title || ']' as title
       from
-        oci_identity_compartment
+        oci_identity_compartment c,
+        oci_identity_tenancy t
       where
-        lifecycle_state = 'ACTIVE'
+        c.tenant_id = t.id and c.lifecycle_state = 'ACTIVE'
       )
     )
     select
-      t.title as "Tenancy",
-      case when t.title = c.title then 'root' else c.title end as "Compartment",
+      c.title as "Title",
       count(i.*) as "Instances"
     from
       oci_core_instance as i,
-      oci_identity_tenancy as t,
       compartments as c
     where
-      c.id = i.compartment_id and i.tenant_id = t.id
+      c.id = i.compartment_id and i.lifecycle_state <> 'TERMINATED'
     group by
-      t.title,
       c.title
     order by
-      t.title,
       c.title;
   EOQ
 }

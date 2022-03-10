@@ -1,6 +1,6 @@
 dashboard "oci_kms_key_dashboard" {
 
-  title = "OCI KMS Key Dashboard"
+  title         = "OCI KMS Key Dashboard"
   documentation = file("./dashboards/kms/docs/kms_key_dashboard.md")
 
   tags = merge(local.kms_common_tags, {
@@ -54,14 +54,14 @@ dashboard "oci_kms_key_dashboard" {
       title = "Keys by Tenancy"
       sql   = query.oci_kms_key_by_tenancy.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
     chart {
       title = "Keys by Compartment"
       sql   = query.oci_kms_key_by_compartment.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
 
@@ -69,21 +69,21 @@ dashboard "oci_kms_key_dashboard" {
       title = "Keys by Region"
       sql   = query.oci_kms_key_by_region.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
     chart {
       title = "Keys by Age"
       sql   = query.oci_kms_key_by_creation_month.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
     chart {
       title = "Keys by Protection Mode"
       sql   = query.oci_kms_key_by_protection_mode.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
   }
@@ -157,33 +157,32 @@ query "oci_kms_key_by_compartment" {
   sql = <<-EOQ
     with compartments as (
       select
-        id, title
+        id,
+        'root [' || title || ']' as title
       from
         oci_identity_tenancy
       union (
       select
-        id,title
+        c.id,
+        c.title || ' [' || t.title || ']' as title
       from
-        oci_identity_compartment
+        oci_identity_compartment c,
+        oci_identity_tenancy t
       where
-        lifecycle_state = 'ACTIVE'
-        )
-       )
+        c.tenant_id = t.id and c.lifecycle_state = 'ACTIVE'
+      )
+    )
     select
-      t.title as "Tenancy",
-      case when t.title = c.title then 'root' else c.title end as "Compartment",
+      c.title as "Title",
       count(k.*) as "Keys"
     from
       oci_kms_key as k,
-      oci_identity_tenancy as t,
       compartments as c
     where
-      c.id = k.compartment_id and k.tenant_id = t.id
+      c.id = k.compartment_id
     group by
-      t.title,
       c.title
     order by
-      t.title,
       c.title;
   EOQ
 }
