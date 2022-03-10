@@ -25,12 +25,17 @@ dashboard "oci_objectstorage_bucket_dashboard" {
     }
 
     card {
+      sql   = query.oci_objectstorage_bucket_public_access_count.sql
+      width = 2
+    }
+
+    card {
       sql   = query.oci_objectstorage_bucket_versioning_disabled_count.sql
       width = 2
     }
 
     card {
-      sql   = query.oci_objectstorage_bucket_public_access_count.sql
+      sql   = query.oci_objectstorage_bucket_logging_disabled_count.sql
       width = 2
     }
 
@@ -38,23 +43,6 @@ dashboard "oci_objectstorage_bucket_dashboard" {
 
   container {
     title = "Assessments"
-
-    chart {
-      title = "Versioning Status"
-      sql   = query.oci_objectstorage_bucket_versioning_status.sql
-      type  = "donut"
-      width = 3
-
-      series "count" {
-        point "enabled" {
-          color = "ok"
-        }
-        point "disabled" {
-          color = "alert"
-        }
-      }
-    }
-
 
     chart {
       title = "Public Access"
@@ -72,6 +60,38 @@ dashboard "oci_objectstorage_bucket_dashboard" {
       }
     }
 
+    chart {
+      title = "Versioning Status"
+      sql   = query.oci_objectstorage_bucket_versioning_status.sql
+      type  = "donut"
+      width = 3
+
+      series "count" {
+        point "enabled" {
+          color = "ok"
+        }
+        point "disabled" {
+          color = "alert"
+        }
+      }
+    }
+
+    chart {
+      title = "Logging Status"
+      sql   = query.oci_objectstorage_bucket_logging_status.sql
+      type  = "donut"
+      width = 3
+
+      series "count" {
+        point "enabled" {
+          color = "ok"
+        }
+        point "disabled" {
+          color = "alert"
+        }
+      }
+    }
+
   }
 
   container {
@@ -81,35 +101,35 @@ dashboard "oci_objectstorage_bucket_dashboard" {
       title = "Buckets by Tenancy"
       sql   = query.oci_objectstorage_bucket_by_tenancy.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
     chart {
       title = "Buckets by Compartment"
       sql   = query.oci_objectstorage_bucket_by_compartment.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
     chart {
       title = "Buckets by Region"
       sql   = query.oci_objectstorage_bucket_by_region.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
     chart {
       title = "Buckets by Age"
       sql   = query.oci_objectstorage_bucket_by_creation_month.sql
       type  = "column"
-      width = 2
+      width = 4
     }
 
     chart {
       title = "Buckets by Encryption Type"
       sql   = query.oci_objectstorage_bucket_encryption_status.sql
       type  = "column"
-      width = 2
+      width = 4
     }
   }
 
@@ -180,7 +200,51 @@ query "oci_objectstorage_bucket_versioning_disabled_count" {
   EOQ
 }
 
+query "oci_objectstorage_bucket_logging_disabled_count" {
+  sql = <<-EOQ
+    with name_with_region as (
+      select
+        concat(configuration -> 'source' ->> 'resource', region) as name_with_region,
+        is_enabled
+      from
+        oci_logging_log
+      where
+        lifecycle_state = 'ACTIVE'
+    )
+   select
+      count(b.*) as value,
+      'Logging Disabled' as label,
+      case count(b.*) when 0 then 'ok' else 'alert' end as type
+    from
+      oci_objectstorage_bucket as b
+      left join name_with_region as n on concat(b.name, b.region) = n.name_with_region
+    where
+      not n.is_enabled or n.is_enabled is null;
+  EOQ
+}
+
 # Assessment Queries
+
+query "oci_objectstorage_bucket_public_access_status" {
+  sql = <<-EOQ
+    with public_access_stat as (
+      select
+        case
+          when public_access_type = 'NoPublicAccess' then 'disabled'
+          else 'enabled'
+        end as public_access_stat
+      from
+        oci_objectstorage_bucket
+    )
+    select
+      public_access_stat,
+      count(*)
+    from
+      public_access_stat
+    group by
+      public_access_stat
+  EOQ
+}
 
 query "oci_objectstorage_bucket_versioning_status" {
   sql = <<-EOQ
@@ -203,24 +267,34 @@ query "oci_objectstorage_bucket_versioning_status" {
   EOQ
 }
 
-query "oci_objectstorage_bucket_public_access_status" {
+query "oci_objectstorage_bucket_logging_status" {
   sql = <<-EOQ
-    with public_access_stat as (
+    with name_with_region as (
       select
-        case
-          when public_access_type = 'NoPublicAccess' then 'disabled'
-          else 'enabled'
-        end as public_access_stat
+        concat(configuration -> 'source' ->> 'resource', region) as name_with_region,
+        is_enabled
       from
-        oci_objectstorage_bucket
+        oci_logging_log
+      where
+        lifecycle_state = 'ACTIVE'
+    ),
+    logging_stat as (
+      select
+      case
+        when not n.is_enabled or n.is_enabled is null then 'disabled'
+        else 'enabled'
+      end as logging_stat
+    from
+      oci_objectstorage_bucket as b
+      left join name_with_region as n on concat(b.name, b.region) = n.name_with_region
     )
     select
-      public_access_stat,
+      logging_stat,
       count(*)
     from
-      public_access_stat
+      logging_stat
     group by
-      public_access_stat
+      logging_stat
   EOQ
 }
 

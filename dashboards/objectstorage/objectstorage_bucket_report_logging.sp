@@ -31,29 +31,6 @@ dashboard "oci_objectstorage_bucket_logging_report" {
 
 }
 
-query "oci_objectstorage_bucket_logging_disabled_count" {
-  sql = <<-EOQ
-    with name_with_region as (
-      select
-        concat(configuration -> 'source' ->> 'resource', region) as name_with_region,
-        is_enabled
-      from
-        oci_logging_log
-      where
-        lifecycle_state = 'ACTIVE'
-    )
-   select
-      count(b.*) as value,
-      'Logging Disabled' as label,
-      case count(b.*) when 0 then 'ok' else 'alert' end as type
-    from
-      oci_objectstorage_bucket as b
-      left join name_with_region as n on concat(b.name, b.region) = n.name_with_region
-    where
-      not n.is_enabled or n.is_enabled is null;
-  EOQ
-}
-
 query "oci_objectstorage_bucket_logging_table" {
   sql = <<-EOQ
     with name_with_region as (
@@ -68,8 +45,8 @@ query "oci_objectstorage_bucket_logging_table" {
     select
       b.name as "Name",
       case when n.is_enabled then 'Enabled' else null end as "Logging Status",
-      coalesce(c.title, 'root') as "Compartment",
       t.title as "Tenancy",
+      coalesce(c.title, 'root') as "Compartment",
       b.region as "Region",
       b.id as "OCID"
     from

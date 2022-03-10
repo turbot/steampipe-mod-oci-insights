@@ -37,8 +37,8 @@ query "oci_objectstorage_bucket_lifecycle_table" {
       select
         b.name as "Name",
         b.versioning as "Versioning",
-        coalesce(c.title, 'root') as "Compartment",
         t.title as "Tenancy",
+        coalesce(c.title, 'root') as "Compartment",
         b.region as "Region",
         b.id as "OCID"
       from

@@ -43,8 +43,8 @@ query "oci_objectstorage_bucket_public_access_table" {
         b.name as "Name",
         public_access_type as "Bucket Access Type",
         b.is_read_only as "Read Only",
-        coalesce(c.title, 'root') as "Compartment",
         t.title as "Tenancy",
+        coalesce(c.title, 'root') as "Compartment",
         b.region as "Region",
         b.id as "OCID"
       from

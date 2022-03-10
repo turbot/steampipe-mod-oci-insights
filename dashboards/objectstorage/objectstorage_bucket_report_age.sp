@@ -123,8 +123,8 @@ query "oci_objectstorage_bucket_age_table" {
       b.name as "Name",
       now()::date - b.time_created::date as "Age in Days",
       b.time_created as "Create Time",
-      coalesce(c.title, 'root') as "Compartment",
       t.title as "Tenancy",
+      coalesce(c.title, 'root') as "Compartment",
       b.region as "Region",
       b.id as "OCID"
     from

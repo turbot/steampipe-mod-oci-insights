@@ -53,8 +53,8 @@ query "oci_objectstorage_bucket_encryption_table" {
         b.name as "Name",
         case when b.kms_key_id is not null then 'Customer-Managed' else 'Oracle-Managed' end as "Encryption Status",
         b.kms_key_id as "KMS Key ID",
-        coalesce(c.title, 'root') as "Compartment",
         t.title as "Tenancy",
+        coalesce(c.title, 'root') as "Compartment",
         b.region as "Region",
         b.id as "OCID"
       from
