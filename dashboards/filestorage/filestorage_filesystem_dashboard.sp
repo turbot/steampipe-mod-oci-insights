@@ -208,7 +208,7 @@ query "oci_filestorage_filesystem_by_creation_month" {
 query "oci_filestorage_filesystem_type" {
   sql = <<-EOQ
     select
-      case when not is_clone_parent then 'Uncloned' else 'Cloned' end as status,
+      case when not is_clone_parent then 'not-cloned' else 'cloned' end as status,
       count(*)
     from
       oci_file_storage_file_system
