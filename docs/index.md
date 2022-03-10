@@ -6,17 +6,34 @@ repository: "https://github.com/turbot/steampipe-mod-oci-insights"
 
 Create dashboards and reports for your OCI resources using Steampipe.
 
+<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-oci-insights/release/v0.1/docs/images/oci_objecstorage_bucket_dashboard.png" width="50%" type="thumbnail"/>
+<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-oci-insights/release/v0.1/docs/images/oci_identity_api_key_age.png" width="50%" type="thumbnail"/>
+<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-oci-insights/release/v0.1/docs/images/oci_blockstorage_block_volume_encryption.png" width="50%" type="thumbnail"/>
+<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-oci-insights/release/v0.1/docs/images/oci_objectstorage_bucket_public_access.png" width="50%" type="thumbnail"/>
+
+## Overview
+
+Dashboards can help answer questions like:
+
+- How many resources do I have?
+- How old are my resources?
+- Are there any publicly accessible resources?
+- Is encryption enabled and what keys are used for encryption?
+- Is versioning enabled?
+
+Dashboards are available for 10+ services, including Block Storage, Compute, Identity, Object Storage, VCN, and more!
+
 ## References
 
 [OCI](https://cloud.oracle.com/) provides on-demand cloud computing platforms and APIs to authenticated customers on a metered pay-as-you-go basis.
 
 [Steampipe](https://steampipe.io) is an open source CLI to instantly query cloud APIs using SQL.
 
-[Steampipe Mods](https://steampipe.io/docs/reference/mod-resources#mod) are collections of `named queries`, and codified `controls` that can be used to test current configuration of your cloud resources against a desired configuration.
+[Steampipe Mods](https://steampipe.io/docs/reference/mod-resources#mod) are collections of `named queries`, codified `controls` that can be used to test current configuration of your cloud resources against a desired configuration, and `dashboards` that organize and display key pieces of information.
 
 ## Documentation
 
-- **[Benchmarks and controls →](https://hub.steampipe.io/mods/turbot/oci_insights/controls)**
+- **[Dashboards →](https://hub.steampipe.io/mods/turbot/oci_insights/dashboards)**
 
 ## Getting started
 
@@ -35,32 +52,21 @@ cd steampipe-mod-oci-insights
 
 ### Usage
 
-TODO
+Start your dashboard server to get started:
+
+```shell
+steampipe dashboard
+```
+
+By default, the dashboard interface will then be launched in a new browser window at https://localhost:9194.
+
+From here, you can view all of your dashboards and reports.
 
 ### Credentials
 
 This mod uses the credentials configured in the [Steampipe OCI plugin](https://hub.steampipe.io/plugins/turbot/oci).
 
-### Configuration
-
-Several dashboards and reports have [input variables](https://steampipe.io/docs/using-steampipe/mod-variables) that can be configured to better match your environment and requirements. Each variable has a default defined in `steampipe.spvars`, but these can be overriden in several ways:
-
-- Modify the `steampipe.spvars` file
-- Remove or comment out the value in `steampipe.spvars`, after which Steampipe will prompt you for a value when running a query or check
-- Pass in a value on the command line:
-  ```shell
-  steampipe check benchmark.mandatory --var 'mandatory_tags=["Application", "Environment", "Department", "Owner"]'
-  ```
-- Set an environment variable:
-  ```shell
-  SP_VAR_mandatory_tags='["Application", "Environment", "Department", "Owner"]' steampipe check control.?????_instance_mandatory
-  ```
-  - Note: When using environment variables, if the variable is defined in `steampipe.spvars` or passed in through the command line, either of those will take precedence over the environment variable value. For more information on variable definition precedence, please see the link below.
-
-These are only some of the ways you can set variables. For a full list, please see [Passing Input Variables](https://steampipe.io/docs/using-steampipe/mod-variables#passing-input-variables).
-
 ## Get involved
 
 * Contribute: [GitHub Repo](https://github.com/turbot/steampipe-mod-oci-insights)
-
 * Community: [Slack Channel](https://steampipe.io/community/join)
