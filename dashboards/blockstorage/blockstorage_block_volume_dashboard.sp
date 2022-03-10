@@ -60,15 +60,8 @@ dashboard "oci_block_storage_block_volume_dashboard" {
     }
 
     chart {
-      title = "Block Volumes by Compartment (New)"
+      title = "Block Volumes by Compartment"
       sql   = query.oci_block_storage_block_volume_by_compartment.sql
-      type  = "column"
-      width = 4
-    }
-
-    chart {
-      title = "Block Volumes by Compartment (Expected)"
-      sql   = query.oci_block_storage_block_volume_by_compartment_expected.sql
       type  = "column"
       width = 4
     }
@@ -276,41 +269,6 @@ query "oci_block_storage_block_volume_by_compartment" {
     group by
       c.title
     order by
-      c.title;
-  EOQ
-}
-
-query "oci_block_storage_block_volume_by_compartment_expected" {
-  sql = <<-EOQ
-    with compartments as (
-      select
-        id, title
-      from
-        oci_identity_tenancy
-      union (
-      select
-        id,title
-      from
-        oci_identity_compartment
-      where
-        lifecycle_state = 'ACTIVE'
-        )
-      )
-    select
-      t.title as "Tenancy",
-      case when t.title = c.title then 'root' else c.title end as "Compartment",
-      count(v.*) as "Volumes"
-    from
-      oci_core_volume as v,
-      oci_identity_tenancy as t,
-      compartments as c
-    where
-      c.id = v.compartment_id and v.tenant_id = t.id and v.lifecycle_state <> 'TERMINATED'
-    group by
-      t.title,
-      c.title
-    order by
-      t.title,
       c.title;
   EOQ
 }
