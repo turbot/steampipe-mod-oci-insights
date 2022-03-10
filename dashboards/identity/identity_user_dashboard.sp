@@ -251,7 +251,7 @@ query "oci_identity_user_by_verified_email" {
     with email_stat as (
       select
         case
-          when email_verified then 'Verified' else 'Unverified'
+          when email_verified then 'verified' else 'unverified'
         end as email_stat
       from
         oci_identity_user

@@ -43,8 +43,8 @@ query "oci_block_storage_block_volume_encryption_table" {
         v.display_name as "Name",
         case when v.kms_key_id is not null then 'Customer-Managed' else 'Oracle-Managed' end as "Encryption Status",
         v.kms_key_id as "KMS Key ID",
-        coalesce(c.title, 'root') as "Compartment",
         t.title as "Tenancy",
+        coalesce(c.title, 'root') as "Compartment",
         v.region as "Region",
         v.id as "OCID"
       from

@@ -322,7 +322,7 @@ query "oci_vcn_security_list_by_tenancy" {
       oci_core_security_list as sg,
       oci_identity_tenancy as c
     where
-      c.id = sg.compartment_id and lifecycle_state <> 'TERMINATED'
+      c.id = sg.tenant_id and lifecycle_state <> 'TERMINATED'
     group by
       c.title
     order by

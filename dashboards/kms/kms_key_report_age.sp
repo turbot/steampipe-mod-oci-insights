@@ -125,8 +125,8 @@ query "oci_kms_key_age_table" {
       now()::date - k.time_created::date as "Age in Days",
       k.time_created as "Create Time",
       k.lifecycle_state as "Lifecycle State",
-      coalesce(c.title, 'root') as "Compartment",
       t.title as "Tenancy",
+      coalesce(c.title, 'root') as "Compartment",
       k.region as "Region",
       k.id as "OCID"
     from

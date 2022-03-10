@@ -124,8 +124,8 @@ query "oci_filestorage_filesystem_age_table" {
       now()::date - f.time_created::date as "Age in Days",
       f.time_created as "Create Time",
       f.lifecycle_state as "Lifecycle State",
-      coalesce(c.title, 'root') as "Compartment",
       t.title as "Tenancy",
+      coalesce(c.title, 'root') as "Compartment",
       f.region as "Region",
       f.id as "OCID"
     from

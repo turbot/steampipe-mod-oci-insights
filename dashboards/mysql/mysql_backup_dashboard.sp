@@ -84,7 +84,7 @@ dashboard "oci_mysql_backup_dashboard" {
       title = "Storage by Tenancy (GB)"
       sql   = query.oci_mysql_backup_storage_by_tenancy.sql
       type  = "column"
-      width = 2
+      width = 4
 
       series "GB" {
         color = "tan"
@@ -95,7 +95,7 @@ dashboard "oci_mysql_backup_dashboard" {
       title = "Storage by Compartment (GB)"
       sql   = query.oci_mysql_backup_storage_by_compartment.sql
       type  = "column"
-      width = 2
+      width = 4
 
       series "GB" {
         color = "tan"
@@ -106,7 +106,7 @@ dashboard "oci_mysql_backup_dashboard" {
       title = "Storage by Region (GB)"
       sql   = query.oci_mysql_backup_storage_by_region.sql
       type  = "column"
-      width = 2
+      width = 4
 
       series "GB" {
         color = "tan"
@@ -117,7 +117,7 @@ dashboard "oci_mysql_backup_dashboard" {
       title = "Storage by Age (GB)"
       sql   = query.oci_mysql_backup_storage_by_creation_month.sql
       type  = "column"
-      width = 2
+      width = 4
 
       series "GB" {
         color = "tan"
@@ -128,7 +128,7 @@ dashboard "oci_mysql_backup_dashboard" {
       title = "Storage by Creation Type"
       sql   = query.oci_mysql_backup_storage_by_creation_type.sql
       type  = "column"
-      width = 2
+      width = 4
 
       series "GB" {
         color = "tan"
@@ -382,7 +382,7 @@ query "oci_mysql_backup_storage_by_compartment" {
     )
     select
       c.title as "Title",
-      count(b.backup_size_in_gbs) as "GB"
+      sum(b.backup_size_in_gbs) as "GB"
     from
       oci_mysql_backup as b,
       compartments as c

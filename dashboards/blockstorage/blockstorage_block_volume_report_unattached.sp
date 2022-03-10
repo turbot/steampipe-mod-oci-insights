@@ -50,8 +50,8 @@ query "oci_block_storage_block_volume_unattached_table" {
         v.display_name as "Name",
         a.lifecycle_state as "Attachment Status",
         i.display_name as "Instance Name",
-        coalesce(c.title, 'root') as "Compartment",
         t.title as "Tenancy",
+        coalesce(c.title, 'root') as "Compartment",
         v.region as "Region",
         v.id as "OCID"
       from

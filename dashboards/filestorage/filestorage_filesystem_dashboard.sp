@@ -33,35 +33,30 @@ dashboard "oci_filestorage_filesystem_dashboard" {
       title = "File Systems by Tenancy"
       sql   = query.oci_filestorage_filesystem_by_tenancy.sql
       type  = "column"
-      width = 4
+      width = 3
     }
 
     chart {
       title = "File Systems by Compartment"
       sql   = query.oci_filestorage_filesystem_by_compartment.sql
       type  = "column"
-      width = 4
+      width = 3
     }
 
     chart {
       title = "File Systems by Region"
       sql   = query.oci_filestorage_filesystem_by_region.sql
       type  = "column"
-      width = 4
+      width = 3
     }
 
     chart {
       title = "File Systems Age"
       sql   = query.oci_filestorage_filesystem_by_creation_month.sql
       type  = "column"
-      width = 4
+      width = 3
     }
-    chart {
-      title = "File Systems by Type"
-      sql   = query.oci_filestorage_filesystem_type.sql
-      type  = "column"
-      width = 4
-    }
+
   }
 
 }
@@ -202,17 +197,5 @@ query "oci_filestorage_filesystem_by_creation_month" {
       left join filesystems_by_month on months.month = filesystems_by_month.creation_month
     order by
       months.month;
-  EOQ
-}
-
-query "oci_filestorage_filesystem_type" {
-  sql = <<-EOQ
-    select
-      case when not is_clone_parent then 'Uncloned' else 'Cloned' end as status,
-      count(*)
-    from
-      oci_file_storage_file_system
-    group by
-      status;
   EOQ
 }
