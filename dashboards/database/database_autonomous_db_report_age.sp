@@ -124,8 +124,8 @@ query "oci_database_autonomous_db_age_table" {
       now()::date - d.time_created::date as "Age in Days",
       d.time_created as "Create Time",
       d.lifecycle_state as "Lifecycle State",
-      coalesce(c.title, 'root') as "Compartment",
       t.title as "Tenancy",
+      coalesce(c.title, 'root') as "Compartment",
       d.region as "Region",
       d.id as "OCID"
     from

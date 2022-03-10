@@ -124,8 +124,8 @@ query "oci_block_storage_block_volume_age_table" {
       now()::date - v.time_created::date as "Age in Days",
       v.time_created as "Create Time",
       v.lifecycle_state as "Lifecycle State",
-      coalesce(c.title, 'root') as "Compartment",
       t.title as "Tenancy",
+      coalesce(c.title, 'root') as "Compartment",
       v.region as "Region",
       v.id as "OCID"
     from

@@ -124,8 +124,8 @@ query "oci_ons_subscription_age_table" {
       now()::date - s.created_time::date as "Age in Days",
       s.created_time as "Create Time",
       s.lifecycle_state as "Lifecycle State",
-      coalesce(c.title, 'root') as "Compartment",
       t.title as "Tenancy",
+      coalesce(c.title, 'root') as "Compartment",
       s.region as "Region",
       s.id as "OCID"
     from

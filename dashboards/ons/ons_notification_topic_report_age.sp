@@ -124,8 +124,8 @@ query "oci_ons_notification_topic_age_table" {
       now()::date - n.time_created::date as "Age in Days",
       n.time_created as "Create Time",
       n.lifecycle_state as "Lifecycle State",
-      coalesce(c.title, 'root') as "Compartment",
       t.title as "Tenancy",
+      coalesce(c.title, 'root') as "Compartment",
       n.region as "Region",
       n.topic_id as "OCID"
     from

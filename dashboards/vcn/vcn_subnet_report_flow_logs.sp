@@ -44,8 +44,8 @@ query "oci_vcn_subnet_flow_logs_table" {
           when l.is_enabled is null or not l.is_enabled then null
           else 'Enabled'
         end as "Flow Logs Status",
-        coalesce(c.title, 'root') as "Compartment",
         t.title as "Tenancy",
+        coalesce(c.title, 'root') as "Compartment",
         s.region as "Region",
         s.id as "OCID"
       from

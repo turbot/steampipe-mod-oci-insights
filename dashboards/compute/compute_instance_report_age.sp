@@ -124,8 +124,8 @@ query "oci_compute_instance_age_table" {
       now()::date - i.time_created::date as "Age in Days",
       i.time_created as "Create Time",
       i.lifecycle_state as "Lifecycle State",
-      coalesce(c.title, 'root') as "Compartment",
       t.title as "Tenancy",
+      coalesce(c.title, 'root') as "Compartment",
       i.region as "Region",
       i.id as "OCID"
     from

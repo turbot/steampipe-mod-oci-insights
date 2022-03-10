@@ -123,8 +123,8 @@ query "oci_mysql_db_system_age_table" {
       now()::date - s.time_created::date as "Age in Days",
       s.time_created as "Create Time",
       s.lifecycle_state as "Lifecycle State",
-      coalesce(c.title, 'root') as "Compartment",
       t.title as "Tenancy",
+      coalesce(c.title, 'root') as "Compartment",
       s.region as "Region",
       s.id as "OCID"
     from
