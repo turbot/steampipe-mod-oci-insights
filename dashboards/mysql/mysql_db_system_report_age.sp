@@ -51,7 +51,7 @@ dashboard "oci_mysql_db_system_age_report" {
       display = "none"
     }
 
-    sql = query.oci_mysql_db_system_age_table.sql
+    sql = query.oci_mysql_db_system_age_report.sql
   }
 
 }
@@ -116,7 +116,7 @@ query "oci_mysql_db_system_1_year" {
   EOQ
 }
 
-query "oci_mysql_db_system_age_table" {
+query "oci_mysql_db_system_age_report" {
   sql = <<-EOQ
     select
       s.display_name as "Name",

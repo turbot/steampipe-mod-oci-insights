@@ -28,12 +28,12 @@ dashboard "oci_identity_user_mfa_report" {
         display = "none"
       }
 
-      sql = query.oci_identity_user_mfa_table.sql
+      sql = query.oci_identity_user_mfa_report.sql
     }
   }
 }
 
-query "oci_identity_user_mfa_table" {
+query "oci_identity_user_mfa_report" {
   sql = <<-EOQ
     select
       u.name as "User Name",

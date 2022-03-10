@@ -32,7 +32,7 @@ dashboard "oci_objectstorage_bucket_encryption_report" {
       display = "none"
     }
 
-    sql = query.oci_objectstorage_bucket_encryption_table.sql
+    sql = query.oci_objectstorage_bucket_encryption_report.sql
   }
 
 }
@@ -47,7 +47,7 @@ query "oci_objectstorage_bucket_report_customer_managed_encryption_count" {
   EOQ
 }
 
-query "oci_objectstorage_bucket_encryption_table" {
+query "oci_objectstorage_bucket_encryption_report" {
   sql = <<-EOQ
       select
         b.name as "Name",

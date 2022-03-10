@@ -26,12 +26,12 @@ dashboard "oci_objectstorage_bucket_logging_report" {
       display = "none"
     }
 
-    sql = query.oci_objectstorage_bucket_logging_table.sql
+    sql = query.oci_objectstorage_bucket_logging_report.sql
   }
 
 }
 
-query "oci_objectstorage_bucket_logging_table" {
+query "oci_objectstorage_bucket_logging_report" {
   sql = <<-EOQ
     with name_with_region as (
       select

@@ -52,7 +52,7 @@ dashboard "oci_block_storage_boot_volume_age_report" {
       display = "none"
     }
 
-    sql = query.oci_block_storage_boot_volume_age_table.sql
+    sql = query.oci_block_storage_boot_volume_age_report.sql
   }
 
 }
@@ -117,7 +117,7 @@ query "oci_block_storage_boot_volume_1_year" {
   EOQ
 }
 
-query "oci_block_storage_boot_volume_age_table" {
+query "oci_block_storage_boot_volume_age_report" {
   sql = <<-EOQ
     select
       v.display_name as "Name",

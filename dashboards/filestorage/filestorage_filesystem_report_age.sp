@@ -52,7 +52,7 @@ dashboard "oci_filestorage_filesystem_age_report" {
       display = "none"
     }
 
-    sql = query.oci_filestorage_filesystem_age_table.sql
+    sql = query.oci_filestorage_filesystem_age_report.sql
   }
 
 }
@@ -117,7 +117,7 @@ query "oci_filestorage_filesystem_1_year" {
   EOQ
 }
 
-query "oci_filestorage_filesystem_age_table" {
+query "oci_filestorage_filesystem_age_report" {
   sql = <<-EOQ
     select
       f.display_name as "Name",

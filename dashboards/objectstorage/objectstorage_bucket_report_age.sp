@@ -52,7 +52,7 @@ dashboard "oci_objectstorage_bucket_age_report" {
       display = "none"
     }
 
-    sql = query.oci_objectstorage_bucket_age_table.sql
+    sql = query.oci_objectstorage_bucket_age_report.sql
   }
 
 }
@@ -117,7 +117,7 @@ query "oci_objectstorage_bucket_1_year" {
   EOQ
 }
 
-query "oci_objectstorage_bucket_age_table" {
+query "oci_objectstorage_bucket_age_report" {
   sql = <<-EOQ
     select
       b.name as "Name",

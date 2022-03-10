@@ -31,12 +31,12 @@ dashboard "oci_vcn_subnet_flow_logs_report" {
       href = "${dashboard.oci_vcn_subnet_detail.url_path}?input.subnet_id={{.OCID | @uri}}"
     }
 
-    sql = query.oci_vcn_subnet_flow_logs_table.sql
+    sql = query.oci_vcn_subnet_flow_logs_report.sql
   }
 
 }
 
-query "oci_vcn_subnet_flow_logs_table" {
+query "oci_vcn_subnet_flow_logs_report" {
   sql = <<-EOQ
       select
         s.display_name as "Name",

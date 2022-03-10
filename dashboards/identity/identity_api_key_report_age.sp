@@ -52,7 +52,7 @@ dashboard "oci_identity_api_key_age_report" {
       display = "none"
     }
 
-    sql = query.oci_identity_api_key_age_table.sql
+    sql = query.oci_identity_api_key_age_report.sql
   }
 
 }
@@ -123,7 +123,7 @@ query "oci_identity_api_key_1_year" {
   EOQ
 }
 
-query "oci_identity_api_key_age_table" {
+query "oci_identity_api_key_age_report" {
   sql = <<-EOQ
     select
       k.user_name as "User Name",

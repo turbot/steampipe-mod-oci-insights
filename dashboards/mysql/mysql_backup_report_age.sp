@@ -52,7 +52,7 @@ dashboard "oci_mysql_backup_age_report" {
       display = "none"
     }
 
-    sql = query.oci_mysql_backup_age_table.sql
+    sql = query.oci_mysql_backup_age_report.sql
   }
 
 }
@@ -117,7 +117,7 @@ query "oci_mysql_backup_1_year" {
   EOQ
 }
 
-query "oci_mysql_backup_age_table" {
+query "oci_mysql_backup_age_report" {
   sql = <<-EOQ
     select
       b.display_name as "Name",

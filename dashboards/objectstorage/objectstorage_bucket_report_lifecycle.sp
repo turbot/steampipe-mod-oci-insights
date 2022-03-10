@@ -27,12 +27,12 @@ dashboard "oci_objectstorage_bucket_lifecycle_report" {
       display = "none"
     }
 
-    sql = query.oci_objectstorage_bucket_lifecycle_table.sql
+    sql = query.oci_objectstorage_bucket_lifecycle_report.sql
   }
 
 }
 
-query "oci_objectstorage_bucket_lifecycle_table" {
+query "oci_objectstorage_bucket_lifecycle_report" {
   sql = <<-EOQ
       select
         b.name as "Name",

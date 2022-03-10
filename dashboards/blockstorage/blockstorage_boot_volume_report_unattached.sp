@@ -26,7 +26,7 @@ dashboard "oci_block_storage_boot_volume_unattached_report" {
       display = "none"
     }
 
-    sql = query.oci_block_storage_boot_volume_unattached_table.sql
+    sql = query.oci_block_storage_boot_volume_unattached_report.sql
   }
 
 }
@@ -49,7 +49,7 @@ query "oci_block_storage_boot_volume_unattached_count" {
   EOQ
 }
 
-query "oci_block_storage_boot_volume_unattached_table" {
+query "oci_block_storage_boot_volume_unattached_report" {
   sql = <<-EOQ
       select
         v.display_name as "Name",

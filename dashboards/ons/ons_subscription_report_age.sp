@@ -52,7 +52,7 @@ dashboard "oci_ons_subscription_age_report" {
     column "OCID" {
       display = "none"
     }
-    sql = query.oci_ons_subscription_age_table.sql
+    sql = query.oci_ons_subscription_age_report.sql
   }
 
 }
@@ -117,7 +117,7 @@ query "oci_ons_subscription_1_year" {
   EOQ
 }
 
-query "oci_ons_subscription_age_table" {
+query "oci_ons_subscription_age_report" {
   sql = <<-EOQ
     select
       s.endpoint as "Endpoint",

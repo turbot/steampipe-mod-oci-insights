@@ -31,7 +31,7 @@ dashboard "oci_block_storage_boot_volume_encryption_report" {
       display = "none"
     }
 
-    sql = query.oci_block_storage_boot_volume_encryption_table.sql
+    sql = query.oci_block_storage_boot_volume_encryption_report.sql
   }
 
 }
@@ -47,7 +47,7 @@ query "oci_block_storage_boot_volume_customer_managed_encryption_count" {
   EOQ
 }
 
-query "oci_block_storage_boot_volume_encryption_table" {
+query "oci_block_storage_boot_volume_encryption_report" {
   sql = <<-EOQ
       select
         v.display_name as "Name",
