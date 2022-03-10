@@ -389,7 +389,7 @@ query "oci_mysql_db_system_storage_by_compartment" {
     )
     select
       c.title as "Title",
-      count(s.data_storage_size_in_gbs) as "GB"
+      sum(s.data_storage_size_in_gbs) as "GB"
     from
       oci_mysql_db_system as s,
       compartments as c

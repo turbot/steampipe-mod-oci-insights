@@ -372,7 +372,7 @@ query "oci_block_storage_block_volume_storage_by_compartment" {
     )
     select
       c.title as "Title",
-      count(v.size_in_gbs) as "GB"
+      sum(v.size_in_gbs) as "GB"
     from
       oci_core_volume as v,
       compartments as c
