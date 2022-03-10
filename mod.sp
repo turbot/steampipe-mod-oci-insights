@@ -12,4 +12,10 @@ mod "oci_insights" {
     description  = "Create dashboards and reports for your Oracle Cloud Infrastructure resources using Steampipe."
     image        = "/images/mods/turbot/oci-insights-social-graphic.png"
   }
+
+  requires {
+    plugin "oci" {
+      version = "0.9.0"
+    }
+  }
 }

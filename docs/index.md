@@ -6,10 +6,10 @@ repository: "https://github.com/turbot/steampipe-mod-oci-insights"
 
 Create dashboards and reports for your OCI resources using Steampipe.
 
-<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-oci-insights/release/v0.1/docs/images/oci_objecstorage_bucket_dashboard.png" width="50%" type="thumbnail"/>
-<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-oci-insights/release/v0.1/docs/images/oci_identity_api_key_age.png" width="50%" type="thumbnail"/>
-<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-oci-insights/release/v0.1/docs/images/oci_blockstorage_block_volume_encryption.png" width="50%" type="thumbnail"/>
-<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-oci-insights/release/v0.1/docs/images/oci_objectstorage_bucket_public_access.png" width="50%" type="thumbnail"/>
+<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-oci-insights/main/docs/images/oci_objecstorage_bucket_dashboard.png" width="50%" type="thumbnail"/>
+<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-oci-insights/main/docs/images/oci_identity_api_key_age.png" width="50%" type="thumbnail"/>
+<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-oci-insights/main/docs/images/oci_blockstorage_block_volume_encryption.png" width="50%" type="thumbnail"/>
+<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-oci-insights/main/docs/images/oci_objectstorage_bucket_public_access.png" width="50%" type="thumbnail"/>
 
 ## Overview
 

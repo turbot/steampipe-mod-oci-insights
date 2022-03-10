@@ -2,7 +2,7 @@
 
 An Oracle Cloud dashboarding tool that can be used to view dashboards and reports across all of your Oracle Cloud accounts.
 
-![image](https://raw.githubusercontent.com/turbot/steampipe-mod-oci-insights/release/v0.1/docs/images/oci_objecstorage_bucket_dashboard.png)
+![image](https://raw.githubusercontent.com/turbot/steampipe-mod-oci-insights/main/docs/images/oci_objecstorage_bucket_dashboard.png)
 
 ## Overview
 
