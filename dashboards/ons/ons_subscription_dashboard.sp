@@ -98,7 +98,7 @@ query "oci_ons_subscription_by_tenancy" {
   sql = <<-EOQ
     select
        t.name as "Tenancy",
-       count(s.id)::numeric as "Keys"
+       count(s.id)::numeric as "Subscriptions"
     from
       oci_ons_subscription as s,
       oci_identity_tenancy as t

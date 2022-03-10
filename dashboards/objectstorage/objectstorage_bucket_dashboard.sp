@@ -106,7 +106,7 @@ dashboard "oci_objectstorage_bucket_dashboard" {
     }
 
     chart {
-      title = "Encryption by Type"
+      title = "Buckets by Encryption Type"
       sql   = query.oci_objectstorage_bucket_encryption_status.sql
       type  = "column"
       width = 2
@@ -262,7 +262,7 @@ query "oci_objectstorage_bucket_by_compartment" {
     select
       t.title as "Tenancy",
       case when t.title = c.title then 'root' else c.title end as "Compartment",
-      count(b.*) as "Keys"
+      count(b.*) as "Buckets"
     from
       oci_objectstorage_bucket as b,
       oci_identity_tenancy as t,
