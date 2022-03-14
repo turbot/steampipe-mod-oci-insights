@@ -52,6 +52,11 @@ dashboard "oci_ons_subscription_age_report" {
     column "OCID" {
       display = "none"
     }
+
+    # column "Name" {
+    #   href = "${dashboard.oci_ons_subscription_detail.url_path}?input.subscription_id={{.OCID | @uri}}"
+    # }
+
     sql = query.oci_ons_subscription_age_report.sql
   }
 
