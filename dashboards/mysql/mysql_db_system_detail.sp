@@ -3,8 +3,7 @@ dashboard "oci_mysql_db_system_detail" {
   title = "OCI MySQL DB System Detail"
 
   tags = merge(local.mysql_common_tags, {
-    type     = "Report"
-    category = "Detail"
+    type = "Detail"
   })
 
   input "db_system_id" {

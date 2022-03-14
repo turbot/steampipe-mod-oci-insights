@@ -3,8 +3,7 @@ dashboard "oci_ons_notification_topic_detail" {
   title = "OCI Notification Topic Detail"
 
   tags = merge(local.ons_common_tags, {
-    type     = "Report"
-    category = "Detail"
+    type = "Detail"
   })
 
   input "topic_id" {

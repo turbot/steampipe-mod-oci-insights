@@ -3,8 +3,7 @@ dashboard "oci_database_autonomous_database_detail" {
   title = "OCI Autonomous Database Detail"
 
   tags = merge(local.database_common_tags, {
-    type     = "Report"
-    category = "Detail"
+    type = "Detail"
   })
 
   input "db_id" {

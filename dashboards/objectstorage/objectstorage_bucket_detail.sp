@@ -3,8 +3,7 @@ dashboard "oci_objectstorage_bucket_detail" {
   title = "OCI Object Storage Bucket Detail"
 
   tags = merge(local.objectstorage_common_tags, {
-    type     = "Report"
-    category = "Detail"
+    type = "Detail"
   })
 
   input "bucket_id" {

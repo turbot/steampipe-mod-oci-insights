@@ -3,8 +3,7 @@ dashboard "oci_kms_key_detail" {
   title = "OCI KMS Key Detail"
 
   tags = merge(local.kms_common_tags, {
-    type     = "Report"
-    category = "Detail"
+    type = "Detail"
   })
 
   input "key_id" {

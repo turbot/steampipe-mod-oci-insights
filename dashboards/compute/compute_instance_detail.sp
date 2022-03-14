@@ -3,8 +3,7 @@ dashboard "oci_compute_instance_detail" {
   title = "OCI Compute Instance Detail"
 
   tags = merge(local.compute_common_tags, {
-    type     = "Report"
-    category = "Detail"
+    type = "Detail"
   })
 
   input "instance_id" {

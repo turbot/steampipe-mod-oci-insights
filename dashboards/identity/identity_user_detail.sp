@@ -3,8 +3,7 @@ dashboard "oci_identity_user_detail" {
   title = "OCI Identity User Detail"
 
   tags = merge(local.identity_common_tags, {
-    type     = "Report"
-    category = "Detail"
+    type = "Detail"
   })
 
   input "user_id" {

@@ -3,8 +3,7 @@ dashboard "oci_block_storage_boot_volume_detail" {
   title = "OCI Block Storage Boot Volume Detail"
 
   tags = merge(local.blockstorage_common_tags, {
-    type     = "Report"
-    category = "Detail"
+    type = "Detail"
   })
 
   input "volume_id" {

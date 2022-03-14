@@ -3,8 +3,7 @@ dashboard "oci_nosql_table_detail" {
   title = "OCI NoSQL Table Detail"
 
   tags = merge(local.nosql_common_tags, {
-    type     = "Report"
-    category = "Detail"
+    type = "Detail"
   })
 
   input "table_id" {
