@@ -52,6 +52,10 @@ dashboard "oci_filestorage_filesystem_age_report" {
       display = "none"
     }
 
+    column "Name" {
+      href = "${dashboard.oci_filestorage_filesystem_detail.url_path}?input.filesystem_id={{.OCID | @uri}}"
+    }
+
     sql = query.oci_filestorage_filesystem_age_report.sql
   }
 

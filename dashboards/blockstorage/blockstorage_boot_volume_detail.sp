@@ -1,6 +1,6 @@
-dashboard "oci_block_storage_block_volume_detail" {
+dashboard "oci_block_storage_boot_volume_detail" {
 
-  title = "OCI Block Storage Block Volume Detail"
+  title = "OCI Block Storage Boot Volume Detail"
 
   tags = merge(local.blockstorage_common_tags, {
     type     = "Report"
@@ -8,8 +8,8 @@ dashboard "oci_block_storage_block_volume_detail" {
   })
 
   input "volume_id" {
-    title = "Select a block volume:"
-    sql   = query.oci_block_storage_block_volume_input.sql
+    title = "Select a boot volume:"
+    sql   = query.oci_block_storage_boot_volume_input.sql
     width = 4
   }
 
@@ -18,7 +18,7 @@ dashboard "oci_block_storage_block_volume_detail" {
     card {
       width = 2
 
-      query = query.oci_block_storage_block_volume_storage_for_volume
+      query = query.oci_block_storage_boot_volume_storage
       args = {
         id = self.input.volume_id.value
       }
@@ -27,7 +27,7 @@ dashboard "oci_block_storage_block_volume_detail" {
     card {
       width = 2
 
-      query = query.oci_block_storage_block_volume_backup_for_volume
+      query = query.oci_block_storage_boot_volume_backup
       args = {
         id = self.input.volume_id.value
       }
@@ -44,7 +44,7 @@ dashboard "oci_block_storage_block_volume_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-        query = query.oci_block_storage_block_volume_overview
+        query = query.oci_block_storage_boot_volume_overview
         args = {
           id = self.input.volume_id.value
         }
@@ -54,7 +54,7 @@ dashboard "oci_block_storage_block_volume_detail" {
       table {
         title = "Tags"
         width = 6
-        query = query.oci_block_storage_block_volume_tags
+        query = query.oci_block_storage_boot_volume_tags
         args = {
           id = self.input.volume_id.value
         }
@@ -67,7 +67,7 @@ dashboard "oci_block_storage_block_volume_detail" {
 
       table {
         title = "Attached To"
-        query = query.oci_block_storage_block_volume_attached_instances
+        query = query.oci_block_storage_boot_volume_attached_instances
         args = {
           id = self.input.volume_id.value
         }
@@ -83,7 +83,7 @@ dashboard "oci_block_storage_block_volume_detail" {
 
       table {
         title = "Encryption Details"
-        query = query.oci_block_storage_block_volume_encryption
+        query = query.oci_block_storage_boot_volume_encryption
         args = {
           id = self.input.volume_id.value
         }
@@ -93,7 +93,7 @@ dashboard "oci_block_storage_block_volume_detail" {
   }
 }
 
-query "oci_block_storage_block_volume_input" {
+query "oci_block_storage_boot_volume_input" {
   sql = <<EOQ
     select
       v.display_name as label,
@@ -104,7 +104,7 @@ query "oci_block_storage_block_volume_input" {
         't.name', t.name
       ) as tags
     from
-      oci_core_volume as v
+      oci_core_boot_volume as v
       left join oci_identity_compartment as c on v.compartment_id = c.id
       left join oci_identity_tenancy as t on v.tenant_id = t.id
     where
@@ -114,12 +114,12 @@ query "oci_block_storage_block_volume_input" {
   EOQ
 }
 
-query "oci_block_storage_block_volume_storage_for_volume" {
+query "oci_block_storage_boot_volume_storage" {
   sql = <<-EOQ
     select
       size_in_gbs as "Storage (GB)"
     from
-      oci_core_volume
+      oci_core_boot_volume
     where
       id = $1 and lifecycle_state <> 'TERMINATED';
   EOQ
@@ -127,14 +127,14 @@ query "oci_block_storage_block_volume_storage_for_volume" {
   param "id" {}
 }
 
-query "oci_block_storage_block_volume_backup_for_volume" {
+query "oci_block_storage_boot_volume_backup" {
   sql = <<-EOQ
     select
       case when volume_backup_policy_assignment_id is null then 'Unassigned' else 'Assigned' end as value,
       'Backup Policy' as label,
       case when volume_backup_policy_assignment_id is null then 'alert' else 'ok' end as type
     from
-      oci_core_volume
+      oci_core_boot_volume
     where
       id = $1 and lifecycle_state <> 'TERMINATED';
   EOQ
@@ -142,7 +142,7 @@ query "oci_block_storage_block_volume_backup_for_volume" {
   param "id" {}
 }
 
-query "oci_block_storage_block_volume_overview" {
+query "oci_block_storage_boot_volume_overview" {
   sql = <<EOQ
     select
       display_name as "Name",
@@ -153,7 +153,7 @@ query "oci_block_storage_block_volume_overview" {
       id as "OCID",
       compartment_id as "Compartment ID"
     from
-      oci_core_volume
+      oci_core_boot_volume
     where
       id = $1 and lifecycle_state <> 'TERMINATED';
   EOQ
@@ -161,13 +161,13 @@ query "oci_block_storage_block_volume_overview" {
   param "id" {}
 }
 
-query "oci_block_storage_block_volume_tags" {
+query "oci_block_storage_boot_volume_tags" {
   sql = <<EOQ
     with jsondata as (
       select
         tags::json as tags
       from
-        oci_core_volume
+        oci_core_boot_volume
       where
         id = $1 and lifecycle_state <> 'TERMINATED'
     )
@@ -182,7 +182,7 @@ query "oci_block_storage_block_volume_tags" {
   param "id" {}
 }
 
-query "oci_block_storage_block_volume_attached_instances" {
+query "oci_block_storage_boot_volume_attached_instances" {
   sql = <<EOQ
     select
       i.id as "Instance ID",
@@ -190,22 +190,22 @@ query "oci_block_storage_block_volume_attached_instances" {
       i.lifecycle_state as "Lifecycle State",
       a.time_created as "Attachment Time"
     from
-      oci_core_volume_attachment as a
+      oci_core_boot_volume_attachment as a
       left join oci_core_instance as i on a.instance_id = i.id
     where
-      a.volume_id = $1 and a.lifecycle_state <> 'TERMINATED';
+      a.boot_volume_id = $1 and a.lifecycle_state <> 'TERMINATED';
   EOQ
 
   param "id" {}
 }
 
-query "oci_block_storage_block_volume_encryption" {
+query "oci_block_storage_boot_volume_encryption" {
   sql = <<EOQ
     select
       case when kms_key_id is not null then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
       kms_key_id as "KMS Key ID"
     from
-      oci_core_volume
+      oci_core_boot_volume
     where
       id  = $1 and lifecycle_state <> 'TERMINATED';
   EOQ

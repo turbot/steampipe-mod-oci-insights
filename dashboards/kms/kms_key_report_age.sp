@@ -52,6 +52,10 @@ dashboard "oci_kms_key_age_report" {
       display = "none"
     }
 
+    column "Name" {
+      href = "${dashboard.oci_kms_key_detail.url_path}?input.key_id={{.OCID | @uri}}"
+    }
+
     sql = query.oci_kms_key_age_report.sql
   }
 
