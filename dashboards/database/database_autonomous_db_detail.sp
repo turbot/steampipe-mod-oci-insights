@@ -121,7 +121,7 @@ query "oci_database_autonomous_database_core" {
 query "oci_database_autonomous_database_data_guard" {
   sql = <<-EOQ
     select
-      case when is_data_guard_enabled then 'ENABLED' else 'DISABLED' end as value,
+      case when is_data_guard_enabled then 'Enabled' else 'Disabled' end as value,
       'Data Guard' as label,
       case when is_data_guard_enabled then 'ok' else 'alert' end as type
     from

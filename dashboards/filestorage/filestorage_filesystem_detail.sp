@@ -99,7 +99,7 @@ query "oci_filestorage_filesystem_input" {
       left join oci_identity_compartment as c on s.compartment_id = c.id
       left join oci_identity_tenancy as t on s.tenant_id = t.id
     where
-      s.lifecycle_state <> 'TERMINATED'
+      s.lifecycle_state <> 'DELETED'
     order by
       s.display_name;
 EOQ

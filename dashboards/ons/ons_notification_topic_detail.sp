@@ -80,8 +80,6 @@ query "oci_ons_notification_topic_input" {
       oci_ons_notification_topic as n
       left join oci_identity_compartment as c on n.compartment_id = c.id
       left join oci_identity_tenancy as t on n.tenant_id = t.id
-    where
-      n.lifecycle_state <> 'DELETED'
     order by
       n.name;
 EOQ

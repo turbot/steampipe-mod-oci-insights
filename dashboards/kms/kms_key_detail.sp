@@ -91,7 +91,7 @@ query "oci_kms_key_input" {
       left join oci_identity_compartment as c on k.compartment_id = c.id
       left join oci_identity_tenancy as t on k.tenant_id = t.id
     where
-      k.lifecycle_state <> 'TERMINATED'
+      k.lifecycle_state <> 'DELETED'
     order by
       k.name;
 EOQ

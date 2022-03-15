@@ -17,7 +17,7 @@ dashboard "oci_block_storage_block_volume_detail" {
     card {
       width = 2
 
-      query = query.oci_block_storage_block_volume_storage_for_volume
+      query = query.oci_block_storage_block_volume_storage
       args = {
         id = self.input.volume_id.value
       }
@@ -26,7 +26,7 @@ dashboard "oci_block_storage_block_volume_detail" {
     card {
       width = 2
 
-      query = query.oci_block_storage_block_volume_backup_for_volume
+      query = query.oci_block_storage_block_volume_backup
       args = {
         id = self.input.volume_id.value
       }
@@ -113,7 +113,7 @@ query "oci_block_storage_block_volume_input" {
   EOQ
 }
 
-query "oci_block_storage_block_volume_storage_for_volume" {
+query "oci_block_storage_block_volume_storage" {
   sql = <<-EOQ
     select
       size_in_gbs as "Storage (GB)"
@@ -126,7 +126,7 @@ query "oci_block_storage_block_volume_storage_for_volume" {
   param "id" {}
 }
 
-query "oci_block_storage_block_volume_backup_for_volume" {
+query "oci_block_storage_block_volume_backup" {
   sql = <<-EOQ
     select
       case when volume_backup_policy_assignment_id is null then 'Unassigned' else 'Assigned' end as value,
