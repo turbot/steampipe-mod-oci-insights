@@ -8,7 +8,7 @@ dashboard "oci_mysql_db_system_detail" {
 
   input "db_system_id" {
     title = "Select a DB system:"
-    sql   = query.oci_mysql_db_system_input.sql
+    query = query.oci_mysql_db_system_input
     width = 4
   }
 

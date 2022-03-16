@@ -8,7 +8,7 @@ dashboard "oci_database_autonomous_database_detail" {
 
   input "db_id" {
     title = "Select a autonomous DB:"
-    sql   = query.oci_database_autonomous_database_input.sql
+    query = query.oci_database_autonomous_database_input
     width = 4
   }
 

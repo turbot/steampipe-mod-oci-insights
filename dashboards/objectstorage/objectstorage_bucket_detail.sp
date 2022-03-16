@@ -8,7 +8,7 @@ dashboard "oci_objectstorage_bucket_detail" {
 
   input "bucket_id" {
     title = "Select a bucket:"
-    sql   = query.oci_objectstorage_bucket_input.sql
+    query = query.oci_objectstorage_bucket_input
     width = 4
   }
 

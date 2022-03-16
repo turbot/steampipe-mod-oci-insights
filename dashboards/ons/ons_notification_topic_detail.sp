@@ -8,7 +8,7 @@ dashboard "oci_ons_notification_topic_detail" {
 
   input "topic_id" {
     title = "Select a topic:"
-    sql   = query.oci_ons_notification_topic_input.sql
+    query = query.oci_ons_notification_topic_input
     width = 4
   }
 

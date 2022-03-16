@@ -8,7 +8,7 @@ dashboard "oci_nosql_table_detail" {
 
   input "table_id" {
     title = "Select a table:"
-    sql   = query.oci_nosql_table_input.sql
+    query = query.oci_nosql_table_input
     width = 4
   }
 

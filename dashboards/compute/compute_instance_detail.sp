@@ -8,7 +8,7 @@ dashboard "oci_compute_instance_detail" {
 
   input "instance_id" {
     title = "Select a instance:"
-    sql   = query.oci_compute_instance_input.sql
+    query = query.oci_compute_instance_input
     width = 4
   }
 

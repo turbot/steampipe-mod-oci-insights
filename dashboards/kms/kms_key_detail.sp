@@ -8,7 +8,7 @@ dashboard "oci_kms_key_detail" {
 
   input "key_id" {
     title = "Select a key:"
-    sql   = query.oci_kms_key_input.sql
+    query = query.oci_kms_key_input
     width = 4
   }
 

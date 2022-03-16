@@ -8,7 +8,7 @@ dashboard "oci_identity_user_detail" {
 
   input "user_id" {
     title = "Select a user:"
-    sql   = query.oci_identity_user_input.sql
+    query = query.oci_identity_user_input
     width = 4
   }
 

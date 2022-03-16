@@ -8,7 +8,7 @@ dashboard "oci_block_storage_boot_volume_detail" {
 
   input "volume_id" {
     title = "Select a boot volume:"
-    sql   = query.oci_block_storage_boot_volume_input.sql
+    query = query.oci_block_storage_boot_volume_input
     width = 4
   }
 

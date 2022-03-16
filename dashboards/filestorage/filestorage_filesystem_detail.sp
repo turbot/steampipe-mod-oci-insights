@@ -4,7 +4,7 @@ dashboard "oci_filestorage_filesystem_detail" {
 
   input "filesystem_id" {
     title = "Select a file system:"
-    sql   = query.oci_filestorage_filesystem_input.sql
+    query = query.oci_filestorage_filesystem_input
     width = 4
   }
 
