@@ -5,36 +5,22 @@ dashboard "oci_compartment_report" {
 
   tags = merge(local.oci_common_tags, {
     type     = "Report"
-    category = "Compartments"
+    category = "Compartment"
   })
 
   container {
 
     card {
-      sql   = query.oci_tenancy_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.oci_compartment_count.sql
+      query = query.oci_compartment_count
       width = 2
     }
 
   }
 
   table {
-    sql = query.oci_tenancy_table.sql
+    query = query.oci_compartment_table
   }
 
-}
-
-query "oci_tenancy_count" {
-  sql = <<-EOQ
-    select
-      count(*) as "Tenancies"
-    from
-      oci_identity_tenancy;
-  EOQ
 }
 
 query "oci_compartment_count" {
@@ -48,13 +34,13 @@ query "oci_compartment_count" {
   EOQ
 }
 
-query "oci_tenancy_table" {
+query "oci_compartment_table" {
   sql = <<-EOQ
     select
-      c.name as "Compartment Name",
-      t.name as "Tenancy Name",
+      c.name as "Name",
       c.lifecycle_state as "Lifecycle State",
-      t.home_region_key as "Home Region Key"
+      c.time_created as "Time Created",
+      t.name as "Tenancy Name"
     from
       oci_identity_compartment as c
       left join oci_identity_tenancy as t on t.id = c.tenant_id;
