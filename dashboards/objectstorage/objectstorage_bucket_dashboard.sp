@@ -27,16 +27,19 @@ dashboard "oci_objectstorage_bucket_dashboard" {
     card {
       sql   = query.oci_objectstorage_bucket_public_access_count.sql
       width = 2
+      href  = dashboard.oci_objectstorage_bucket_public_access_report.url_path
     }
 
     card {
       sql   = query.oci_objectstorage_bucket_versioning_disabled_count.sql
       width = 2
+      href  = dashboard.oci_objectstorage_bucket_lifecycle_report.url_path
     }
 
     card {
       sql   = query.oci_objectstorage_bucket_logging_disabled_count.sql
       width = 2
+      href  = dashboard.oci_objectstorage_bucket_logging_report.url_path
     }
 
   }

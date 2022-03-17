@@ -17,6 +17,7 @@ dashboard "oci_vcn_subnet_dashboard" {
     card {
       width = 2
       sql   = query.oci_vcn_subnet_flow_logs_not_configured_count.sql
+      href  = dashboard.oci_vcn_subnet_flow_logs_report.url_path
     }
 
   }
