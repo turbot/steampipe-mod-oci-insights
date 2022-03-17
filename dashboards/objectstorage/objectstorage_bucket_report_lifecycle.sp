@@ -27,6 +27,10 @@ dashboard "oci_objectstorage_bucket_lifecycle_report" {
       display = "none"
     }
 
+    column "Name" {
+      href = "${dashboard.oci_objectstorage_bucket_detail.url_path}?input.bucket_id={{.OCID | @uri}}"
+    }
+
     sql = query.oci_objectstorage_bucket_lifecycle_report.sql
   }
 

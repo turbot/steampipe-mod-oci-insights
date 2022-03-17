@@ -51,6 +51,10 @@ dashboard "oci_mysql_db_system_age_report" {
       display = "none"
     }
 
+    column "Name" {
+      href = "${dashboard.oci_mysql_db_system_detail.url_path}?input.db_system_id={{.OCID | @uri}}"
+    }
+
     sql = query.oci_mysql_db_system_age_report.sql
   }
 

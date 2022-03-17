@@ -53,6 +53,10 @@ dashboard "oci_nosql_table_age_report" {
       display = "none"
     }
 
+    column "Name" {
+      href = "${dashboard.oci_nosql_table_detail.url_path}?input.table_id={{.OCID | @uri}}"
+    }
+
     sql = query.oci_nosql_table_age_report.sql
   }
 

@@ -52,6 +52,10 @@ dashboard "oci_compute_instance_age_report" {
       display = "none"
     }
 
+    column "Name" {
+      href = "${dashboard.oci_compute_instance_detail.url_path}?input.instance_id={{.OCID | @uri}}"
+    }
+
     sql = query.oci_compute_instance_age_report.sql
   }
 

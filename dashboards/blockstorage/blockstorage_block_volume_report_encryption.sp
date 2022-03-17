@@ -32,6 +32,10 @@ dashboard "oci_block_storage_block_volume_encryption_report" {
       display = "none"
     }
 
+    column "Name" {
+      href = "${dashboard.oci_block_storage_block_volume_detail.url_path}?input.volume_id={{.OCID | @uri}}"
+    }
+
     sql = query.oci_block_storage_block_volume_encryption_report.sql
   }
 
