@@ -77,7 +77,7 @@ dashboard "oci_compute_instance_detail" {
     container {
 
       table {
-        title = "Attached VNIC Details"
+        title = "Virtual Network Interface Card (VNIC) Details"
         query = query.oci_compute_instance_vnic
         args = {
           id = self.input.instance_id.value
@@ -85,7 +85,7 @@ dashboard "oci_compute_instance_detail" {
       }
 
       table {
-        title = "Shape Config"
+        title = "Shape Configurations"
         query = query.oci_compute_instance_shape
         args = {
           id = self.input.instance_id.value

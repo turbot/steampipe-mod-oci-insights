@@ -73,7 +73,7 @@ dashboard "oci_objectstorage_bucket_detail" {
       }
 
       table {
-        title = "Access Type"
+        title = "Public Access"
         query = query.oci_objectstorage_bucket_access
         args = {
           id = self.input.bucket_id.value
@@ -188,7 +188,7 @@ query "oci_objectstorage_bucket_tag" {
 query "oci_objectstorage_bucket_encryption" {
   sql = <<-EOQ
    select
-     case when kms_key_id is not null then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
+     case when kms_key_id is not null and kms_key_id <> '' then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
      kms_key_id as "KMS Key ID"
    from
      oci_objectstorage_bucket

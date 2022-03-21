@@ -177,7 +177,7 @@ query "oci_block_storage_boot_volume_attached_instances" {
 query "oci_block_storage_boot_volume_encryption" {
   sql = <<EOQ
     select
-      case when kms_key_id is not null then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
+      case when kms_key_id is not null and kms_key_id <> '' then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
       kms_key_id as "KMS Key ID"
     from
       oci_core_boot_volume

@@ -73,7 +73,7 @@ dashboard "oci_filestorage_filesystem_detail" {
       }
 
       table {
-        title = "Encryption"
+        title = "Encryption Details"
         query = query.oci_filestorage_filesystem_encryption
         args = {
           id = self.input.filesystem_id.value
@@ -196,7 +196,7 @@ query "oci_filestorage_filesystem_snapshot_detail" {
 query "oci_filestorage_filesystem_encryption" {
   sql = <<-EOQ
     select
-      case when kms_key_id is not null then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
+      case when kms_key_id is not null and kms_key_id <> '' then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
       kms_key_id as "KMS Key ID"
     from
       oci_file_storage_file_system
