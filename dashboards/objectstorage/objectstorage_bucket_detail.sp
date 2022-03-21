@@ -65,7 +65,7 @@ dashboard "oci_objectstorage_bucket_detail" {
       width = 6
 
       table {
-        title = "Encryption"
+        title = "Encryption Details"
         query = query.oci_objectstorage_bucket_encryption
         args = {
           id = self.input.bucket_id.value
