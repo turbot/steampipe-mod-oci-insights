@@ -65,20 +65,33 @@ dashboard "oci_compute_instance_detail" {
       width = 6
 
       table {
-        title = "Shape"
-        query = query.oci_compute_instance_shape
-        args = {
-          id = self.input.instance_id.value
-        }
-      }
-
-      table {
         title = "Launch Options"
         query = query.oci_compute_instance_launch_options
         args = {
           id = self.input.instance_id.value
         }
       }
+
+    }
+
+    container {
+
+      table {
+        title = "Attached VNIC Details"
+        query = query.oci_compute_instance_vnic
+        args = {
+          id = self.input.instance_id.value
+        }
+      }
+
+      table {
+        title = "Shape Config"
+        query = query.oci_compute_instance_shape
+        args = {
+          id = self.input.instance_id.value
+        }
+      }
+
     }
 
   }
@@ -152,8 +165,6 @@ query "oci_compute_instance_overview" {
       display_name as "Name",
       time_created as "Time Created",
       availability_domain as "Availability Domain",
-      launch_mode as "Launch mode",
-      shape_config_memory_in_gbs as "Shape Config Memory In GBs",
       id as "OCID",
       compartment_id as "Compartment ID"
     from
@@ -186,21 +197,6 @@ query "oci_compute_instance_tag" {
   param "id" {}
 }
 
-query "oci_compute_instance_shape" {
-  sql = <<-EOQ
-    select
-      shape as "Shape",
-      shape_config_gpus as "Shape Config GPUs",
-      shape_config_max_vnic_attachments as "Shape Config Max Vnic Attachments"
-    from
-      oci_core_instance
-    where
-      id  = $1 and lifecycle_state <> 'TERMINATED';
-  EOQ
-
-  param "id" {}
-}
-
 query "oci_compute_instance_launch_options" {
   sql = <<-EOQ
     select
@@ -211,6 +207,44 @@ query "oci_compute_instance_launch_options" {
       oci_core_instance
     where
       id  = $1 and lifecycle_state <> 'TERMINATED';
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_compute_instance_shape" {
+  sql = <<-EOQ
+    select
+      shape as "Shape",
+      shape_config_baseline_ocpu_utilization as "Shape Config Baseline OCPU Utilization",
+      shape_config_ocpus as "Shape Config OCPUs",
+      shape_config_gpus as "Shape Config GPUs",
+      shape_config_local_disks as "Shape Config Local Disks",
+      shape_config_max_vnic_attachments as "Shape Config Max Vnic Attachments",
+      shape_config_memory_in_gbs as "Shape Config Memory in GBs"
+    from
+      oci_core_instance
+    where
+      id  = $1 and lifecycle_state <> 'TERMINATED';
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_compute_instance_vnic" {
+  sql = <<-EOQ
+    select
+      vnic_name as "VNIC Name",
+      private_ip as "Private IP",
+      public_ip as "Public IP",
+      time_created as "Time Created",
+      hostname_label as "Hostname Label",
+      is_primary as "Primary",
+      mac_address as "MAC Address"
+    from
+      oci_core_vnic_attachment
+    where
+      instance_id = $1 and public_ip is not null;
   EOQ
 
   param "id" {}

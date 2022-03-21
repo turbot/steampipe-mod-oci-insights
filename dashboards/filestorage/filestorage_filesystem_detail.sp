@@ -79,6 +79,14 @@ dashboard "oci_filestorage_filesystem_detail" {
           id = self.input.filesystem_id.value
         }
       }
+
+      table {
+        title = "Source Details"
+        query = query.oci_filestorage_filesystem_source
+        args = {
+          id = self.input.filesystem_id.value
+        }
+      }
     }
 
   }
@@ -190,6 +198,20 @@ query "oci_filestorage_filesystem_encryption" {
     select
       case when kms_key_id is not null then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
       kms_key_id as "KMS Key ID"
+    from
+      oci_file_storage_file_system
+    where
+      id  = $1 and lifecycle_state <> 'DELETED';
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_filestorage_filesystem_source" {
+  sql = <<-EOQ
+    select
+      source_details ->> 'parentFileSystemId' as "Parent File System Id",
+      source_details ->> 'sourceSnapshotId' as "Source Snapshot Id"
     from
       oci_file_storage_file_system
     where

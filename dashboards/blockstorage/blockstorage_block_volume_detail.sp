@@ -23,15 +23,6 @@ dashboard "oci_block_storage_block_volume_detail" {
       }
     }
 
-    card {
-      width = 2
-
-      query = query.oci_block_storage_block_volume_backup
-      args = {
-        id = self.input.volume_id.value
-      }
-    }
-
   }
 
   container {
@@ -126,21 +117,6 @@ query "oci_block_storage_block_volume_storage" {
   param "id" {}
 }
 
-query "oci_block_storage_block_volume_backup" {
-  sql = <<-EOQ
-    select
-      case when volume_backup_policy_assignment_id is null then 'Unassigned' else 'Assigned' end as value,
-      'Backup Policy' as label,
-      case when volume_backup_policy_assignment_id is null then 'alert' else 'ok' end as type
-    from
-      oci_core_volume
-    where
-      id = $1 and lifecycle_state <> 'TERMINATED';
-  EOQ
-
-  param "id" {}
-}
-
 query "oci_block_storage_block_volume_overview" {
   sql = <<EOQ
     select
@@ -148,7 +124,7 @@ query "oci_block_storage_block_volume_overview" {
       time_created as "Time Created",
       availability_domain as "Availability Domain",
       is_auto_tune_enabled as "Auto Tune Enabled",
-      size_in_gbs as "Size In GBs",
+      is_hydrated as "Hydrated",
       id as "OCID",
       compartment_id as "Compartment ID"
     from

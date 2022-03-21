@@ -71,6 +71,27 @@ dashboard "oci_objectstorage_bucket_detail" {
           id = self.input.bucket_id.value
         }
       }
+
+      table {
+        title = "Access Type"
+        query = query.oci_objectstorage_bucket_access
+        args = {
+          id = self.input.bucket_id.value
+        }
+      }
+
+    }
+
+    container {
+
+      table {
+        title = "Object Lifecycle Policy"
+        query = query.oci_objectstorage_bucket_object_lifecycle_policy
+        args = {
+          id = self.input.bucket_id.value
+        }
+      }
+
     }
 
   }
@@ -130,8 +151,8 @@ query "oci_objectstorage_bucket_overview" {
    select
     name as "Name",
     time_created as "Time Created",
-    public_access_type as "Public Access Type",
-    versioning as "Versioning",
+    namespace as "Namespace",
+    storage_tier as "Storage Tier",
     id as "OCID",
     compartment_id as "Compartment ID"
   from
@@ -178,3 +199,36 @@ query "oci_objectstorage_bucket_encryption" {
   param "id" {}
 }
 
+query "oci_objectstorage_bucket_access" {
+  sql = <<-EOQ
+   select
+    public_access_type as "Public Access Type",
+    is_read_only as "Read Only"
+  from
+    oci_objectstorage_bucket
+  where
+    id = $1;
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_objectstorage_bucket_object_lifecycle_policy" {
+  sql = <<-EOQ
+   select
+    i ->> 'name' as "Name",
+    i ->> 'isEnabled' as "Enabled",
+    object_lifecycle_policy ->> 'timeCreated' as "Time Created",
+    i ->> 'action' as "Action",
+    i ->> 'target' as "Target",
+    i ->> 'timeAmount' as "Time Amount",
+    i ->> 'timeUnit' as "Time Unit"
+  from
+    oci_objectstorage_bucket,
+    jsonb_array_elements(object_lifecycle_policy -> 'items') as i
+  where
+    id = $1 and jsonb_typeof(object_lifecycle_policy -> 'items') = 'array';
+  EOQ
+
+  param "id" {}
+}

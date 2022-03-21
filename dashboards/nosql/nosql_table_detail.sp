@@ -49,6 +49,22 @@ dashboard "oci_nosql_table_detail" {
           id = self.input.table_id.value
         }
       }
+
+      table {
+        title = "Column Details"
+        query = query.oci_nosql_table_column
+        args = {
+          id = self.input.table_id.value
+        }
+      }
+
+      table {
+        title = "DDL Statement"
+        query = query.oci_nosql_table_ddl
+        args = {
+          id = self.input.table_id.value
+        }
+      }
     }
 
   }
@@ -124,6 +140,36 @@ query "oci_nosql_table_limits" {
       oci_nosql_table
     where
       id  = $1 and lifecycle_state <> 'DELETED';
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_nosql_table_column" {
+  sql = <<-EOQ
+    select
+      c ->> 'name' as "Name",
+      c ->> 'defaultValue' as "Default Value",
+      c ->> 'isNullable' as "Nullable",
+      c ->> 'type' as "Type"
+    from
+      oci_nosql_table,
+      jsonb_array_elements(schema -> 'columns') as c
+    where
+      id = $1 and lifecycle_state <> 'DELETED';
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_nosql_table_ddl" {
+  sql = <<-EOQ
+    select
+      ddl_statement as "Statement"
+    from
+      oci_nosql_table
+    where
+      id = $1 and lifecycle_state <> 'DELETED';
   EOQ
 
   param "id" {}

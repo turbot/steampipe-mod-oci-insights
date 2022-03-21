@@ -7,7 +7,7 @@ dashboard "oci_database_autonomous_database_detail" {
   })
 
   input "db_id" {
-    title = "Select a autonomous DB:"
+    title = "Select an autonomous DB:"
     query = query.oci_database_autonomous_database_input
     width = 4
   }
@@ -79,6 +79,25 @@ dashboard "oci_database_autonomous_database_detail" {
           id = self.input.db_id.value
         }
       }
+
+      table {
+        title = "Private Endpoint Details"
+        query = query.oci_database_autonomous_database_private_endpoint
+        args = {
+          id = self.input.db_id.value
+        }
+      }
+    }
+
+    container {
+
+      table {
+        title = "Basic Details"
+        query = query.oci_database_autonomous_database_basic
+        args = {
+          id = self.input.db_id.value
+        }
+      }
     }
 
   }
@@ -138,8 +157,7 @@ query "oci_database_autonomous_database_overview" {
     select
       display_name as "Name",
       time_created as "Time Created",
-      db_name as "DB Name",
-      cpu_core_count as "Cpu Core Count",
+      data_storage_size_in_gbs as "Total Size (GB)",
       license_model as "License Model",
       id as "OCID",
       compartment_id as "Compartment ID"
@@ -202,3 +220,38 @@ query "oci_database_autonomous_database_backup" {
   param "id" {}
 }
 
+query "oci_database_autonomous_database_private_endpoint" {
+  sql = <<-EOQ
+    select
+      private_endpoint as "Private Endpoint",
+      private_endpoint_ip as "Private Endpoint IP",
+      private_endpoint_label as "Private Endpoint Label"
+    from
+      oci_database_autonomous_database
+    where
+      id = $1 and lifecycle_state <> 'TERMINATED';
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_database_autonomous_database_basic" {
+  sql = <<-EOQ
+    select
+      data_safe_status as "Data Safe Status",
+      infrastructure_type as "Infrastructure Type",
+      is_access_control_enabled as "Access Control Enabled",
+      is_auto_scaling_enabled as "Auto Scaling Enabled",
+      is_dedicated as "Dedicated",
+      is_free_tier as "Free Tier",
+      open_mode as "Open Mode",
+      operations_insights_status as "Operations Insights Status",
+      permission_level as "Permission Level"
+    from
+      oci_database_autonomous_database
+    where
+      id = $1 and lifecycle_state <> 'TERMINATED';
+  EOQ
+
+  param "id" {}
+}

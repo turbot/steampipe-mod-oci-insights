@@ -14,28 +14,6 @@ dashboard "oci_mysql_db_system_detail" {
 
   container {
 
-    card {
-      width = 2
-
-      query = query.oci_mysql_db_system_analytics_cluster_attached
-      args = {
-        id = self.input.db_system_id.value
-      }
-    }
-
-    card {
-      width = 2
-
-      query = query.oci_mysql_db_system_heat_wave_cluster_attached
-      args = {
-        id = self.input.db_system_id.value
-      }
-    }
-
-  }
-
-  container {
-
     container {
       width = 6
 
@@ -67,6 +45,17 @@ dashboard "oci_mysql_db_system_detail" {
       table {
         title = "Backup Policy"
         query = query.oci_mysql_db_system_backup_policy
+        args = {
+          id = self.input.db_system_id.value
+        }
+      }
+    }
+
+    container {
+
+      table {
+        title = "Endpoint Details"
+        query = query.oci_mysql_db_system_endpoint
         args = {
           id = self.input.db_system_id.value
         }
@@ -129,7 +118,6 @@ query "oci_mysql_db_system_overview" {
       display_name as "Name",
       time_created as "Time Created",
       mysql_version as "MySQL Version",
-      port as "Port",
       id as "OCID",
       compartment_id as "Compartment ID"
     from
@@ -171,6 +159,25 @@ query "oci_mysql_db_system_backup_policy" {
       oci_mysql_db_system
     where
       id  = $1 and lifecycle_state <> 'DELETED';
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_mysql_db_system_endpoint" {
+  sql = <<-EOQ
+    select
+      e ->> 'hostname' as "Hostname",
+      e ->> 'ipAddress' as "IP Address",
+      e ->> 'modes' as "Modes",
+      e ->> 'port' as "Port",
+      e ->> 'portX' as "PortX",
+      e ->> 'status' as "Status"
+    from
+      oci_mysql_db_system,
+      jsonb_array_elements(endpoints) as e
+    where
+      id = $1 and lifecycle_state <> 'DELETED';
   EOQ
 
   param "id" {}
