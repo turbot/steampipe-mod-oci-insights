@@ -67,6 +67,32 @@ dashboard "oci_nosql_table_detail" {
       }
     }
 
+    container {
+
+      width = 12
+
+      chart {
+        title = "Read Throttle Count - Last 7 Days"
+        type  = "line"
+        width = 6
+        query = query.oci_nosql_table_read_throttle
+        args = {
+          id = self.input.table_id.value
+        }
+      }
+
+      chart {
+        title = "Write Throttle Count - Last 7 Days"
+        type  = "line"
+        width = 6
+        query = query.oci_nosql_table_write_throttle
+        args = {
+          id = self.input.table_id.value
+        }
+      }
+
+    }
+
   }
 }
 
@@ -170,6 +196,38 @@ query "oci_nosql_table_ddl" {
       oci_nosql_table
     where
       id = $1 and lifecycle_state <> 'DELETED';
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_nosql_table_read_throttle" {
+  sql = <<-EOQ
+    select
+      h.timestamp,
+      (sum / 3600) as read_throttle_count
+    from
+      oci_nosql_table_metric_read_throttle_count_hourly as h
+      left join oci_nosql_table as t on h.name = t.name
+    where
+      h.timestamp >= current_date - interval '7 day' and t.id = $1
+    order by h.timestamp;
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_nosql_table_write_throttle" {
+  sql = <<-EOQ
+   select
+      h.timestamp,
+      (sum / 3600) as write_throttle_count
+    from
+      oci_nosql_table_metric_write_throttle_count_hourly as h
+      left join oci_nosql_table as t on h.name = t.name
+    where
+      h.timestamp >= current_date - interval '7 day' and t.id = $1
+    order by h.timestamp;
   EOQ
 
   param "id" {}
