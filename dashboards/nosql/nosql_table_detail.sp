@@ -205,9 +205,9 @@ query "oci_nosql_table_read_throttle" {
   sql = <<-EOQ
     select
       h.timestamp,
-      (sum / 3600) as read_throttle_count
+      (sum / 300) as read_throttle_count
     from
-      oci_nosql_table_metric_read_throttle_count_hourly as h
+      oci_nosql_table_metric_read_throttle_count as h
       left join oci_nosql_table as t on h.name = t.name
     where
       h.timestamp >= current_date - interval '7 day' and t.id = $1
@@ -221,9 +221,9 @@ query "oci_nosql_table_write_throttle" {
   sql = <<-EOQ
    select
       h.timestamp,
-      (sum / 3600) as write_throttle_count
+      (sum / 300) as write_throttle_count
     from
-      oci_nosql_table_metric_write_throttle_count_hourly as h
+      oci_nosql_table_metric_write_throttle_count as h
       left join oci_nosql_table as t on h.name = t.name
     where
       h.timestamp >= current_date - interval '7 day' and t.id = $1

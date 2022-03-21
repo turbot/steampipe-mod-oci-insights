@@ -62,6 +62,19 @@ dashboard "oci_mysql_db_system_detail" {
       }
     }
 
+    container {
+
+      chart {
+        title = "Metric Connections - Last 7 Days"
+        type  = "line"
+        width = 6
+        query = query.oci_mysql_db_system_connection
+        args = {
+          id = self.input.db_system_id.value
+        }
+      }
+    }
+
   }
 }
 
@@ -183,3 +196,17 @@ query "oci_mysql_db_system_endpoint" {
   param "id" {}
 }
 
+query "oci_mysql_db_system_connection" {
+  sql = <<-EOQ
+    select
+      timestamp,
+      (sum / 300) as metric_connection
+    from
+      oci_mysql_db_system_metric_connections
+    where
+      timestamp >= current_date - interval '7 day' and id = $1
+    order by timestamp;
+  EOQ
+
+  param "id" {}
+}
