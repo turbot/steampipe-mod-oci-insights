@@ -72,7 +72,7 @@ dashboard "oci_nosql_table_detail" {
       width = 12
 
       chart {
-        title = "Read Throttle Count - Last 7 Days"
+        title = "Read Throttle Count Daily - Last 7 Days"
         type  = "line"
         width = 6
         query = query.oci_nosql_table_read_throttle
@@ -82,7 +82,7 @@ dashboard "oci_nosql_table_detail" {
       }
 
       chart {
-        title = "Write Throttle Count - Last 7 Days"
+        title = "Write Throttle Count Daily - Last 7 Days"
         type  = "line"
         width = 6
         query = query.oci_nosql_table_write_throttle
@@ -204,14 +204,14 @@ query "oci_nosql_table_ddl" {
 query "oci_nosql_table_read_throttle" {
   sql = <<-EOQ
     select
-      h.timestamp,
-      (sum / 300) as read_throttle_count
+      d.timestamp,
+      (sum / 86400) as read_throttle_count_daily
     from
-      oci_nosql_table_metric_read_throttle_count as h
-      left join oci_nosql_table as t on h.name = t.name
+      oci_nosql_table_metric_read_throttle_count_daily as d
+      left join oci_nosql_table as t on d.name = t.name
     where
-      h.timestamp >= current_date - interval '7 day' and t.id = $1
-    order by h.timestamp;
+      d.timestamp >= current_date - interval '7 day' and t.id = $1
+    order by d.timestamp;
   EOQ
 
   param "id" {}
@@ -220,14 +220,14 @@ query "oci_nosql_table_read_throttle" {
 query "oci_nosql_table_write_throttle" {
   sql = <<-EOQ
    select
-      h.timestamp,
-      (sum / 300) as write_throttle_count
+      d.timestamp,
+      (sum / 86400) as write_throttle_count_daily
     from
-      oci_nosql_table_metric_write_throttle_count as h
-      left join oci_nosql_table as t on h.name = t.name
+      oci_nosql_table_metric_write_throttle_count_daily as d
+      left join oci_nosql_table as t on d.name = t.name
     where
-      h.timestamp >= current_date - interval '7 day' and t.id = $1
-    order by h.timestamp;
+      d.timestamp >= current_date - interval '7 day' and t.id = $1
+    order by d.timestamp;
   EOQ
 
   param "id" {}
