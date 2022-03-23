@@ -14,6 +14,28 @@ dashboard "oci_mysql_db_system_detail" {
 
   container {
 
+    card {
+      width = 2
+
+      query = query.oci_mysql_db_system_mysql_version
+      args = {
+        id = self.input.db_system_id.value
+      }
+    }
+
+    card {
+      width = 2
+
+      query = query.oci_mysql_db_system_backup
+      args = {
+        id = self.input.db_system_id.value
+      }
+    }
+
+  }
+
+  container {
+
     container {
       width = 6
 
@@ -99,10 +121,10 @@ query "oci_mysql_db_system_input" {
 EOQ
 }
 
-query "oci_mysql_db_system_analytics_cluster_attached" {
+query "oci_mysql_db_system_mysql_version" {
   sql = <<-EOQ
     select
-      case when is_analytics_cluster_attached then 'Attached' else 'Unattached' end as "Analytics Cluster"
+      mysql_version as "MySQL Version"
     from
       oci_mysql_db_system
     where
@@ -112,14 +134,17 @@ query "oci_mysql_db_system_analytics_cluster_attached" {
   param "id" {}
 }
 
-query "oci_mysql_db_system_heat_wave_cluster_attached" {
+query "oci_mysql_db_system_backup" {
   sql = <<-EOQ
     select
-      case when is_heat_wave_cluster_attached then 'Attached' else 'Unattached' end as "Heat Wave Cluster"
+      'Backup Status' as label,
+      case when b.id is null then 'Disabled' else 'Enabled' end as value,
+      case when b.id is null then 'alert' else 'ok' end as type
     from
-      oci_mysql_db_system
+      oci_mysql_db_system as s
+      left join oci_mysql_backup as b on s.id = b.db_system_id
     where
-      id = $1;
+      s.id = $1;
   EOQ
 
   param "id" {}
@@ -130,7 +155,6 @@ query "oci_mysql_db_system_overview" {
     select
       display_name as "Name",
       time_created as "Time Created",
-      mysql_version as "MySQL Version",
       id as "OCID",
       compartment_id as "Compartment ID"
     from

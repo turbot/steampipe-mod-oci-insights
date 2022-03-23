@@ -17,6 +17,15 @@ dashboard "oci_objectstorage_bucket_detail" {
     card {
       width = 2
 
+      query = query.oci_objectstorage_bucket_read_only
+      args = {
+        id = self.input.bucket_id.value
+      }
+    }
+
+    card {
+      width = 2
+
       query = query.oci_objectstorage_bucket_versioning
       args = {
         id = self.input.bucket_id.value
@@ -116,6 +125,20 @@ query "oci_objectstorage_bucket_input" {
 EOQ
 }
 
+query "oci_objectstorage_bucket_read_only" {
+  sql = <<-EOQ
+    select
+      case when is_read_only then 'Enabled' else 'Disabled' end as value,
+      'Read Only' as label
+    from
+      oci_objectstorage_bucket
+    where
+      id = $1;
+  EOQ
+
+  param "id" {}
+}
+
 query "oci_objectstorage_bucket_versioning" {
   sql = <<-EOQ
     select
@@ -202,8 +225,7 @@ query "oci_objectstorage_bucket_encryption" {
 query "oci_objectstorage_bucket_access" {
   sql = <<-EOQ
    select
-    public_access_type as "Public Access Type",
-    is_read_only as "Read Only"
+    public_access_type as "Public Access Type"
   from
     oci_objectstorage_bucket
   where

@@ -14,6 +14,29 @@ dashboard "oci_nosql_table_detail" {
 
   container {
 
+    card {
+      width = 2
+
+      query = query.oci_nosql_table_state
+      args = {
+        id = self.input.table_id.value
+      }
+    }
+
+    card {
+      width = 2
+
+      query = query.oci_nosql_table_auto_reclaimable
+      args = {
+        id = self.input.table_id.value
+      }
+    }
+
+
+  }
+
+  container {
+
     container {
       width = 6
 
@@ -108,6 +131,32 @@ query "oci_nosql_table_input" {
     order by
       n.name;
 EOQ
+}
+
+query "oci_nosql_table_state" {
+  sql = <<-EOQ
+    select
+      initcap(lifecycle_state) as "State"
+    from
+      oci_nosql_table
+    where
+      id = $1;
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_nosql_table_auto_reclaimable" {
+  sql = <<-EOQ
+    select
+      case when is_auto_reclaimable then 'Enabled' else 'Disabled' end as "Auto Reclaimable"
+    from
+      oci_nosql_table
+    where
+      id = $1;
+  EOQ
+
+  param "id" {}
 }
 
 query "oci_nosql_table_overview" {

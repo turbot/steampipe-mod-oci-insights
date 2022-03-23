@@ -167,8 +167,8 @@ query "oci_compute_instance_core" {
 query "oci_compute_instance_public" {
   sql = <<-EOQ
     select
-      case when title = '' then 'Private' else 'Public' end as value,
-      'Instance Access Type' as label,
+      case when title = '' then 'Disabled' else 'Enabled' end as value,
+      'Public Access' as label,
       case when title = '' then 'ok' else 'alert' end as type
     from
       oci_core_vnic_attachment
