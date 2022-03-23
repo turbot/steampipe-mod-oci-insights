@@ -16,7 +16,22 @@ dashboard "oci_compute_instance_detail" {
 
     card {
       width = 2
+      query = query.oci_compute_instance_state
+      args = {
+        id = self.input.instance_id.value
+      }
+    }
 
+    card {
+      width = 2
+      query = query.oci_compute_instance_shape
+      args = {
+        id = self.input.instance_id.value
+      }
+    }
+
+    card {
+      width = 2
       query = query.oci_compute_instance_core
       args = {
         id = self.input.instance_id.value
@@ -25,13 +40,11 @@ dashboard "oci_compute_instance_detail" {
 
     card {
       width = 2
-
       query = query.oci_compute_instance_public
       args = {
         id = self.input.instance_id.value
       }
     }
-
   }
 
   container {
@@ -47,7 +60,6 @@ dashboard "oci_compute_instance_detail" {
         args = {
           id = self.input.instance_id.value
         }
-
       }
 
       table {
@@ -57,7 +69,6 @@ dashboard "oci_compute_instance_detail" {
         args = {
           id = self.input.instance_id.value
         }
-
       }
     }
 
@@ -84,17 +95,9 @@ dashboard "oci_compute_instance_detail" {
         }
       }
 
-      table {
-        title = "Shape Configurations"
-        query = query.oci_compute_instance_shape
-        args = {
-          id = self.input.instance_id.value
-        }
-      }
-
     }
-
   }
+
 }
 
 query "oci_compute_instance_input" {
@@ -118,17 +121,34 @@ query "oci_compute_instance_input" {
 EOQ
 }
 
-query "oci_compute_instance_name_for_instance" {
+query "oci_compute_instance_state" {
   sql = <<-EOQ
     select
-      display_name as "Instance"
+      'State' as label,
+      initcap(lifecycle_state) as value
     from
       oci_core_instance
     where
-      id = $1 and lifecycle_state <> 'TERMINATED';
+      id = $1;
   EOQ
 
   param "id" {}
+
+}
+
+query "oci_compute_instance_shape" {
+  sql = <<-EOQ
+    select
+      'Shape' as label,
+      shape as value
+    from
+      oci_core_instance
+    where
+      id = $1;
+  EOQ
+
+  param "id" {}
+
 }
 
 query "oci_compute_instance_core" {
@@ -138,7 +158,7 @@ query "oci_compute_instance_core" {
     from
       oci_core_instance
     where
-      id = $1 and lifecycle_state <> 'TERMINATED';
+      id = $1;
   EOQ
 
   param "id" {}
@@ -148,7 +168,7 @@ query "oci_compute_instance_public" {
   sql = <<-EOQ
     select
       case when title = '' then 'Private' else 'Public' end as value,
-      'Instance Type' as label,
+      'Instance Access Type' as label,
       case when title = '' then 'ok' else 'alert' end as type
     from
       oci_core_vnic_attachment
@@ -165,12 +185,13 @@ query "oci_compute_instance_overview" {
       display_name as "Name",
       time_created as "Time Created",
       availability_domain as "Availability Domain",
+      fault_domain as "Fault Domain",
       id as "OCID",
       compartment_id as "Compartment ID"
     from
       oci_core_instance
     where
-      id = $1 and lifecycle_state <> 'TERMINATED';
+      id = $1;
   EOQ
 
   param "id" {}
@@ -184,7 +205,7 @@ query "oci_compute_instance_tag" {
     from
       oci_core_instance
     where
-      id = $1 and lifecycle_state <> 'TERMINATED'
+      id = $1
     )
     select
       key as "Key",
@@ -206,26 +227,7 @@ query "oci_compute_instance_launch_options" {
     from
       oci_core_instance
     where
-      id  = $1 and lifecycle_state <> 'TERMINATED';
-  EOQ
-
-  param "id" {}
-}
-
-query "oci_compute_instance_shape" {
-  sql = <<-EOQ
-    select
-      shape as "Shape",
-      shape_config_baseline_ocpu_utilization as "Shape Config Baseline OCPU Utilization",
-      shape_config_ocpus as "Shape Config OCPUs",
-      shape_config_gpus as "Shape Config GPUs",
-      shape_config_local_disks as "Shape Config Local Disks",
-      shape_config_max_vnic_attachments as "Shape Config Max Vnic Attachments",
-      shape_config_memory_in_gbs as "Shape Config Memory in GBs"
-    from
-      oci_core_instance
-    where
-      id  = $1 and lifecycle_state <> 'TERMINATED';
+      id  = $1;
   EOQ
 
   param "id" {}

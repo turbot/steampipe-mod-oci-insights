@@ -6,7 +6,7 @@ dashboard "oci_block_storage_block_volume_detail" {
     type = "Detail"
   })
 
-  input "volume_id" {
+  input "block_volume_id" {
     title = "Select a block volume:"
     query = query.oci_block_storage_block_volume_input
     width = 4
@@ -19,7 +19,16 @@ dashboard "oci_block_storage_block_volume_detail" {
 
       query = query.oci_block_storage_block_volume_storage
       args = {
-        id = self.input.volume_id.value
+        id = self.input.block_volume_id.value
+      }
+    }
+
+    card {
+      width = 2
+
+      query = query.oci_block_storage_block_volume_vpu
+      args = {
+        id = self.input.block_volume_id.value
       }
     }
 
@@ -36,7 +45,7 @@ dashboard "oci_block_storage_block_volume_detail" {
         width = 6
         query = query.oci_block_storage_block_volume_overview
         args = {
-          id = self.input.volume_id.value
+          id = self.input.block_volume_id.value
         }
 
       }
@@ -46,7 +55,7 @@ dashboard "oci_block_storage_block_volume_detail" {
         width = 6
         query = query.oci_block_storage_block_volume_tags
         args = {
-          id = self.input.volume_id.value
+          id = self.input.block_volume_id.value
         }
 
       }
@@ -59,7 +68,7 @@ dashboard "oci_block_storage_block_volume_detail" {
         title = "Attached To"
         query = query.oci_block_storage_block_volume_attached_instances
         args = {
-          id = self.input.volume_id.value
+          id = self.input.block_volume_id.value
         }
 
         column "Instance ID" {
@@ -75,7 +84,7 @@ dashboard "oci_block_storage_block_volume_detail" {
         title = "Encryption Details"
         query = query.oci_block_storage_block_volume_encryption
         args = {
-          id = self.input.volume_id.value
+          id = self.input.block_volume_id.value
         }
       }
     }
@@ -111,7 +120,20 @@ query "oci_block_storage_block_volume_storage" {
     from
       oci_core_volume
     where
-      id = $1 and lifecycle_state <> 'TERMINATED';
+      id = $1;
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_block_storage_block_volume_vpu" {
+  sql = <<-EOQ
+    select
+      vpus_per_gb as "VPUs"
+    from
+      oci_core_volume
+    where
+      id = $1;
   EOQ
 
   param "id" {}
@@ -130,7 +152,7 @@ query "oci_block_storage_block_volume_overview" {
     from
       oci_core_volume
     where
-      id = $1 and lifecycle_state <> 'TERMINATED';
+      id = $1;
   EOQ
 
   param "id" {}
@@ -144,7 +166,7 @@ query "oci_block_storage_block_volume_tags" {
       from
         oci_core_volume
       where
-        id = $1 and lifecycle_state <> 'TERMINATED'
+        id = $1
     )
     select
       key as "Key",
@@ -168,7 +190,7 @@ query "oci_block_storage_block_volume_attached_instances" {
       oci_core_volume_attachment as a
       left join oci_core_instance as i on a.instance_id = i.id
     where
-      a.volume_id = $1 and a.lifecycle_state <> 'TERMINATED';
+      a.volume_id = $1;
   EOQ
 
   param "id" {}
@@ -182,7 +204,7 @@ query "oci_block_storage_block_volume_encryption" {
     from
       oci_core_volume
     where
-      id  = $1 and lifecycle_state <> 'TERMINATED';
+      id  = $1;
   EOQ
 
   param "id" {}

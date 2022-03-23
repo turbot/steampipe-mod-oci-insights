@@ -47,7 +47,6 @@ dashboard "oci_database_autonomous_database_detail" {
         args = {
           id = self.input.db_id.value
         }
-
       }
 
       table {
@@ -57,7 +56,6 @@ dashboard "oci_database_autonomous_database_detail" {
         args = {
           id = self.input.db_id.value
         }
-
       }
     }
 
@@ -79,6 +77,10 @@ dashboard "oci_database_autonomous_database_detail" {
           id = self.input.db_id.value
         }
       }
+    }
+
+    container {
+      width = 6
 
       table {
         title = "Private Endpoint Details"
@@ -88,18 +90,17 @@ dashboard "oci_database_autonomous_database_detail" {
         }
       }
     }
-
     container {
+      width = 6
 
       table {
-        title = "Basic Details"
-        query = query.oci_database_autonomous_database_basic
+        title = "Access Details"
+        query = query.oci_database_autonomous_database_access_detail
         args = {
           id = self.input.db_id.value
         }
       }
     }
-
   }
 }
 
@@ -131,7 +132,7 @@ query "oci_database_autonomous_database_core" {
     from
       oci_database_autonomous_database
     where
-      id = $1 and lifecycle_state <> 'TERMINATED';
+      id = $1;
   EOQ
 
   param "id" {}
@@ -146,7 +147,7 @@ query "oci_database_autonomous_database_data_guard" {
     from
       oci_database_autonomous_database
     where
-      id = $1 and lifecycle_state <> 'TERMINATED';
+      id = $1;
   EOQ
 
   param "id" {}
@@ -157,6 +158,8 @@ query "oci_database_autonomous_database_overview" {
     select
       display_name as "Name",
       time_created as "Time Created",
+      is_dedicated as "Dedicated",
+      is_free_tier as "Free Tier",
       data_storage_size_in_gbs as "Total Size (GB)",
       license_model as "License Model",
       id as "OCID",
@@ -164,7 +167,7 @@ query "oci_database_autonomous_database_overview" {
     from
       oci_database_autonomous_database
     where
-      id = $1 and lifecycle_state <> 'TERMINATED';
+      id = $1;
   EOQ
 
   param "id" {}
@@ -178,7 +181,7 @@ query "oci_database_autonomous_database_tag" {
     from
       oci_database_autonomous_database
     where
-      id = $1 and lifecycle_state <> 'TERMINATED'
+      id = $1
     )
     select
       key as "Key",
@@ -200,7 +203,7 @@ query "oci_database_autonomous_database_db" {
     from
       oci_database_autonomous_database
     where
-      id  = $1 and lifecycle_state <> 'TERMINATED';
+      id  = $1;
   EOQ
 
   param "id" {}
@@ -214,7 +217,7 @@ query "oci_database_autonomous_database_backup" {
     from
       oci_database_autonomous_database
     where
-      id  = $1 and lifecycle_state <> 'TERMINATED';
+      id  = $1;
   EOQ
 
   param "id" {}
@@ -229,28 +232,22 @@ query "oci_database_autonomous_database_private_endpoint" {
     from
       oci_database_autonomous_database
     where
-      id = $1 and lifecycle_state <> 'TERMINATED';
+      id = $1;
   EOQ
 
   param "id" {}
 }
 
-query "oci_database_autonomous_database_basic" {
+query "oci_database_autonomous_database_access_detail" {
   sql = <<-EOQ
     select
-      data_safe_status as "Data Safe Status",
-      infrastructure_type as "Infrastructure Type",
       is_access_control_enabled as "Access Control Enabled",
-      is_auto_scaling_enabled as "Auto Scaling Enabled",
-      is_dedicated as "Dedicated",
-      is_free_tier as "Free Tier",
       open_mode as "Open Mode",
-      operations_insights_status as "Operations Insights Status",
       permission_level as "Permission Level"
     from
       oci_database_autonomous_database
     where
-      id = $1 and lifecycle_state <> 'TERMINATED';
+      id = $1;
   EOQ
 
   param "id" {}

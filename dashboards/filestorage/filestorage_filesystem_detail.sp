@@ -116,11 +116,11 @@ EOQ
 query "oci_filestorage_filesystem_cloned" {
   sql = <<-EOQ
     select
-      case when is_clone_parent then 'Cloned' else 'Not Cloned' end as "File System Type"
+      case when is_clone_parent then 'Cloned' else 'Not cloned' end as "File System Type"
     from
       oci_file_storage_file_system
     where
-      id = $1 and lifecycle_state <> 'DELETED';
+      id = $1;
   EOQ
 
   param "id" {}
@@ -129,11 +129,11 @@ query "oci_filestorage_filesystem_cloned" {
 query "oci_filestorage_filesystem_snapshot" {
   sql = <<-EOQ
     select
-      count(*) as "Snapshot"
+      count(*) as "Snapshots"
     from
       oci_file_storage_snapshot
     where
-      file_system_id = $1 and lifecycle_state <> 'DELETED';
+      file_system_id = $1;
   EOQ
 
   param "id" {}
@@ -150,7 +150,7 @@ query "oci_filestorage_filesystem_overview" {
     from
       oci_file_storage_file_system
     where
-      id = $1 and lifecycle_state <> 'DELETED';
+      id = $1;
   EOQ
 
   param "id" {}
@@ -164,7 +164,7 @@ query "oci_filestorage_filesystem_tag" {
     from
       oci_file_storage_file_system
     where
-      id = $1 and lifecycle_state <> 'DELETED'
+      id = $1
     )
     select
       key as "Key",
@@ -186,7 +186,7 @@ query "oci_filestorage_filesystem_snapshot_detail" {
     from
       oci_file_storage_snapshot
     where
-      file_system_id  = $1 and lifecycle_state <> 'DELETED';
+      file_system_id  = $1;
   EOQ
 
   param "id" {}
@@ -201,7 +201,7 @@ query "oci_filestorage_filesystem_encryption" {
     from
       oci_file_storage_file_system
     where
-      id  = $1 and lifecycle_state <> 'DELETED';
+      id  = $1;
   EOQ
 
   param "id" {}
@@ -210,12 +210,12 @@ query "oci_filestorage_filesystem_encryption" {
 query "oci_filestorage_filesystem_source" {
   sql = <<-EOQ
     select
-      source_details ->> 'parentFileSystemId' as "Parent File System Id",
-      source_details ->> 'sourceSnapshotId' as "Source Snapshot Id"
+      source_details ->> 'parentFileSystemId' as "Parent File System ID",
+      source_details ->> 'sourceSnapshotId' as "Source Snapshot ID"
     from
       oci_file_storage_file_system
     where
-      id  = $1 and lifecycle_state <> 'DELETED';
+      id  = $1 ;
   EOQ
 
   param "id" {}

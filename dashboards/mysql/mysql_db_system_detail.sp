@@ -73,17 +73,6 @@ dashboard "oci_mysql_db_system_detail" {
           id = self.input.db_system_id.value
         }
       }
-
-      chart {
-        title = "Metric Connections Daily - Last 7 Days"
-        type  = "line"
-        width = 6
-        query = query.oci_mysql_db_system_connection_daily
-        args = {
-          id = self.input.db_system_id.value
-        }
-      }
-
     }
 
   }
@@ -117,7 +106,7 @@ query "oci_mysql_db_system_analytics_cluster_attached" {
     from
       oci_mysql_db_system
     where
-      id = $1 and lifecycle_state <> 'DELETED';
+      id = $1;
   EOQ
 
   param "id" {}
@@ -130,7 +119,7 @@ query "oci_mysql_db_system_heat_wave_cluster_attached" {
     from
       oci_mysql_db_system
     where
-      id = $1 and lifecycle_state <> 'DELETED';
+      id = $1;
   EOQ
 
   param "id" {}
@@ -147,7 +136,7 @@ query "oci_mysql_db_system_overview" {
     from
       oci_mysql_db_system
     where
-      id = $1 and lifecycle_state <> 'DELETED';
+      id = $1;
   EOQ
 
   param "id" {}
@@ -161,7 +150,7 @@ query "oci_mysql_db_system_tag" {
     from
       oci_mysql_db_system
     where
-      id = $1 and lifecycle_state <> 'DELETED'
+      id = $1
     )
     select
       key as "Key",
@@ -182,7 +171,7 @@ query "oci_mysql_db_system_backup_policy" {
     from
       oci_mysql_db_system
     where
-      id  = $1 and lifecycle_state <> 'DELETED';
+      id  = $1;
   EOQ
 
   param "id" {}
@@ -201,7 +190,7 @@ query "oci_mysql_db_system_endpoint" {
       oci_mysql_db_system,
       jsonb_array_elements(endpoints) as e
     where
-      id = $1 and lifecycle_state <> 'DELETED';
+      id = $1;
   EOQ
 
   param "id" {}
@@ -214,21 +203,6 @@ query "oci_mysql_db_system_connection" {
       (sum / 300) as metric_connection
     from
       oci_mysql_db_system_metric_connections
-    where
-      timestamp >= current_date - interval '7 day' and id = $1
-    order by timestamp;
-  EOQ
-
-  param "id" {}
-}
-
-query "oci_mysql_db_system_connection_daily" {
-  sql = <<-EOQ
-    select
-      timestamp,
-      (sum / 86400) as metric_connection
-    from
-      oci_mysql_db_system_metric_connections_daily
     where
       timestamp >= current_date - interval '7 day' and id = $1
     order by timestamp;

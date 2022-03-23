@@ -106,7 +106,7 @@ query "oci_kms_key_disabled" {
     from
       oci_kms_key
     where
-      id = $1 and lifecycle_state <> 'DELETED';
+      id = $1;
   EOQ
 
   param "id" {}
@@ -119,7 +119,7 @@ query "oci_kms_key_protection_mode" {
     from
       oci_kms_key
     where
-      id = $1 and lifecycle_state <> 'DELETED';
+      id = $1;
   EOQ
 
   param "id" {}
@@ -137,7 +137,7 @@ query "oci_kms_key_overview" {
     from
       oci_kms_key
     where
-      id = $1 and lifecycle_state <> 'DELETED';
+      id = $1;
   EOQ
 
   param "id" {}
@@ -151,7 +151,7 @@ query "oci_kms_key_tag" {
     from
       oci_kms_key
     where
-      id = $1 and lifecycle_state <> 'DELETED'
+      id = $1
     )
     select
       key as "Key",
@@ -173,9 +173,8 @@ query "oci_kms_key_detail" {
     from
       oci_kms_key
     where
-      id  = $1 and lifecycle_state <> 'DELETED';
+      id  = $1;
   EOQ
 
   param "id" {}
 }
-
