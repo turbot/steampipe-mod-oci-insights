@@ -73,8 +73,16 @@ dashboard "oci_filestorage_filesystem_detail" {
       }
 
       table {
-        title = "Encryption"
+        title = "Encryption Details"
         query = query.oci_filestorage_filesystem_encryption
+        args = {
+          id = self.input.filesystem_id.value
+        }
+      }
+
+      table {
+        title = "Source Details"
+        query = query.oci_filestorage_filesystem_source
         args = {
           id = self.input.filesystem_id.value
         }
@@ -108,11 +116,11 @@ EOQ
 query "oci_filestorage_filesystem_cloned" {
   sql = <<-EOQ
     select
-      case when is_clone_parent then 'Cloned' else 'Not Cloned' end as "File System Type"
+      case when is_clone_parent then 'Cloned' else 'Not cloned' end as "File System Type"
     from
       oci_file_storage_file_system
     where
-      id = $1 and lifecycle_state <> 'DELETED';
+      id = $1;
   EOQ
 
   param "id" {}
@@ -121,11 +129,11 @@ query "oci_filestorage_filesystem_cloned" {
 query "oci_filestorage_filesystem_snapshot" {
   sql = <<-EOQ
     select
-      count(*) as "Snapshot"
+      count(*) as "Snapshots"
     from
       oci_file_storage_snapshot
     where
-      file_system_id = $1 and lifecycle_state <> 'DELETED';
+      file_system_id = $1;
   EOQ
 
   param "id" {}
@@ -142,7 +150,7 @@ query "oci_filestorage_filesystem_overview" {
     from
       oci_file_storage_file_system
     where
-      id = $1 and lifecycle_state <> 'DELETED';
+      id = $1;
   EOQ
 
   param "id" {}
@@ -156,7 +164,7 @@ query "oci_filestorage_filesystem_tag" {
     from
       oci_file_storage_file_system
     where
-      id = $1 and lifecycle_state <> 'DELETED'
+      id = $1
     )
     select
       key as "Key",
@@ -178,7 +186,7 @@ query "oci_filestorage_filesystem_snapshot_detail" {
     from
       oci_file_storage_snapshot
     where
-      file_system_id  = $1 and lifecycle_state <> 'DELETED';
+      file_system_id  = $1;
   EOQ
 
   param "id" {}
@@ -188,12 +196,26 @@ query "oci_filestorage_filesystem_snapshot_detail" {
 query "oci_filestorage_filesystem_encryption" {
   sql = <<-EOQ
     select
-      case when kms_key_id is not null then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
+      case when kms_key_id is not null and kms_key_id <> '' then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
       kms_key_id as "KMS Key ID"
     from
       oci_file_storage_file_system
     where
-      id  = $1 and lifecycle_state <> 'DELETED';
+      id  = $1;
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_filestorage_filesystem_source" {
+  sql = <<-EOQ
+    select
+      source_details ->> 'parentFileSystemId' as "Parent File System ID",
+      source_details ->> 'sourceSnapshotId' as "Source Snapshot ID"
+    from
+      oci_file_storage_file_system
+    where
+      id  = $1 ;
   EOQ
 
   param "id" {}

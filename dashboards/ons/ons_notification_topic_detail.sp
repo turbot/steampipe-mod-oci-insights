@@ -55,7 +55,7 @@ dashboard "oci_ons_notification_topic_detail" {
       width = 6
 
       table {
-        title = "Subscriptions Details"
+        title = "Subscription Details"
         query = query.oci_ons_notification_topic_subscription
         args = {
           id = self.input.topic_id.value
@@ -88,7 +88,7 @@ EOQ
 query "oci_ons_notification_topic_state" {
   sql = <<-EOQ
     select
-      lifecycle_state as "Lifecycle State"
+      initcap(lifecycle_state) as "Lifecycle State"
     from
       oci_ons_notification_topic
     where

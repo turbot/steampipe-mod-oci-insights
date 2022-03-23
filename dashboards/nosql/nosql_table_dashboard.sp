@@ -49,19 +49,38 @@ dashboard "oci_nosql_table_dashboard" {
 
   }
 
+  # container {
+  #   title = "Performance & Utilization"
+
+  #   chart {
+  #     title = "Top 10 Storage - Last 7 days"
+  #     sql   = query.oci_nosql_table_top10_storage_past_week.sql
+  #     type  = "line"
+  #     width = 6
+  #   }
+
+  #   chart {
+  #     title = "Average Max Daily Storage - Last 30 days"
+  #     sql   = query.oci_nosql_table_by_storage_utilization_category.sql
+  #     type  = "column"
+  #     width = 6
+  #   }
+
+  # }
+
   container {
     title = "Performance & Utilization"
 
     chart {
-      title = "Top 10 Storage - Last 7 days"
-      sql   = query.oci_nosql_table_top10_storage_past_week.sql
+      title = "Top 10 Average Read Throttle Count - Last 7 days"
+      query   = query.oci_nosql_table_top_10_read_throttle_count_avg
       type  = "line"
       width = 6
     }
 
     chart {
-      title = "Average Max Daily Storage - Last 30 days"
-      sql   = query.oci_nosql_table_by_storage_utilization_category.sql
+      title = "Top 10 Average Write Throttle Count - Last 7 days"
+      query   = query.oci_nosql_table_top_10_write_throttle_count_avg
       type  = "column"
       width = 6
     }
@@ -199,66 +218,132 @@ query "oci_nosql_table_by_creation_month" {
   EOQ
 }
 
-query "oci_nosql_table_top10_storage_past_week" {
+# Performance Queries
+
+# query "oci_nosql_table_top10_storage_past_week" {
+#   sql = <<-EOQ
+#      with top_n as (
+#       select
+#         name,
+#         avg(average)
+#       from
+#         oci_nosql_table_metric_storage_utilization_daily
+#       where
+#         timestamp  >= CURRENT_DATE - INTERVAL '7 day'
+#       group by
+#         name
+#       order by
+#         avg desc
+#       limit 10
+#     )
+#     select
+#       timestamp,
+#       name,
+#       average
+#     from
+#       oci_nosql_table_metric_storage_utilization_hourly
+#     where
+#       timestamp  >= CURRENT_DATE - INTERVAL '7 day'
+#       and name in (select name from top_n)
+#     order by
+#       timestamp;
+#   EOQ
+# }
+
+# query "oci_nosql_table_by_storage_utilization_category" {
+#   sql = <<-EOQ
+#     with storage_buckets as (
+#       select
+#     unnest(array ['Unused (<1%)','Underutilized (1-10%)','Right-sized (10-90%)', 'Overutilized (>90%)' ]) as storage_bucket
+#     ),
+#     max_averages as (
+#       select
+#         name,
+#         case
+#           when max(average) <= 1 then 'Unused (<1%)'
+#           when max(average) between 1 and 10 then 'Underutilized (1-10%)'
+#           when max(average) between 10 and 90 then 'Right-sized (10-90%)'
+#           when max(average) > 90 then 'Overutilized (>90%)'
+#         end as storage_bucket,
+#         max(average) as max_avg
+#       from
+#         oci_nosql_table_metric_storage_utilization_daily
+#       where
+#         date_part('day', now() - timestamp) <= 30
+#       group by
+#         name
+#     )
+#     select
+#       b.storage_bucket as "storage Utilization",
+#       count(a.*)
+#     from
+#       storage_buckets as b
+#     left join max_averages as a on b.storage_bucket = a.storage_bucket
+#     group by
+#       b.storage_bucket;
+#   EOQ
+# }
+
+query "oci_nosql_table_top_10_read_throttle_count_avg" {
   sql = <<-EOQ
-     with top_n as (
+    with top_n as (
       select
         name,
         avg(average)
       from
-        oci_nosql_table_metric_storage_utilization_daily
+        oci_nosql_table_metric_read_throttle_count_daily
       where
-        timestamp  >= CURRENT_DATE - INTERVAL '7 day'
+        timestamp >= CURRENT_DATE - INTERVAL '7 day'
       group by
         name
       order by
         avg desc
-      limit 10
+      limit
+        10
     )
     select
       timestamp,
       name,
       average
     from
-      oci_nosql_table_metric_storage_utilization_hourly
+      oci_nosql_table_metric_read_throttle_count_hourly
     where
-      timestamp  >= CURRENT_DATE - INTERVAL '7 day'
-      and name in (select name from top_n)
-    order by
-      timestamp;
+      timestamp >= CURRENT_DATE - INTERVAL '7 day'
+      and name in (
+        select
+          name
+        from top_n);
   EOQ
 }
 
-query "oci_nosql_table_by_storage_utilization_category" {
+query "oci_nosql_table_top_10_write_throttle_count_avg" {
   sql = <<-EOQ
-    with storage_buckets as (
-      select
-    unnest(array ['Unused (<1%)','Underutilized (1-10%)','Right-sized (10-90%)', 'Overutilized (>90%)' ]) as storage_bucket
-    ),
-    max_averages as (
+    with top_n as (
       select
         name,
-        case
-          when max(average) <= 1 then 'Unused (<1%)'
-          when max(average) between 1 and 10 then 'Underutilized (1-10%)'
-          when max(average) between 10 and 90 then 'Right-sized (10-90%)'
-          when max(average) > 90 then 'Overutilized (>90%)'
-        end as storage_bucket,
-        max(average) as max_avg
+        avg(average)
       from
-        oci_nosql_table_metric_storage_utilization_daily
+        oci_nosql_table_metric_write_throttle_count_daily
       where
-        date_part('day', now() - timestamp) <= 30
+        timestamp >= CURRENT_DATE - INTERVAL '7 day'
       group by
         name
+      order by
+        avg desc
+      limit
+        10
     )
     select
-      b.storage_bucket as "storage Utilization",
-      count(a.*)
+      timestamp,
+      name,
+      average
     from
-      storage_buckets as b
-    left join max_averages as a on b.storage_bucket = a.storage_bucket
-    group by
-      b.storage_bucket;
+      oci_nosql_table_metric_write_throttle_count_hourly
+    where
+      timestamp >= CURRENT_DATE - INTERVAL '7 day'
+      and name in (
+        select
+          name
+        from top_n);
   EOQ
 }

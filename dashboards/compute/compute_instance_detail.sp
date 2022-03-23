@@ -16,7 +16,22 @@ dashboard "oci_compute_instance_detail" {
 
     card {
       width = 2
+      query = query.oci_compute_instance_state
+      args = {
+        id = self.input.instance_id.value
+      }
+    }
 
+    card {
+      width = 2
+      query = query.oci_compute_instance_shape
+      args = {
+        id = self.input.instance_id.value
+      }
+    }
+
+    card {
+      width = 2
       query = query.oci_compute_instance_core
       args = {
         id = self.input.instance_id.value
@@ -25,13 +40,11 @@ dashboard "oci_compute_instance_detail" {
 
     card {
       width = 2
-
       query = query.oci_compute_instance_public
       args = {
         id = self.input.instance_id.value
       }
     }
-
   }
 
   container {
@@ -47,7 +60,6 @@ dashboard "oci_compute_instance_detail" {
         args = {
           id = self.input.instance_id.value
         }
-
       }
 
       table {
@@ -57,20 +69,11 @@ dashboard "oci_compute_instance_detail" {
         args = {
           id = self.input.instance_id.value
         }
-
       }
     }
 
     container {
       width = 6
-
-      table {
-        title = "Shape"
-        query = query.oci_compute_instance_shape
-        args = {
-          id = self.input.instance_id.value
-        }
-      }
 
       table {
         title = "Launch Options"
@@ -79,9 +82,22 @@ dashboard "oci_compute_instance_detail" {
           id = self.input.instance_id.value
         }
       }
+
     }
 
+    container {
+
+      table {
+        title = "Virtual Network Interface Card (VNIC) Details"
+        query = query.oci_compute_instance_vnic
+        args = {
+          id = self.input.instance_id.value
+        }
+      }
+
+    }
   }
+
 }
 
 query "oci_compute_instance_input" {
@@ -105,17 +121,34 @@ query "oci_compute_instance_input" {
 EOQ
 }
 
-query "oci_compute_instance_name_for_instance" {
+query "oci_compute_instance_state" {
   sql = <<-EOQ
     select
-      display_name as "Instance"
+      'State' as label,
+      initcap(lifecycle_state) as value
     from
       oci_core_instance
     where
-      id = $1 and lifecycle_state <> 'TERMINATED';
+      id = $1;
   EOQ
 
   param "id" {}
+
+}
+
+query "oci_compute_instance_shape" {
+  sql = <<-EOQ
+    select
+      'Shape' as label,
+      shape as value
+    from
+      oci_core_instance
+    where
+      id = $1;
+  EOQ
+
+  param "id" {}
+
 }
 
 query "oci_compute_instance_core" {
@@ -125,7 +158,7 @@ query "oci_compute_instance_core" {
     from
       oci_core_instance
     where
-      id = $1 and lifecycle_state <> 'TERMINATED';
+      id = $1;
   EOQ
 
   param "id" {}
@@ -135,7 +168,7 @@ query "oci_compute_instance_public" {
   sql = <<-EOQ
     select
       case when title = '' then 'Private' else 'Public' end as value,
-      'Instance Type' as label,
+      'Instance Access Type' as label,
       case when title = '' then 'ok' else 'alert' end as type
     from
       oci_core_vnic_attachment
@@ -152,14 +185,13 @@ query "oci_compute_instance_overview" {
       display_name as "Name",
       time_created as "Time Created",
       availability_domain as "Availability Domain",
-      launch_mode as "Launch mode",
-      shape_config_memory_in_gbs as "Shape Config Memory In GBs",
+      fault_domain as "Fault Domain",
       id as "OCID",
       compartment_id as "Compartment ID"
     from
       oci_core_instance
     where
-      id = $1 and lifecycle_state <> 'TERMINATED';
+      id = $1;
   EOQ
 
   param "id" {}
@@ -173,7 +205,7 @@ query "oci_compute_instance_tag" {
     from
       oci_core_instance
     where
-      id = $1 and lifecycle_state <> 'TERMINATED'
+      id = $1
     )
     select
       key as "Key",
@@ -181,21 +213,6 @@ query "oci_compute_instance_tag" {
     from
       jsondata,
       json_each_text(tags);
-  EOQ
-
-  param "id" {}
-}
-
-query "oci_compute_instance_shape" {
-  sql = <<-EOQ
-    select
-      shape as "Shape",
-      shape_config_gpus as "Shape Config GPUs",
-      shape_config_max_vnic_attachments as "Shape Config Max Vnic Attachments"
-    from
-      oci_core_instance
-    where
-      id  = $1 and lifecycle_state <> 'TERMINATED';
   EOQ
 
   param "id" {}
@@ -210,7 +227,26 @@ query "oci_compute_instance_launch_options" {
     from
       oci_core_instance
     where
-      id  = $1 and lifecycle_state <> 'TERMINATED';
+      id  = $1;
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_compute_instance_vnic" {
+  sql = <<-EOQ
+    select
+      vnic_name as "VNIC Name",
+      private_ip as "Private IP",
+      public_ip as "Public IP",
+      time_created as "Time Created",
+      hostname_label as "Hostname Label",
+      is_primary as "Primary",
+      mac_address as "MAC Address"
+    from
+      oci_core_vnic_attachment
+    where
+      instance_id = $1 and public_ip is not null;
   EOQ
 
   param "id" {}

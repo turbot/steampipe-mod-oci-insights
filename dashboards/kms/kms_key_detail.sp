@@ -100,13 +100,13 @@ EOQ
 query "oci_kms_key_disabled" {
   sql = <<-EOQ
     select
-      lifecycle_state as value,
+      initcap(lifecycle_state) as value,
       'Lifecycle State' as label,
       case when lifecycle_state = 'DISABLED' then 'alert' else 'ok' end as type
     from
       oci_kms_key
     where
-      id = $1 and lifecycle_state <> 'DELETED';
+      id = $1;
   EOQ
 
   param "id" {}
@@ -115,11 +115,11 @@ query "oci_kms_key_disabled" {
 query "oci_kms_key_protection_mode" {
   sql = <<-EOQ
     select
-      protection_mode as "Protection Mode"
+      case when protection_mode = 'HSM' then 'HSM' else initcap(protection_mode) end as "Protection Mode"
     from
       oci_kms_key
     where
-      id = $1 and lifecycle_state <> 'DELETED';
+      id = $1;
   EOQ
 
   param "id" {}
@@ -132,13 +132,12 @@ query "oci_kms_key_overview" {
       time_created as "Time Created",
       time_of_deletion as "Time Of Deletion",
       vault_name as "Vault Name",
-      length as "Length",
       id as "OCID",
       compartment_id as "Compartment ID"
     from
       oci_kms_key
     where
-      id = $1 and lifecycle_state <> 'DELETED';
+      id = $1;
   EOQ
 
   param "id" {}
@@ -152,7 +151,7 @@ query "oci_kms_key_tag" {
     from
       oci_kms_key
     where
-      id = $1 and lifecycle_state <> 'DELETED'
+      id = $1
     )
     select
       key as "Key",
@@ -174,9 +173,8 @@ query "oci_kms_key_detail" {
     from
       oci_kms_key
     where
-      id  = $1 and lifecycle_state <> 'DELETED';
+      id  = $1;
   EOQ
 
   param "id" {}
 }
-

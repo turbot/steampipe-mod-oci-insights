@@ -49,6 +49,41 @@ dashboard "oci_nosql_table_detail" {
           id = self.input.table_id.value
         }
       }
+
+      table {
+        title = "Column Details"
+        query = query.oci_nosql_table_column
+        args = {
+          id = self.input.table_id.value
+        }
+      }
+
+    }
+
+    container {
+
+      width = 12
+
+      chart {
+        title = "Read Throttle Count Daily - Last 7 Days"
+        type  = "line"
+        width = 6
+        query = query.oci_nosql_table_read_throttle
+        args = {
+          id = self.input.table_id.value
+        }
+      }
+
+      chart {
+        title = "Write Throttle Count Daily - Last 7 Days"
+        type  = "line"
+        width = 6
+        query = query.oci_nosql_table_write_throttle
+        args = {
+          id = self.input.table_id.value
+        }
+      }
+
     }
 
   }
@@ -87,7 +122,7 @@ query "oci_nosql_table_overview" {
     from
       oci_nosql_table
     where
-      id = $1 and lifecycle_state <> 'DELETED';
+      id = $1;
   EOQ
 
   param "id" {}
@@ -101,7 +136,7 @@ query "oci_nosql_table_tag" {
     from
       oci_nosql_table
     where
-      id = $1 and lifecycle_state <> 'DELETED'
+      id = $1
     )
     select
       key as "Key",
@@ -123,7 +158,56 @@ query "oci_nosql_table_limits" {
     from
       oci_nosql_table
     where
-      id  = $1 and lifecycle_state <> 'DELETED';
+      id  = $1;
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_nosql_table_column" {
+  sql = <<-EOQ
+    select
+      c ->> 'name' as "Name",
+      c ->> 'defaultValue' as "Default Value",
+      c ->> 'isNullable' as "Nullable",
+      c ->> 'type' as "Type"
+    from
+      oci_nosql_table,
+      jsonb_array_elements(schema -> 'columns') as c
+    where
+      id = $1;
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_nosql_table_read_throttle" {
+  sql = <<-EOQ
+    select
+      d.timestamp,
+      (sum / 86400) as read_throttle_count_daily
+    from
+      oci_nosql_table_metric_read_throttle_count_daily as d
+      left join oci_nosql_table as t on d.name = t.name
+    where
+      d.timestamp >= current_date - interval '7 day' and t.id = $1
+    order by d.timestamp;
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_nosql_table_write_throttle" {
+  sql = <<-EOQ
+   select
+      d.timestamp,
+      (sum / 86400) as write_throttle_count_daily
+    from
+      oci_nosql_table_metric_write_throttle_count_daily as d
+      left join oci_nosql_table as t on d.name = t.name
+    where
+      d.timestamp >= current_date - interval '7 day' and t.id = $1
+    order by d.timestamp;
   EOQ
 
   param "id" {}

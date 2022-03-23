@@ -6,7 +6,7 @@ dashboard "oci_block_storage_block_volume_detail" {
     type = "Detail"
   })
 
-  input "volume_id" {
+  input "block_volume_id" {
     title = "Select a block volume:"
     query = query.oci_block_storage_block_volume_input
     width = 4
@@ -19,16 +19,16 @@ dashboard "oci_block_storage_block_volume_detail" {
 
       query = query.oci_block_storage_block_volume_storage
       args = {
-        id = self.input.volume_id.value
+        id = self.input.block_volume_id.value
       }
     }
 
     card {
       width = 2
 
-      query = query.oci_block_storage_block_volume_backup
+      query = query.oci_block_storage_block_volume_vpu
       args = {
-        id = self.input.volume_id.value
+        id = self.input.block_volume_id.value
       }
     }
 
@@ -45,7 +45,7 @@ dashboard "oci_block_storage_block_volume_detail" {
         width = 6
         query = query.oci_block_storage_block_volume_overview
         args = {
-          id = self.input.volume_id.value
+          id = self.input.block_volume_id.value
         }
 
       }
@@ -55,7 +55,7 @@ dashboard "oci_block_storage_block_volume_detail" {
         width = 6
         query = query.oci_block_storage_block_volume_tags
         args = {
-          id = self.input.volume_id.value
+          id = self.input.block_volume_id.value
         }
 
       }
@@ -68,7 +68,7 @@ dashboard "oci_block_storage_block_volume_detail" {
         title = "Attached To"
         query = query.oci_block_storage_block_volume_attached_instances
         args = {
-          id = self.input.volume_id.value
+          id = self.input.block_volume_id.value
         }
 
         column "Instance ID" {
@@ -84,7 +84,7 @@ dashboard "oci_block_storage_block_volume_detail" {
         title = "Encryption Details"
         query = query.oci_block_storage_block_volume_encryption
         args = {
-          id = self.input.volume_id.value
+          id = self.input.block_volume_id.value
         }
       }
     }
@@ -120,22 +120,20 @@ query "oci_block_storage_block_volume_storage" {
     from
       oci_core_volume
     where
-      id = $1 and lifecycle_state <> 'TERMINATED';
+      id = $1;
   EOQ
 
   param "id" {}
 }
 
-query "oci_block_storage_block_volume_backup" {
+query "oci_block_storage_block_volume_vpu" {
   sql = <<-EOQ
     select
-      case when volume_backup_policy_assignment_id is null then 'Unassigned' else 'Assigned' end as value,
-      'Backup Policy' as label,
-      case when volume_backup_policy_assignment_id is null then 'alert' else 'ok' end as type
+      vpus_per_gb as "VPUs"
     from
       oci_core_volume
     where
-      id = $1 and lifecycle_state <> 'TERMINATED';
+      id = $1;
   EOQ
 
   param "id" {}
@@ -148,13 +146,13 @@ query "oci_block_storage_block_volume_overview" {
       time_created as "Time Created",
       availability_domain as "Availability Domain",
       is_auto_tune_enabled as "Auto Tune Enabled",
-      size_in_gbs as "Size In GBs",
+      is_hydrated as "Hydrated",
       id as "OCID",
       compartment_id as "Compartment ID"
     from
       oci_core_volume
     where
-      id = $1 and lifecycle_state <> 'TERMINATED';
+      id = $1;
   EOQ
 
   param "id" {}
@@ -168,7 +166,7 @@ query "oci_block_storage_block_volume_tags" {
       from
         oci_core_volume
       where
-        id = $1 and lifecycle_state <> 'TERMINATED'
+        id = $1
     )
     select
       key as "Key",
@@ -192,7 +190,7 @@ query "oci_block_storage_block_volume_attached_instances" {
       oci_core_volume_attachment as a
       left join oci_core_instance as i on a.instance_id = i.id
     where
-      a.volume_id = $1 and a.lifecycle_state <> 'TERMINATED';
+      a.volume_id = $1;
   EOQ
 
   param "id" {}
@@ -201,12 +199,12 @@ query "oci_block_storage_block_volume_attached_instances" {
 query "oci_block_storage_block_volume_encryption" {
   sql = <<EOQ
     select
-      case when kms_key_id is not null then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
+      case when kms_key_id is not null and kms_key_id <> '' then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
       kms_key_id as "KMS Key ID"
     from
       oci_core_volume
     where
-      id  = $1 and lifecycle_state <> 'TERMINATED';
+      id  = $1;
   EOQ
 
   param "id" {}
