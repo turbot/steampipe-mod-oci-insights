@@ -32,6 +32,15 @@ dashboard "oci_database_autonomous_database_detail" {
       }
     }
 
+    card {
+      width = 2
+
+      query = query.oci_database_autonomous_db_operations_insights
+      args = {
+        id = self.input.db_id.value
+      }
+    }
+
   }
 
   container {
@@ -144,6 +153,21 @@ query "oci_database_autonomous_database_data_guard" {
       case when is_data_guard_enabled then 'Enabled' else 'Disabled' end as value,
       'Data Guard' as label,
       case when is_data_guard_enabled then 'ok' else 'alert' end as type
+    from
+      oci_database_autonomous_database
+    where
+      id = $1;
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_database_autonomous_db_operations_insights" {
+  sql = <<-EOQ
+    select
+      case when operations_insights_status = 'NOT_ENABLED' then 'Enabled' else 'Disabled' end as value,
+      'Operations Insights' as label,
+      case when operations_insights_status = 'NOT_ENABLED' then 'ok' else 'alert' end as type
     from
       oci_database_autonomous_database
     where
