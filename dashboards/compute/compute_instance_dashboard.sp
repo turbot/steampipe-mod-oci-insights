@@ -10,17 +10,22 @@ dashboard "oci_compute_instance_dashboard" {
   container {
 
     card {
-      sql   = query.oci_compute_instance_count.sql
+      query = query.oci_compute_instance_count
       width = 2
     }
 
     card {
-      sql   = query.oci_compute_instance_total_cores.sql
+      query = query.oci_compute_instance_total_cores
       width = 2
     }
 
     card {
-      sql   = query.oci_compute_instance_public_instance_count.sql
+      query = query.oci_compute_instance_public_instance_count
+      width = 2
+    }
+
+    card {
+      query = query.oci_compute_instance_monitoring_disabled_count
       width = 2
     }
 
@@ -32,7 +37,7 @@ dashboard "oci_compute_instance_dashboard" {
 
     chart {
       title = "Public/Private"
-      sql   = query.oci_compute_instance_by_public_ip.sql
+      query = query.oci_compute_instance_by_public_ip
       type  = "donut"
       width = 3
 
@@ -41,6 +46,22 @@ dashboard "oci_compute_instance_dashboard" {
           color = "ok"
         }
         point "public" {
+          color = "alert"
+        }
+      }
+    }
+
+    chart {
+      title = "Monitoring Status"
+      query = query.oci_compute_instance_by_monitoring
+      type  = "donut"
+      width = 3
+
+      series "count" {
+        point "enabled" {
+          color = "ok"
+        }
+        point "disabled" {
           color = "alert"
         }
       }
@@ -55,35 +76,35 @@ dashboard "oci_compute_instance_dashboard" {
 
     chart {
       title = "Instances by Tenancy"
-      sql   = query.oci_compute_instance_by_tenancy.sql
+      query = query.oci_compute_instance_by_tenancy
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Instances by Compartment"
-      sql   = query.oci_compute_instance_by_compartment.sql
+      query = query.oci_compute_instance_by_compartment
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Instances by Region"
-      sql   = query.oci_compute_instance_by_region.sql
+      query = query.oci_compute_instance_by_region
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Instances by Age"
-      sql   = query.oci_compute_instance_by_creation_month.sql
+      query = query.oci_compute_instance_by_creation_month
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Instances by Shape"
-      sql   = query.oci_compute_instance_by_type.sql
+      query = query.oci_compute_instance_by_type
       type  = "column"
       width = 4
     }
@@ -96,7 +117,7 @@ dashboard "oci_compute_instance_dashboard" {
 
     chart {
       title = "Top 10 CPU - Last 7 days"
-      sql   = query.oci_compute_top10_cpu_past_week.sql
+      query = query.oci_compute_top10_cpu_past_week
       type  = "line"
       width = 6
     }
@@ -104,7 +125,7 @@ dashboard "oci_compute_instance_dashboard" {
 
     chart {
       title = "Average max daily CPU - Last 30 days"
-      sql   = query.oci_compute_instances_by_cpu_utilization_category.sql
+      query = query.oci_compute_instances_by_cpu_utilization_category
       type  = "column"
       width = 6
     }
@@ -151,6 +172,27 @@ query "oci_compute_instance_public_instance_count" {
   EOQ
 }
 
+query "oci_compute_instance_monitoring_disabled_count" {
+  sql = <<-EOQ
+    with instance_monitoring as (
+      select
+        distinct display_name
+      from
+        oci_core_instance,
+        jsonb_array_elements(agent_config -> 'pluginsConfig') as config
+      where
+        config ->> 'name' = 'Compute Instance Monitoring'
+        and config ->> 'desiredState' = 'DISABLED'
+    )
+    select
+      count(*) as value,
+      'Monitoring Disabled' as label,
+      case count(*) when 0 then 'ok' else 'alert' end as type
+    from
+      instance_monitoring;
+  EOQ
+}
+
 # Assesments Queries
 
 query "oci_compute_instance_by_public_ip" {
@@ -174,6 +216,29 @@ query "oci_compute_instance_by_public_ip" {
       instances
     group by
       visibility;
+  EOQ
+}
+
+query "oci_compute_instance_by_monitoring" {
+  sql = <<-EOQ
+    with instance_monitoring as (
+      select
+        distinct display_name
+      from
+        oci_core_instance,
+        jsonb_array_elements(agent_config -> 'pluginsConfig') as config
+      where
+        config ->> 'name' = 'Compute Instance Monitoring'
+        and config ->> 'desiredState' = 'ENABLED'
+    )
+    select
+      case when m.display_name is null then 'disabled' else 'enabled' end as status,
+      count(*)
+    from
+      oci_core_instance as i
+      left join instance_monitoring as m on i.display_name = m.display_name
+    group by
+      status;
   EOQ
 }
 
