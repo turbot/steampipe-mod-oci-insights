@@ -93,7 +93,7 @@ dashboard "oci_identity_user_detail" {
 }
 
 query "oci_identity_user_input" {
-  sql = <<EOQ
+  sql = <<-EOQ
     select
       u.name as label,
       u.id as value,
