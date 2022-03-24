@@ -148,6 +148,25 @@ dashboard "oci_block_storage_boot_volume_dashboard" {
 
   }
 
+  container {
+
+    title = "Performance & Utilization"
+
+    chart {
+      title = "Top 10 Average Read IOPS - Last 7 days"
+      type  = "line"
+      width = 6
+      sql   = query.oci_block_storage_boot_volume_top_10_read_ops_avg.sql
+    }
+
+    chart {
+      title = "Top 10 Average Write IOPS - Last 7 days"
+      type  = "line"
+      width = 6
+      sql   = query.oci_block_storage_boot_volume_top_10_write_ops_avg.sql
+    }
+
+  }
 }
 
 # Card Queries
@@ -473,5 +492,63 @@ query "oci_block_storage_boot_volume_storage_by_encryption_type" {
       lifecycle_state <> 'TERMINATED'
     group by
       encryption_type;
+  EOQ
+}
+
+# Performance Queries
+
+query "oci_block_storage_boot_volume_top_10_read_ops_avg" {
+  sql = <<-EOQ
+    with top_n as (
+      select
+        id,
+        avg(average)
+      from
+        oci_core_boot_volume_metric_read_ops_daily
+      where
+        timestamp  >= CURRENT_DATE - INTERVAL '7 day'
+      group by
+        id
+      order by
+        avg desc
+      limit 10
+    )
+    select
+        timestamp,
+        id,
+        average
+      from
+        oci_core_boot_volume_metric_read_ops_hourly
+      where
+        timestamp  >= CURRENT_DATE - INTERVAL '7 day'
+        and id in (select id from top_n);
+  EOQ
+}
+
+query "oci_block_storage_boot_volume_top_10_write_ops_avg" {
+  sql = <<-EOQ
+    with top_n as (
+      select
+        id,
+        avg(average)
+      from
+        oci_core_boot_volume_metric_write_ops_daily
+      where
+        timestamp  >= CURRENT_DATE - INTERVAL '7 day'
+      group by
+        id
+      order by
+        avg desc
+      limit 10
+    )
+    select
+      timestamp,
+      id,
+      average
+    from
+      oci_core_boot_volume_metric_write_ops_hourly
+    where
+      timestamp  >= CURRENT_DATE - INTERVAL '7 day'
+      and id in (select id from top_n);
   EOQ
 }
