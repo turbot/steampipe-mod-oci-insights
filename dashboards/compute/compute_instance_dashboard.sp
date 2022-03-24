@@ -182,7 +182,7 @@ query "oci_compute_instance_monitoring_disabled_count" {
         jsonb_array_elements(agent_config -> 'pluginsConfig') as config
       where
         config ->> 'name' = 'Compute Instance Monitoring'
-        and config ->> 'desiredState' = 'DISABLED'
+        and config ->> 'desiredState' = 'DISABLED' and lifecycle_state <> 'TERMINATED'
     )
     select
       count(*) as value,
@@ -237,6 +237,8 @@ query "oci_compute_instance_by_monitoring" {
     from
       oci_core_instance as i
       left join instance_monitoring as m on i.display_name = m.display_name
+    where
+      i.lifecycle_state <> 'TERMINATED'
     group by
       status;
   EOQ
