@@ -53,6 +53,10 @@ dashboard "oci_nosql_table_age_report" {
       display = "none"
     }
 
+    column "Name" {
+      href = "${dashboard.oci_nosql_table_detail.url_path}?input.table_id={{.OCID | @uri}}"
+    }
+
     sql = query.oci_nosql_table_age_report.sql
   }
 
@@ -124,6 +128,7 @@ query "oci_nosql_table_age_report" {
       n.name as "Name",
       now()::date - n.time_created::date as "Age in Days",
       n.time_created as "Create Time",
+      n.time_of_expiration as "Expiry Time",
       n.lifecycle_state as "Lifecycle State",
       t.title as "Tenancy",
       coalesce(c.title, 'root') as "Compartment",

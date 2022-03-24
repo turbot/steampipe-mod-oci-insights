@@ -52,6 +52,7 @@ dashboard "oci_ons_subscription_age_report" {
     column "OCID" {
       display = "none"
     }
+
     sql = query.oci_ons_subscription_age_report.sql
   }
 

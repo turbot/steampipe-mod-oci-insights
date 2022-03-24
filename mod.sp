@@ -13,7 +13,8 @@ mod "oci_insights" {
     image        = "/images/mods/turbot/oci-insights-social-graphic.png"
   }
 
-  requires {
+  require {
+    steampipe = "0.13.1"
     plugin "oci" {
       version = "0.9.0"
     }

@@ -28,6 +28,10 @@ dashboard "oci_identity_user_mfa_report" {
         display = "none"
       }
 
+      column "User Name" {
+        href = "${dashboard.oci_identity_user_detail.url_path}?input.user_id={{.OCID | @uri}}"
+      }
+
       sql = query.oci_identity_user_mfa_report.sql
     }
   }

@@ -22,6 +22,7 @@ dashboard "oci_identity_user_dashboard" {
     card {
       sql   = query.oci_identity_user_mfa_disabled_count.sql
       width = 2
+      href  = dashboard.oci_identity_user_mfa_report.url_path
     }
 
   }

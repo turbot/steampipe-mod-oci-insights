@@ -52,6 +52,10 @@ dashboard "oci_database_autonomous_database_age_report" {
       display = "none"
     }
 
+    column "Name" {
+      href = "${dashboard.oci_database_autonomous_database_detail.url_path}?input.db_id={{.OCID | @uri}}"
+    }
+
     sql = query.oci_database_autonomous_db_age_report.sql
   }
 
