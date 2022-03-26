@@ -69,9 +69,10 @@ dashboard "oci_vcn_detail" {
     }
 
     container {
-      table {
-        title = "Subnets"
-        query = query.oci_vcn_subnet
+      title = "Subnets"
+
+      flow {
+        query = query.oci_vcn_subnet_sankey
         args = {
           id = self.input.vcn_id.value
         }
@@ -80,11 +81,9 @@ dashboard "oci_vcn_detail" {
     }
 
     container {
-
-      title = "Associated Subnet -> CIDR -> NAT Gateway"
-
-      flow {
-        query = query.oci_vcn_subnet_sankey
+      table {
+        title = "Subnet Details"
+        query = query.oci_vcn_subnet
         args = {
           id = self.input.vcn_id.value
         }
@@ -97,6 +96,57 @@ dashboard "oci_vcn_detail" {
       table {
         title = "Route Rules"
         query = query.oci_vcn_route_table
+        args = {
+          id = self.input.vcn_id.value
+        }
+      }
+
+    }
+
+    container {
+
+      title = "Network Security List Egress Rules"
+
+      flow {
+        query = query.oci_vcn_nsl_egress_rule_sankey
+        args = {
+          id = self.input.vcn_id.value
+        }
+      }
+
+    }
+
+    container {
+
+      title = "Network Security List Ingress Rules"
+
+      flow {
+        query = query.oci_vcn_nsl_ingress_rule_sankey
+        args = {
+          id = self.input.vcn_id.value
+        }
+      }
+
+    }
+
+    container {
+
+      title = "Network Security Group Egress Rules"
+
+      flow {
+        query = query.oci_vcn_nsg_egress_rule_sankey
+        args = {
+          id = self.input.vcn_id.value
+        }
+      }
+
+    }
+
+    container {
+
+      title = "Network Security Group Ingress Rules"
+      flow {
+        query = query.oci_vcn_nsg_ingress_rule_sankey
         args = {
           id = self.input.vcn_id.value
         }
@@ -286,6 +336,331 @@ query "oci_vcn_route_table" {
       jsonb_array_elements(route_rules) as r
     where
       vcn_id = $1;
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_vcn_nsl_egress_rule_sankey" {
+
+  sql = <<-EOQ
+    with subnets_nsl as (
+      select
+        s.display_name as subnet_name,
+        s.id as subnet_id,
+        s.cidr_block::text as "cidr",
+        l.display_name as list_name,
+        l.id as list_id,
+        l.egress_security_rules as rules
+      from
+        oci_core_subnet as s
+        left join oci_core_vcn as v on s.vcn_id = v.id
+        left join oci_core_security_list as l on l.vcn_id = v.id
+      where
+        s.vcn_id = $1
+    ),
+    rule as (
+      select
+        subnet_name,
+        subnet_id,
+        list_id,
+        list_name,
+        cidr,
+        case
+          when r ->> 'protocol' = 'all' then 'Allow All Traffic'
+          when r ->> 'protocol' = '6' then 'Allow TCP'
+          when r ->> 'protocol' = '17' then 'Allow UDP'
+          when r ->> 'protocol' = '1' then 'Allow ICMP'
+          when r is null then 'Deny All'
+        end as rule_description
+      from
+        subnets_nsl,
+        jsonb_array_elements(rules) as r
+    )
+
+      -- Subnet Nodes
+      select
+        distinct subnet_id as id,
+        subnet_name title,
+        'subnet' as category,
+        null as from_id,
+        null as to_id,
+        0 as depth
+      from rule
+
+      -- CIDR Nodes
+      union select
+        distinct cidr as id,
+        cidr as title,
+        'cidr_block' as category,
+        subnet_id as from_id,
+        null as to_id,
+        1 as depth
+      from rule
+
+        -- NSL Nodes
+      union select
+        list_id as id,
+        list_name as title,
+        'nslid' as category,
+        cidr as from_id,
+        null as to_id,
+        2 as depth
+      from rule
+
+        -- Rule Nodes
+      union select
+        rule_description as id,
+        rule_description as title,
+        'rule' as category,
+        list_id as from_id,
+        null as to_id,
+        3 as depth
+      from rule
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_vcn_nsl_ingress_rule_sankey" {
+
+  sql = <<-EOQ
+    with subnets_nsl as (
+      select
+        s.display_name as subnet_name,
+        s.id as subnet_id,
+        s.cidr_block::text as "cidr",
+        l.display_name as list_name,
+        l.id as list_id,
+        l.ingress_security_rules as rules
+      from
+        oci_core_subnet as s
+        left join oci_core_vcn as v on s.vcn_id = v.id
+        left join oci_core_security_list as l on l.vcn_id = v.id
+      where
+        s.vcn_id = $1
+    ),
+    rule as (
+      select
+        subnet_name,
+        subnet_id,
+        list_id,
+        list_name,
+        cidr,
+        case
+          when r ->> 'protocol' = 'all' then 'Allow All Traffic'
+          when r ->> 'protocol' = '6' then 'Allow TCP'
+          when r ->> 'protocol' = '17' then 'Allow UDP'
+          when r ->> 'protocol' = '1' then 'Allow ICMP'
+        end as rule_description
+      from
+        subnets_nsl,
+        jsonb_array_elements(rules) as r
+    )
+
+      -- Subnet Nodes
+      select
+        distinct subnet_id as id,
+        subnet_name title,
+        'subnet' as category,
+        null as from_id,
+        null as to_id,
+        0 as depth
+      from rule
+
+      -- CIDR Nodes
+      union select
+        distinct cidr as id,
+        cidr as title,
+        'cidr_block' as category,
+        subnet_id as from_id,
+        null as to_id,
+        1 as depth
+      from rule
+
+        -- NSL Nodes
+      union select
+        list_id as id,
+        list_name as title,
+        'nslid' as category,
+        cidr as from_id,
+        null as to_id,
+        2 as depth
+      from rule
+
+        -- Rule Nodes
+      union select
+        rule_description as id,
+        rule_description as title,
+        'rule' as category,
+        list_id as from_id,
+        null as to_id,
+        3 as depth
+      from rule
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_vcn_nsg_egress_rule_sankey" {
+
+  sql = <<-EOQ
+    with subnets_nsg as (
+      select
+        s.display_name as subnet_name,
+        s.id as subnet_id,
+        s.cidr_block::text as "cidr",
+        g.display_name as group_name,
+        g.id as group_id,
+        g.rules as rules
+      from
+        oci_core_subnet as s
+        left join oci_core_vcn as v on s.vcn_id = v.id
+        left join oci_core_network_security_group as g on g.vcn_id = v.id
+      where
+        s.vcn_id = $1
+    ),
+    rule as (
+      select
+        subnet_name,
+        subnet_id,
+        group_id,
+        group_name,
+        cidr,
+        case
+          when r ->> 'protocol' = 'all' then 'Allow All Traffic'
+          when r ->> 'protocol' = '6' then 'Allow TCP'
+          when r ->> 'protocol' = '17' then 'Allow UDP'
+          when r ->> 'protocol' = '1' then 'Allow ICMP'
+        end as rule_description
+        from
+          subnets_nsg,
+          jsonb_array_elements(rules) as r
+        where
+          r ->> 'direction' = 'EGRESS'
+    )
+
+      -- Subnet Nodes
+      select
+        distinct subnet_id as id,
+        subnet_name title,
+        'subnet' as category,
+        null as from_id,
+        null as to_id,
+        0 as depth
+      from rule
+
+      -- CIDR Nodes
+      union select
+        distinct cidr as id,
+        cidr as title,
+        'cidr_block' as category,
+        subnet_id as from_id,
+        null as to_id,
+        1 as depth
+      from rule
+
+        -- NSG Nodes
+      union select
+        group_id as id,
+        group_name as title,
+        'nsgid' as category,
+        cidr as from_id,
+        null as to_id,
+        2 as depth
+      from rule
+
+        -- Rule Nodes
+      union select
+        rule_description as id,
+        rule_description as title,
+        'rule' as category,
+        group_id as from_id,
+        null as to_id,
+        3 as depth
+      from rule
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_vcn_nsg_ingress_rule_sankey" {
+
+  sql = <<-EOQ
+    with subnets_nsg as (
+      select
+        s.display_name as subnet_name,
+        s.id as subnet_id,
+        s.cidr_block::text as "cidr",
+        g.display_name as group_name,
+        g.id as group_id,
+        g.rules as rules
+      from
+        oci_core_subnet as s
+        left join oci_core_vcn as v on s.vcn_id = v.id
+        left join oci_core_network_security_group as g on g.vcn_id = v.id
+      where
+        s.vcn_id = $1
+    ),
+    rule as (
+      select
+        subnet_name,
+        subnet_id,
+        group_id,
+        group_name,
+        cidr,
+        case
+          when r ->> 'protocol' = 'all' then 'Allow All Traffic'
+          when r ->> 'protocol' = '6' then 'Allow TCP'
+          when r ->> 'protocol' = '17' then 'Allow UDP'
+          when r ->> 'protocol' = '1' then 'Allow ICMP'
+        end as rule_description
+      from
+        subnets_nsg,
+        jsonb_array_elements(rules) as r
+       where
+          r ->> 'direction' = 'INGRESS'
+    )
+
+      -- Subnet Nodes
+      select
+        distinct subnet_id as id,
+        subnet_name title,
+        'subnet' as category,
+        null as from_id,
+        null as to_id,
+        0 as depth
+      from rule
+
+      -- CIDR Nodes
+      union select
+        distinct cidr as id,
+        cidr as title,
+        'cidr_block' as category,
+        subnet_id as from_id,
+        null as to_id,
+        1 as depth
+      from rule
+
+        -- NSG Nodes
+      union select
+        group_id as id,
+        group_name as title,
+        'nsgid' as category,
+        cidr as from_id,
+        null as to_id,
+        2 as depth
+      from rule
+
+        -- Rule Nodes
+      union select
+        rule_description as id,
+        rule_description as title,
+        'rule' as category,
+        group_id as from_id,
+        null as to_id,
+        3 as depth
+      from rule
   EOQ
 
   param "id" {}
