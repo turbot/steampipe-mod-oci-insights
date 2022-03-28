@@ -87,6 +87,12 @@ dashboard "oci_vcn_detail" {
         args = {
           id = self.input.vcn_id.value
         }
+        column "OCID" {
+          display = "none"
+        }
+        column "Name" {
+          href = "${dashboard.oci_vcn_subnet_detail.url_path}?input.subnet_id={{.OCID | @uri}}"
+        }
       }
 
     }
@@ -104,8 +110,41 @@ dashboard "oci_vcn_detail" {
     }
 
     container {
+      table {
+        title = "Security List Details"
+        width = 6
+        query = query.oci_vcn_security_list
+        args = {
+          id = self.input.vcn_id.value
+        }
+        column "OCID" {
+          display = "none"
+        }
+        column "Name" {
+          href = "${dashboard.oci_vcn_security_list_detail.url_path}?input.security_list_id={{.OCID | @uri}}"
+        }
+      }
 
-      title = "Network Security List Egress Rules"
+      table {
+        title = "Network Security Group Details"
+        width = 6
+        query = query.oci_vcn_security_group
+        args = {
+          id = self.input.vcn_id.value
+        }
+        column "OCID" {
+          display = "none"
+        }
+        column "Name" {
+          href = "${dashboard.oci_vcn_network_security_group_detail.url_path}?input.security_group_id={{.OCID | @uri}}"
+        }
+      }
+
+    }
+
+    container {
+
+      title = "Security List Egress Rules"
 
       flow {
         query = query.oci_vcn_nsl_egress_rule_sankey
@@ -118,7 +157,7 @@ dashboard "oci_vcn_detail" {
 
     container {
 
-      title = "Network Security List Ingress Rules"
+      title = "Security List Ingress Rules"
 
       flow {
         query = query.oci_vcn_nsl_ingress_rule_sankey
@@ -256,6 +295,7 @@ query "oci_vcn_subnet" {
   sql = <<-EOQ
     select
       display_name as "Name",
+      id as "OCID",
       lifecycle_state as "State",
       time_created as "Time Created",
       availability_domain as "Availability Domain",
@@ -334,6 +374,38 @@ query "oci_vcn_route_table" {
     from
       oci_core_route_table,
       jsonb_array_elements(route_rules) as r
+    where
+      vcn_id = $1;
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_vcn_security_list" {
+  sql = <<-EOQ
+    select
+      display_name as "Name",
+      id as "OCID",
+      lifecycle_state as "State",
+      time_created as "Time Created"
+    from
+      oci_core_security_list
+    where
+      vcn_id = $1;
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_vcn_security_group" {
+  sql = <<-EOQ
+    select
+      display_name as "Name",
+      id as "OCID",
+      lifecycle_state as "State",
+      time_created as "Time Created"
+    from
+      oci_core_network_security_group
     where
       vcn_id = $1;
   EOQ
