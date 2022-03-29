@@ -18,7 +18,43 @@ dashboard "oci_vcn_detail" {
     card {
       width = 2
 
+      query = query.oci_vcn_ipv4_count
+      args = {
+        id = self.input.vcn_id.value
+      }
+    }
+
+    card {
+      width = 2
+
+      query = query.oci_vcn_ipv6_count
+      args = {
+        id = self.input.vcn_id.value
+      }
+    }
+
+    card {
+      width = 2
+
       query = query.oci_vcn_attached_subnet_count
+      args = {
+        id = self.input.vcn_id.value
+      }
+    }
+
+    card {
+      width = 2
+
+      query = query.oci_vcn_attached_nsg_count
+      args = {
+        id = self.input.vcn_id.value
+      }
+    }
+
+    card {
+      width = 2
+
+      query = query.oci_vcn_attached_sl_count
       args = {
         id = self.input.vcn_id.value
       }
@@ -59,6 +95,14 @@ dashboard "oci_vcn_detail" {
       width = 6
 
       table {
+        title = "CIDR Blocks"
+        query = query.oci_vcn_cidr_blocks
+        args = {
+          id = self.input.vcn_id.value
+        }
+      }
+
+      table {
         title = "DHCP Options"
         query = query.oci_vcn_dhcp_options
         args = {
@@ -71,18 +115,7 @@ dashboard "oci_vcn_detail" {
     container {
       title = "Subnets"
 
-      flow {
-        query = query.oci_vcn_subnet_sankey
-        args = {
-          id = self.input.vcn_id.value
-        }
-      }
-
-    }
-
-    container {
       table {
-        title = "Subnet Details"
         query = query.oci_vcn_subnet
         args = {
           id = self.input.vcn_id.value
@@ -92,6 +125,18 @@ dashboard "oci_vcn_detail" {
         }
         column "Name" {
           href = "${dashboard.oci_vcn_subnet_detail.url_path}?input.subnet_id={{.OCID | @uri}}"
+        }
+      }
+
+    }
+
+    container {
+      title = "Routing"
+
+      flow {
+        query = query.oci_vcn_gateway_sankey
+        args = {
+          id = self.input.vcn_id.value
         }
       }
 
@@ -110,6 +155,7 @@ dashboard "oci_vcn_detail" {
     }
 
     container {
+
       table {
         title = "Security List Details"
         width = 6
@@ -126,6 +172,45 @@ dashboard "oci_vcn_detail" {
       }
 
       table {
+        title = "Gateways"
+        width = 6
+        query = query.oci_vcn_gateways_table
+        args = {
+          id = self.input.vcn_id.value
+        }
+      }
+
+    }
+
+    container {
+      width = 6
+      title = "Security List Ingress Analysis"
+
+      flow {
+        query = query.oci_vcn_nsl_ingress_rule_sankey
+        args = {
+          id = self.input.vcn_id.value
+        }
+      }
+
+    }
+
+    container {
+      width = 6
+      title = "Security List Egress Analysis"
+
+      flow {
+        query = query.oci_vcn_nsl_egress_rule_sankey
+        args = {
+          id = self.input.vcn_id.value
+        }
+      }
+
+    }
+
+    container {
+
+      table {
         title = "Network Security Group Details"
         width = 6
         query = query.oci_vcn_security_group
@@ -139,58 +224,6 @@ dashboard "oci_vcn_detail" {
           href = "${dashboard.oci_vcn_network_security_group_detail.url_path}?input.security_group_id={{.OCID | @uri}}"
         }
       }
-
-    }
-
-    container {
-
-      title = "Security List Egress Rules"
-
-      flow {
-        query = query.oci_vcn_nsl_egress_rule_sankey
-        args = {
-          id = self.input.vcn_id.value
-        }
-      }
-
-    }
-
-    container {
-
-      title = "Security List Ingress Rules"
-
-      flow {
-        query = query.oci_vcn_nsl_ingress_rule_sankey
-        args = {
-          id = self.input.vcn_id.value
-        }
-      }
-
-    }
-
-    container {
-
-      title = "Network Security Group Egress Rules"
-
-      flow {
-        query = query.oci_vcn_nsg_egress_rule_sankey
-        args = {
-          id = self.input.vcn_id.value
-        }
-      }
-
-    }
-
-    container {
-
-      title = "Network Security Group Ingress Rules"
-      flow {
-        query = query.oci_vcn_nsg_ingress_rule_sankey
-        args = {
-          id = self.input.vcn_id.value
-        }
-      }
-
     }
 
   }
@@ -218,6 +251,40 @@ query "oci_vcn_input" {
   EOQ
 }
 
+query "oci_vcn_ipv4_count" {
+  sql = <<-EOQ
+    with cidrs as (
+      select
+        power(2, 32 - masklen(b :: cidr)) as num_ips
+      from
+        oci_core_vcn,
+        jsonb_array_elements_text(cidr_blocks) as b
+      where
+        id = $1
+    )
+    select
+      sum(num_ips) as "IPv4 Addresses"
+    from
+      cidrs
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_vcn_ipv6_count" {
+  sql = <<-EOQ
+      select
+        power(2, 128 - masklen(b :: cidr)) as "IPv6 Addresses"
+      from
+        oci_core_vcn,
+        jsonb_array_elements_text(ipv6_cidr_blocks) as b
+      where
+        id = $1;
+  EOQ
+
+  param "id" {}
+}
+
 query "oci_vcn_attached_subnet_count" {
   sql = <<-EOQ
     select
@@ -225,6 +292,34 @@ query "oci_vcn_attached_subnet_count" {
       count(*) as value
     from
       oci_core_subnet
+    where
+      vcn_id = $1;
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_vcn_attached_nsg_count" {
+  sql = <<-EOQ
+    select
+      'Network Security Groups' as label,
+      count(*) as value
+    from
+      oci_core_network_security_group
+    where
+      vcn_id = $1;
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_vcn_attached_sl_count" {
+  sql = <<-EOQ
+    select
+      'Security Lists' as label,
+      count(*) as value
+    from
+      oci_core_security_list
     where
       vcn_id = $1;
   EOQ
@@ -272,6 +367,30 @@ query "oci_vcn_tag" {
   param "id" {}
 }
 
+query "oci_vcn_cidr_blocks" {
+  sql = <<-EOQ
+    select
+      b as "CIDR Block",
+      power(2, 32 - masklen(b :: cidr)) as "Total IPs"
+    from
+      oci_core_vcn,
+      jsonb_array_elements_text(cidr_blocks) as b
+    where
+      id = $1
+    union all
+    select
+      b as cidr_block,
+      power(2, 128 - masklen(b :: cidr)) as num_ips
+    from
+      oci_core_vcn,
+      jsonb_array_elements_text(ipv6_cidr_blocks) as b
+    where
+      id = $1;
+  EOQ
+
+  param "id" {}
+}
+
 query "oci_vcn_dhcp_options" {
   sql = <<-EOQ
     select
@@ -295,17 +414,12 @@ query "oci_vcn_subnet" {
   sql = <<-EOQ
     select
       display_name as "Name",
-      id as "OCID",
-      lifecycle_state as "State",
-      time_created as "Time Created",
-      availability_domain as "Availability Domain",
       cidr_block as "IPv4 CIDR Block",
-      dns_label as "DNS Label",
       ipv6_cidr_block as "IPv6 CIDR Block",
+      id as "OCID",
+      availability_domain as "Availability Domain",
       subnet_domain_name as "Subnet Domain Name",
-      virtual_router_ip as "Virtual Router IP",
-      prohibit_public_ip_on_vnic as "Prohibit Public IP on Vnic",
-      virtual_router_mac as "Virtual Router MAC"
+      prohibit_public_ip_on_vnic as "Prohibit Public IP on VNIC"
     from
       oci_core_subnet
     where
@@ -315,48 +429,66 @@ query "oci_vcn_subnet" {
   param "id" {}
 }
 
-query "oci_vcn_subnet_sankey" {
+query "oci_vcn_gateway_sankey" {
   sql = <<-EOQ
-    with subnets as (
-      select
-        s.display_name as subnet_name,
-        s.id as subnet_id,
-        s.cidr_block::text as "cidr",
-        g.display_name as gateway_name,
-        g.id as gateway_id
+    with routes as (
+    select
+        r.id as route_table_id,
+        r.vcn_id,
+        rule ->> 'networkEntityId' as gateway,
+        rule ->> 'destination' as destination_cidr,
+        s.display_name as associated_to
       from
         oci_core_subnet as s
-        left join oci_core_vcn as v on s.vcn_id = v.id
-        left join oci_core_nat_gateway as g on g.vcn_id = v.id
+        left join oci_core_route_table as r on s.route_table_id = r.id,
+        jsonb_array_elements(route_rules) as rule
       where
         s.vcn_id = $1
-    )
+    ),
+    gateway as (
       select
+        associated_to,
+        gateway,
+        destination_cidr,
+        case
+          when i.id is not null then i.display_name
+          when l.id is not null then l.name
+          when n.id is not null then n.display_name
+          when s.id is not null then s.display_name
+        end as gateway_name
+      from
+        routes as r
+        left join oci_core_internet_gateway as i on i.id = gateway
+        left join oci_core_local_peering_gateway as l on l.id = gateway
+        left join oci_core_nat_gateway as n on n.id = gateway
+        left join oci_core_service_gateway as s on s.id = gateway
+    )
+    select
         null as from_id,
-        subnet_name as id,
-        subnet_name as title,
-        'subnet' as category,
+        associated_to as id,
+        associated_to as title,
+        'route_table' as category,
         0 as depth
       from
-        subnets
+        gateway
       union
         select
-          subnet_name as from_id,
-          cidr as id,
-          cidr as title,
-          'cidr' as category,
+          associated_to as from_id,
+          destination_cidr as id,
+          destination_cidr as title,
+          'subnet' as category,
           1 as depth
         from
-          subnets
+          gateway
       union
         select
-          cidr as from_id,
+          destination_cidr as from_id,
           gateway_name as id,
           gateway_name as title,
-          'natGateway' as category,
+          'gateway' as category,
           2 as depth
         from
-          subnets
+          gateway
   EOQ
 
   param "id" {}
@@ -374,6 +506,48 @@ query "oci_vcn_route_table" {
     from
       oci_core_route_table,
       jsonb_array_elements(route_rules) as r
+    where
+      vcn_id = $1;
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_vcn_gateways_table" {
+  sql = <<-EOQ
+    select
+      display_name as "Name",
+      'oci_core_internet_gateway' as "Type",
+      lifecycle_state as "State"
+    from
+      oci_core_internet_gateway
+    where
+      vcn_id = $1
+    union all
+    select
+      name as "Name",
+      'oci_core_local_peering_gateway' as "Type",
+      lifecycle_state as "State"
+    from
+      oci_core_local_peering_gateway
+    where
+      vcn_id = $1
+    union all
+    select
+      display_name as "Name",
+      'oci_core_nat_gateway' as "Type",
+      lifecycle_state as "State"
+    from
+      oci_core_nat_gateway
+    where
+      vcn_id = $1
+    union all
+    select
+      display_name as "Name",
+      'oci_core_service_gateway' as "Type",
+      lifecycle_state as "State"
+    from
+      oci_core_service_gateway
     where
       vcn_id = $1;
   EOQ
@@ -413,327 +587,237 @@ query "oci_vcn_security_group" {
   param "id" {}
 }
 
-query "oci_vcn_nsl_egress_rule_sankey" {
-
-  sql = <<-EOQ
-    with subnets_nsl as (
-      select
-        s.display_name as subnet_name,
-        s.id as subnet_id,
-        s.cidr_block::text as "cidr",
-        l.display_name as list_name,
-        l.id as list_id,
-        l.egress_security_rules as rules
-      from
-        oci_core_subnet as s
-        left join oci_core_vcn as v on s.vcn_id = v.id
-        left join oci_core_security_list as l on l.vcn_id = v.id
-      where
-        s.vcn_id = $1
-    ),
-    rule as (
-      select
-        subnet_name,
-        subnet_id,
-        list_id,
-        list_name,
-        cidr,
-        case
-          when r ->> 'protocol' = 'all' then 'Allow All Traffic'
-          when r ->> 'protocol' = '6' then 'Allow TCP'
-          when r ->> 'protocol' = '17' then 'Allow UDP'
-          when r ->> 'protocol' = '1' then 'Allow ICMP'
-          when r is null then 'Deny All'
-        end as rule_description
-      from
-        subnets_nsl,
-        jsonb_array_elements(rules) as r
-    )
-
-      -- Subnet Nodes
-      select
-        distinct subnet_id as id,
-        subnet_name title,
-        'subnet' as category,
-        null as from_id,
-        null as to_id,
-        0 as depth
-      from rule
-
-      -- CIDR Nodes
-      union select
-        distinct cidr as id,
-        cidr as title,
-        'cidr_block' as category,
-        subnet_id as from_id,
-        null as to_id,
-        1 as depth
-      from rule
-
-        -- NSL Nodes
-      union select
-        list_id as id,
-        list_name as title,
-        'nslid' as category,
-        cidr as from_id,
-        null as to_id,
-        2 as depth
-      from rule
-
-        -- Rule Nodes
-      union select
-        rule_description as id,
-        rule_description as title,
-        'rule' as category,
-        list_id as from_id,
-        null as to_id,
-        3 as depth
-      from rule
-  EOQ
-
-  param "id" {}
-}
-
 query "oci_vcn_nsl_ingress_rule_sankey" {
 
   sql = <<-EOQ
-    with subnets_nsl as (
+   with subnets as (
       select
-        s.display_name as subnet_name,
-        s.id as subnet_id,
-        s.cidr_block::text as "cidr",
-        l.display_name as list_name,
-        l.id as list_id,
-        l.ingress_security_rules as rules
+        display_name as subnet_name,
+        id as subnet_id,
+        sl as sl_id
       from
-        oci_core_subnet as s
-        left join oci_core_vcn as v on s.vcn_id = v.id
-        left join oci_core_security_list as l on l.vcn_id = v.id
+        oci_core_subnet as s,
+        jsonb_array_elements_text(security_list_ids) as sl
       where
-        s.vcn_id = $1
+        vcn_id = $1
+    ),
+    securityList as (
+      select
+        subnet_name,
+        subnet_id,
+        display_name as sl_name,
+        l.id as sl_id,
+        ingress_security_rules as rules
+      from
+        oci_core_security_list as l
+        left join subnets as s on s.sl_id = l.id
+      where
+        vcn_id = $1
     ),
     rule as (
       select
         subnet_name,
         subnet_id,
-        list_id,
-        list_name,
-        cidr,
+        sl_id,
+        sl_name,
+        r ->> 'source' as source,
         case
           when r ->> 'protocol' = 'all' then 'Allow All Traffic'
-          when r ->> 'protocol' = '6' then 'Allow TCP'
-          when r ->> 'protocol' = '17' then 'Allow UDP'
-          when r ->> 'protocol' = '1' then 'Allow ICMP'
+          when r ->> 'protocol' = '6' and r ->> 'tcpOptions' is null then 'Allow All TCP'
+          when r ->> 'protocol' = '17' and r ->> 'udpOptions' is null then 'Allow All UDP'
+          when r ->> 'protocol' = '1' and r ->> 'icmpOptions' is null then 'Allow All ICMP'
+          else concat('Protocol: ', r ->> 'protocol')
         end as rule_description
       from
-        subnets_nsl,
+        securityList,
         jsonb_array_elements(rules) as r
     )
 
-      -- Subnet Nodes
-      select
-        distinct subnet_id as id,
-        subnet_name title,
-        'subnet' as category,
-        null as from_id,
-        null as to_id,
-        0 as depth
-      from rule
-
       -- CIDR Nodes
-      union select
-        distinct cidr as id,
-        cidr as title,
-        'cidr_block' as category,
-        subnet_id as from_id,
-        null as to_id,
-        1 as depth
-      from rule
+    select
+      distinct source as id,
+      source as title,
+      'source' as category,
+      null as from_id,
+      null as to_id
+    from rule
 
-        -- NSL Nodes
-      union select
-        list_id as id,
-        list_name as title,
-        'nslid' as category,
-        cidr as from_id,
-        null as to_id,
-        2 as depth
-      from rule
+      -- Rule Nodes
+    union select
+      distinct rule_description as id,
+      rule_description as title,
+      'rule' as category,
+      null as from_id,
+      null as to_id
+    from rule
 
-        -- Rule Nodes
-      union select
-        rule_description as id,
-        rule_description as title,
-        'rule' as category,
-        list_id as from_id,
-        null as to_id,
-        3 as depth
-      from rule
+      -- SL Nodes
+    union select
+      distinct sl_name as id,
+      sl_name as title,
+      'sl' as category,
+      null as from_id,
+      null as to_id
+    from rule
+
+      -- Subnet node
+    union select
+      distinct subnet_name as id,
+      subnet_name as title,
+      'subnet' as category,
+      null as from_id,
+      null as to_id
+    from rule
+
+      -- ip -> rule edge
+    union select
+      null as id,
+      null as title,
+      sl_name as category,
+      source as from_id,
+      rule_description as to_id
+    from rule
+
+      -- rule -> SL edge
+    union select
+      null as id,
+      null as title,
+      sl_name as category,
+      rule_description as from_id,
+      sl_name as to_id
+    from rule
+
+      -- sl -> subnet edge
+    union select
+      null as id,
+      null as title,
+      'attached' as category,
+      sl_name as from_id,
+      subnet_name as to_id
+    from rule
   EOQ
 
   param "id" {}
 }
 
-query "oci_vcn_nsg_egress_rule_sankey" {
+query "oci_vcn_nsl_egress_rule_sankey" {
 
   sql = <<-EOQ
-    with subnets_nsg as (
+    with subnets as (
       select
-        s.display_name as subnet_name,
-        s.id as subnet_id,
-        s.cidr_block::text as "cidr",
-        g.display_name as group_name,
-        g.id as group_id,
-        g.rules as rules
+        display_name as subnet_name,
+        id as subnet_id,
+        sl as sl_id
       from
-        oci_core_subnet as s
-        left join oci_core_vcn as v on s.vcn_id = v.id
-        left join oci_core_network_security_group as g on g.vcn_id = v.id
+        oci_core_subnet as s,
+        jsonb_array_elements_text(security_list_ids) as sl
       where
-        s.vcn_id = $1
+        vcn_id = $1
+    ),
+    securityList as (
+      select
+        subnet_name,
+        subnet_id,
+        display_name as sl_name,
+        l.id as sl_id,
+        egress_security_rules as rules
+      from
+        oci_core_security_list as l
+        left join subnets as s on s.sl_id = l.id
+      where
+        vcn_id = $1
     ),
     rule as (
       select
         subnet_name,
         subnet_id,
-        group_id,
-        group_name,
-        cidr,
+        sl_id,
+        sl_name,
+        r ->> 'source' as source,
         case
           when r ->> 'protocol' = 'all' then 'Allow All Traffic'
-          when r ->> 'protocol' = '6' then 'Allow TCP'
-          when r ->> 'protocol' = '17' then 'Allow UDP'
-          when r ->> 'protocol' = '1' then 'Allow ICMP'
-        end as rule_description
-        from
-          subnets_nsg,
-          jsonb_array_elements(rules) as r
-        where
-          r ->> 'direction' = 'EGRESS'
-    )
-
-      -- Subnet Nodes
-      select
-        distinct subnet_id as id,
-        subnet_name title,
-        'subnet' as category,
-        null as from_id,
-        null as to_id,
-        0 as depth
-      from rule
-
-      -- CIDR Nodes
-      union select
-        distinct cidr as id,
-        cidr as title,
-        'cidr_block' as category,
-        subnet_id as from_id,
-        null as to_id,
-        1 as depth
-      from rule
-
-        -- NSG Nodes
-      union select
-        group_id as id,
-        group_name as title,
-        'nsgid' as category,
-        cidr as from_id,
-        null as to_id,
-        2 as depth
-      from rule
-
-        -- Rule Nodes
-      union select
-        rule_description as id,
-        rule_description as title,
-        'rule' as category,
-        group_id as from_id,
-        null as to_id,
-        3 as depth
-      from rule
-  EOQ
-
-  param "id" {}
-}
-
-query "oci_vcn_nsg_ingress_rule_sankey" {
-
-  sql = <<-EOQ
-    with subnets_nsg as (
-      select
-        s.display_name as subnet_name,
-        s.id as subnet_id,
-        s.cidr_block::text as "cidr",
-        g.display_name as group_name,
-        g.id as group_id,
-        g.rules as rules
-      from
-        oci_core_subnet as s
-        left join oci_core_vcn as v on s.vcn_id = v.id
-        left join oci_core_network_security_group as g on g.vcn_id = v.id
-      where
-        s.vcn_id = $1
-    ),
-    rule as (
-      select
-        subnet_name,
-        subnet_id,
-        group_id,
-        group_name,
-        cidr,
-        case
-          when r ->> 'protocol' = 'all' then 'Allow All Traffic'
-          when r ->> 'protocol' = '6' then 'Allow TCP'
-          when r ->> 'protocol' = '17' then 'Allow UDP'
-          when r ->> 'protocol' = '1' then 'Allow ICMP'
+          when r ->> 'protocol' = '6' and r ->> 'tcpOptions' is null then 'Allow All TCP'
+          when r ->> 'protocol' = '17' and r ->> 'udpOptions' is null then 'Allow All UDP'
+          when r ->> 'protocol' = '1' and r ->> 'icmpOptions' is null then 'Allow All ICMP'
+          else concat('Protocol: ', r->>'protocol')
         end as rule_description
       from
-        subnets_nsg,
+        securityList,
         jsonb_array_elements(rules) as r
-       where
-          r ->> 'direction' = 'INGRESS'
     )
 
-      -- Subnet Nodes
-      select
-        distinct subnet_id as id,
-        subnet_name title,
-        'subnet' as category,
-        null as from_id,
-        null as to_id,
-        0 as depth
-      from rule
+      -- Subnet node
+    select
+      distinct subnet_name as id,
+      subnet_name as title,
+      'subnet' as category,
+      null as from_id,
+      null as to_id,
+      0 as depth
+    from rule
+
+      -- SL Nodes
+    union select
+      distinct sl_name as id,
+      sl_name as title,
+      'sl' as category,
+      null as from_id,
+      null as to_id,
+      1 as depth
+    from rule
+
+      -- Rule Nodes
+    union select
+      distinct rule_description as id,
+      rule_description as title,
+      'rule' as category,
+      null as from_id,
+      null as to_id,
+      2 as depth
+    from rule
 
       -- CIDR Nodes
-      union select
-        distinct cidr as id,
-        cidr as title,
-        'cidr_block' as category,
-        subnet_id as from_id,
-        null as to_id,
-        1 as depth
-      from rule
+    union select
+      distinct source as id,
+      source as title,
+      'source' as category,
+      null as from_id,
+      null as to_id,
+      3 as depth
+    from rule
 
-        -- NSG Nodes
-      union select
-        group_id as id,
-        group_name as title,
-        'nsgid' as category,
-        cidr as from_id,
-        null as to_id,
-        2 as depth
-      from rule
+    -- sl -> subnet edge
+    union select
+      null as id,
+      null as title,
+      'attached' as category,
+      sl_name as from_id,
+      subnet_name as to_id,
+      null as depth
+    from rule
 
-        -- Rule Nodes
-      union select
-        rule_description as id,
-        rule_description as title,
-        'rule' as category,
-        group_id as from_id,
-        null as to_id,
-        3 as depth
-      from rule
+    -- rule -> SL edge
+    union select
+      null as id,
+      null as title,
+      'rule' as category,
+      rule_description as from_id,
+      sl_name as to_id,
+      null as depth
+    from rule
+
+      -- ip -> rule edge
+    union select
+      null as id,
+      null as title,
+      'rule' as category,
+      source as from_id,
+      rule_description as to_id,
+      null as depth
+    from rule
   EOQ
 
   param "id" {}
 }
+
+
