@@ -45,6 +45,14 @@ dashboard "oci_compute_instance_detail" {
         id = self.input.instance_id.value
       }
     }
+
+    card {
+      width = 2
+      query = query.oci_compute_instance_monitoring
+      args = {
+        id = self.input.instance_id.value
+      }
+    }
   }
 
   container {
@@ -174,6 +182,32 @@ query "oci_compute_instance_public" {
       oci_core_vnic_attachment
     where
       instance_id = $1 and public_ip is not null;
+  EOQ
+
+  param "id" {}
+}
+
+query "oci_compute_instance_monitoring" {
+  sql = <<-EOQ
+    with instance_monitoring as (
+      select
+        distinct display_name
+      from
+        oci_core_instance,
+        jsonb_array_elements(agent_config -> 'pluginsConfig') as config
+      where
+        config ->> 'name' = 'Compute Instance Monitoring'
+        and config ->> 'desiredState' = 'ENABLED'
+    )
+    select
+      'Monitoring' as label,
+      case when m.display_name is null then 'Disabled' else 'Enabled' end as value,
+      case when m.display_name is null then 'alert' else 'ok' end as type
+    from
+      oci_core_instance as i
+      left join instance_monitoring as m on i.display_name = m.display_name
+    where
+      i.id = $1;
   EOQ
 
   param "id" {}
