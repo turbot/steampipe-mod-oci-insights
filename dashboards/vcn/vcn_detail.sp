@@ -402,7 +402,9 @@ query "oci_vcn_dhcp_options" {
       oci_core_dhcp_options,
       jsonb_array_elements(options) as op
     where
-      vcn_id = $1;
+      vcn_id = $1
+    order by
+      display_name;
   EOQ
 
   param "id" {}
@@ -421,7 +423,9 @@ query "oci_vcn_subnet" {
     from
       oci_core_subnet
     where
-      vcn_id = $1;
+      vcn_id = $1
+    order by
+      display_name;
   EOQ
 
   param "id" {}
@@ -505,7 +509,9 @@ query "oci_vcn_route_table" {
       oci_core_route_table,
       jsonb_array_elements(route_rules) as r
     where
-      vcn_id = $1;
+      vcn_id = $1
+    order by
+      display_name;
   EOQ
 
   param "id" {}
@@ -563,7 +569,9 @@ query "oci_vcn_security_list" {
     from
       oci_core_security_list
     where
-      vcn_id = $1;
+      vcn_id = $1
+    order by
+      display_name;
   EOQ
 
   param "id" {}
@@ -579,7 +587,9 @@ query "oci_vcn_security_group" {
     from
       oci_core_network_security_group
     where
-      vcn_id = $1;
+      vcn_id = $1
+    order by
+      display_name;
   EOQ
 
   param "id" {}
