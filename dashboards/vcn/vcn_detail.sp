@@ -183,7 +183,6 @@ dashboard "oci_vcn_detail" {
     }
 
     container {
-      width = 6
       title = "Security List Ingress Analysis"
 
       flow {
@@ -196,7 +195,6 @@ dashboard "oci_vcn_detail" {
     }
 
     container {
-      width = 6
       title = "Security List Egress Analysis"
 
       flow {
@@ -626,6 +624,35 @@ query "oci_vcn_nsl_ingress_rule_sankey" {
           when r ->> 'protocol' = '6' and r ->> 'tcpOptions' is null then 'Allow All TCP'
           when r ->> 'protocol' = '17' and r ->> 'udpOptions' is null then 'Allow All UDP'
           when r ->> 'protocol' = '1' and r ->> 'icmpOptions' is null then 'Allow All ICMP'
+
+          when r->>'protocol' = '6' and (r->'tcpOptions' -> 'sourcePortRange' ->>'min' = '1' or r->'tcpOptions' -> 'sourcePortRange' ->>'min' is null)
+              and (r->'tcpOptions' -> 'destinationPortRange' ->>'max' = '65535' or r->'tcpOptions' -> 'destinationPortRange' ->>'max' is null)
+              then 'Allow All TCP'
+
+          when r->>'protocol' = '17' and (r->'udpOptions' -> 'sourcePortRange' ->>'min' = '1' or r->'udpOptions' -> 'sourcePortRange' ->>'min' is null)
+              and (r->'udpOptions' -> 'destinationPortRange' ->>'max' = '65535' or r->'udpOptions' -> 'destinationPortRange' ->>'max' is null)
+              then 'Allow All UDP'
+
+          when r ->> 'protocol' = '1' and r -> 'icmpOptions' ->> 'code' is not null and r -> 'icmpOptions' ->> 'type' is not null
+            then concat('ICMP Type ', r -> 'icmpOptions' ->> 'type', ', Code ',  r -> 'icmpOptions' ->> 'code')
+          when r ->> 'protocol' = '1' and r -> 'icmpOptions' ->> 'code' is not null
+            then concat('ICMP Code ',  r -> 'icmpOptions' ->> 'code')
+          when r ->> 'protocol' = '1' and r -> 'icmpOptions' ->> 'type' is not null
+            then concat('ICMP Type ',  r -> 'icmpOptions' ->> 'type')
+
+          when r->>'protocol' = '6' and r->'tcpOptions' -> 'sourcePortRange' ->>'min' = r->'tcpOptions' -> 'destinationPortRange' ->>'max'
+              then concat(r -> 'tcpOptions' -> 'sourcePortRange' ->> 'min','/TCP')
+
+          when r->>'protocol' = '17' and r->'udpOptions' -> 'sourcePortRange' ->>'min' = r->'udpOptions' -> 'destinationPortRange' ->>'max'
+              then concat(r -> 'udpOptions' -> 'sourcePortRange' ->> 'min','/UDP')
+
+          when r->>'protocol' = '6' and COALESCE(r->'tcpOptions' -> 'sourcePortRange' ->>'min','1') <> COALESCE(r->'tcpOptions' -> 'destinationPortRange' ->>'max','65535')
+              then concat(COALESCE(r -> 'tcpOptions' -> 'sourcePortRange' ->> 'min','1'), '-',COALESCE(r->'tcpOptions' -> 'destinationPortRange' ->>'max','65535'),'/TCP')
+
+          when r->>'protocol' = '17' and COALESCE(r->'udpOptions' -> 'sourcePortRange' ->>'min','1') <> COALESCE(r->'udpOptions' -> 'destinationPortRange' ->>'max','65535')
+              then concat(COALESCE(r -> 'udpOptions' -> 'sourcePortRange' ->> 'min','1'), '-',COALESCE(r->'udpOptions' -> 'destinationPortRange' ->>'max','65535'),'/UDP')
+
+
           else concat('Protocol: ', r ->> 'protocol')
         end as rule_description
       from
@@ -739,7 +766,36 @@ query "oci_vcn_nsl_egress_rule_sankey" {
           when r ->> 'protocol' = '6' and r ->> 'tcpOptions' is null then 'Allow All TCP'
           when r ->> 'protocol' = '17' and r ->> 'udpOptions' is null then 'Allow All UDP'
           when r ->> 'protocol' = '1' and r ->> 'icmpOptions' is null then 'Allow All ICMP'
-          else concat('Protocol: ', r->>'protocol')
+
+          when r->>'protocol' = '6' and (r->'tcpOptions' -> 'sourcePortRange' ->>'min' = '1' or r->'tcpOptions' -> 'sourcePortRange' ->>'min' is null)
+              and (r->'tcpOptions' -> 'destinationPortRange' ->>'max' = '65535' or r->'tcpOptions' -> 'destinationPortRange' ->>'max' is null)
+              then 'Allow All TCP'
+
+          when r->>'protocol' = '17' and (r->'udpOptions' -> 'sourcePortRange' ->>'min' = '1' or r->'udpOptions' -> 'sourcePortRange' ->>'min' is null)
+              and (r->'udpOptions' -> 'destinationPortRange' ->>'max' = '65535' or r->'udpOptions' -> 'destinationPortRange' ->>'max' is null)
+              then 'Allow All UDP'
+
+          when r ->> 'protocol' = '1' and r -> 'icmpOptions' ->> 'code' is not null and r -> 'icmpOptions' ->> 'type' is not null
+            then concat('ICMP Type ', r -> 'icmpOptions' ->> 'type', ', Code ',  r -> 'icmpOptions' ->> 'code')
+          when r ->> 'protocol' = '1' and r -> 'icmpOptions' ->> 'code' is not null
+            then concat('ICMP Code ',  r -> 'icmpOptions' ->> 'code')
+          when r ->> 'protocol' = '1' and r -> 'icmpOptions' ->> 'type' is not null
+            then concat('ICMP Type ',  r -> 'icmpOptions' ->> 'type')
+
+          when r->>'protocol' = '6' and r->'tcpOptions' -> 'sourcePortRange' ->>'min' = r->'tcpOptions' -> 'destinationPortRange' ->>'max'
+              then concat(r -> 'tcpOptions' -> 'sourcePortRange' ->> 'min','/TCP')
+
+          when r->>'protocol' = '17' and r->'udpOptions' -> 'sourcePortRange' ->>'min' = r->'udpOptions' -> 'destinationPortRange' ->>'max'
+              then concat(r -> 'udpOptions' -> 'sourcePortRange' ->> 'min','/UDP')
+
+          when r->>'protocol' = '6' and COALESCE(r->'tcpOptions' -> 'sourcePortRange' ->>'min','1') <> COALESCE(r->'tcpOptions' -> 'destinationPortRange' ->>'max','65535')
+              then concat(COALESCE(r -> 'tcpOptions' -> 'sourcePortRange' ->> 'min','1'), '-',COALESCE(r->'tcpOptions' -> 'destinationPortRange' ->>'max','65535'),'/TCP')
+
+          when r->>'protocol' = '17' and COALESCE(r->'udpOptions' -> 'sourcePortRange' ->>'min','1') <> COALESCE(r->'udpOptions' -> 'destinationPortRange' ->>'max','65535')
+              then concat(COALESCE(r -> 'udpOptions' -> 'sourcePortRange' ->> 'min','1'), '-',COALESCE(r->'udpOptions' -> 'destinationPortRange' ->>'max','65535'),'/UDP')
+
+
+          else concat('Protocol: ', r ->> 'protocol')
         end as rule_description
       from
         securityList,
