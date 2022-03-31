@@ -393,7 +393,7 @@ query "oci_vcn_dhcp_options" {
   sql = <<-EOQ
     select
       display_name as "Name",
-      lifecycle_state as "State",
+      lifecycle_state as "Lifecycle State",
       op ->> 'type' as "Option Type",
       op -> 'searchDomainNames' as "Search Domain Names",
       op -> 'customDnsServers' as "Custom DNS Servers",
@@ -500,7 +500,7 @@ query "oci_vcn_route_table" {
   sql = <<-EOQ
     select
       display_name as "Route Table Name",
-      lifecycle_state as "Route Table State",
+      lifecycle_state as "Lifecycle State",
       r ->> 'cidrBlock' as "CIDR Block",
       r ->> 'destination' as "Destination",
       r ->> 'destinationType' as "Destination Type",
@@ -522,7 +522,7 @@ query "oci_vcn_gateways_table" {
     select
       display_name as "Name",
       'oci_core_internet_gateway' as "Type",
-      lifecycle_state as "State"
+      lifecycle_state as "Lifecycle State"
     from
       oci_core_internet_gateway
     where
@@ -564,7 +564,7 @@ query "oci_vcn_security_list" {
     select
       display_name as "Name",
       id as "OCID",
-      lifecycle_state as "State",
+      lifecycle_state as "Lifecycle State",
       time_created as "Time Created"
     from
       oci_core_security_list
@@ -582,7 +582,7 @@ query "oci_vcn_security_group" {
     select
       display_name as "Name",
       id as "OCID",
-      lifecycle_state as "State",
+      lifecycle_state as "Lifecycle State",
       time_created as "Time Created"
     from
       oci_core_network_security_group
