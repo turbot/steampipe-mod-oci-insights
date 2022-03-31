@@ -4,3 +4,4 @@ This dashboard answers the following questions:
 - How much storage is allocated across all boot volumes?
 - How many boot volumes do not have a backup policy?
 - How many boot volumes are encrypted with oracle-managed and customer-managed encryption?
+- What are my most used boot volumes by read and write IOPS?
