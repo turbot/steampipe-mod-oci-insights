@@ -1,3 +1,19 @@
+## v0.3 [2022-03-31]
+
+_Dependencies_
+
+- OCI plugin `v0.11.0` or higher is now required ([#56](https://github.com/turbot/steampipe-mod-oci-insights/pull/56))
+
+_What's new?_
+
+- New dashboards added:
+  - [VCN Detail](https://hub.steampipe.io/mods/turbot/oci_insights/dashboards/dashboard.oci_vcn_detail) ([#52](https://github.com/turbot/steampipe-mod-oci-insights/pull/52))
+
+_Enhancements_
+
+- Added monitoring status card and chart to `OCI Compute Instance Dashboard` and `OCI Compute Instance Detail` dashboards ([#50](https://github.com/turbot/steampipe-mod-oci-insights/pull/50))
+- Added performance and utilization charts to `OCI Block Storage Boot Volume Dashboard` dashboard ([#49](https://github.com/turbot/steampipe-mod-oci-insights/pull/49))
+
 ## v0.2 [2022-03-24]
 
 _Dependencies_
