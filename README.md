@@ -20,23 +20,20 @@ Dashboards are available for 10+ services, including Block Storage, Compute, Ide
 
 ### Installation
 
-1) Download and install Steampipe (https://steampipe.io/downloads). Or use Brew:
+Download and install Steampipe (https://steampipe.io/downloads). Or use Brew:
 
-```shell
+```sh
 brew tap turbot/tap
 brew install steampipe
-
-steampipe -v
-steampipe version 0.13.0
 ```
 
-2) Install the OCI plugin:
+Install the OCI plugin with [Steampipe](https://steampipe.io):
 
-```shell
+```sh
 steampipe plugin install oci
 ```
 
-3) Clone this repo:
+Clone:
 
 ```sh
 git clone https://github.com/turbot/steampipe-mod-oci-insights.git
@@ -47,17 +44,25 @@ cd steampipe-mod-oci-insights
 
 Start your dashboard server to get started:
 
-```shell
+```sh
 steampipe dashboard
 ```
 
-By default, the dashboard interface will then be launched in a new browser window at https://localhost:9194.
+By default, the dashboard interface will then be launched in a new browser
+window at https://localhost:9194. From here, you can run benchmarks by
+selecting one or searching for a specific one.
 
-From here, you can view all of your dashboards and reports.
+### Credentials
+
+This mod uses the credentials configured in the [Steampipe OCI plugin](https://hub.steampipe.io/plugins/turbot/oci).
+
+### Configuration
+
+No extra configuration is required.
 
 ## Contributing
 
-If you have an idea for additional dashboards or reports, or just want to help maintain and extend this mod ([or others](https://github.com/topics/steampipe-mod)) we would love you to join the community and start contributing.
+If you have an idea for additional dashboards or just want to help maintain and extend this mod ([or others](https://github.com/topics/steampipe-mod)) we would love you to join the community and start contributing.
 
 - **[Join our Slack community →](https://steampipe.io/community/join)** and hang out with other Mod developers.
 
@@ -66,4 +71,4 @@ Please see the [contribution guidelines](https://github.com/turbot/steampipe/blo
 Want to help but not sure where to start? Pick up one of the `help wanted` issues:
 
 - [Steampipe](https://github.com/turbot/steampipe/labels/help%20wanted)
-- [Oracle Cloud Insights Mod](https://github.com/turbot/steampipe-mod-oci-insights/labels/help%20wanted)
+- [OCI Insights Mod](https://github.com/turbot/steampipe-mod-oci-insights/labels/help%20wanted)
