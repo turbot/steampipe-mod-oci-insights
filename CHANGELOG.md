@@ -1,3 +1,9 @@
+## v0.4 [2022-05-10]
+
+_Enhancements_
+
+- Updated docs/index.md and README to the latest format. ([#61](https://github.com/turbot/steampipe-mod-oci-insights/pull/61))
+
 ## v0.3 [2022-03-31]
 
 _Dependencies_
