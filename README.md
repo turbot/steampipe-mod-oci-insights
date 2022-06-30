@@ -1,4 +1,4 @@
-# Oracle Cloud Insights
+# Oracle Cloud Insights Mod for Steampipe
 
 An Oracle Cloud dashboarding tool that can be used to view dashboards and reports across all of your Oracle Cloud accounts.
 
