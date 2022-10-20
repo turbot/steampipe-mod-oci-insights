@@ -36,6 +36,34 @@ dashboard "oci_block_storage_block_volume_detail" {
 
   container {
 
+    graph {
+      title     = "Relationships"
+      type      = "graph"
+      direction = "TD"
+
+      nodes = [
+        node.oci_block_storage_block_volume_node,
+        node.oci_block_storage_block_volume_to_compute_instance_node,
+        node.oci_block_storage_block_volume_to_kms_key_node,
+        node.oci_block_storage_block_volume_to_block_volume_backup_node,
+        node.oci_block_storage_block_volume_to_block_volume_replica_node
+      ]
+
+      edges = [
+        edge.oci_block_storage_block_volume_to_compute_instance_edge,
+        edge.oci_block_storage_block_volume_to_kms_key_edge,
+        edge.oci_block_storage_block_volume_to_block_volume_backup_edge,
+        edge.oci_block_storage_block_volume_to_block_volume_replica_edge
+      ]
+
+      args = {
+        id = self.input.block_volume_id.value
+      }
+    }
+  }
+
+  container {
+
     container {
       width = 6
 
@@ -90,6 +118,192 @@ dashboard "oci_block_storage_block_volume_detail" {
     }
 
   }
+}
+
+node "oci_block_storage_block_volume_node" {
+  category = category.oci_block_storage_block_volume
+
+  sql = <<-EOQ
+    select
+      id as id,
+      title as title,
+      jsonb_build_object(
+        'Lifecycle State', lifecycle_state,
+        'Region', region,
+        'Compartment ID', compartment_id,
+        'Tenant ID', tenant_id
+      ) as properties
+    from
+        oci_core_volume
+    where
+      id = $1;
+  EOQ
+
+  param "id" {}
+}
+
+node "oci_block_storage_block_volume_to_compute_instance_node" {
+  category = category.oci_compute_instance
+
+  sql = <<-EOQ
+    select
+      i.id as id,
+      i.title as title,
+      jsonb_build_object(
+        'ID', i.id,
+        'Lifecycle State', i.lifecycle_state,
+        'Region', i.region,
+        'Compartment ID', i.compartment_id,
+        'Tenant ID', i.tenant_id
+      ) as properties
+    from
+      oci_core_volume_attachment as a
+      left join oci_core_instance as i on a.instance_id = i.id
+    where
+      a.volume_id = $1;
+  EOQ
+
+  param "id" {}
+}
+
+edge "oci_block_storage_block_volume_to_compute_instance_edge" {
+  title = "attached to"
+
+  sql = <<-EOQ
+    select
+      a.volume_id as from_id,
+      i.id as to_id
+    from
+        oci_core_volume_attachment as a
+      left join oci_core_instance as i on a.instance_id = i.id
+    where
+      a.volume_id = $1;
+  EOQ
+
+  param "id" {}
+}
+
+node "oci_block_storage_block_volume_to_kms_key_node" {
+  category = category.oci_kms_key
+
+  sql = <<-EOQ
+    select
+      k.id as id,
+      k.title as title,
+      jsonb_build_object(
+        'ID', k.id,
+        'Lifecycle State', k.lifecycle_state,
+        'Region', k.region,
+        'Compartment ID', k.compartment_id,
+        'Tenant ID', k.tenant_id
+      ) as properties
+    from
+      oci_kms_key as k
+      left join oci_core_volume as v on v.kms_key_id = k.id
+    where
+      v.id = $1;
+  EOQ
+
+  param "id" {}
+}
+
+edge "oci_block_storage_block_volume_to_kms_key_edge" {
+  title = "encrypted with"
+
+  sql = <<-EOQ
+    select
+      v.id as from_id,
+      k.id as to_id
+    from
+      oci_kms_key as k
+      left join oci_core_volume as v on v.kms_key_id = k.id
+    where
+      v.id = $1;
+  EOQ
+
+  param "id" {}
+}
+
+node "oci_block_storage_block_volume_to_block_volume_backup_node" {
+  category = category.oci_block_storage_block_volume_backup
+
+  sql = <<-EOQ
+    select
+      b.id as id,
+      b.title as title,
+      jsonb_build_object(
+        'ID', b.id,
+        'Lifecycle State', b.lifecycle_state,
+        'Region', b.region,
+        'Compartment ID', b.compartment_id,
+        'Tenant ID', b.tenant_id
+      ) as properties
+    from
+      oci_core_volume_backup as b
+      left join oci_core_volume as v on v.id = b.volume_id
+    where
+      v.id = $1;
+  EOQ
+
+  param "id" {}
+}
+
+edge "oci_block_storage_block_volume_to_block_volume_backup_edge" {
+  title = "backup"
+
+  sql = <<-EOQ
+    select
+      v.id as from_id,
+      b.id as to_id
+    from
+      oci_core_volume_backup as b
+      left join oci_core_volume as v on v.id = b.volume_id
+    where
+      v.id = $1;
+  EOQ
+
+  param "id" {}
+}
+
+node "oci_block_storage_block_volume_to_block_volume_replica_node" {
+  category = category.oci_block_storage_block_volume_replica
+
+  sql = <<-EOQ
+    select
+      r.id as id,
+      r.title as title,
+      jsonb_build_object(
+        'ID', r.id,
+        'Lifecycle State', r.lifecycle_state,
+        'Region', r.region,
+        'Compartment ID', r.compartment_id,
+        'Tenant ID', r.tenant_id
+      ) as properties
+    from
+      oci_core_block_volume_replica as r
+      left join oci_core_volume as v on v.id = r.block_volume_id
+    where
+      v.id = $1;
+  EOQ
+
+  param "id" {}
+}
+
+edge "oci_block_storage_block_volume_to_block_volume_replica_edge" {
+  title = "replica"
+
+  sql = <<-EOQ
+    select
+      v.id as from_id,
+      r.id as to_id
+    from
+      oci_core_block_volume_replica as r
+      left join oci_core_volume as v on v.id = r.block_volume_id
+    where
+      v.id = $1;
+  EOQ
+
+  param "id" {}
 }
 
 query "oci_block_storage_block_volume_input" {
