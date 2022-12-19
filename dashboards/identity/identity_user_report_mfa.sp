@@ -1,4 +1,4 @@
-dashboard "oci_identity_user_mfa_report" {
+dashboard "identity_user_mfa_report" {
 
   title         = "OCI Identity User MFA Report"
   documentation = file("./dashboards/identity/docs/identity_user_report_mfa.md")
@@ -10,12 +10,12 @@ dashboard "oci_identity_user_mfa_report" {
   container {
 
     card {
-      sql   = query.oci_identity_user_count.sql
+      sql   = query.identity_user_count.sql
       width = 2
     }
 
     card {
-      sql   = query.oci_identity_user_mfa_disabled_count.sql
+      sql   = query.identity_user_mfa_disabled_count.sql
       width = 2
     }
 
@@ -29,15 +29,15 @@ dashboard "oci_identity_user_mfa_report" {
       }
 
       column "User Name" {
-        href = "${dashboard.oci_identity_user_detail.url_path}?input.user_id={{.OCID | @uri}}"
+        href = "${dashboard.identity_user_detail.url_path}?input.user_id={{.OCID | @uri}}"
       }
 
-      sql = query.oci_identity_user_mfa_report.sql
+      sql = query.identity_user_mfa_report.sql
     }
   }
 }
 
-query "oci_identity_user_mfa_report" {
+query "identity_user_mfa_report" {
   sql = <<-EOQ
     select
       u.name as "User Name",

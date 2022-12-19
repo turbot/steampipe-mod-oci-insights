@@ -1,4 +1,4 @@
-dashboard "oci_block_storage_block_volume_detail" {
+dashboard "block_storage_block_volume_detail" {
 
   title = "OCI Block Storage Block Volume Detail"
 
@@ -8,7 +8,7 @@ dashboard "oci_block_storage_block_volume_detail" {
 
   input "block_volume_id" {
     title = "Select a block volume:"
-    query = query.oci_block_storage_block_volume_input
+    query = query.block_storage_block_volume_input
     width = 4
   }
 
@@ -17,7 +17,7 @@ dashboard "oci_block_storage_block_volume_detail" {
     card {
       width = 2
 
-      query = query.oci_block_storage_block_volume_storage
+      query = query.block_storage_block_volume_storage
       args = {
         id = self.input.block_volume_id.value
       }
@@ -26,7 +26,7 @@ dashboard "oci_block_storage_block_volume_detail" {
     card {
       width = 2
 
-      query = query.oci_block_storage_block_volume_vpu
+      query = query.block_storage_block_volume_vpu
       args = {
         id = self.input.block_volume_id.value
       }
@@ -43,7 +43,7 @@ dashboard "oci_block_storage_block_volume_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-        query = query.oci_block_storage_block_volume_overview
+        query = query.block_storage_block_volume_overview
         args = {
           id = self.input.block_volume_id.value
         }
@@ -53,7 +53,7 @@ dashboard "oci_block_storage_block_volume_detail" {
       table {
         title = "Tags"
         width = 6
-        query = query.oci_block_storage_block_volume_tags
+        query = query.block_storage_block_volume_tags
         args = {
           id = self.input.block_volume_id.value
         }
@@ -66,7 +66,7 @@ dashboard "oci_block_storage_block_volume_detail" {
 
       table {
         title = "Attached To"
-        query = query.oci_block_storage_block_volume_attached_instances
+        query = query.block_storage_block_volume_attached_instances
         args = {
           id = self.input.block_volume_id.value
         }
@@ -76,13 +76,13 @@ dashboard "oci_block_storage_block_volume_detail" {
         }
 
         column "Instance Name" {
-          href = "${dashboard.oci_compute_instance_detail.url_path}?input.instance_id={{.'Instance ID' | @uri}}"
+          href = "${dashboard.compute_instance_detail.url_path}?input.instance_id={{.'Instance ID' | @uri}}"
         }
       }
 
       table {
         title = "Encryption Details"
-        query = query.oci_block_storage_block_volume_encryption
+        query = query.block_storage_block_volume_encryption
         args = {
           id = self.input.block_volume_id.value
         }
@@ -92,7 +92,7 @@ dashboard "oci_block_storage_block_volume_detail" {
   }
 }
 
-query "oci_block_storage_block_volume_input" {
+query "block_storage_block_volume_input" {
   sql = <<EOQ
     select
       v.display_name as label,
@@ -113,7 +113,7 @@ query "oci_block_storage_block_volume_input" {
   EOQ
 }
 
-query "oci_block_storage_block_volume_storage" {
+query "block_storage_block_volume_storage" {
   sql = <<-EOQ
     select
       size_in_gbs as "Storage (GB)"
@@ -126,7 +126,7 @@ query "oci_block_storage_block_volume_storage" {
   param "id" {}
 }
 
-query "oci_block_storage_block_volume_vpu" {
+query "block_storage_block_volume_vpu" {
   sql = <<-EOQ
     select
       vpus_per_gb as "VPUs"
@@ -139,7 +139,7 @@ query "oci_block_storage_block_volume_vpu" {
   param "id" {}
 }
 
-query "oci_block_storage_block_volume_overview" {
+query "block_storage_block_volume_overview" {
   sql = <<EOQ
     select
       display_name as "Name",
@@ -158,7 +158,7 @@ query "oci_block_storage_block_volume_overview" {
   param "id" {}
 }
 
-query "oci_block_storage_block_volume_tags" {
+query "block_storage_block_volume_tags" {
   sql = <<EOQ
     with jsondata as (
       select
@@ -179,7 +179,7 @@ query "oci_block_storage_block_volume_tags" {
   param "id" {}
 }
 
-query "oci_block_storage_block_volume_attached_instances" {
+query "block_storage_block_volume_attached_instances" {
   sql = <<EOQ
     select
       i.id as "Instance ID",
@@ -196,7 +196,7 @@ query "oci_block_storage_block_volume_attached_instances" {
   param "id" {}
 }
 
-query "oci_block_storage_block_volume_encryption" {
+query "block_storage_block_volume_encryption" {
   sql = <<EOQ
     select
       case when kms_key_id is not null and kms_key_id <> '' then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",

@@ -1,4 +1,4 @@
-dashboard "oci_vcn_detail" {
+dashboard "vcn_detail" {
 
   title         = "OCI VCN Detail"
   documentation = file("./dashboards/vcn/docs/vcn_detail.md")
@@ -9,7 +9,7 @@ dashboard "oci_vcn_detail" {
 
   input "vcn_id" {
     title = "Select a VCN:"
-    sql   = query.oci_vcn_input.sql
+    sql   = query.vcn_input.sql
     width = 4
   }
 
@@ -18,7 +18,7 @@ dashboard "oci_vcn_detail" {
     card {
       width = 2
 
-      query = query.oci_vcn_ipv4_count
+      query = query.vcn_ipv4_count
       args = {
         id = self.input.vcn_id.value
       }
@@ -27,7 +27,7 @@ dashboard "oci_vcn_detail" {
     card {
       width = 2
 
-      query = query.oci_vcn_ipv6_count
+      query = query.vcn_ipv6_count
       args = {
         id = self.input.vcn_id.value
       }
@@ -36,7 +36,7 @@ dashboard "oci_vcn_detail" {
     card {
       width = 2
 
-      query = query.oci_vcn_attached_subnet_count
+      query = query.vcn_attached_subnet_count
       args = {
         id = self.input.vcn_id.value
       }
@@ -45,7 +45,7 @@ dashboard "oci_vcn_detail" {
     card {
       width = 2
 
-      query = query.oci_vcn_attached_nsg_count
+      query = query.vcn_attached_nsg_count
       args = {
         id = self.input.vcn_id.value
       }
@@ -54,13 +54,37 @@ dashboard "oci_vcn_detail" {
     card {
       width = 2
 
-      query = query.oci_vcn_attached_sl_count
+      query = query.vcn_attached_sl_count
       args = {
         id = self.input.vcn_id.value
       }
     }
 
   }
+
+  container {
+
+    graph {
+      title     = "Relationships"
+      type      = "graph"
+      direction = "TD"
+
+      node {
+        base = node.vcn_vcn
+        args = {
+          vcn_vcn_ids = [self.input.vcn_id.value]
+        }
+      }
+
+      # edge {
+      #   base = edge.s3_bucket_to_sqs_queue
+      #   args = {
+      #     s3_bucket_arns = [self.input.bucket_arn.value]
+      #   }
+      # }
+    }
+  }
+
 
   container {
 
@@ -72,7 +96,7 @@ dashboard "oci_vcn_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-        query = query.oci_vcn_overview
+        query = query.vcn_overview
         args = {
           id = self.input.vcn_id.value
         }
@@ -83,7 +107,7 @@ dashboard "oci_vcn_detail" {
         title = "Tags"
         width = 6
 
-        query = query.oci_vcn_tag
+        query = query.vcn_tag
         args = {
           id = self.input.vcn_id.value
         }
@@ -96,7 +120,7 @@ dashboard "oci_vcn_detail" {
 
       table {
         title = "CIDR Blocks"
-        query = query.oci_vcn_cidr_blocks
+        query = query.vcn_cidr_blocks
         args = {
           id = self.input.vcn_id.value
         }
@@ -104,7 +128,7 @@ dashboard "oci_vcn_detail" {
 
       table {
         title = "DHCP Options"
-        query = query.oci_vcn_dhcp_options
+        query = query.vcn_dhcp_options
         args = {
           id = self.input.vcn_id.value
         }
@@ -116,7 +140,7 @@ dashboard "oci_vcn_detail" {
       title = "Subnets"
 
       table {
-        query = query.oci_vcn_subnet
+        query = query.vcn_subnet
         args = {
           id = self.input.vcn_id.value
         }
@@ -134,7 +158,7 @@ dashboard "oci_vcn_detail" {
       title = "Routing"
 
       flow {
-        query = query.oci_vcn_gateway_sankey
+        query = query.vcn_gateway_sankey
         args = {
           id = self.input.vcn_id.value
         }
@@ -146,7 +170,7 @@ dashboard "oci_vcn_detail" {
 
       table {
         title = "Route Rules"
-        query = query.oci_vcn_route_table
+        query = query.vcn_route_table
         args = {
           id = self.input.vcn_id.value
         }
@@ -159,7 +183,7 @@ dashboard "oci_vcn_detail" {
       table {
         title = "Security List Details"
         width = 6
-        query = query.oci_vcn_security_list
+        query = query.vcn_security_list
         args = {
           id = self.input.vcn_id.value
         }
@@ -174,7 +198,7 @@ dashboard "oci_vcn_detail" {
       table {
         title = "Gateways"
         width = 6
-        query = query.oci_vcn_gateways_table
+        query = query.vcn_gateways_table
         args = {
           id = self.input.vcn_id.value
         }
@@ -186,7 +210,7 @@ dashboard "oci_vcn_detail" {
       title = "Security List Ingress Analysis"
 
       flow {
-        query = query.oci_vcn_nsl_ingress_rule_sankey
+        query = query.vcn_nsl_ingress_rule_sankey
         args = {
           id = self.input.vcn_id.value
         }
@@ -198,7 +222,7 @@ dashboard "oci_vcn_detail" {
       title = "Security List Egress Analysis"
 
       flow {
-        query = query.oci_vcn_nsl_egress_rule_sankey
+        query = query.vcn_nsl_egress_rule_sankey
         args = {
           id = self.input.vcn_id.value
         }
@@ -211,7 +235,7 @@ dashboard "oci_vcn_detail" {
       table {
         title = "Network Security Group Details"
         width = 6
-        query = query.oci_vcn_security_group
+        query = query.vcn_security_group
         args = {
           id = self.input.vcn_id.value
         }
@@ -228,7 +252,7 @@ dashboard "oci_vcn_detail" {
 
 }
 
-query "oci_vcn_input" {
+query "vcn_input" {
   sql = <<-EOQ
     select
       v.display_name as label,
@@ -249,7 +273,7 @@ query "oci_vcn_input" {
   EOQ
 }
 
-query "oci_vcn_ipv4_count" {
+query "vcn_ipv4_count" {
   sql = <<-EOQ
     with cidrs as (
       select
@@ -269,7 +293,7 @@ query "oci_vcn_ipv4_count" {
   param "id" {}
 }
 
-query "oci_vcn_ipv6_count" {
+query "vcn_ipv6_count" {
   sql = <<-EOQ
       select
         power(2, 128 - masklen(b :: cidr)) as "IPv6 Addresses"
@@ -283,7 +307,7 @@ query "oci_vcn_ipv6_count" {
   param "id" {}
 }
 
-query "oci_vcn_attached_subnet_count" {
+query "vcn_attached_subnet_count" {
   sql = <<-EOQ
     select
       'Subnets' as label,
@@ -297,7 +321,7 @@ query "oci_vcn_attached_subnet_count" {
   param "id" {}
 }
 
-query "oci_vcn_attached_nsg_count" {
+query "vcn_attached_nsg_count" {
   sql = <<-EOQ
     select
       'Network Security Groups' as label,
@@ -311,7 +335,7 @@ query "oci_vcn_attached_nsg_count" {
   param "id" {}
 }
 
-query "oci_vcn_attached_sl_count" {
+query "vcn_attached_sl_count" {
   sql = <<-EOQ
     select
       'Security Lists' as label,
@@ -325,7 +349,7 @@ query "oci_vcn_attached_sl_count" {
   param "id" {}
 }
 
-query "oci_vcn_overview" {
+query "vcn_overview" {
   sql = <<-EOQ
     select
       display_name as "Name",
@@ -342,7 +366,7 @@ query "oci_vcn_overview" {
   param "id" {}
 }
 
-query "oci_vcn_tag" {
+query "vcn_tag" {
   sql = <<-EOQ
     with jsondata as (
       select
@@ -365,7 +389,7 @@ query "oci_vcn_tag" {
   param "id" {}
 }
 
-query "oci_vcn_cidr_blocks" {
+query "vcn_cidr_blocks" {
   sql = <<-EOQ
     select
       b as "CIDR Block",
@@ -389,7 +413,7 @@ query "oci_vcn_cidr_blocks" {
   param "id" {}
 }
 
-query "oci_vcn_dhcp_options" {
+query "vcn_dhcp_options" {
   sql = <<-EOQ
     select
       display_name as "Name",
@@ -410,7 +434,7 @@ query "oci_vcn_dhcp_options" {
   param "id" {}
 }
 
-query "oci_vcn_subnet" {
+query "vcn_subnet" {
   sql = <<-EOQ
     select
       display_name as "Name",
@@ -431,7 +455,7 @@ query "oci_vcn_subnet" {
   param "id" {}
 }
 
-query "oci_vcn_gateway_sankey" {
+query "vcn_gateway_sankey" {
   sql = <<-EOQ
     with routes as (
     select
@@ -496,7 +520,7 @@ query "oci_vcn_gateway_sankey" {
   param "id" {}
 }
 
-query "oci_vcn_route_table" {
+query "vcn_route_table" {
   sql = <<-EOQ
     select
       display_name as "Route Table Name",
@@ -517,7 +541,7 @@ query "oci_vcn_route_table" {
   param "id" {}
 }
 
-query "oci_vcn_gateways_table" {
+query "vcn_gateways_table" {
   sql = <<-EOQ
     select
       display_name as "Name",
@@ -559,7 +583,7 @@ query "oci_vcn_gateways_table" {
   param "id" {}
 }
 
-query "oci_vcn_security_list" {
+query "vcn_security_list" {
   sql = <<-EOQ
     select
       display_name as "Name",
@@ -577,7 +601,7 @@ query "oci_vcn_security_list" {
   param "id" {}
 }
 
-query "oci_vcn_security_group" {
+query "vcn_security_group" {
   sql = <<-EOQ
     select
       display_name as "Name",
@@ -595,7 +619,7 @@ query "oci_vcn_security_group" {
   param "id" {}
 }
 
-query "oci_vcn_nsl_ingress_rule_sankey" {
+query "vcn_nsl_ingress_rule_sankey" {
 
   sql = <<-EOQ
    with subnets as (
@@ -737,7 +761,7 @@ query "oci_vcn_nsl_ingress_rule_sankey" {
   param "id" {}
 }
 
-query "oci_vcn_nsl_egress_rule_sankey" {
+query "vcn_nsl_egress_rule_sankey" {
 
   sql = <<-EOQ
     with subnets as (

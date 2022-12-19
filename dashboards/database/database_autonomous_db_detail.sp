@@ -1,4 +1,4 @@
-dashboard "oci_database_autonomous_database_detail" {
+dashboard "database_autonomous_database_detail" {
 
   title = "OCI Autonomous Database Detail"
 
@@ -8,7 +8,7 @@ dashboard "oci_database_autonomous_database_detail" {
 
   input "db_id" {
     title = "Select an autonomous DB:"
-    query = query.oci_database_autonomous_database_input
+    query = query.database_autonomous_database_input
     width = 4
   }
 
@@ -17,7 +17,7 @@ dashboard "oci_database_autonomous_database_detail" {
     card {
       width = 2
 
-      query = query.oci_database_autonomous_database_core
+      query = query.database_autonomous_database_core
       args = {
         id = self.input.db_id.value
       }
@@ -26,7 +26,7 @@ dashboard "oci_database_autonomous_database_detail" {
     card {
       width = 2
 
-      query = query.oci_database_autonomous_database_data_guard
+      query = query.database_autonomous_database_data_guard
       args = {
         id = self.input.db_id.value
       }
@@ -35,7 +35,7 @@ dashboard "oci_database_autonomous_database_detail" {
     card {
       width = 2
 
-      query = query.oci_database_autonomous_db_operations_insights
+      query = query.database_autonomous_db_operations_insights
       args = {
         id = self.input.db_id.value
       }
@@ -52,7 +52,7 @@ dashboard "oci_database_autonomous_database_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-        query = query.oci_database_autonomous_database_overview
+        query = query.database_autonomous_database_overview
         args = {
           id = self.input.db_id.value
         }
@@ -61,7 +61,7 @@ dashboard "oci_database_autonomous_database_detail" {
       table {
         title = "Tags"
         width = 6
-        query = query.oci_database_autonomous_database_tag
+        query = query.database_autonomous_database_tag
         args = {
           id = self.input.db_id.value
         }
@@ -73,7 +73,7 @@ dashboard "oci_database_autonomous_database_detail" {
 
       table {
         title = "DB Details"
-        query = query.oci_database_autonomous_database_db
+        query = query.database_autonomous_database_db
         args = {
           id = self.input.db_id.value
         }
@@ -81,7 +81,7 @@ dashboard "oci_database_autonomous_database_detail" {
 
       table {
         title = "Backup Config"
-        query = query.oci_database_autonomous_database_backup
+        query = query.database_autonomous_database_backup
         args = {
           id = self.input.db_id.value
         }
@@ -93,7 +93,7 @@ dashboard "oci_database_autonomous_database_detail" {
 
       table {
         title = "Private Endpoint Details"
-        query = query.oci_database_autonomous_database_private_endpoint
+        query = query.database_autonomous_database_private_endpoint
         args = {
           id = self.input.db_id.value
         }
@@ -104,7 +104,7 @@ dashboard "oci_database_autonomous_database_detail" {
 
       table {
         title = "Access Details"
-        query = query.oci_database_autonomous_database_access_detail
+        query = query.database_autonomous_database_access_detail
         args = {
           id = self.input.db_id.value
         }
@@ -113,7 +113,7 @@ dashboard "oci_database_autonomous_database_detail" {
   }
 }
 
-query "oci_database_autonomous_database_input" {
+query "database_autonomous_database_input" {
   sql = <<EOQ
     select
       d.display_name as label,
@@ -134,7 +134,7 @@ query "oci_database_autonomous_database_input" {
 EOQ
 }
 
-query "oci_database_autonomous_database_core" {
+query "database_autonomous_database_core" {
   sql = <<-EOQ
     select
       cpu_core_count as "OCPUs"
@@ -147,7 +147,7 @@ query "oci_database_autonomous_database_core" {
   param "id" {}
 }
 
-query "oci_database_autonomous_database_data_guard" {
+query "database_autonomous_database_data_guard" {
   sql = <<-EOQ
     select
       case when is_data_guard_enabled then 'Enabled' else 'Disabled' end as value,
@@ -162,7 +162,7 @@ query "oci_database_autonomous_database_data_guard" {
   param "id" {}
 }
 
-query "oci_database_autonomous_db_operations_insights" {
+query "database_autonomous_db_operations_insights" {
   sql = <<-EOQ
     select
       case when operations_insights_status = 'NOT_ENABLED' then 'Enabled' else 'Disabled' end as value,
@@ -177,7 +177,7 @@ query "oci_database_autonomous_db_operations_insights" {
   param "id" {}
 }
 
-query "oci_database_autonomous_database_overview" {
+query "database_autonomous_database_overview" {
   sql = <<-EOQ
     select
       display_name as "Name",
@@ -197,7 +197,7 @@ query "oci_database_autonomous_database_overview" {
   param "id" {}
 }
 
-query "oci_database_autonomous_database_tag" {
+query "database_autonomous_database_tag" {
   sql = <<-EOQ
     with jsondata as (
     select
@@ -218,7 +218,7 @@ query "oci_database_autonomous_database_tag" {
   param "id" {}
 }
 
-query "oci_database_autonomous_database_db" {
+query "database_autonomous_database_db" {
   sql = <<-EOQ
     select
       db_name as "DB Name",
@@ -233,7 +233,7 @@ query "oci_database_autonomous_database_db" {
   param "id" {}
 }
 
-query "oci_database_autonomous_database_backup" {
+query "database_autonomous_database_backup" {
   sql = <<-EOQ
     select
       backup_config ->> 'manualBackupBucketName' as "Manual Backup Bucket Name",
@@ -247,7 +247,7 @@ query "oci_database_autonomous_database_backup" {
   param "id" {}
 }
 
-query "oci_database_autonomous_database_private_endpoint" {
+query "database_autonomous_database_private_endpoint" {
   sql = <<-EOQ
     select
       private_endpoint as "Private Endpoint",
@@ -262,7 +262,7 @@ query "oci_database_autonomous_database_private_endpoint" {
   param "id" {}
 }
 
-query "oci_database_autonomous_database_access_detail" {
+query "database_autonomous_database_access_detail" {
   sql = <<-EOQ
     select
       is_access_control_enabled as "Access Control Enabled",

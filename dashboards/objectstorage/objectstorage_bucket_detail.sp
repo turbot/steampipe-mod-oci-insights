@@ -1,4 +1,4 @@
-dashboard "oci_objectstorage_bucket_detail" {
+dashboard "objectstorage_bucket_detail" {
 
   title = "OCI Object Storage Bucket Detail"
 
@@ -8,7 +8,7 @@ dashboard "oci_objectstorage_bucket_detail" {
 
   input "bucket_id" {
     title = "Select a bucket:"
-    query = query.oci_objectstorage_bucket_input
+    query = query.objectstorage_bucket_input
     width = 4
   }
 
@@ -17,7 +17,7 @@ dashboard "oci_objectstorage_bucket_detail" {
     card {
       width = 2
 
-      query = query.oci_objectstorage_bucket_read_only
+      query = query.objectstorage_bucket_read_only
       args = {
         id = self.input.bucket_id.value
       }
@@ -26,14 +26,14 @@ dashboard "oci_objectstorage_bucket_detail" {
     card {
       width = 2
 
-      query = query.oci_objectstorage_bucket_versioning
+      query = query.objectstorage_bucket_versioning
       args = {
         id = self.input.bucket_id.value
       }
     }
 
     card {
-      query = query.oci_objectstorage_bucket_public_access
+      query = query.objectstorage_bucket_public_access
       width = 2
 
       args = {
@@ -52,7 +52,7 @@ dashboard "oci_objectstorage_bucket_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-        query = query.oci_objectstorage_bucket_overview
+        query = query.objectstorage_bucket_overview
         args = {
           id = self.input.bucket_id.value
         }
@@ -62,7 +62,7 @@ dashboard "oci_objectstorage_bucket_detail" {
       table {
         title = "Tags"
         width = 6
-        query = query.oci_objectstorage_bucket_tag
+        query = query.objectstorage_bucket_tag
         args = {
           id = self.input.bucket_id.value
         }
@@ -75,7 +75,7 @@ dashboard "oci_objectstorage_bucket_detail" {
 
       table {
         title = "Encryption Details"
-        query = query.oci_objectstorage_bucket_encryption
+        query = query.objectstorage_bucket_encryption
         args = {
           id = self.input.bucket_id.value
         }
@@ -83,7 +83,7 @@ dashboard "oci_objectstorage_bucket_detail" {
 
       table {
         title = "Public Access"
-        query = query.oci_objectstorage_bucket_access
+        query = query.objectstorage_bucket_access
         args = {
           id = self.input.bucket_id.value
         }
@@ -95,7 +95,7 @@ dashboard "oci_objectstorage_bucket_detail" {
 
       table {
         title = "Object Lifecycle Policy"
-        query = query.oci_objectstorage_bucket_object_lifecycle_policy
+        query = query.objectstorage_bucket_object_lifecycle_policy
         args = {
           id = self.input.bucket_id.value
         }
@@ -106,7 +106,7 @@ dashboard "oci_objectstorage_bucket_detail" {
   }
 }
 
-query "oci_objectstorage_bucket_input" {
+query "objectstorage_bucket_input" {
   sql = <<EOQ
     select
       b.name as label,
@@ -125,7 +125,7 @@ query "oci_objectstorage_bucket_input" {
 EOQ
 }
 
-query "oci_objectstorage_bucket_read_only" {
+query "objectstorage_bucket_read_only" {
   sql = <<-EOQ
     select
       case when is_read_only then 'Enabled' else 'Disabled' end as value,
@@ -139,7 +139,7 @@ query "oci_objectstorage_bucket_read_only" {
   param "id" {}
 }
 
-query "oci_objectstorage_bucket_versioning" {
+query "objectstorage_bucket_versioning" {
   sql = <<-EOQ
     select
       case when versioning = 'Disabled' then 'Disabled' else 'Enabled' end as value,
@@ -154,7 +154,7 @@ query "oci_objectstorage_bucket_versioning" {
   param "id" {}
 }
 
-query "oci_objectstorage_bucket_public_access" {
+query "objectstorage_bucket_public_access" {
   sql = <<-EOQ
     select
       case when public_access_type <> 'NoPublicAccess' then 'Enabled' else 'Disabled' end as value,
@@ -169,7 +169,7 @@ query "oci_objectstorage_bucket_public_access" {
   param "id" {}
 }
 
-query "oci_objectstorage_bucket_overview" {
+query "objectstorage_bucket_overview" {
   sql = <<-EOQ
    select
     name as "Name",
@@ -187,7 +187,7 @@ query "oci_objectstorage_bucket_overview" {
   param "id" {}
 }
 
-query "oci_objectstorage_bucket_tag" {
+query "objectstorage_bucket_tag" {
   sql = <<-EOQ
    with jsondata as (
    select
@@ -208,7 +208,7 @@ query "oci_objectstorage_bucket_tag" {
   param "id" {}
 }
 
-query "oci_objectstorage_bucket_encryption" {
+query "objectstorage_bucket_encryption" {
   sql = <<-EOQ
    select
      case when kms_key_id is not null and kms_key_id <> '' then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
@@ -222,7 +222,7 @@ query "oci_objectstorage_bucket_encryption" {
   param "id" {}
 }
 
-query "oci_objectstorage_bucket_access" {
+query "objectstorage_bucket_access" {
   sql = <<-EOQ
    select
     public_access_type as "Public Access Type"
@@ -235,7 +235,7 @@ query "oci_objectstorage_bucket_access" {
   param "id" {}
 }
 
-query "oci_objectstorage_bucket_object_lifecycle_policy" {
+query "objectstorage_bucket_object_lifecycle_policy" {
   sql = <<-EOQ
    select
     i ->> 'name' as "Name",

@@ -1,4 +1,4 @@
-dashboard "oci_compute_instance_dashboard" {
+dashboard "compute_instance_dashboard" {
 
   title         = "OCI Compute Instance Dashboard"
   documentation = file("./dashboards/compute/docs/compute_instance_dashboard.md")
@@ -10,22 +10,22 @@ dashboard "oci_compute_instance_dashboard" {
   container {
 
     card {
-      query = query.oci_compute_instance_count
+      query = query.compute_instance_count
       width = 2
     }
 
     card {
-      query = query.oci_compute_instance_total_cores
+      query = query.compute_instance_total_cores
       width = 2
     }
 
     card {
-      query = query.oci_compute_instance_public_instance_count
+      query = query.compute_instance_public_instance_count
       width = 2
     }
 
     card {
-      query = query.oci_compute_instance_monitoring_disabled_count
+      query = query.compute_instance_monitoring_disabled_count
       width = 2
     }
 
@@ -37,7 +37,7 @@ dashboard "oci_compute_instance_dashboard" {
 
     chart {
       title = "Public/Private"
-      query = query.oci_compute_instance_by_public_ip
+      query = query.compute_instance_by_public_ip
       type  = "donut"
       width = 3
 
@@ -53,7 +53,7 @@ dashboard "oci_compute_instance_dashboard" {
 
     chart {
       title = "Monitoring Status"
-      query = query.oci_compute_instance_by_monitoring
+      query = query.compute_instance_by_monitoring
       type  = "donut"
       width = 3
 
@@ -76,35 +76,35 @@ dashboard "oci_compute_instance_dashboard" {
 
     chart {
       title = "Instances by Tenancy"
-      query = query.oci_compute_instance_by_tenancy
+      query = query.compute_instance_by_tenancy
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Instances by Compartment"
-      query = query.oci_compute_instance_by_compartment
+      query = query.compute_instance_by_compartment
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Instances by Region"
-      query = query.oci_compute_instance_by_region
+      query = query.compute_instance_by_region
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Instances by Age"
-      query = query.oci_compute_instance_by_creation_month
+      query = query.compute_instance_by_creation_month
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Instances by Shape"
-      query = query.oci_compute_instance_by_type
+      query = query.compute_instance_by_type
       type  = "column"
       width = 4
     }
@@ -117,7 +117,7 @@ dashboard "oci_compute_instance_dashboard" {
 
     chart {
       title = "Top 10 CPU - Last 7 days"
-      query = query.oci_compute_top10_cpu_past_week
+      query = query.compute_top10_cpu_past_week
       type  = "line"
       width = 6
     }
@@ -125,7 +125,7 @@ dashboard "oci_compute_instance_dashboard" {
 
     chart {
       title = "Average max daily CPU - Last 30 days"
-      query = query.oci_compute_instances_by_cpu_utilization_category
+      query = query.compute_instances_by_cpu_utilization_category
       type  = "column"
       width = 6
     }
@@ -135,13 +135,13 @@ dashboard "oci_compute_instance_dashboard" {
 
 # Card Queries
 
-query "oci_compute_instance_count" {
+query "compute_instance_count" {
   sql = <<-EOQ
     select count(*) as "Instances" from oci_core_instance where lifecycle_state <> 'TERMINATED';
   EOQ
 }
 
-query "oci_compute_instance_total_cores" {
+query "compute_instance_total_cores" {
   sql = <<-EOQ
     select
       sum(shape_config_ocpus)  as "Total OCPUs"
@@ -152,7 +152,7 @@ query "oci_compute_instance_total_cores" {
   EOQ
 }
 
-query "oci_compute_instance_public_instance_count" {
+query "compute_instance_public_instance_count" {
   sql = <<-EOQ
     with public_ips as (
       select
@@ -172,7 +172,7 @@ query "oci_compute_instance_public_instance_count" {
   EOQ
 }
 
-query "oci_compute_instance_monitoring_disabled_count" {
+query "compute_instance_monitoring_disabled_count" {
   sql = <<-EOQ
     with instance_monitoring as (
       select
@@ -195,7 +195,7 @@ query "oci_compute_instance_monitoring_disabled_count" {
 
 # Assesments Queries
 
-query "oci_compute_instance_by_public_ip" {
+query "compute_instance_by_public_ip" {
   sql = <<-EOQ
     with instances as (
       select
@@ -219,7 +219,7 @@ query "oci_compute_instance_by_public_ip" {
   EOQ
 }
 
-query "oci_compute_instance_by_monitoring" {
+query "compute_instance_by_monitoring" {
   sql = <<-EOQ
     with instance_monitoring as (
       select
@@ -246,7 +246,7 @@ query "oci_compute_instance_by_monitoring" {
 
 # Analysis Queries
 
-query "oci_compute_instance_by_tenancy" {
+query "compute_instance_by_tenancy" {
   sql = <<-EOQ
     select
       t.title as "Tenancy",
@@ -263,7 +263,7 @@ query "oci_compute_instance_by_tenancy" {
   EOQ
 }
 
-query "oci_compute_instance_by_compartment" {
+query "compute_instance_by_compartment" {
   sql = <<-EOQ
     with compartments as (
       select
@@ -297,7 +297,7 @@ query "oci_compute_instance_by_compartment" {
   EOQ
 }
 
-query "oci_compute_instance_by_region" {
+query "compute_instance_by_region" {
   sql = <<-EOQ
     select
       region,
@@ -311,7 +311,7 @@ query "oci_compute_instance_by_region" {
   EOQ
 }
 
-query "oci_compute_instance_by_creation_month" {
+query "compute_instance_by_creation_month" {
   sql = <<-EOQ
     with instances as (
       select
@@ -359,7 +359,7 @@ query "oci_compute_instance_by_creation_month" {
   EOQ
 }
 
-query "oci_compute_instance_by_type" {
+query "compute_instance_by_type" {
   sql = <<-EOQ
     select
       shape as "Shape",
@@ -377,7 +377,7 @@ query "oci_compute_instance_by_type" {
 
 # Performance & Utilization Queries
 
-query "oci_compute_top10_cpu_past_week" {
+query "compute_top10_cpu_past_week" {
   sql = <<-EOQ
      with top_n as (
     select
@@ -407,7 +407,7 @@ query "oci_compute_top10_cpu_past_week" {
   EOQ
 }
 
-query "oci_compute_instances_by_cpu_utilization_category" {
+query "compute_instances_by_cpu_utilization_category" {
   sql = <<-EOQ
     with compute_buckets as (
       select

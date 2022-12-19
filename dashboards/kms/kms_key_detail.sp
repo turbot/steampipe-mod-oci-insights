@@ -1,4 +1,4 @@
-dashboard "oci_kms_key_detail" {
+dashboard "kms_key_detail" {
 
   title = "OCI KMS Key Detail"
 
@@ -8,7 +8,7 @@ dashboard "oci_kms_key_detail" {
 
   input "key_id" {
     title = "Select a key:"
-    query = query.oci_kms_key_input
+    query = query.kms_key_input
     width = 4
   }
 
@@ -17,14 +17,14 @@ dashboard "oci_kms_key_detail" {
     card {
       width = 2
 
-      query = query.oci_kms_key_disabled
+      query = query.kms_key_disabled
       args = {
         id = self.input.key_id.value
       }
     }
 
     card {
-      query = query.oci_kms_key_protection_mode
+      query = query.kms_key_protection_mode
       width = 2
 
       args = {
@@ -43,7 +43,7 @@ dashboard "oci_kms_key_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-        query = query.oci_kms_key_overview
+        query = query.kms_key_overview
         args = {
           id = self.input.key_id.value
         }
@@ -53,7 +53,7 @@ dashboard "oci_kms_key_detail" {
       table {
         title = "Tags"
         width = 6
-        query = query.oci_kms_key_tag
+        query = query.kms_key_tag
         args = {
           id = self.input.key_id.value
         }
@@ -66,7 +66,7 @@ dashboard "oci_kms_key_detail" {
 
       table {
         title = "Key Details"
-        query = query.oci_kms_key_detail
+        query = query.kms_key_detail
         args = {
           id = self.input.key_id.value
         }
@@ -76,7 +76,7 @@ dashboard "oci_kms_key_detail" {
   }
 }
 
-query "oci_kms_key_input" {
+query "kms_key_input" {
   sql = <<EOQ
     select
       k.name as label,
@@ -97,7 +97,7 @@ query "oci_kms_key_input" {
 EOQ
 }
 
-query "oci_kms_key_disabled" {
+query "kms_key_disabled" {
   sql = <<-EOQ
     select
       initcap(lifecycle_state) as value,
@@ -112,7 +112,7 @@ query "oci_kms_key_disabled" {
   param "id" {}
 }
 
-query "oci_kms_key_protection_mode" {
+query "kms_key_protection_mode" {
   sql = <<-EOQ
     select
       case when protection_mode = 'HSM' then 'HSM' else initcap(protection_mode) end as "Protection Mode"
@@ -125,7 +125,7 @@ query "oci_kms_key_protection_mode" {
   param "id" {}
 }
 
-query "oci_kms_key_overview" {
+query "kms_key_overview" {
   sql = <<-EOQ
     select
       name as "Name",
@@ -143,7 +143,7 @@ query "oci_kms_key_overview" {
   param "id" {}
 }
 
-query "oci_kms_key_tag" {
+query "kms_key_tag" {
   sql = <<-EOQ
     with jsondata as (
     select
@@ -164,7 +164,7 @@ query "oci_kms_key_tag" {
   param "id" {}
 }
 
-query "oci_kms_key_detail" {
+query "kms_key_detail" {
   sql = <<-EOQ
     select
       algorithm as "Algorithm",

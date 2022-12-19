@@ -1,4 +1,4 @@
-dashboard "oci_compute_instance_detail" {
+dashboard "compute_instance_detail" {
 
   title = "OCI Compute Instance Detail"
 
@@ -8,7 +8,7 @@ dashboard "oci_compute_instance_detail" {
 
   input "instance_id" {
     title = "Select an instance:"
-    query = query.oci_compute_instance_input
+    query = query.compute_instance_input
     width = 4
   }
 
@@ -16,7 +16,7 @@ dashboard "oci_compute_instance_detail" {
 
     card {
       width = 2
-      query = query.oci_compute_instance_state
+      query = query.compute_instance_state
       args = {
         id = self.input.instance_id.value
       }
@@ -24,7 +24,7 @@ dashboard "oci_compute_instance_detail" {
 
     card {
       width = 2
-      query = query.oci_compute_instance_shape
+      query = query.compute_instance_shape
       args = {
         id = self.input.instance_id.value
       }
@@ -32,7 +32,7 @@ dashboard "oci_compute_instance_detail" {
 
     card {
       width = 2
-      query = query.oci_compute_instance_core
+      query = query.compute_instance_core
       args = {
         id = self.input.instance_id.value
       }
@@ -40,7 +40,7 @@ dashboard "oci_compute_instance_detail" {
 
     card {
       width = 2
-      query = query.oci_compute_instance_public
+      query = query.compute_instance_public
       args = {
         id = self.input.instance_id.value
       }
@@ -48,7 +48,7 @@ dashboard "oci_compute_instance_detail" {
 
     card {
       width = 2
-      query = query.oci_compute_instance_monitoring
+      query = query.compute_instance_monitoring
       args = {
         id = self.input.instance_id.value
       }
@@ -64,7 +64,7 @@ dashboard "oci_compute_instance_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-        query = query.oci_compute_instance_overview
+        query = query.compute_instance_overview
         args = {
           id = self.input.instance_id.value
         }
@@ -73,7 +73,7 @@ dashboard "oci_compute_instance_detail" {
       table {
         title = "Tags"
         width = 6
-        query = query.oci_compute_instance_tag
+        query = query.compute_instance_tag
         args = {
           id = self.input.instance_id.value
         }
@@ -85,7 +85,7 @@ dashboard "oci_compute_instance_detail" {
 
       table {
         title = "Launch Options"
-        query = query.oci_compute_instance_launch_options
+        query = query.compute_instance_launch_options
         args = {
           id = self.input.instance_id.value
         }
@@ -97,7 +97,7 @@ dashboard "oci_compute_instance_detail" {
 
       table {
         title = "Virtual Network Interface Card (VNIC) Details"
-        query = query.oci_compute_instance_vnic
+        query = query.compute_instance_vnic
         args = {
           id = self.input.instance_id.value
         }
@@ -108,7 +108,7 @@ dashboard "oci_compute_instance_detail" {
 
 }
 
-query "oci_compute_instance_input" {
+query "compute_instance_input" {
   sql = <<EOQ
     select
       i.display_name as label,
@@ -129,7 +129,7 @@ query "oci_compute_instance_input" {
 EOQ
 }
 
-query "oci_compute_instance_state" {
+query "compute_instance_state" {
   sql = <<-EOQ
     select
       'State' as label,
@@ -144,7 +144,7 @@ query "oci_compute_instance_state" {
 
 }
 
-query "oci_compute_instance_shape" {
+query "compute_instance_shape" {
   sql = <<-EOQ
     select
       'Shape' as label,
@@ -159,7 +159,7 @@ query "oci_compute_instance_shape" {
 
 }
 
-query "oci_compute_instance_core" {
+query "compute_instance_core" {
   sql = <<-EOQ
     select
       shape_config_ocpus as "OCPUs"
@@ -172,7 +172,7 @@ query "oci_compute_instance_core" {
   param "id" {}
 }
 
-query "oci_compute_instance_public" {
+query "compute_instance_public" {
   sql = <<-EOQ
     select
       case when title = '' then 'Disabled' else 'Enabled' end as value,
@@ -187,7 +187,7 @@ query "oci_compute_instance_public" {
   param "id" {}
 }
 
-query "oci_compute_instance_monitoring" {
+query "compute_instance_monitoring" {
   sql = <<-EOQ
     with instance_monitoring as (
       select
@@ -213,7 +213,7 @@ query "oci_compute_instance_monitoring" {
   param "id" {}
 }
 
-query "oci_compute_instance_overview" {
+query "compute_instance_overview" {
   sql = <<-EOQ
     select
       display_name as "Name",
@@ -231,7 +231,7 @@ query "oci_compute_instance_overview" {
   param "id" {}
 }
 
-query "oci_compute_instance_tag" {
+query "compute_instance_tag" {
   sql = <<-EOQ
     with jsondata as (
     select
@@ -252,7 +252,7 @@ query "oci_compute_instance_tag" {
   param "id" {}
 }
 
-query "oci_compute_instance_launch_options" {
+query "compute_instance_launch_options" {
   sql = <<-EOQ
     select
       launch_options ->> 'bootVolumeType' as "Boot Volume Type",
@@ -267,7 +267,7 @@ query "oci_compute_instance_launch_options" {
   param "id" {}
 }
 
-query "oci_compute_instance_vnic" {
+query "compute_instance_vnic" {
   sql = <<-EOQ
     select
       vnic_name as "VNIC Name",

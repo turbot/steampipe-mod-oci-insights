@@ -1,4 +1,4 @@
-dashboard "oci_nosql_table_detail" {
+dashboard "nosql_table_detail" {
 
   title = "OCI NoSQL Table Detail"
 
@@ -8,7 +8,7 @@ dashboard "oci_nosql_table_detail" {
 
   input "table_id" {
     title = "Select a table:"
-    query = query.oci_nosql_table_input
+    query = query.nosql_table_input
     width = 4
   }
 
@@ -17,7 +17,7 @@ dashboard "oci_nosql_table_detail" {
     card {
       width = 2
 
-      query = query.oci_nosql_table_state
+      query = query.nosql_table_state
       args = {
         id = self.input.table_id.value
       }
@@ -26,7 +26,7 @@ dashboard "oci_nosql_table_detail" {
     card {
       width = 2
 
-      query = query.oci_nosql_table_auto_reclaimable
+      query = query.nosql_table_auto_reclaimable
       args = {
         id = self.input.table_id.value
       }
@@ -44,7 +44,7 @@ dashboard "oci_nosql_table_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-        query = query.oci_nosql_table_overview
+        query = query.nosql_table_overview
         args = {
           id = self.input.table_id.value
         }
@@ -54,7 +54,7 @@ dashboard "oci_nosql_table_detail" {
       table {
         title = "Tags"
         width = 6
-        query = query.oci_nosql_table_tag
+        query = query.nosql_table_tag
         args = {
           id = self.input.table_id.value
         }
@@ -67,7 +67,7 @@ dashboard "oci_nosql_table_detail" {
 
       table {
         title = "Table Limits"
-        query = query.oci_nosql_table_limits
+        query = query.nosql_table_limits
         args = {
           id = self.input.table_id.value
         }
@@ -75,7 +75,7 @@ dashboard "oci_nosql_table_detail" {
 
       table {
         title = "Column Details"
-        query = query.oci_nosql_table_column
+        query = query.nosql_table_column
         args = {
           id = self.input.table_id.value
         }
@@ -91,7 +91,7 @@ dashboard "oci_nosql_table_detail" {
         title = "Read Throttle Count Daily - Last 7 Days"
         type  = "line"
         width = 6
-        query = query.oci_nosql_table_read_throttle
+        query = query.nosql_table_read_throttle
         args = {
           id = self.input.table_id.value
         }
@@ -101,7 +101,7 @@ dashboard "oci_nosql_table_detail" {
         title = "Write Throttle Count Daily - Last 7 Days"
         type  = "line"
         width = 6
-        query = query.oci_nosql_table_write_throttle
+        query = query.nosql_table_write_throttle
         args = {
           id = self.input.table_id.value
         }
@@ -112,7 +112,7 @@ dashboard "oci_nosql_table_detail" {
   }
 }
 
-query "oci_nosql_table_input" {
+query "nosql_table_input" {
   sql = <<EOQ
     select
       n.name as label,
@@ -133,7 +133,7 @@ query "oci_nosql_table_input" {
 EOQ
 }
 
-query "oci_nosql_table_state" {
+query "nosql_table_state" {
   sql = <<-EOQ
     select
       initcap(lifecycle_state) as "State"
@@ -146,7 +146,7 @@ query "oci_nosql_table_state" {
   param "id" {}
 }
 
-query "oci_nosql_table_auto_reclaimable" {
+query "nosql_table_auto_reclaimable" {
   sql = <<-EOQ
     select
       case when is_auto_reclaimable then 'Enabled' else 'Disabled' end as "Auto Reclaimable"
@@ -159,7 +159,7 @@ query "oci_nosql_table_auto_reclaimable" {
   param "id" {}
 }
 
-query "oci_nosql_table_overview" {
+query "nosql_table_overview" {
   sql = <<-EOQ
     select
       name as "Name",
@@ -177,7 +177,7 @@ query "oci_nosql_table_overview" {
   param "id" {}
 }
 
-query "oci_nosql_table_tag" {
+query "nosql_table_tag" {
   sql = <<-EOQ
     with jsondata as (
     select
@@ -198,7 +198,7 @@ query "oci_nosql_table_tag" {
   param "id" {}
 }
 
-query "oci_nosql_table_limits" {
+query "nosql_table_limits" {
   sql = <<-EOQ
     select
       table_limits ->> 'maxReadUnits' as "Max Read Units",
@@ -213,7 +213,7 @@ query "oci_nosql_table_limits" {
   param "id" {}
 }
 
-query "oci_nosql_table_column" {
+query "nosql_table_column" {
   sql = <<-EOQ
     select
       c ->> 'name' as "Name",
@@ -230,7 +230,7 @@ query "oci_nosql_table_column" {
   param "id" {}
 }
 
-query "oci_nosql_table_read_throttle" {
+query "nosql_table_read_throttle" {
   sql = <<-EOQ
     select
       d.timestamp,
@@ -246,7 +246,7 @@ query "oci_nosql_table_read_throttle" {
   param "id" {}
 }
 
-query "oci_nosql_table_write_throttle" {
+query "nosql_table_write_throttle" {
   sql = <<-EOQ
    select
       d.timestamp,

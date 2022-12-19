@@ -1,4 +1,4 @@
-dashboard "oci_objectstorage_bucket_lifecycle_report" {
+dashboard "objectstorage_bucket_lifecycle_report" {
 
   title         = "OCI Object Storage Bucket Lifecycle Report"
   documentation = file("./dashboards/objectstorage/docs/objectstorage_bucket_report_lifecycle.md")
@@ -11,12 +11,12 @@ dashboard "oci_objectstorage_bucket_lifecycle_report" {
   container {
 
     card {
-      sql   = query.oci_objectstorage_bucket_count.sql
+      sql   = query.objectstorage_bucket_count.sql
       width = 2
     }
 
     card {
-      sql   = query.oci_objectstorage_bucket_versioning_disabled_count.sql
+      sql   = query.objectstorage_bucket_versioning_disabled_count.sql
       width = 2
     }
 
@@ -28,15 +28,15 @@ dashboard "oci_objectstorage_bucket_lifecycle_report" {
     }
 
     column "Name" {
-      href = "${dashboard.oci_objectstorage_bucket_detail.url_path}?input.bucket_id={{.OCID | @uri}}"
+      href = "${dashboard.objectstorage_bucket_detail.url_path}?input.bucket_id={{.OCID | @uri}}"
     }
 
-    sql = query.oci_objectstorage_bucket_lifecycle_report.sql
+    sql = query.objectstorage_bucket_lifecycle_report.sql
   }
 
 }
 
-query "oci_objectstorage_bucket_lifecycle_report" {
+query "objectstorage_bucket_lifecycle_report" {
   sql = <<-EOQ
       select
         b.name as "Name",

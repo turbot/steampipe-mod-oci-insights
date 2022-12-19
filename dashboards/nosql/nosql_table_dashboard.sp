@@ -1,4 +1,4 @@
-dashboard "oci_nosql_table_dashboard" {
+dashboard "nosql_table_dashboard" {
 
   title         = "OCI NoSQL Table Dashboard"
   documentation = file("./dashboards/nosql/docs/nosql_table_dashboard.md")
@@ -10,7 +10,7 @@ dashboard "oci_nosql_table_dashboard" {
   container {
 
     card {
-      sql   = query.oci_nosql_table_count.sql
+      sql   = query.nosql_table_count.sql
       width = 2
     }
 
@@ -21,28 +21,28 @@ dashboard "oci_nosql_table_dashboard" {
 
     chart {
       title = "Tables by Tenancy"
-      sql   = query.oci_nosql_table_by_tenancy.sql
+      sql   = query.nosql_table_by_tenancy.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Tables by Compartment"
-      sql   = query.oci_nosql_table_by_compartment.sql
+      sql   = query.nosql_table_by_compartment.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Tables by Region"
-      sql   = query.oci_nosql_table_by_region.sql
+      sql   = query.nosql_table_by_region.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Tables by Age"
-      sql   = query.oci_nosql_table_by_creation_month.sql
+      sql   = query.nosql_table_by_creation_month.sql
       type  = "column"
       width = 3
     }
@@ -54,14 +54,14 @@ dashboard "oci_nosql_table_dashboard" {
 
   #   chart {
   #     title = "Top 10 Storage - Last 7 days"
-  #     sql   = query.oci_nosql_table_top10_storage_past_week.sql
+  #     sql   = query.nosql_table_top10_storage_past_week.sql
   #     type  = "line"
   #     width = 6
   #   }
 
   #   chart {
   #     title = "Average Max Daily Storage - Last 30 days"
-  #     sql   = query.oci_nosql_table_by_storage_utilization_category.sql
+  #     sql   = query.nosql_table_by_storage_utilization_category.sql
   #     type  = "column"
   #     width = 6
   #   }
@@ -73,14 +73,14 @@ dashboard "oci_nosql_table_dashboard" {
 
     chart {
       title = "Top 10 Average Read Throttle Count - Last 7 days"
-      query   = query.oci_nosql_table_top_10_read_throttle_count_avg
+      query   = query.nosql_table_top_10_read_throttle_count_avg
       type  = "line"
       width = 6
     }
 
     chart {
       title = "Top 10 Average Write Throttle Count - Last 7 days"
-      query   = query.oci_nosql_table_top_10_write_throttle_count_avg
+      query   = query.nosql_table_top_10_write_throttle_count_avg
       type  = "column"
       width = 6
     }
@@ -91,7 +91,7 @@ dashboard "oci_nosql_table_dashboard" {
 
 # Card Queries
 
-query "oci_nosql_table_count" {
+query "nosql_table_count" {
   sql = <<-EOQ
   select
     count(*) as "NoSQL Tables"
@@ -104,7 +104,7 @@ query "oci_nosql_table_count" {
 
 # Analysis Queries
 
-query "oci_nosql_table_by_tenancy" {
+query "nosql_table_by_tenancy" {
   sql = <<-EOQ
     select
       c.title as "Tenancy",
@@ -121,7 +121,7 @@ query "oci_nosql_table_by_tenancy" {
   EOQ
 }
 
-query "oci_nosql_table_by_region" {
+query "nosql_table_by_region" {
   sql = <<-EOQ
     select
       region as "Region",
@@ -137,7 +137,7 @@ query "oci_nosql_table_by_region" {
   EOQ
 }
 
-query "oci_nosql_table_by_compartment" {
+query "nosql_table_by_compartment" {
   sql = <<-EOQ
     with compartments as (
       select
@@ -171,7 +171,7 @@ query "oci_nosql_table_by_compartment" {
   EOQ
 }
 
-query "oci_nosql_table_by_creation_month" {
+query "nosql_table_by_creation_month" {
   sql = <<-EOQ
     with nosql as (
       select
@@ -220,7 +220,7 @@ query "oci_nosql_table_by_creation_month" {
 
 # Performance Queries
 
-# query "oci_nosql_table_top10_storage_past_week" {
+# query "nosql_table_top10_storage_past_week" {
 #   sql = <<-EOQ
 #      with top_n as (
 #       select
@@ -250,7 +250,7 @@ query "oci_nosql_table_by_creation_month" {
 #   EOQ
 # }
 
-# query "oci_nosql_table_by_storage_utilization_category" {
+# query "nosql_table_by_storage_utilization_category" {
 #   sql = <<-EOQ
 #     with storage_buckets as (
 #       select
@@ -284,7 +284,7 @@ query "oci_nosql_table_by_creation_month" {
 #   EOQ
 # }
 
-query "oci_nosql_table_top_10_read_throttle_count_avg" {
+query "nosql_table_top_10_read_throttle_count_avg" {
   sql = <<-EOQ
     with top_n as (
       select
@@ -316,7 +316,7 @@ query "oci_nosql_table_top_10_read_throttle_count_avg" {
   EOQ
 }
 
-query "oci_nosql_table_top_10_write_throttle_count_avg" {
+query "nosql_table_top_10_write_throttle_count_avg" {
   sql = <<-EOQ
     with top_n as (
       select

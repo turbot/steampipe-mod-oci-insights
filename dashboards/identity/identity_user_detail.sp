@@ -1,4 +1,4 @@
-dashboard "oci_identity_user_detail" {
+dashboard "identity_user_detail" {
 
   title = "OCI Identity User Detail"
 
@@ -8,7 +8,7 @@ dashboard "oci_identity_user_detail" {
 
   input "user_id" {
     title = "Select a user:"
-    query = query.oci_identity_user_input
+    query = query.identity_user_input
     width = 4
   }
 
@@ -17,14 +17,14 @@ dashboard "oci_identity_user_detail" {
     card {
       width = 2
 
-      query = query.oci_identity_user_email
+      query = query.identity_user_email
       args = {
         id = self.input.user_id.value
       }
     }
 
     card {
-      query = query.oci_identity_user_mfa
+      query = query.identity_user_mfa
       width = 2
 
       args = {
@@ -43,7 +43,7 @@ dashboard "oci_identity_user_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-        query = query.oci_identity_user_overview
+        query = query.identity_user_overview
         args = {
           id = self.input.user_id.value
         }
@@ -53,7 +53,7 @@ dashboard "oci_identity_user_detail" {
       table {
         title = "Tags"
         width = 6
-        query = query.oci_identity_user_tag
+        query = query.identity_user_tag
         args = {
           id = self.input.user_id.value
         }
@@ -66,7 +66,7 @@ dashboard "oci_identity_user_detail" {
 
       table {
         title = "Access Keys"
-        query = query.oci_identity_user_access_key
+        query = query.identity_user_access_key
         args = {
           id = self.input.user_id.value
         }
@@ -74,7 +74,7 @@ dashboard "oci_identity_user_detail" {
 
       table {
         title = "Console Password"
-        query = query.oci_identity_user_password
+        query = query.identity_user_password
         args = {
           id = self.input.user_id.value
         }
@@ -82,7 +82,7 @@ dashboard "oci_identity_user_detail" {
 
       table {
         title = "Group Details"
-        query = query.oci_identity_user_group
+        query = query.identity_user_group
         args = {
           id = self.input.user_id.value
         }
@@ -92,7 +92,7 @@ dashboard "oci_identity_user_detail" {
   }
 }
 
-query "oci_identity_user_input" {
+query "identity_user_input" {
   sql = <<-EOQ
     select
       u.name as label,
@@ -108,7 +108,7 @@ query "oci_identity_user_input" {
 EOQ
 }
 
-query "oci_identity_user_email" {
+query "identity_user_email" {
   sql = <<-EOQ
     select
       case when email_verified then 'Verified' else 'Unverified' end as "Email Verification"
@@ -121,7 +121,7 @@ query "oci_identity_user_email" {
   param "id" {}
 }
 
-query "oci_identity_user_mfa" {
+query "identity_user_mfa" {
   sql = <<-EOQ
     select
       case when is_mfa_activated then 'Activated' else 'Inactive' end as value,
@@ -136,7 +136,7 @@ query "oci_identity_user_mfa" {
   param "id" {}
 }
 
-query "oci_identity_user_overview" {
+query "identity_user_overview" {
   sql = <<-EOQ
     select
       name as "Name",
@@ -154,7 +154,7 @@ query "oci_identity_user_overview" {
   param "id" {}
 }
 
-query "oci_identity_user_tag" {
+query "identity_user_tag" {
   sql = <<-EOQ
     with jsondata as (
     select
@@ -175,7 +175,7 @@ query "oci_identity_user_tag" {
   param "id" {}
 }
 
-query "oci_identity_user_access_key" {
+query "identity_user_access_key" {
   sql = <<-EOQ
     select
       fingerprint as "Fingerprint",
@@ -190,7 +190,7 @@ query "oci_identity_user_access_key" {
   param "id" {}
 }
 
-query "oci_identity_user_password" {
+query "identity_user_password" {
   sql = <<-EOQ
     select
       can_use_console_password as "Can Use Console Password",
@@ -204,7 +204,7 @@ query "oci_identity_user_password" {
   param "id" {}
 }
 
-query "oci_identity_user_group" {
+query "identity_user_group" {
   sql = <<-EOQ
     select
       i.name as "Group Name",

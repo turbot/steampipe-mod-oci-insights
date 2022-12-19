@@ -1,10 +1,10 @@
-dashboard "oci_filestorage_filesystem_detail" {
+dashboard "filestorage_filesystem_detail" {
 
   title = "OCI File Storage File System Detail"
 
   input "filesystem_id" {
     title = "Select a file system:"
-    query = query.oci_filestorage_filesystem_input
+    query = query.filestorage_filesystem_input
     width = 4
   }
 
@@ -17,14 +17,14 @@ dashboard "oci_filestorage_filesystem_detail" {
     card {
       width = 2
 
-      query = query.oci_filestorage_filesystem_cloned
+      query = query.filestorage_filesystem_cloned
       args = {
         id = self.input.filesystem_id.value
       }
     }
 
     card {
-      query = query.oci_filestorage_filesystem_snapshot
+      query = query.filestorage_filesystem_snapshot
       width = 2
 
       args = {
@@ -43,7 +43,7 @@ dashboard "oci_filestorage_filesystem_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-        query = query.oci_filestorage_filesystem_overview
+        query = query.filestorage_filesystem_overview
         args = {
           id = self.input.filesystem_id.value
         }
@@ -53,7 +53,7 @@ dashboard "oci_filestorage_filesystem_detail" {
       table {
         title = "Tags"
         width = 6
-        query = query.oci_filestorage_filesystem_tag
+        query = query.filestorage_filesystem_tag
         args = {
           id = self.input.filesystem_id.value
         }
@@ -66,7 +66,7 @@ dashboard "oci_filestorage_filesystem_detail" {
 
       table {
         title = "Snapshots Details"
-        query = query.oci_filestorage_filesystem_snapshot_detail
+        query = query.filestorage_filesystem_snapshot_detail
         args = {
           id = self.input.filesystem_id.value
         }
@@ -74,7 +74,7 @@ dashboard "oci_filestorage_filesystem_detail" {
 
       table {
         title = "Encryption Details"
-        query = query.oci_filestorage_filesystem_encryption
+        query = query.filestorage_filesystem_encryption
         args = {
           id = self.input.filesystem_id.value
         }
@@ -82,7 +82,7 @@ dashboard "oci_filestorage_filesystem_detail" {
 
       table {
         title = "Source Details"
-        query = query.oci_filestorage_filesystem_source
+        query = query.filestorage_filesystem_source
         args = {
           id = self.input.filesystem_id.value
         }
@@ -92,7 +92,7 @@ dashboard "oci_filestorage_filesystem_detail" {
   }
 }
 
-query "oci_filestorage_filesystem_input" {
+query "filestorage_filesystem_input" {
   sql = <<EOQ
     select
       s.display_name as label,
@@ -113,7 +113,7 @@ query "oci_filestorage_filesystem_input" {
 EOQ
 }
 
-query "oci_filestorage_filesystem_cloned" {
+query "filestorage_filesystem_cloned" {
   sql = <<-EOQ
     select
       case when is_clone_parent then 'Cloned' else 'Not cloned' end as "File System Type"
@@ -126,7 +126,7 @@ query "oci_filestorage_filesystem_cloned" {
   param "id" {}
 }
 
-query "oci_filestorage_filesystem_snapshot" {
+query "filestorage_filesystem_snapshot" {
   sql = <<-EOQ
     select
       count(*) as "Snapshots"
@@ -139,7 +139,7 @@ query "oci_filestorage_filesystem_snapshot" {
   param "id" {}
 }
 
-query "oci_filestorage_filesystem_overview" {
+query "filestorage_filesystem_overview" {
   sql = <<-EOQ
     select
       display_name as "Name",
@@ -156,7 +156,7 @@ query "oci_filestorage_filesystem_overview" {
   param "id" {}
 }
 
-query "oci_filestorage_filesystem_tag" {
+query "filestorage_filesystem_tag" {
   sql = <<-EOQ
     with jsondata as (
     select
@@ -177,7 +177,7 @@ query "oci_filestorage_filesystem_tag" {
   param "id" {}
 }
 
-query "oci_filestorage_filesystem_snapshot_detail" {
+query "filestorage_filesystem_snapshot_detail" {
   sql = <<-EOQ
     select
       name as "Snapshot Name",
@@ -193,7 +193,7 @@ query "oci_filestorage_filesystem_snapshot_detail" {
 }
 
 
-query "oci_filestorage_filesystem_encryption" {
+query "filestorage_filesystem_encryption" {
   sql = <<-EOQ
     select
       case when kms_key_id is not null and kms_key_id <> '' then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
@@ -207,7 +207,7 @@ query "oci_filestorage_filesystem_encryption" {
   param "id" {}
 }
 
-query "oci_filestorage_filesystem_source" {
+query "filestorage_filesystem_source" {
   sql = <<-EOQ
     select
       source_details ->> 'parentFileSystemId' as "Parent File System ID",

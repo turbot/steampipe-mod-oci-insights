@@ -1,4 +1,4 @@
-dashboard "oci_compute_instance_age_report" {
+dashboard "compute_instance_age_report" {
 
   title         = "OCI Compute Instance Age Report"
   documentation = file("./dashboards/compute/docs/compute_instance_report_age.md")
@@ -11,36 +11,36 @@ dashboard "oci_compute_instance_age_report" {
   container {
 
     card {
-      sql   = query.oci_compute_instance_count.sql
+      sql   = query.compute_instance_count.sql
       width = 2
     }
 
     card {
-      sql   = query.oci_compute_instance_24_hrs.sql
-      width = 2
-      type  = "info"
-    }
-
-    card {
-      sql   = query.oci_compute_instance_30_days.sql
+      sql   = query.compute_instance_24_hrs.sql
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_compute_instance_90_days.sql
+      sql   = query.compute_instance_30_days.sql
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_compute_instance_365_days.sql
+      sql   = query.compute_instance_90_days.sql
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_compute_instance_1_year.sql
+      sql   = query.compute_instance_365_days.sql
+      width = 2
+      type  = "info"
+    }
+
+    card {
+      sql   = query.compute_instance_1_year.sql
       width = 2
       type  = "info"
     }
@@ -53,15 +53,15 @@ dashboard "oci_compute_instance_age_report" {
     }
 
     column "Name" {
-      href = "${dashboard.oci_compute_instance_detail.url_path}?input.instance_id={{.OCID | @uri}}"
+      href = "${dashboard.compute_instance_detail.url_path}?input.instance_id={{.OCID | @uri}}"
     }
 
-    sql = query.oci_compute_instance_age_report.sql
+    sql = query.compute_instance_age_report.sql
   }
 
 }
 
-query "oci_compute_instance_24_hrs" {
+query "compute_instance_24_hrs" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -73,7 +73,7 @@ query "oci_compute_instance_24_hrs" {
   EOQ
 }
 
-query "oci_compute_instance_30_days" {
+query "compute_instance_30_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -85,7 +85,7 @@ query "oci_compute_instance_30_days" {
   EOQ
 }
 
-query "oci_compute_instance_90_days" {
+query "compute_instance_90_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -97,7 +97,7 @@ query "oci_compute_instance_90_days" {
   EOQ
 }
 
-query "oci_compute_instance_365_days" {
+query "compute_instance_365_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -109,7 +109,7 @@ query "oci_compute_instance_365_days" {
   EOQ
 }
 
-query "oci_compute_instance_1_year" {
+query "compute_instance_1_year" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -121,7 +121,7 @@ query "oci_compute_instance_1_year" {
   EOQ
 }
 
-query "oci_compute_instance_age_report" {
+query "compute_instance_age_report" {
   sql = <<-EOQ
     select
       i.display_name as "Name",

@@ -1,4 +1,4 @@
-dashboard "oci_block_storage_boot_volume_encryption_report" {
+dashboard "block_storage_boot_volume_encryption_report" {
 
   title         = "OCI Block Storage Boot Volume Encryption Report"
   documentation = file("./dashboards/blockstorage/docs/blockstorage_boot_volume_report_encryption.md")
@@ -11,17 +11,17 @@ dashboard "oci_block_storage_boot_volume_encryption_report" {
   container {
 
     card {
-      sql   = query.oci_block_storage_boot_volume_count.sql
+      sql   = query.block_storage_boot_volume_count.sql
       width = 2
     }
 
     card {
-      sql   = query.oci_block_storage_boot_volume_customer_managed_encryption_count.sql
+      sql   = query.block_storage_boot_volume_customer_managed_encryption_count.sql
       width = 2
     }
 
     card {
-      sql   = query.oci_block_storage_boot_volume_default_encrypted_volumes_count.sql
+      sql   = query.block_storage_boot_volume_default_encrypted_volumes_count.sql
       width = 2
     }
   }
@@ -32,15 +32,15 @@ dashboard "oci_block_storage_boot_volume_encryption_report" {
     }
 
     column "Name" {
-      href = "${dashboard.oci_block_storage_boot_volume_detail.url_path}?input.volume_id={{.OCID | @uri}}"
+      href = "${dashboard.block_storage_boot_volume_detail.url_path}?input.volume_id={{.OCID | @uri}}"
     }
 
-    sql = query.oci_block_storage_boot_volume_encryption_report.sql
+    sql = query.block_storage_boot_volume_encryption_report.sql
   }
 
 }
 
-query "oci_block_storage_boot_volume_customer_managed_encryption_count" {
+query "block_storage_boot_volume_customer_managed_encryption_count" {
   sql = <<-EOQ
     select
       count(*) as "Customer-Managed Encryption"
@@ -51,7 +51,7 @@ query "oci_block_storage_boot_volume_customer_managed_encryption_count" {
   EOQ
 }
 
-query "oci_block_storage_boot_volume_encryption_report" {
+query "block_storage_boot_volume_encryption_report" {
   sql = <<-EOQ
       select
         v.display_name as "Name",

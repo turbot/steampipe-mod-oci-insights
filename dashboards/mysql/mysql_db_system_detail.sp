@@ -1,4 +1,4 @@
-dashboard "oci_mysql_db_system_detail" {
+dashboard "mysql_db_system_detail" {
 
   title = "OCI MySQL DB System Detail"
 
@@ -8,7 +8,7 @@ dashboard "oci_mysql_db_system_detail" {
 
   input "db_system_id" {
     title = "Select a DB system:"
-    query = query.oci_mysql_db_system_input
+    query = query.mysql_db_system_input
     width = 4
   }
 
@@ -17,7 +17,7 @@ dashboard "oci_mysql_db_system_detail" {
     card {
       width = 2
 
-      query = query.oci_mysql_db_system_mysql_version
+      query = query.mysql_db_system_mysql_version
       args = {
         id = self.input.db_system_id.value
       }
@@ -26,7 +26,7 @@ dashboard "oci_mysql_db_system_detail" {
     card {
       width = 2
 
-      query = query.oci_mysql_db_system_backup
+      query = query.mysql_db_system_backup
       args = {
         id = self.input.db_system_id.value
       }
@@ -43,7 +43,7 @@ dashboard "oci_mysql_db_system_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-        query = query.oci_mysql_db_system_overview
+        query = query.mysql_db_system_overview
         args = {
           id = self.input.db_system_id.value
         }
@@ -53,7 +53,7 @@ dashboard "oci_mysql_db_system_detail" {
       table {
         title = "Tags"
         width = 6
-        query = query.oci_mysql_db_system_tag
+        query = query.mysql_db_system_tag
         args = {
           id = self.input.db_system_id.value
         }
@@ -66,7 +66,7 @@ dashboard "oci_mysql_db_system_detail" {
 
       table {
         title = "Backup Policy"
-        query = query.oci_mysql_db_system_backup_policy
+        query = query.mysql_db_system_backup_policy
         args = {
           id = self.input.db_system_id.value
         }
@@ -77,7 +77,7 @@ dashboard "oci_mysql_db_system_detail" {
 
       table {
         title = "Endpoint Details"
-        query = query.oci_mysql_db_system_endpoint
+        query = query.mysql_db_system_endpoint
         args = {
           id = self.input.db_system_id.value
         }
@@ -90,7 +90,7 @@ dashboard "oci_mysql_db_system_detail" {
         title = "Metric Connections - Last 7 Days"
         type  = "line"
         width = 6
-        query = query.oci_mysql_db_system_connection
+        query = query.mysql_db_system_connection
         args = {
           id = self.input.db_system_id.value
         }
@@ -100,7 +100,7 @@ dashboard "oci_mysql_db_system_detail" {
   }
 }
 
-query "oci_mysql_db_system_input" {
+query "mysql_db_system_input" {
   sql = <<EOQ
     select
       s.display_name as label,
@@ -121,7 +121,7 @@ query "oci_mysql_db_system_input" {
 EOQ
 }
 
-query "oci_mysql_db_system_mysql_version" {
+query "mysql_db_system_mysql_version" {
   sql = <<-EOQ
     select
       mysql_version as "MySQL Version"
@@ -134,7 +134,7 @@ query "oci_mysql_db_system_mysql_version" {
   param "id" {}
 }
 
-query "oci_mysql_db_system_backup" {
+query "mysql_db_system_backup" {
   sql = <<-EOQ
     select
       'Backup Status' as label,
@@ -150,7 +150,7 @@ query "oci_mysql_db_system_backup" {
   param "id" {}
 }
 
-query "oci_mysql_db_system_overview" {
+query "mysql_db_system_overview" {
   sql = <<-EOQ
     select
       display_name as "Name",
@@ -166,7 +166,7 @@ query "oci_mysql_db_system_overview" {
   param "id" {}
 }
 
-query "oci_mysql_db_system_tag" {
+query "mysql_db_system_tag" {
   sql = <<-EOQ
     with jsondata as (
       select
@@ -187,7 +187,7 @@ query "oci_mysql_db_system_tag" {
   param "id" {}
 }
 
-query "oci_mysql_db_system_backup_policy" {
+query "mysql_db_system_backup_policy" {
   sql = <<-EOQ
     select
       backup_policy ->> 'isEnabled' as "Automatic Backup Enabled",
@@ -201,7 +201,7 @@ query "oci_mysql_db_system_backup_policy" {
   param "id" {}
 }
 
-query "oci_mysql_db_system_endpoint" {
+query "mysql_db_system_endpoint" {
   sql = <<-EOQ
     select
       e ->> 'hostname' as "Hostname",
@@ -220,7 +220,7 @@ query "oci_mysql_db_system_endpoint" {
   param "id" {}
 }
 
-query "oci_mysql_db_system_connection" {
+query "mysql_db_system_connection" {
   sql = <<-EOQ
     select
       timestamp,
