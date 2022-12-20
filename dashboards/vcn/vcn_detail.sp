@@ -19,45 +19,35 @@ dashboard "vcn_detail" {
       width = 2
 
       query = query.vcn_ipv4_count
-      args = {
-        id = self.input.vcn_id.value
-      }
+      args = [self.input.vcn_id.value]
     }
 
     card {
       width = 2
 
       query = query.vcn_ipv6_count
-      args = {
-        id = self.input.vcn_id.value
-      }
+      args = [self.input.vcn_id.value]
     }
 
     card {
       width = 2
 
       query = query.vcn_attached_subnet_count
-      args = {
-        id = self.input.vcn_id.value
-      }
+      args = [self.input.vcn_id.value]
     }
 
     card {
       width = 2
 
       query = query.vcn_attached_nsg_count
-      args = {
-        id = self.input.vcn_id.value
-      }
+      args = [self.input.vcn_id.value]
     }
 
     card {
       width = 2
 
       query = query.vcn_attached_sl_count
-      args = {
-        id = self.input.vcn_id.value
-      }
+      args = [self.input.vcn_id.value]
     }
 
   }
@@ -317,9 +307,7 @@ dashboard "vcn_detail" {
         type  = "line"
         width = 6
         query = query.vcn_overview
-        args = {
-          id = self.input.vcn_id.value
-        }
+        args = [self.input.vcn_id.value]
 
       }
 
@@ -328,9 +316,7 @@ dashboard "vcn_detail" {
         width = 6
 
         query = query.vcn_tag
-        args = {
-          id = self.input.vcn_id.value
-        }
+        args = [self.input.vcn_id.value]
       }
 
     }
@@ -341,17 +327,13 @@ dashboard "vcn_detail" {
       table {
         title = "CIDR Blocks"
         query = query.vcn_cidr_blocks
-        args = {
-          id = self.input.vcn_id.value
-        }
+        args = [self.input.vcn_id.value]
       }
 
       table {
         title = "DHCP Options"
         query = query.vcn_dhcp_options
-        args = {
-          id = self.input.vcn_id.value
-        }
+        args = [self.input.vcn_id.value]
       }
 
     }
@@ -361,14 +343,12 @@ dashboard "vcn_detail" {
 
       table {
         query = query.vcn_subnet
-        args = {
-          id = self.input.vcn_id.value
-        }
+        args = [self.input.vcn_id.value]
         column "OCID" {
           display = "none"
         }
         column "Name" {
-          href = "${dashboard.oci_vcn_subnet_detail.url_path}?input.subnet_id={{.OCID | @uri}}"
+          href = "${dashboard.vcn_subnet_detail.url_path}?input.subnet_id={{.OCID | @uri}}"
         }
       }
 
@@ -379,9 +359,7 @@ dashboard "vcn_detail" {
 
       flow {
         query = query.vcn_gateway_sankey
-        args = {
-          id = self.input.vcn_id.value
-        }
+        args = [self.input.vcn_id.value]
       }
 
     }
@@ -391,9 +369,7 @@ dashboard "vcn_detail" {
       table {
         title = "Route Rules"
         query = query.vcn_route_table
-        args = {
-          id = self.input.vcn_id.value
-        }
+        args = [self.input.vcn_id.value]
       }
 
     }
@@ -404,9 +380,7 @@ dashboard "vcn_detail" {
         title = "Security List Details"
         width = 6
         query = query.vcn_security_list
-        args = {
-          id = self.input.vcn_id.value
-        }
+        args = [self.input.vcn_id.value]
         column "OCID" {
           display = "none"
         }
@@ -419,9 +393,7 @@ dashboard "vcn_detail" {
         title = "Gateways"
         width = 6
         query = query.vcn_gateways_table
-        args = {
-          id = self.input.vcn_id.value
-        }
+        args = [self.input.vcn_id.value]
       }
 
     }
@@ -431,9 +403,7 @@ dashboard "vcn_detail" {
 
       flow {
         query = query.vcn_nsl_ingress_rule_sankey
-        args = {
-          id = self.input.vcn_id.value
-        }
+        args = [self.input.vcn_id.value]
       }
 
     }
@@ -443,9 +413,7 @@ dashboard "vcn_detail" {
 
       flow {
         query = query.vcn_nsl_egress_rule_sankey
-        args = {
-          id = self.input.vcn_id.value
-        }
+        args = [self.input.vcn_id.value]
       }
 
     }
@@ -456,9 +424,7 @@ dashboard "vcn_detail" {
         title = "Network Security Group Details"
         width = 6
         query = query.vcn_security_group
-        args = {
-          id = self.input.vcn_id.value
-        }
+        args = [self.input.vcn_id.value]
         column "OCID" {
           display = "none"
         }
