@@ -62,6 +62,26 @@ dashboard "vcn_detail" {
 
   }
 
+  with "vcn_subnets" {
+    query = query.vcn_vcn_subnets
+    args  = [self.input.vcn_id.value]
+  }
+
+  with "vcn_internet_gateways" {
+    query = query.vcn_vcn_internet_gateways
+    args  = [self.input.vcn_id.value]
+  }
+
+  with "vcn_network_security_groups" {
+    query = query.vcn_network_security_groups
+    args  = [self.input.vcn_id.value]
+  }
+
+  with "vcn_load_balancers" {
+    query = query.vcn_vcn_load_balancers
+    args  = [self.input.vcn_id.value]
+  }
+
   container {
 
     graph {
@@ -76,6 +96,34 @@ dashboard "vcn_detail" {
         }
       }
 
+      node {
+        base = node.vcn_subnet
+        args = {
+          vcn_subnet_ids = with.vcn_subnets.rows[*].subnet_id
+        }
+      }
+
+      node {
+        base = node.vcn_internet_gateway
+        args = {
+          vcn_internet_gateway_ids = with.vcn_internet_gateways.rows[*].internet_gateway_id
+        }
+      }
+
+      node {
+        base = node.vcn_network_security_group
+        args = {
+          vcn_network_security_group_ids = with.vcn_network_security_groups.rows[*].network_security_group_id
+        }
+      }
+
+      node {
+        base = node.vcn_load_balancer
+        args = {
+          vcn_load_balancer_ids = with.vcn_load_balancers.rows[*].load_balancer_id
+        }
+      }
+
       # edge {
       #   base = edge.s3_bucket_to_sqs_queue
       #   args = {
@@ -84,7 +132,6 @@ dashboard "vcn_detail" {
       # }
     }
   }
-
 
   container {
 
@@ -243,7 +290,7 @@ dashboard "vcn_detail" {
           display = "none"
         }
         column "Name" {
-          href = "${dashboard.oci_vcn_network_security_group_detail.url_path}?input.security_group_id={{.OCID | @uri}}"
+          href = "${dashboard.vcn_network_security_group_detail.url_path}?input.security_group_id={{.OCID | @uri}}"
         }
       }
     }
@@ -910,4 +957,56 @@ query "vcn_nsl_egress_rule_sankey" {
   param "id" {}
 }
 
+query "vcn_vcn_subnets" {
+  sql   = <<-EOQ
+    select
+      id as subnet_id
+    from
+      oci_core_subnet
+    where
+      vcn_id = $1;
+  EOQ
+}
+
+query "vcn_vcn_internet_gateways" {
+  sql   = <<-EOQ
+    select
+      id as internet_gateway_id
+    from
+      oci_core_internet_gateway
+    where
+      vcn_id = $1;
+  EOQ
+}
+
+query "vcn_network_security_groups" {
+  sql   = <<-EOQ
+    select
+      id as network_security_group_id
+    from
+      oci_core_network_security_group
+    where
+      vcn_id = $1;
+  EOQ
+}
+
+query "vcn_vcn_load_balancers" {
+  sql   = <<-EOQ
+    with subnet_list as (
+      select
+        id as subnet_id
+      from
+        oci_core_subnet
+      where
+        vcn_id = $1
+      )
+      select
+        id as load_balancer_id
+      from
+        oci_core_load_balancer,
+        jsonb_array_elements_text(subnet_ids) as s
+      where
+        s in (select subnet_id from subnet_list);
+  EOQ
+}
 
