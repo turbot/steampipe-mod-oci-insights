@@ -1111,6 +1111,7 @@ query "vcn_compute_instances" {
     where
       v.instance_id = i.id
       and v.subnet_id = s.id
+      and i.lifecycle_state = 'RUNNING'
       and s.vcn_id = $1;
   EOQ
 }
