@@ -10,6 +10,12 @@ category "vcn_dhcp_option" {
   color = local.networking_color
 }
 
+category "vcn_flow_log" {
+  title = "VCN Flow Log"
+  icon  = "format-text-overflow"
+  color = local.networking_color
+}
+
 category "vcn_internet_gateway" {
   title = "VCN Internet Gateway"
   icon  = "gate"
@@ -35,7 +41,7 @@ category "vcn_nat_gateway" {
 }
 
 category "vcn_network_load_balancer" {
-  title = "Network Load Balancer"
+  title = "VCN Network Load Balancer"
   icon  = "mediation"
   color = local.networking_color
 }

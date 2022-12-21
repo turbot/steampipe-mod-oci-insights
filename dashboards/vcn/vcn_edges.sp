@@ -34,6 +34,79 @@ edge "vcn_subnet_to_compute_instance" {
   param "compute_instance_ids" {}
 }
 
+edge "vcn_subnet_to_vcn_dhcp_option" {
+  title = "dhcp option"
+
+  sql = <<-EOQ
+    select
+      id as from_id,
+      dhcp_options_id as to_id
+    from
+      oci_core_subnet
+    where
+      id = any($1);
+  EOQ
+
+  param "vcn_subnet_ids" {}
+}
+
+edge "vcn_subnet_to_vcn_flow_log" {
+  title = "flow log"
+
+  sql = <<-EOQ
+    select
+      configuration -> 'source' ->> 'resource' as from_id,
+      id as to_id
+    from
+      oci_logging_log
+    where
+      id = any($1);
+  EOQ
+
+  param "vcn_flow_log_ids" {}
+}
+
+edge "vcn_subnet_to_vcn_route_table" {
+  title = "route table"
+
+  sql = <<-EOQ
+    select
+      id as from_id,
+      route_table_id as to_id
+    from
+      oci_core_subnet as s
+    where
+     id = any($1);
+  EOQ
+
+  param "vcn_subnet_ids" {}
+}
+
+edge "vcn_subnet_to_vcn_security_list" {
+  title = "security list"
+
+  sql = <<-EOQ
+    with subnet_security_lists as (
+      select
+        jsonb_array_elements_text(security_list_ids) as s_id,
+        id as subnet_id
+      from
+        oci_core_subnet
+      )
+      select
+        ssl.subnet_id as from_id,
+        sl.id as to_id
+      from
+        oci_core_security_list as sl,
+        subnet_security_lists as ssl
+      where
+        sl.id = ssl.s_id
+        and sl.id = any($1);
+  EOQ
+
+  param "vcn_security_list_ids" {}
+}
+
 edge "vcn_subnet_to_vcn_load_balancer" {
   title = "load balancer"
 
@@ -44,7 +117,7 @@ edge "vcn_subnet_to_vcn_load_balancer" {
       from
         oci_core_subnet
       where
-        vcn_id = any($1)
+        id = any($1)
       )
       select
         subnet_ids as from_id,
@@ -56,7 +129,7 @@ edge "vcn_subnet_to_vcn_load_balancer" {
         s in (select subnet_id from subnet_list);
   EOQ
 
-  param "vcn_vcn_ids" {}
+  param "vcn_subnet_ids" {}
 }
 
 edge "vcn_subnet_to_vcn_network_load_balancer" {

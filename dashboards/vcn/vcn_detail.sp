@@ -53,12 +53,17 @@ dashboard "vcn_detail" {
   }
 
   with "compute_instances" {
-    query = query.compute_compute_instances
+    query = query.vcn_compute_instances
     args  = [self.input.vcn_id.value]
   }
 
   with "vcn_dhcp_options" {
     query = query.vcn_vcn_dhcp_options
+    args  = [self.input.vcn_id.value]
+  }
+
+  with "vcn_flow_logs" {
+    query = query.vcn_vcn_flow_logs
     args  = [self.input.vcn_id.value]
   }
 
@@ -130,6 +135,13 @@ dashboard "vcn_detail" {
         base = node.vcn_dhcp_option
         args = {
           vcn_dhcp_option_ids = with.vcn_dhcp_options.rows[*].dhcp_option_id
+        }
+      }
+
+      node {
+        base = node.vcn_flow_log
+        args = {
+          vcn_flow_log_ids = with.vcn_flow_logs.rows[*].flow_log_id
         }
       }
 
@@ -227,7 +239,7 @@ dashboard "vcn_detail" {
       edge {
         base = edge.vcn_subnet_to_vcn_load_balancer
         args = {
-          vcn_vcn_ids = [self.input.vcn_id.value]
+          vcn_subnet_ids = with.vcn_subnets.rows[*].subnet_id
         }
       }
 
@@ -242,6 +254,13 @@ dashboard "vcn_detail" {
         base = edge.vcn_vcn_to_vcn_dhcp_option
         args = {
           vcn_dhcp_option_ids = with.vcn_dhcp_options.rows[*].dhcp_option_id
+        }
+      }
+
+      edge {
+        base = edge.vcn_subnet_to_vcn_flow_log
+        args = {
+          vcn_flow_log_ids = with.vcn_flow_logs.rows[*].flow_log_id
         }
       }
 
@@ -475,8 +494,6 @@ query "vcn_ipv4_count" {
     from
       cidrs
   EOQ
-
-  param "id" {}
 }
 
 query "vcn_ipv6_count" {
@@ -489,8 +506,6 @@ query "vcn_ipv6_count" {
       where
         id = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "vcn_attached_subnet_count" {
@@ -503,8 +518,6 @@ query "vcn_attached_subnet_count" {
     where
       vcn_id = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "vcn_attached_nsg_count" {
@@ -517,8 +530,6 @@ query "vcn_attached_nsg_count" {
     where
       vcn_id = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "vcn_attached_sl_count" {
@@ -531,8 +542,6 @@ query "vcn_attached_sl_count" {
     where
       vcn_id = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "vcn_overview" {
@@ -548,8 +557,6 @@ query "vcn_overview" {
     where
       id = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "vcn_tag" {
@@ -571,8 +578,6 @@ query "vcn_tag" {
     order by
       key;
   EOQ
-
-  param "id" {}
 }
 
 query "vcn_cidr_blocks" {
@@ -595,8 +600,6 @@ query "vcn_cidr_blocks" {
     where
       id = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "vcn_dhcp_options" {
@@ -616,8 +619,6 @@ query "vcn_dhcp_options" {
     order by
       display_name;
   EOQ
-
-  param "id" {}
 }
 
 query "vcn_subnet" {
@@ -637,8 +638,6 @@ query "vcn_subnet" {
     order by
       display_name;
   EOQ
-
-  param "id" {}
 }
 
 query "vcn_gateway_sankey" {
@@ -702,8 +701,6 @@ query "vcn_gateway_sankey" {
         from
           gateway
   EOQ
-
-  param "id" {}
 }
 
 query "vcn_route_table" {
@@ -723,8 +720,6 @@ query "vcn_route_table" {
     order by
       display_name;
   EOQ
-
-  param "id" {}
 }
 
 query "vcn_gateways_table" {
@@ -765,8 +760,6 @@ query "vcn_gateways_table" {
     where
       vcn_id = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "vcn_security_list" {
@@ -783,8 +776,6 @@ query "vcn_security_list" {
     order by
       display_name;
   EOQ
-
-  param "id" {}
 }
 
 query "vcn_security_group" {
@@ -801,8 +792,6 @@ query "vcn_security_group" {
     order by
       display_name;
   EOQ
-
-  param "id" {}
 }
 
 query "vcn_nsl_ingress_rule_sankey" {
@@ -943,8 +932,6 @@ query "vcn_nsl_ingress_rule_sankey" {
       subnet_name as to_id
     from rule
   EOQ
-
-  param "id" {}
 }
 
 query "vcn_nsl_egress_rule_sankey" {
@@ -1092,11 +1079,9 @@ query "vcn_nsl_egress_rule_sankey" {
       null as depth
     from rule
   EOQ
-
-  param "id" {}
 }
 
-query "compute_compute_instances" {
+query "vcn_compute_instances" {
   sql = <<-EOQ
     select
       i.id as compute_instance_id
@@ -1239,6 +1224,20 @@ query "vcn_network_load_balancers" {
       oci_core_subnet as s
     where
       s.id = n.subnet_id
+      and s.vcn_id = $1;
+  EOQ
+}
+
+query "vcn_vcn_flow_logs" {
+  sql = <<-EOQ
+    select
+      l.id as flow_log_id
+    from
+      oci_logging_log as l,
+      oci_core_subnet as s
+    where
+      configuration -> 'source' ->> 'service' = 'flowlogs'
+      and configuration -> 'source' ->> 'resource' = s.id
       and s.vcn_id = $1;
   EOQ
 }

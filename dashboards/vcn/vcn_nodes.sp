@@ -22,6 +22,32 @@ node "vcn_dhcp_option" {
   param "vcn_dhcp_option_ids" {}
 }
 
+node "vcn_flow_log" {
+  category = category.vcn_flow_log
+
+  sql = <<-EOQ
+    select
+      id as id,
+      title as title,
+      jsonb_build_object(
+        'ID', id,
+        'Display Name', name,
+        'Retention Duration', retention_duration,
+        'Time Created', time_created,
+        'Lifecycle State', lifecycle_state,
+        'Region', region,
+        'compartment ID', compartment_id
+      ) as properties
+    from
+      oci_logging_log
+    where
+      configuration -> 'source' ->> 'service' = 'flowlogs'
+      and id = any($1);
+  EOQ
+
+  param "vcn_flow_log_ids" {}
+}
+
 node "vcn_internet_gateway" {
   category = category.vcn_internet_gateway
 
