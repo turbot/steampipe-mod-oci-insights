@@ -84,3 +84,9 @@ category "vcn_vcn" {
   icon  = "cloud"
   color = local.networking_color
 }
+
+category "vcn_vnic" {
+  title = "VCN VNIC"
+  icon  = "memory"
+  color = local.networking_color
+}

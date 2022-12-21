@@ -52,6 +52,11 @@ dashboard "vcn_detail" {
 
   }
 
+  with "identity_availability_domains" {
+    query = query.vcn_identity_availability_domains
+    args  = [self.input.vcn_id.value]
+  }
+
   with "compute_instances" {
     query = query.vcn_compute_instances
     args  = [self.input.vcn_id.value]
@@ -123,6 +128,13 @@ dashboard "vcn_detail" {
       title     = "Relationships"
       type      = "graph"
       direction = "TD"
+
+      node {
+        base = node.identity_availability_domain
+        args = {
+          availability_domain_ids = with.identity_availability_domains.rows[*].availability_domain_id
+        }
+      }
 
       node {
         base = node.compute_instance
@@ -265,6 +277,13 @@ dashboard "vcn_detail" {
       }
 
       edge {
+        base = edge.vcn_vcn_to_identity_availability_domain
+        args = {
+          availability_domain_ids = with.identity_availability_domains.rows[*].availability_domain_id
+        }
+      }
+
+      edge {
         base = edge.vcn_vcn_to_vcn_nat_gateway
         args = {
           vcn_nat_gateway_ids = with.vcn_nat_gateways.rows[*].nat_gateway_id
@@ -279,7 +298,7 @@ dashboard "vcn_detail" {
       }
 
       edge {
-        base = edge.vcn_vcn_to_vcn_route_table
+        base = edge.vcn_subnet_to_vcn_route_table
         args = {
           vcn_route_table_ids = with.vcn_route_tables.rows[*].route_table_id
         }
@@ -307,9 +326,9 @@ dashboard "vcn_detail" {
       }
 
       edge {
-        base = edge.vcn_vcn_to_vcn_subnet
+        base = edge.identity_availability_domain_to_vcn_subnet
         args = {
-          vcn_subnet_ids = with.vcn_subnets.rows[*].subnet_id
+          availability_domain_ids = with.identity_availability_domains.rows[*].availability_domain_id
         }
       }
     }
@@ -1238,6 +1257,19 @@ query "vcn_vcn_flow_logs" {
     where
       configuration -> 'source' ->> 'service' = 'flowlogs'
       and configuration -> 'source' ->> 'resource' = s.id
+      and s.vcn_id = $1;
+  EOQ
+}
+
+query "vcn_identity_availability_domains" {
+  sql = <<-EOQ
+    select
+      a.id as availability_domain_id
+    from
+      oci_identity_availability_domain as a,
+      oci_core_subnet as s
+    where
+      s.availability_domain = a.name
       and s.vcn_id = $1;
   EOQ
 }

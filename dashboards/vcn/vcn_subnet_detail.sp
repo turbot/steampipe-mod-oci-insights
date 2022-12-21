@@ -171,7 +171,7 @@ dashboard "vcn_subnet_detail" {
       edge {
         base = edge.vcn_subnet_to_vcn_route_table
         args = {
-          vcn_subnet_ids = [self.input.subnet_id.value]
+          vcn_route_table_ids = with.vcn_route_tables.rows[*].route_table_id
         }
       }
 

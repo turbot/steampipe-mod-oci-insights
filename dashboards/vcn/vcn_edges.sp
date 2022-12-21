@@ -14,6 +14,106 @@ edge "vcn_internet_gateway_to_vcn_vcn" {
   param "vcn_internet_gateway_ids" {}
 }
 
+edge "vcn_network_security_group_to_file_storage_mount_target" {
+  title = "mount target"
+
+  sql = <<-EOQ
+    with network_security_groups as (
+      select
+        jsonb_array_elements_text(nsg_ids) as n_id,
+        id
+      from
+        oci_file_storage_mount_target
+    )
+    select
+      n.id as from_id,
+      s.id as to_id
+    from
+      oci_core_network_security_group as n,
+      network_security_groups as s
+    where
+      n.id = n_id
+      and s.id = any($1)
+  EOQ
+
+  param "file_storage_mount_target_ids" {}
+}
+
+edge "vcn_network_security_group_to_vcn_load_balancer" {
+  title = "load balancer"
+
+  sql = <<-EOQ
+    with nsg_list as (
+      select
+        id as nsg_id
+      from
+        oci_core_network_security_group
+      where
+        id = any($1)
+      )
+      select
+        s as from_id,
+        id as to_id
+      from
+        oci_core_load_balancer,
+        jsonb_array_elements_text(network_security_group_ids) as s
+      where
+        s in (select nsg_id from nsg_list);
+  EOQ
+
+  param "vcn_network_security_group_ids" {}
+}
+
+edge "vcn_network_security_group_to_vcn_network_load_balancer" {
+  title = "network load balancer"
+
+  sql = <<-EOQ
+    with nsg_list as (
+      select
+        id as nsg_id
+      from
+        oci_core_network_security_group
+      where
+        id = any($1)
+      )
+      select
+        s as from_id,
+        id as to_id
+      from
+        oci_core_network_load_balancer,
+        jsonb_array_elements_text(network_security_group_ids) as s
+      where
+        s in (select nsg_id from nsg_list);
+  EOQ
+
+  param "vcn_network_security_group_ids" {}
+}
+
+edge "vcn_network_security_group_to_vcn_vnic" {
+  title = "vnic"
+
+  sql = <<-EOQ
+    with network_security_groups as (
+      select
+        jsonb_array_elements_text(nsg_ids) as n_id,
+        vnic_id
+      from
+        oci_core_vnic_attachment
+    )
+    select
+      n_id as from_id,
+      vnic_id as to_id
+    from
+      oci_core_network_security_group,
+      network_security_groups
+    where
+      id = n_id
+      and vnic_id = any($1)
+  EOQ
+
+  param "vcn_vnic_ids" {}
+}
+
 edge "vcn_subnet_to_compute_instance" {
   title = "instance"
 
@@ -64,22 +164,6 @@ edge "vcn_subnet_to_vcn_flow_log" {
   EOQ
 
   param "vcn_flow_log_ids" {}
-}
-
-edge "vcn_subnet_to_vcn_route_table" {
-  title = "route table"
-
-  sql = <<-EOQ
-    select
-      id as from_id,
-      route_table_id as to_id
-    from
-      oci_core_subnet as s
-    where
-     id = any($1);
-  EOQ
-
-  param "vcn_subnet_ids" {}
 }
 
 edge "vcn_subnet_to_vcn_security_list" {
@@ -148,6 +232,24 @@ edge "vcn_subnet_to_vcn_network_load_balancer" {
   param "vcn_network_load_balancer_ids" {}
 }
 
+edge "vcn_vcn_to_identity_availability_domain" {
+  title = "availability domain"
+
+  sql = <<-EOQ
+    select
+      s.vcn_id as from_id,
+      a.id as to_id
+    from
+      oci_identity_availability_domain as a,
+      oci_core_subnet as s
+    where
+      s.availability_domain = a.name
+      and a.id = any($1);
+  EOQ
+
+  param "availability_domain_ids" {}
+}
+
 edge "vcn_vcn_to_vcn_dhcp_option" {
   title = "dhcp option"
 
@@ -212,17 +314,17 @@ edge "vcn_vcn_to_vcn_network_security_group" {
   param "vcn_network_security_group_ids" {}
 }
 
-edge "vcn_vcn_to_vcn_route_table" {
+edge "vcn_subnet_to_vcn_route_table" {
   title = "route table"
 
   sql = <<-EOQ
     select
-      vcn_id as from_id,
-      id as to_id
+      id as from_id,
+      route_table_id as to_id
     from
-      oci_core_route_table
+      oci_core_subnet
     where
-      id = any($1);
+      route_table_id = any($1);
   EOQ
 
   param "vcn_route_table_ids" {}

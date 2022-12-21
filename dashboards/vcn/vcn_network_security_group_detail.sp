@@ -9,7 +9,7 @@ dashboard "vcn_network_security_group_detail" {
 
   input "security_group_id" {
     title = "Select a security group:"
-    sql   = query.oci_vcn_network_security_group_input.sql
+    sql   = query.vcn_network_security_group_input.sql
     width = 4
   }
 
@@ -18,21 +18,135 @@ dashboard "vcn_network_security_group_detail" {
     card {
       width = 2
 
-      query = query.oci_vcn_network_security_group_ingress_ssh
-      args = {
-        id = self.input.security_group_id.value
-      }
+      query = query.vcn_network_security_group_ingress_ssh
+      args = [self.input.security_group_id.value]
     }
 
     card {
       width = 2
 
-      query = query.oci_vcn_network_security_group_ingress_rdp
-      args = {
-        id = self.input.security_group_id.value
-      }
+      query = query.vcn_network_security_group_ingress_rdp
+      args = [self.input.security_group_id.value]
     }
 
+  }
+
+  with "file_storage_mount_target" {
+    query = query.vcn_network_security_group_file_storage_mount_target
+    args  = [self.input.security_group_id.value]
+  }
+
+  with "vcn_load_balancers" {
+    query = query.vcn_network_security_group_vcn_load_balancers
+    args  = [self.input.security_group_id.value]
+  }
+
+  with "vcn_network_load_balancers" {
+    query = query.vcn_network_security_group_vcn_network_load_balancers
+    args  = [self.input.security_group_id.value]
+  }
+
+  with "vcn_vcns" {
+    query = query.vcn_network_security_group_vcn_vcns
+    args  = [self.input.security_group_id.value]
+  }
+
+  with "vcn_vnics" {
+    query = query.vcn_network_security_group_vcn_vnics
+    args  = [self.input.security_group_id.value]
+  }
+
+  container {
+
+    graph {
+      title     = "Relationships"
+      type      = "graph"
+      direction = "TD"
+
+      node {
+        base = node.file_storage_mount_target
+        args = {
+          file_storage_mount_target_ids = with.file_storage_mount_target.rows[*].mount_target_id
+        }
+      }
+
+      node {
+        base = node.vcn_load_balancer
+        args = {
+          vcn_load_balancer_ids = with.vcn_load_balancers.rows[*].load_balancer_id
+        }
+      }
+
+      node {
+        base = node.vcn_network_load_balancer
+        args = {
+          vcn_network_load_balancer_ids = with.vcn_network_load_balancers.rows[*].network_load_balancer_id
+        }
+      }
+
+      node {
+        base = node.vcn_network_security_group
+        args = {
+          vcn_network_security_group_ids = [self.input.security_group_id.value]
+        }
+      }
+
+      node {
+        base = node.vcn_vcn
+        args = {
+          vcn_vcn_ids = with.vcn_vcns.rows[*].vcn_id
+        }
+      }
+
+      node {
+        base = node.vcn_vnic
+        args = {
+          vcn_vnic_ids = with.vcn_vnics.rows[*].vnic_id
+        }
+      }
+
+      node {
+        base = node.vcn_network_security_group
+        args = {
+          vcn_network_security_group_ids = [self.input.security_group_id.value]
+        }
+      }
+
+      edge {
+        base = edge.vcn_network_security_group_to_file_storage_mount_target
+        args = {
+          file_storage_mount_target_ids = with.file_storage_mount_target.rows[*].mount_target_id
+        }
+      }
+
+      edge {
+        base = edge.vcn_network_security_group_to_vcn_load_balancer
+        args = {
+          vcn_network_security_group_ids = [self.input.security_group_id.value]
+        }
+      }
+
+      edge {
+        base = edge.vcn_network_security_group_to_vcn_network_load_balancer
+        args = {
+          vcn_network_security_group_ids = [self.input.security_group_id.value]
+        }
+      }
+
+      edge {
+        base = edge.vcn_network_security_group_to_vcn_vnic
+        args = {
+          vcn_vnic_ids = with.vcn_vnics.rows[*].vnic_id
+        }
+      }
+
+      edge {
+        base = edge.vcn_vcn_to_vcn_network_security_group
+        args = {
+          vcn_network_security_group_ids = [self.input.security_group_id.value]
+        }
+      }
+    }
   }
 
   container {
@@ -45,10 +159,8 @@ dashboard "vcn_network_security_group_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-        query = query.oci_vcn_network_security_group_overview
-        args = {
-          id = self.input.security_group_id.value
-        }
+        query = query.vcn_network_security_group_overview
+        args = [self.input.security_group_id.value]
 
       }
 
@@ -56,10 +168,8 @@ dashboard "vcn_network_security_group_detail" {
         title = "Tags"
         width = 6
 
-        query = query.oci_vcn_network_security_group_tag
-        args = {
-          id = self.input.security_group_id.value
-        }
+        query = query.vcn_network_security_group_tag
+        args = [self.input.security_group_id.value]
 
       }
 
@@ -70,18 +180,14 @@ dashboard "vcn_network_security_group_detail" {
 
       table {
         title = "Ingress Rules"
-        query = query.oci_vcn_network_security_group_ingress_rule
-        args = {
-          id = self.input.security_group_id.value
-        }
+        query = query.vcn_network_security_group_ingress_rule
+        args = [self.input.security_group_id.value]
       }
 
       table {
         title = "Egress Rules"
-        query = query.oci_vcn_network_security_group_egress_rule
-        args = {
-          id = self.input.security_group_id.value
-        }
+        query = query.vcn_network_security_group_egress_rule
+        args = [self.input.security_group_id.value]
       }
 
     }
@@ -90,7 +196,7 @@ dashboard "vcn_network_security_group_detail" {
 
 }
 
-query "oci_vcn_network_security_group_input" {
+query "vcn_network_security_group_input" {
   sql = <<-EOQ
     select
       g.display_name as label,
@@ -111,7 +217,7 @@ query "oci_vcn_network_security_group_input" {
   EOQ
 }
 
-query "oci_vcn_network_security_group_ingress_ssh" {
+query "vcn_network_security_group_ingress_ssh" {
   sql = <<-EOQ
     with non_compliant_rules as (
       select
@@ -144,11 +250,9 @@ query "oci_vcn_network_security_group_ingress_ssh" {
       where
         nsg.id = $1 and nsg.lifecycle_state <> 'TERMINATED';
   EOQ
-
-  param "id" {}
 }
 
-query "oci_vcn_network_security_group_ingress_rdp" {
+query "vcn_network_security_group_ingress_rdp" {
   sql = <<-EOQ
     with non_compliant_rules as (
       select
@@ -181,11 +285,9 @@ query "oci_vcn_network_security_group_ingress_rdp" {
       where
         nsg.id = $1 and nsg.lifecycle_state <> 'TERMINATED';
   EOQ
-
-  param "id" {}
 }
 
-query "oci_vcn_network_security_group_overview" {
+query "vcn_network_security_group_overview" {
   sql = <<-EOQ
     select
       display_name as "Name",
@@ -198,11 +300,9 @@ query "oci_vcn_network_security_group_overview" {
     where
       id = $1 and lifecycle_state <> 'TERMINATED';
   EOQ
-
-  param "id" {}
 }
 
-query "oci_vcn_network_security_group_tag" {
+query "vcn_network_security_group_tag" {
   sql = <<-EOQ
     with jsondata as (
       select
@@ -221,11 +321,9 @@ query "oci_vcn_network_security_group_tag" {
     order by
       key;
   EOQ
-
-  param "id" {}
 }
 
-query "oci_vcn_network_security_group_ingress_rule" {
+query "vcn_network_security_group_ingress_rule" {
   sql = <<-EOQ
     select
       r ->> 'protocol' as "Protocol",
@@ -239,11 +337,9 @@ query "oci_vcn_network_security_group_ingress_rule" {
     r ->> 'direction' = 'INGRESS' and
       id  = $1 and lifecycle_state <> 'TERMINATED';
   EOQ
-
-  param "id" {}
 }
 
-query "oci_vcn_network_security_group_egress_rule" {
+query "vcn_network_security_group_egress_rule" {
   sql = <<-EOQ
     select
       r ->> 'protocol' as "Protocol",
@@ -257,6 +353,95 @@ query "oci_vcn_network_security_group_egress_rule" {
       r ->> 'direction' = 'EGRESS' and
       id  = $1 and lifecycle_state <> 'TERMINATED';
   EOQ
+}
 
-  param "id" {}
+query "vcn_network_security_group_vcn_vcns" {
+  sql = <<-EOQ
+    select
+      vcn_id
+    from
+      oci_core_network_security_group
+    where
+      id = $1;
+  EOQ
+}
+
+query "vcn_network_security_group_vcn_vnics" {
+  sql = <<-EOQ
+    with network_security_groups as (
+      select
+        jsonb_array_elements_text(nsg_ids) as n_id,
+        vnic_id
+      from
+        oci_core_vnic_attachment
+    )
+    select
+      vnic_id
+    from
+      oci_core_network_security_group,
+      network_security_groups
+    where
+      id = n_id
+      and id = $1
+  EOQ
+}
+
+query "vcn_network_security_group_vcn_load_balancers" {
+  sql = <<-EOQ
+    with nsg_list as (
+      select
+        id as nsg_id
+      from
+        oci_core_network_security_group
+      where
+        id = $1
+      )
+      select
+        id as load_balancer_id
+      from
+        oci_core_load_balancer,
+        jsonb_array_elements_text(network_security_group_ids) as s
+      where
+        s in (select nsg_id from nsg_list);
+  EOQ
+}
+
+query "vcn_network_security_group_vcn_network_load_balancers" {
+  sql = <<-EOQ
+    with nsg_list as (
+      select
+        id as nsg_id
+      from
+        oci_core_network_security_group
+      where
+        id = $1
+      )
+      select
+        id as network_load_balancer_id
+      from
+        oci_core_network_load_balancer,
+        jsonb_array_elements_text(network_security_group_ids) as s
+      where
+        s in (select nsg_id from nsg_list);
+  EOQ
+}
+
+query "vcn_network_security_group_file_storage_mount_target" {
+  sql = <<-EOQ
+    with network_security_groups as (
+      select
+        jsonb_array_elements_text(nsg_ids) as n_id,
+        id
+      from
+        oci_file_storage_mount_target
+    )
+    select
+      s.id as mount_target_id
+    from
+      oci_core_network_security_group as n,
+      network_security_groups as s
+    where
+      n.id = n_id
+      and n.id = $1
+  EOQ
 }

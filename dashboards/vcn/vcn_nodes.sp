@@ -317,3 +317,27 @@ node "vcn_vcn" {
 
   param "vcn_vcn_ids" {}
 }
+
+node "vcn_vnic" {
+  category = category.vcn_vnic
+
+  sql = <<-EOQ
+    select
+      vnic_id as id,
+      title as title,
+      jsonb_build_object(
+        'ID', vnic_id,
+        'Display Name', display_name,
+        'Lifecycle State', lifecycle_state,
+        'Time Created', time_created,
+        'Compartment ID', compartment_id,
+        'Region', region
+      ) as properties
+    from
+      oci_core_vnic_attachment
+    where
+      vnic_id = any($1);
+  EOQ
+
+  param "vcn_vnic_ids" {}
+}
