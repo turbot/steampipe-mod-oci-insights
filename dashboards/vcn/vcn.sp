@@ -30,7 +30,7 @@ category "vcn_load_balancer" {
 
 category "vcn_local_peering_gateway" {
   title = "VCN Local Peering Gateway"
-  icon  = "text:LPG"
+  icon  = "sync-alt"
   color = local.networking_color
 }
 

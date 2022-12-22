@@ -14,6 +14,31 @@ edge "vcn_internet_gateway_to_vcn_vcn" {
   param "vcn_internet_gateway_ids" {}
 }
 
+edge "vcn_network_security_group_to_compute_instance" {
+  title = "instance"
+
+  sql = <<-EOQ
+    with network_security_groups as (
+      select
+        jsonb_array_elements_text(nsg_ids) as n_id,
+        instance_id
+      from
+        oci_core_vnic_attachment
+    )
+    select
+      id as from_id,
+      instance_id as to_id
+    from
+      oci_core_network_security_group,
+      network_security_groups
+    where
+      id = n_id
+      and instance_id = any($1)
+  EOQ
+
+  param "compute_instance_ids" {}
+}
+
 edge "vcn_network_security_group_to_file_storage_mount_target" {
   title = "mount target"
 
@@ -363,7 +388,7 @@ edge "vcn_vcn_to_vcn_service_gateway" {
 }
 
 edge "vcn_vcn_to_vcn_subnet" {
-  title = "subnet"
+  title = "regional subnet"
 
   sql = <<-EOQ
     select
@@ -372,7 +397,8 @@ edge "vcn_vcn_to_vcn_subnet" {
     from
       oci_core_subnet
     where
-      id = any($1);
+      availability_domain is null
+      and id = any($1);
   EOQ
 
   param "vcn_subnet_ids" {}

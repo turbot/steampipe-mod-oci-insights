@@ -10,8 +10,8 @@ edge "identity_availability_domain_to_vcn_subnet" {
       oci_identity_availability_domain as a
     where
       s.availability_domain = a.name
-      and a.id = any($1);
+      and s.id = any($1);
   EOQ
 
-  param "availability_domain_ids" {}
+  param "vcn_subnet_ids" {}
 }

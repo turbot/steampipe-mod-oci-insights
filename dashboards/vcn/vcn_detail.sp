@@ -235,6 +235,13 @@ dashboard "vcn_detail" {
       }
 
       edge {
+        base = edge.identity_availability_domain_to_vcn_subnet
+        args = {
+          vcn_subnet_ids = with.vcn_subnets.rows[*].subnet_id
+        }
+      }
+
+      edge {
         base = edge.vcn_internet_gateway_to_vcn_vcn
         args = {
           vcn_internet_gateway_ids = with.vcn_internet_gateways.rows[*].internet_gateway_id
@@ -326,9 +333,9 @@ dashboard "vcn_detail" {
       }
 
       edge {
-        base = edge.identity_availability_domain_to_vcn_subnet
+        base = edge.vcn_vcn_to_vcn_subnet
         args = {
-          availability_domain_ids = with.identity_availability_domains.rows[*].availability_domain_id
+          vcn_subnet_ids = with.vcn_subnets.rows[*].subnet_id
         }
       }
     }
@@ -520,8 +527,8 @@ query "vcn_ipv6_count" {
       select
         power(2, 128 - masklen(b :: cidr)) as "IPv6 Addresses"
       from
-        oci_core_vcn,
-        jsonb_array_elements_text(ipv6_cidr_blocks) as b
+        oci_core_vcn
+        left join jsonb_array_elements_text(ipv6_cidr_blocks) as b on ipv6_cidr_blocks is not null
       where
         id = $1;
   EOQ

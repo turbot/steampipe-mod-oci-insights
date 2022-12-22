@@ -31,8 +31,13 @@ dashboard "vcn_network_security_group_detail" {
 
   }
 
-  with "file_storage_mount_target" {
-    query = query.vcn_network_security_group_file_storage_mount_target
+  with "file_storage_mount_targets" {
+    query = query.vcn_network_security_group_file_storage_mount_targets
+    args  = [self.input.security_group_id.value]
+  }
+
+  with "compute_instances" {
+    query = query.vcn_network_security_group_compute_instances
     args  = [self.input.security_group_id.value]
   }
 
@@ -66,7 +71,14 @@ dashboard "vcn_network_security_group_detail" {
       node {
         base = node.file_storage_mount_target
         args = {
-          file_storage_mount_target_ids = with.file_storage_mount_target.rows[*].mount_target_id
+          file_storage_mount_target_ids = with.file_storage_mount_targets.rows[*].mount_target_id
+        }
+      }
+
+      node {
+        base = node.compute_instance
+        args = {
+          compute_instance_ids = with.compute_instances.rows[*].compute_instance_id
         }
       }
 
@@ -113,9 +125,16 @@ dashboard "vcn_network_security_group_detail" {
       }
 
       edge {
+        base = edge.vcn_network_security_group_to_compute_instance
+        args = {
+          compute_instance_ids = with.compute_instances.rows[*].compute_instance_id
+        }
+      }
+
+      edge {
         base = edge.vcn_network_security_group_to_file_storage_mount_target
         args = {
-          file_storage_mount_target_ids = with.file_storage_mount_target.rows[*].mount_target_id
+          file_storage_mount_target_ids = with.file_storage_mount_targets.rows[*].mount_target_id
         }
       }
 
@@ -426,7 +445,7 @@ query "vcn_network_security_group_vcn_network_load_balancers" {
   EOQ
 }
 
-query "vcn_network_security_group_file_storage_mount_target" {
+query "vcn_network_security_group_file_storage_mount_targets" {
   sql = <<-EOQ
     with network_security_groups as (
       select
@@ -443,5 +462,25 @@ query "vcn_network_security_group_file_storage_mount_target" {
     where
       n.id = n_id
       and n.id = $1
+  EOQ
+}
+
+query "vcn_network_security_group_compute_instances" {
+  sql = <<-EOQ
+    with network_security_groups as (
+      select
+        jsonb_array_elements_text(nsg_ids) as n_id,
+        instance_id
+      from
+        oci_core_vnic_attachment
+    )
+    select
+      instance_id as compute_instance_id
+    from
+      oci_core_network_security_group,
+      network_security_groups
+    where
+      id = n_id
+      and id = $1
   EOQ
 }
