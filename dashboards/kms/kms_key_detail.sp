@@ -34,6 +34,80 @@ dashboard "kms_key_detail" {
 
   }
 
+  with "blockstorage_block_volumes" {
+    query = query.kms_blockstorage_block_volumes
+    args  = [self.input.key_id.value]
+  }
+
+  with "kms_key_versions" {
+    query = query.kms_kms_key_versions
+    args  = [self.input.key_id.value]
+  }
+
+  with "kms_vaults" {
+    query = query.kms_kms_vaults
+    args  = [self.input.key_id.value]
+  }
+
+  container {
+
+    graph {
+      title     = "Relationships"
+      type      = "graph"
+      direction = "TD"
+
+      node {
+        base = node.blockstorage_block_volume
+        args = {
+          blockstorage_block_volume_ids = with.blockstorage_block_volumes.rows[*].block_volume_id
+        }
+      }
+
+      node {
+        base = node.kms_key
+        args = {
+          kms_key_ids = [self.input.key_id.value]
+        }
+      }
+
+      node {
+        base = node.kms_key_version
+        args = {
+          kms_key_version_ids =  with.kms_key_versions.rows[*].current_key_version
+        }
+      }
+
+      node {
+        base = node.kms_vault
+        args = {
+          kms_vault_ids = with.kms_vaults.rows[*].vault_id
+        }
+      }
+
+      edge {
+        base = edge.blockstorage_block_volume_to_kms_key_version
+        args = {
+          blockstorage_block_volume_ids = with.blockstorage_block_volumes.rows[*].block_volume_id
+        }
+      }
+
+      edge {
+        base = edge.kms_key_version_to_kms_key
+        args = {
+          kms_key_version_ids =  with.kms_key_versions.rows[*].current_key_version
+        }
+      }
+
+      edge {
+        base = edge.kms_key_to_kms_vault
+        args = {
+          kms_key_ids = [self.input.key_id.value]
+        }
+      }
+
+    }
+  }
+
   container {
 
     container {
@@ -177,4 +251,37 @@ query "kms_key_detail" {
   EOQ
 
   param "id" {}
+}
+
+query "kms_kms_vaults" {
+  sql = <<-EOQ
+    select
+      vault_id
+    from
+      oci_kms_key
+    where
+      id = $1;
+  EOQ
+}
+
+query "kms_kms_key_versions" {
+  sql = <<-EOQ
+    select
+      current_key_version
+    from
+      oci_kms_key
+    where
+      id = $1;
+  EOQ
+}
+
+query "kms_blockstorage_block_volumes" {
+  sql = <<-EOQ
+    select
+      id as block_volume_id
+    from
+      oci_core_volume
+    where
+      kms_key_id = $1;
+  EOQ
 }
