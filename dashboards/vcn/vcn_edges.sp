@@ -292,7 +292,7 @@ edge "vcn_vcn_to_vcn_dhcp_option" {
 }
 
 edge "vcn_local_peering_gateway_to_vcn_vcn" {
-  title = "local peering gateway"
+  title = "vcn"
 
   sql = <<-EOQ
     select
@@ -308,7 +308,7 @@ edge "vcn_local_peering_gateway_to_vcn_vcn" {
 }
 
 edge "vcn_nat_gateway_vcn_vcn" {
-  title = "nat gateway"
+  title = "vcn"
 
   sql = <<-EOQ
     select
@@ -372,7 +372,7 @@ edge "vcn_vcn_to_vcn_security_list" {
 }
 
 edge "vcn_service_gateway_to_vcn_vcn" {
-  title = "service gateway"
+  title = "vcn"
 
   sql = <<-EOQ
     select
