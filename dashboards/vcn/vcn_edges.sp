@@ -262,17 +262,17 @@ edge "vcn_vcn_to_identity_availability_domain" {
 
   sql = <<-EOQ
     select
-      s.vcn_id as from_id,
+      v.id as from_id,
       a.id as to_id
     from
       oci_identity_availability_domain as a,
-      oci_core_subnet as s
+      oci_core_vcn as v
     where
-      s.availability_domain = a.name
-      and a.id = any($1);
+      a.region = v.region
+      and v.id = any($1);
   EOQ
 
-  param "availability_domain_ids" {}
+  param "vcn_vcn_ids" {}
 }
 
 edge "vcn_vcn_to_vcn_dhcp_option" {
@@ -291,13 +291,13 @@ edge "vcn_vcn_to_vcn_dhcp_option" {
   param "vcn_dhcp_option_ids" {}
 }
 
-edge "vcn_vcn_to_vcn_local_peering_gateway" {
+edge "vcn_local_peering_gateway_to_vcn_vcn" {
   title = "local peering gateway"
 
   sql = <<-EOQ
     select
-      vcn_id as from_id,
-      id as to_id
+      id as from_id,
+      vcn_id as to_id
     from
       oci_core_local_peering_gateway
     where
@@ -307,13 +307,13 @@ edge "vcn_vcn_to_vcn_local_peering_gateway" {
   param "vcn_local_peering_gateway_ids" {}
 }
 
-edge "vcn_vcn_to_vcn_nat_gateway" {
+edge "vcn_nat_gateway_vcn_vcn" {
   title = "nat gateway"
 
   sql = <<-EOQ
     select
-      vcn_id as from_id,
-      id as to_id
+      id as from_id,
+      vcn_id as to_id
     from
       oci_core_nat_gateway
     where
@@ -371,13 +371,13 @@ edge "vcn_vcn_to_vcn_security_list" {
   param "vcn_security_list_ids" {}
 }
 
-edge "vcn_vcn_to_vcn_service_gateway" {
+edge "vcn_service_gateway_to_vcn_vcn" {
   title = "service gateway"
 
   sql = <<-EOQ
     select
-      vcn_id as from_id,
-      id as to_id
+      id as from_id,
+      vcn_id as to_id
     from
       oci_core_service_gateway
     where
@@ -387,17 +387,29 @@ edge "vcn_vcn_to_vcn_service_gateway" {
   param "vcn_service_gateway_ids" {}
 }
 
-edge "vcn_vcn_to_vcn_subnet" {
-  title = "regional subnet"
+edge "vcn_availability_domain_to_vcn_regional_subnet" {
+  title = "subnet"
 
   sql = <<-EOQ
+    with ad as (
+      select
+        a.id as ad_id,
+        a.region as ad_region
+      from
+        oci_identity_availability_domain as a,
+        oci_region as r
+      where
+        a.region = r.name
+    )
     select
-      vcn_id as from_id,
+      ad_id as from_id,
       id as to_id
     from
-      oci_core_subnet
+      oci_core_subnet,
+      ad
     where
       availability_domain is null
+      and ad_region = region
       and id = any($1);
   EOQ
 

@@ -57,6 +57,11 @@ dashboard "vcn_detail" {
     args  = [self.input.vcn_id.value]
   }
 
+  with "regional_identity_availability_domains" {
+    query = query.vcn_regional_identity_availability_domains
+    args  = [self.input.vcn_id.value]
+  }
+
   with "compute_instances" {
     query = query.vcn_compute_instances
     args  = [self.input.vcn_id.value]
@@ -133,6 +138,13 @@ dashboard "vcn_detail" {
         base = node.identity_availability_domain
         args = {
           availability_domain_ids = with.identity_availability_domains.rows[*].availability_domain_id
+        }
+      }
+
+      node {
+        base = node.regional_identity_availability_domain
+        args = {
+          availability_domain_ids = with.regional_identity_availability_domains.rows[*].availability_domain_id
         }
       }
 
@@ -235,6 +247,13 @@ dashboard "vcn_detail" {
       }
 
       edge {
+        base = edge.vcn_availability_domain_to_vcn_regional_subnet
+        args = {
+          vcn_subnet_ids = with.vcn_subnets.rows[*].subnet_id
+        }
+      }
+
+      edge {
         base = edge.identity_availability_domain_to_vcn_subnet
         args = {
           vcn_subnet_ids = with.vcn_subnets.rows[*].subnet_id
@@ -286,12 +305,12 @@ dashboard "vcn_detail" {
       edge {
         base = edge.vcn_vcn_to_identity_availability_domain
         args = {
-          availability_domain_ids = with.identity_availability_domains.rows[*].availability_domain_id
+          vcn_vcn_ids = [self.input.vcn_id.value]
         }
       }
 
       edge {
-        base = edge.vcn_vcn_to_vcn_nat_gateway
+        base = edge.vcn_nat_gateway_vcn_vcn
         args = {
           vcn_nat_gateway_ids = with.vcn_nat_gateways.rows[*].nat_gateway_id
         }
@@ -312,7 +331,7 @@ dashboard "vcn_detail" {
       }
 
       edge {
-        base = edge.vcn_vcn_to_vcn_local_peering_gateway
+        base = edge.vcn_local_peering_gateway_to_vcn_vcn
         args = {
           vcn_local_peering_gateway_ids = with.vcn_local_peering_gateways.rows[*].local_peering_gateway_id
         }
@@ -326,16 +345,9 @@ dashboard "vcn_detail" {
       }
 
       edge {
-        base = edge.vcn_vcn_to_vcn_service_gateway
+        base = edge.vcn_service_gateway_to_vcn_vcn
         args = {
           vcn_service_gateway_ids = with.vcn_service_gateways.rows[*].service_gateway_id
-        }
-      }
-
-      edge {
-        base = edge.vcn_vcn_to_vcn_subnet
-        args = {
-          vcn_subnet_ids = with.vcn_subnets.rows[*].subnet_id
         }
       }
     }
@@ -1278,6 +1290,20 @@ query "vcn_identity_availability_domains" {
       oci_core_subnet as s
     where
       s.availability_domain = a.name
+      and s.vcn_id = $1;
+  EOQ
+}
+
+query "vcn_regional_identity_availability_domains" {
+  sql = <<-EOQ
+    select
+      a.id as availability_domain_id
+    from
+      oci_identity_availability_domain as a,
+      oci_core_subnet as s
+    where
+      s.region = a.region
+      and s.availability_domain is null
       and s.vcn_id = $1;
   EOQ
 }
