@@ -1,3 +1,32 @@
+edge "vcn_availability_domain_to_vcn_regional_subnet" {
+  title = "subnet"
+
+  sql = <<-EOQ
+    with ad as (
+      select
+        a.id as ad_id,
+        a.region as ad_region
+      from
+        oci_identity_availability_domain as a,
+        oci_region as r
+      where
+        a.region = r.name
+    )
+    select
+      ad_id as from_id,
+      id as to_id
+    from
+      oci_core_subnet,
+      ad
+    where
+      availability_domain is null
+      and ad_region = region
+      and id = any($1);
+  EOQ
+
+  param "vcn_subnet_ids" {}
+}
+
 edge "vcn_internet_gateway_to_vcn_vcn" {
   title = "vcn"
 
@@ -12,6 +41,38 @@ edge "vcn_internet_gateway_to_vcn_vcn" {
   EOQ
 
   param "vcn_internet_gateway_ids" {}
+}
+
+edge "vcn_local_peering_gateway_to_vcn_vcn" {
+  title = "vcn"
+
+  sql = <<-EOQ
+    select
+      id as from_id,
+      vcn_id as to_id
+    from
+      oci_core_local_peering_gateway
+    where
+      id = any($1);
+  EOQ
+
+  param "vcn_local_peering_gateway_ids" {}
+}
+
+edge "vcn_nat_gateway_vcn_vcn" {
+  title = "vcn"
+
+  sql = <<-EOQ
+    select
+      id as from_id,
+      vcn_id as to_id
+    from
+      oci_core_nat_gateway
+    where
+      id = any($1);
+  EOQ
+
+  param "vcn_nat_gateway_ids" {}
 }
 
 edge "vcn_network_security_group_to_compute_instance" {
@@ -139,6 +200,22 @@ edge "vcn_network_security_group_to_vcn_vnic" {
   param "vcn_vnic_ids" {}
 }
 
+edge "vcn_service_gateway_to_vcn_vcn" {
+  title = "vcn"
+
+  sql = <<-EOQ
+    select
+      id as from_id,
+      vcn_id as to_id
+    from
+      oci_core_service_gateway
+    where
+      id = any($1);
+  EOQ
+
+  param "vcn_service_gateway_ids" {}
+}
+
 edge "vcn_subnet_to_compute_instance" {
   title = "instance"
 
@@ -191,31 +268,6 @@ edge "vcn_subnet_to_vcn_flow_log" {
   param "vcn_flow_log_ids" {}
 }
 
-edge "vcn_subnet_to_vcn_security_list" {
-  title = "security list"
-
-  sql = <<-EOQ
-    with subnet_security_lists as (
-      select
-        jsonb_array_elements_text(security_list_ids) as s_id,
-        id as subnet_id
-      from
-        oci_core_subnet
-      )
-      select
-        ssl.subnet_id as from_id,
-        sl.id as to_id
-      from
-        oci_core_security_list as sl,
-        subnet_security_lists as ssl
-      where
-        sl.id = ssl.s_id
-        and sl.id = any($1);
-  EOQ
-
-  param "vcn_security_list_ids" {}
-}
-
 edge "vcn_subnet_to_vcn_load_balancer" {
   title = "load balancer"
 
@@ -257,6 +309,47 @@ edge "vcn_subnet_to_vcn_network_load_balancer" {
   param "vcn_network_load_balancer_ids" {}
 }
 
+edge "vcn_subnet_to_vcn_route_table" {
+  title = "route table"
+
+  sql = <<-EOQ
+    select
+      id as from_id,
+      route_table_id as to_id
+    from
+      oci_core_subnet
+    where
+      route_table_id = any($1);
+  EOQ
+
+  param "vcn_route_table_ids" {}
+}
+
+edge "vcn_subnet_to_vcn_security_list" {
+  title = "security list"
+
+  sql = <<-EOQ
+    with subnet_security_lists as (
+      select
+        jsonb_array_elements_text(security_list_ids) as s_id,
+        id as subnet_id
+      from
+        oci_core_subnet
+      )
+      select
+        ssl.subnet_id as from_id,
+        sl.id as to_id
+      from
+        oci_core_security_list as sl,
+        subnet_security_lists as ssl
+      where
+        sl.id = ssl.s_id
+        and sl.id = any($1);
+  EOQ
+
+  param "vcn_security_list_ids" {}
+}
+
 edge "vcn_vcn_to_identity_availability_domain" {
   title = "availability domain"
 
@@ -291,38 +384,6 @@ edge "vcn_vcn_to_vcn_dhcp_option" {
   param "vcn_dhcp_option_ids" {}
 }
 
-edge "vcn_local_peering_gateway_to_vcn_vcn" {
-  title = "vcn"
-
-  sql = <<-EOQ
-    select
-      id as from_id,
-      vcn_id as to_id
-    from
-      oci_core_local_peering_gateway
-    where
-      id = any($1);
-  EOQ
-
-  param "vcn_local_peering_gateway_ids" {}
-}
-
-edge "vcn_nat_gateway_vcn_vcn" {
-  title = "vcn"
-
-  sql = <<-EOQ
-    select
-      id as from_id,
-      vcn_id as to_id
-    from
-      oci_core_nat_gateway
-    where
-      id = any($1);
-  EOQ
-
-  param "vcn_nat_gateway_ids" {}
-}
-
 edge "vcn_vcn_to_vcn_network_security_group" {
   title = "nsg"
 
@@ -337,22 +398,6 @@ edge "vcn_vcn_to_vcn_network_security_group" {
   EOQ
 
   param "vcn_network_security_group_ids" {}
-}
-
-edge "vcn_subnet_to_vcn_route_table" {
-  title = "route table"
-
-  sql = <<-EOQ
-    select
-      id as from_id,
-      route_table_id as to_id
-    from
-      oci_core_subnet
-    where
-      route_table_id = any($1);
-  EOQ
-
-  param "vcn_route_table_ids" {}
 }
 
 edge "vcn_vcn_to_vcn_security_list" {
@@ -371,7 +416,7 @@ edge "vcn_vcn_to_vcn_security_list" {
   param "vcn_security_list_ids" {}
 }
 
-edge "vcn_service_gateway_to_vcn_vcn" {
+edge "vcn_subnet_to_vcn_vcn" {
   title = "vcn"
 
   sql = <<-EOQ
@@ -379,38 +424,9 @@ edge "vcn_service_gateway_to_vcn_vcn" {
       id as from_id,
       vcn_id as to_id
     from
-      oci_core_service_gateway
+      oci_core_subnet
     where
       id = any($1);
-  EOQ
-
-  param "vcn_service_gateway_ids" {}
-}
-
-edge "vcn_availability_domain_to_vcn_regional_subnet" {
-  title = "subnet"
-
-  sql = <<-EOQ
-    with ad as (
-      select
-        a.id as ad_id,
-        a.region as ad_region
-      from
-        oci_identity_availability_domain as a,
-        oci_region as r
-      where
-        a.region = r.name
-    )
-    select
-      ad_id as from_id,
-      id as to_id
-    from
-      oci_core_subnet,
-      ad
-    where
-      availability_domain is null
-      and ad_region = region
-      and id = any($1);
   EOQ
 
   param "vcn_subnet_ids" {}

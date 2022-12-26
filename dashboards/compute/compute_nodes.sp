@@ -1,3 +1,28 @@
+node "compute_image" {
+  category = category.compute_image
+
+  sql = <<-EOQ
+    select
+      id as id,
+      title as title,
+      jsonb_build_object(
+        'Instance ID', id,
+        'Display Name', display_name,
+        'Lifecycle State', lifecycle_state,
+        'Launch Mode', launch_mode,
+        'Compartment ID', compartment_id,
+        'Operating System', operating_system,
+        'Region', region
+      ) as properties
+    from
+      oci_core_image
+    where
+      id = any($1);
+  EOQ
+
+  param "compute_image_ids" {}
+}
+
 node "compute_instance" {
   category = category.compute_instance
 
