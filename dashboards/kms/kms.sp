@@ -12,12 +12,12 @@ category "kms_key" {
 
 category "kms_key_version" {
   title = "KMS Ket Version"
-  icon  = "hard-drive"
+  icon  = "hard_drive"
   color = local.security_color
 }
 
 category "kms_vault" {
   title = "KMS Vault"
-  icon  = "hard-drive"
+  icon  = "hard_drive"
   color = local.security_color
 }

@@ -12,7 +12,7 @@ category "vcn_dhcp_option" {
 
 category "vcn_flow_log" {
   title = "VCN Flow Log"
-  icon  = "format-text-overflow"
+  icon  = "format_text_overflow"
   color = local.networking_color
 }
 
@@ -30,7 +30,7 @@ category "vcn_load_balancer" {
 
 category "vcn_local_peering_gateway" {
   title = "VCN Local Peering Gateway"
-  icon  = "sync-alt"
+  icon  = "sync_alt"
   color = local.networking_color
 }
 
@@ -49,13 +49,13 @@ category "vcn_network_load_balancer" {
 category "vcn_network_security_group" {
   title = "VCN Network Security Group"
   href  = "/oci_insights.dashboard.vcn_network_security_group_detail?input.security_group_id={{.properties.'ID' | @uri}}"
-  icon  = "enhanced-encryption"
+  icon  = "enhanced_encryption"
   color = local.networking_color
 }
 
 category "vcn_route_table" {
   title = "VCN Route Table"
-  icon  = "table-rows"
+  icon  = "table_rows"
   color = local.networking_color
 }
 

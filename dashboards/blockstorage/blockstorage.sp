@@ -6,6 +6,6 @@ locals {
 
 category "blockstorage_block_volume" {
   title = "Blockstorage Block Volume"
-  icon  = "hard-drive"
+  icon  = "hard_drive"
   color = local.storage_color
 }
