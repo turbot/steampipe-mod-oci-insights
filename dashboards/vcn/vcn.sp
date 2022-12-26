@@ -61,6 +61,7 @@ category "vcn_route_table" {
 
 category "vcn_security_list" {
   title = "VCN Security List"
+  href  = "/oci_insights.dashboard.vcn_security_list_detail?input.security_list_id={{.properties.'ID' | @uri}}"
   icon  = "text:SL"
   color = local.networking_color
 }

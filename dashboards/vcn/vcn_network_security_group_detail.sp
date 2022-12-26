@@ -117,13 +117,6 @@ dashboard "vcn_network_security_group_detail" {
         }
       }
 
-      node {
-        base = node.vcn_network_security_group
-        args = {
-          vcn_network_security_group_ids = [self.input.security_group_id.value]
-        }
-      }
-
       edge {
         base = edge.vcn_network_security_group_to_compute_instance
         args = {

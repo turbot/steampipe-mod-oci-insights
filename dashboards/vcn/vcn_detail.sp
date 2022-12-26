@@ -442,7 +442,7 @@ dashboard "vcn_detail" {
           display = "none"
         }
         column "Name" {
-          href = "${dashboard.oci_vcn_security_list_detail.url_path}?input.security_list_id={{.OCID | @uri}}"
+          href = "${dashboard.vcn_security_list_detail.url_path}?input.security_list_id={{.OCID | @uri}}"
         }
       }
 

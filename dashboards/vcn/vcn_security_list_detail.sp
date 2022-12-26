@@ -1,4 +1,4 @@
-dashboard "oci_vcn_security_list_detail" {
+dashboard "vcn_security_list_detail" {
 
   title = "OCI VCN Security List Detail"
   documentation = file("./dashboards/vcn/docs/vcn_security_list_detail.md")
@@ -9,7 +9,7 @@ dashboard "oci_vcn_security_list_detail" {
 
   input "security_list_id" {
     title = "Select a security list:"
-    sql   = query.oci_vcn_security_list_input.sql
+    sql   = query.vcn_security_list_input.sql
     width = 4
   }
 
@@ -18,21 +18,72 @@ dashboard "oci_vcn_security_list_detail" {
     card {
       width = 2
 
-      query = query.oci_vcn_security_list_ingress_ssh
-      args = {
-        id = self.input.security_list_id.value
-      }
+      query = query.vcn_security_list_ingress_ssh
+      args = [self.input.security_list_id.value]
     }
 
     card {
       width = 2
 
-      query = query.oci_vcn_security_list_ingress_rdp
-      args = {
-        id = self.input.security_list_id.value
-      }
+      query = query.vcn_security_list_ingress_rdp
+      args = [self.input.security_list_id.value]
     }
 
+  }
+
+  with "vcn_subnets" {
+    query = query.vcn_security_list_vcn_subnets
+    args  = [self.input.security_list_id.value]
+  }
+
+  with "vcn_vcns" {
+    query = query.vcn_security_list_vcn_vcns
+    args  = [self.input.security_list_id.value]
+  }
+
+  container {
+
+    graph {
+      title     = "Relationships"
+      type      = "graph"
+      direction = "TD"
+
+      node {
+        base = node.vcn_security_list
+        args = {
+          vcn_security_list_ids = [self.input.security_list_id.value]
+        }
+      }
+
+      node {
+        base = node.vcn_subnet
+        args = {
+          vcn_subnet_ids = with.vcn_subnets.rows[*].subnet_id
+        }
+      }
+
+      node {
+        base = node.vcn_vcn
+        args = {
+          vcn_vcn_ids = with.vcn_vcns.rows[*].vcn_id
+        }
+      }
+
+      edge {
+        base = edge.vcn_subnet_to_vcn_security_list
+        args = {
+          vcn_security_list_ids = [self.input.security_list_id.value]
+        }
+      }
+
+      edge {
+        base = edge.vcn_vcn_to_vcn_security_list
+        args = {
+          vcn_security_list_ids = [self.input.security_list_id.value]
+        }
+      }
+
+    }
   }
 
   container {
@@ -45,20 +96,16 @@ dashboard "oci_vcn_security_list_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-        query = query.oci_vcn_security_list_overview
-        args = {
-          id = self.input.security_list_id.value
-        }
+        query = query.vcn_security_list_overview
+        args = [self.input.security_list_id.value]
 
       }
 
       table {
         title = "Tags"
         width = 6
-        query = query.oci_vcn_security_list_tag
-        args = {
-          id = self.input.security_list_id.value
-        }
+        query = query.vcn_security_list_tag
+        args = [self.input.security_list_id.value]
 
       }
 
@@ -70,18 +117,14 @@ dashboard "oci_vcn_security_list_detail" {
 
       table {
         title = "Ingress Rules"
-        query = query.oci_vcn_network_security_list_ingress_rule
-        args = {
-          id = self.input.security_list_id.value
-        }
+        query = query.vcn_network_security_list_ingress_rule
+        args = [self.input.security_list_id.value]
       }
 
       table {
         title = "Egress Rules"
-        query = query.oci_vcn_network_security_list_egress_rule
-        args = {
-          id = self.input.security_list_id.value
-        }
+        query = query.vcn_network_security_list_egress_rule
+        args = [self.input.security_list_id.value]
       }
 
     }
@@ -90,7 +133,7 @@ dashboard "oci_vcn_security_list_detail" {
 
 }
 
-query "oci_vcn_security_list_input" {
+query "vcn_security_list_input" {
   sql = <<EOQ
     select
       l.display_name as label,
@@ -111,7 +154,7 @@ query "oci_vcn_security_list_input" {
 EOQ
 }
 
-query "oci_vcn_security_list_ingress_ssh" {
+query "vcn_security_list_ingress_ssh" {
   sql = <<-EOQ
     with non_compliant_rules as (
       select
@@ -144,11 +187,9 @@ query "oci_vcn_security_list_ingress_ssh" {
       where
         sl.id = $1 and sl.lifecycle_state <> 'TERMINATED';
   EOQ
-
-  param "id" {}
 }
 
-query "oci_vcn_security_list_ingress_rdp" {
+query "vcn_security_list_ingress_rdp" {
   sql = <<-EOQ
     with non_compliant_rules as (
       select
@@ -181,11 +222,9 @@ query "oci_vcn_security_list_ingress_rdp" {
       where
         sl.id = $1 and sl.lifecycle_state <> 'TERMINATED';
   EOQ
-
-  param "id" {}
 }
 
-query "oci_vcn_security_list_overview" {
+query "vcn_security_list_overview" {
   sql = <<-EOQ
     select
       display_name as "Name",
@@ -198,11 +237,9 @@ query "oci_vcn_security_list_overview" {
     where
       id = $1 and lifecycle_state <> 'TERMINATED';
   EOQ
-
-  param "id" {}
 }
 
-query "oci_vcn_security_list_tag" {
+query "vcn_security_list_tag" {
   sql = <<-EOQ
     with jsondata as (
       select
@@ -221,11 +258,9 @@ query "oci_vcn_security_list_tag" {
     order by
       key;
   EOQ
-
-  param "id" {}
 }
 
-query "oci_vcn_network_security_list_ingress_rule" {
+query "vcn_network_security_list_ingress_rule" {
   sql = <<-EOQ
     select
       r ->> 'protocol' as "Protocol",
@@ -237,11 +272,9 @@ query "oci_vcn_network_security_list_ingress_rule" {
     where
       id  = $1 and lifecycle_state <> 'TERMINATED';
   EOQ
-
-  param "id" {}
 }
 
-query "oci_vcn_network_security_list_egress_rule" {
+query "vcn_network_security_list_egress_rule" {
   sql = <<-EOQ
     select
       r ->> 'protocol' as "Protocol",
@@ -253,6 +286,35 @@ query "oci_vcn_network_security_list_egress_rule" {
     where
       id  = $1 and lifecycle_state <> 'TERMINATED';
   EOQ
+}
 
-  param "id" {}
+query "vcn_security_list_vcn_vcns" {
+  sql = <<-EOQ
+    select
+      vcn_id
+    from
+      oci_core_security_list
+    where
+      id = $1
+  EOQ
+}
+
+query "vcn_security_list_vcn_subnets" {
+  sql = <<-EOQ
+    with subnet_security_lists as (
+      select
+        jsonb_array_elements_text(security_list_ids) as s_id,
+        id as subnet_id
+      from
+        oci_core_subnet
+      )
+      select
+        subnet_id
+      from
+        oci_core_security_list as sl,
+        subnet_security_lists as ssl
+      where
+        sl.id = ssl.s_id
+        and sl.id = $1
+  EOQ
 }
