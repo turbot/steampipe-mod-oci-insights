@@ -15,3 +15,19 @@ edge "identity_availability_domain_to_vcn_subnet" {
 
   param "vcn_subnet_ids" {}
 }
+
+edge "identity_group_to_identity_user" {
+  title = "has member"
+
+  sql = <<-EOQ
+    select
+      jsonb_array_elements(user_groups)->> 'groupId' as from_id,
+      id as to_id
+    from
+      oci_identity_user
+    where
+      id = any($1);
+  EOQ
+
+  param "identity_user_ids" {}
+}

@@ -18,20 +18,52 @@ dashboard "identity_user_detail" {
       width = 2
 
       query = query.identity_user_email
-      args = {
-        id = self.input.user_id.value
-      }
+      args = [self.input.user_id.value]
     }
 
     card {
       query = query.identity_user_mfa
       width = 2
 
-      args = {
-        id = self.input.user_id.value
-      }
+      args = [self.input.user_id.value]
     }
 
+  }
+
+  with "identity_groups" {
+    query = query.identity_user_identity_groups
+    args  = [self.input.user_id.value]
+  }
+
+  container {
+
+    graph {
+      title     = "Relationships"
+      type      = "graph"
+      direction = "TD"
+
+      node {
+        base = node.identity_group
+        args = {
+          identity_group_ids = with.identity_groups.rows[*].group_id
+        }
+      }
+
+      node {
+        base = node.identity_user
+        args = {
+          identity_user_ids = [self.input.user_id.value]
+        }
+      }
+
+      edge {
+        base = edge.identity_group_to_identity_user
+        args = {
+          identity_user_ids = [self.input.user_id.value]
+        }
+      }
+
+    }
   }
 
   container {
@@ -44,9 +76,7 @@ dashboard "identity_user_detail" {
         type  = "line"
         width = 6
         query = query.identity_user_overview
-        args = {
-          id = self.input.user_id.value
-        }
+        args = [self.input.user_id.value]
 
       }
 
@@ -54,9 +84,7 @@ dashboard "identity_user_detail" {
         title = "Tags"
         width = 6
         query = query.identity_user_tag
-        args = {
-          id = self.input.user_id.value
-        }
+        args = [self.input.user_id.value]
 
       }
     }
@@ -67,25 +95,19 @@ dashboard "identity_user_detail" {
       table {
         title = "Access Keys"
         query = query.identity_user_access_key
-        args = {
-          id = self.input.user_id.value
-        }
+        args = [self.input.user_id.value]
       }
 
       table {
         title = "Console Password"
         query = query.identity_user_password
-        args = {
-          id = self.input.user_id.value
-        }
+        args = [self.input.user_id.value]
       }
 
       table {
         title = "Group Details"
         query = query.identity_user_group
-        args = {
-          id = self.input.user_id.value
-        }
+        args = [self.input.user_id.value]
       }
     }
 
@@ -117,8 +139,6 @@ query "identity_user_email" {
     where
       id = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "identity_user_mfa" {
@@ -132,8 +152,6 @@ query "identity_user_mfa" {
     where
       id = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "identity_user_overview" {
@@ -150,8 +168,6 @@ query "identity_user_overview" {
     where
       id = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "identity_user_tag" {
@@ -171,8 +187,6 @@ query "identity_user_tag" {
       jsondata,
       json_each_text(tags);
   EOQ
-
-  param "id" {}
 }
 
 query "identity_user_access_key" {
@@ -186,8 +200,6 @@ query "identity_user_access_key" {
     where
       user_id = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "identity_user_password" {
@@ -200,8 +212,6 @@ query "identity_user_password" {
     where
       id  = $1
   EOQ
-
-  param "id" {}
 }
 
 query "identity_user_group" {
@@ -216,7 +226,16 @@ query "identity_user_group" {
     where
       u.id  = $1
   EOQ
+}
 
-  param "id" {}
+query "identity_user_identity_groups" {
+  sql = <<-EOQ
+    select
+      jsonb_array_elements(user_groups)->> 'groupId' as group_id
+    from
+      oci_identity_user
+    where
+      id  = $1
+  EOQ
 }
 
