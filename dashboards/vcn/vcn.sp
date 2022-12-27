@@ -12,7 +12,7 @@ category "vcn_dhcp_option" {
 
 category "vcn_flow_log" {
   title = "VCN Flow Log"
-  icon  = "format_text_overflow"
+  icon  = "export_notes"
   color = local.networking_color
 }
 
@@ -68,7 +68,7 @@ category "vcn_security_list" {
 
 category "vcn_service_gateway" {
   title = "VCN Service Gateway"
-  icon  = "text:SGW"
+  icon  = "vpn_lock"
   color = local.networking_color
 }
 

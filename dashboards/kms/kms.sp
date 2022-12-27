@@ -11,7 +11,7 @@ category "kms_key" {
 }
 
 category "kms_key_version" {
-  title = "KMS Ket Version"
+  title = "KMS Key Version"
   icon  = "hard_drive"
   color = local.security_color
 }

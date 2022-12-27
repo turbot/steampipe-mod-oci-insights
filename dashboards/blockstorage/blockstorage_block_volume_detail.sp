@@ -18,20 +18,109 @@ dashboard "block_storage_block_volume_detail" {
       width = 2
 
       query = query.block_storage_block_volume_storage
-      args = {
-        id = self.input.block_volume_id.value
-      }
+      args = [self.input.block_volume_id.value]
     }
 
     card {
       width = 2
 
       query = query.block_storage_block_volume_vpu
-      args = {
-        id = self.input.block_volume_id.value
-      }
+      args = [self.input.block_volume_id.value]
     }
 
+  }
+
+  with "blockstorage_block_volume_backups" {
+    query = query.block_storage_block_volume_blockstorage_block_volume_backups
+    args  = [self.input.block_volume_id.value]
+  }
+
+  with "compute_instances" {
+    query = query.block_storage_block_volume_compute_instances
+    args  = [self.input.block_volume_id.value]
+  }
+
+  with "kms_keys" {
+    query = query.block_storage_block_volume_kms_keys
+    args  = [self.input.block_volume_id.value]
+  }
+
+  with "kms_key_versions" {
+    query = query.block_storage_block_volume_kms_key_versions
+    args  = [self.input.block_volume_id.value]
+  }
+
+  container {
+
+    graph {
+      title     = "Relationships"
+      type      = "graph"
+      direction = "TD"
+
+      node {
+        base = node.blockstorage_block_volume
+        args = {
+          blockstorage_block_volume_ids = [self.input.block_volume_id.value]
+        }
+      }
+
+      node {
+        base = node.blockstorage_block_volume_backup
+        args = {
+          blockstorage_block_volume_backup_ids = with.blockstorage_block_volume_backups.rows[*].backup_id
+        }
+      }
+
+      node {
+        base = node.compute_instance
+        args = {
+          compute_instance_ids = with.compute_instances.rows[*].instance_id
+        }
+      }
+
+      node {
+        base = node.kms_key
+        args = {
+          kms_key_ids = with.kms_keys.rows[*].kms_key_id
+        }
+      }
+
+      node {
+        base = node.kms_key_version
+        args = {
+          kms_key_version_ids = with.kms_key_versions.rows[*].key_version_id
+        }
+      }
+
+      edge {
+        base = edge.blockstorage_block_volume_to_blockstorage_block_volume_backup
+        args = {
+          blockstorage_block_volume_ids = [self.input.block_volume_id.value]
+        }
+      }
+
+      edge {
+        base = edge.blockstorage_block_volume_to_compute_instance
+        args = {
+          blockstorage_block_volume_ids = [self.input.block_volume_id.value]
+        }
+      }
+
+      edge {
+        base = edge.blockstorage_block_volume_to_kms_key_version
+        args = {
+          blockstorage_block_volume_ids = [self.input.block_volume_id.value]
+        }
+      }
+
+      edge {
+        base = edge.kms_key_version_to_kms_key
+        args = {
+          kms_key_version_ids = with.kms_key_versions.rows[*].key_version_id
+        }
+      }
+
+    }
   }
 
   container {
@@ -44,9 +133,7 @@ dashboard "block_storage_block_volume_detail" {
         type  = "line"
         width = 6
         query = query.block_storage_block_volume_overview
-        args = {
-          id = self.input.block_volume_id.value
-        }
+        args = [self.input.block_volume_id.value]
 
       }
 
@@ -54,9 +141,7 @@ dashboard "block_storage_block_volume_detail" {
         title = "Tags"
         width = 6
         query = query.block_storage_block_volume_tags
-        args = {
-          id = self.input.block_volume_id.value
-        }
+        args = [self.input.block_volume_id.value]
 
       }
     }
@@ -67,9 +152,7 @@ dashboard "block_storage_block_volume_detail" {
       table {
         title = "Attached To"
         query = query.block_storage_block_volume_attached_instances
-        args = {
-          id = self.input.block_volume_id.value
-        }
+        args = [self.input.block_volume_id.value]
 
         column "Instance ID" {
           display = "none"
@@ -83,9 +166,7 @@ dashboard "block_storage_block_volume_detail" {
       table {
         title = "Encryption Details"
         query = query.block_storage_block_volume_encryption
-        args = {
-          id = self.input.block_volume_id.value
-        }
+        args = [self.input.block_volume_id.value]
       }
     }
 
@@ -122,8 +203,6 @@ query "block_storage_block_volume_storage" {
     where
       id = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "block_storage_block_volume_vpu" {
@@ -135,8 +214,6 @@ query "block_storage_block_volume_vpu" {
     where
       id = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "block_storage_block_volume_overview" {
@@ -154,8 +231,6 @@ query "block_storage_block_volume_overview" {
     where
       id = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "block_storage_block_volume_tags" {
@@ -175,8 +250,6 @@ query "block_storage_block_volume_tags" {
       jsondata,
       json_each_text(tags);
   EOQ
-
-  param "id" {}
 }
 
 query "block_storage_block_volume_attached_instances" {
@@ -192,8 +265,6 @@ query "block_storage_block_volume_attached_instances" {
     where
       a.volume_id = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "block_storage_block_volume_encryption" {
@@ -206,6 +277,50 @@ query "block_storage_block_volume_encryption" {
     where
       id  = $1;
   EOQ
+}
 
-  param "id" {}
+query "block_storage_block_volume_kms_keys" {
+  sql = <<EOQ
+    select
+      kms_key_id
+    from
+      oci_core_volume
+    where
+      id  = $1;
+  EOQ
+}
+
+query "block_storage_block_volume_kms_key_versions" {
+  sql = <<EOQ
+    select
+      k.current_key_version as key_version_id
+    from
+      oci_core_volume as v,
+      oci_kms_key as k
+    where
+      k.id = v.kms_key_id
+      and v.id  = $1;
+  EOQ
+}
+
+query "block_storage_block_volume_compute_instances" {
+  sql = <<EOQ
+    select
+      instance_id
+    from
+      oci_core_volume_attachment
+    where
+      volume_id  = $1;
+  EOQ
+}
+
+query "block_storage_block_volume_blockstorage_block_volume_backups" {
+  sql = <<EOQ
+    select
+      id as backup_id
+    from
+      oci_core_volume_backup
+    where
+      volume_id  = $1;
+  EOQ
 }
