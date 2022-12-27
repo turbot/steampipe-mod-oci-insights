@@ -43,6 +43,31 @@ edge "vcn_internet_gateway_to_vcn_vcn" {
   param "vcn_internet_gateway_ids" {}
 }
 
+edge "vcn_load_balancer_to_compute_instance" {
+  title = "routes to"
+
+  sql = <<-EOQ
+    with subnet_list as (
+      select
+        jsonb_array_elements_text(subnet_ids) as subnet_id,
+        id
+      from
+        oci_core_load_balancer
+    )
+    select
+      s.id as from_id,
+      a.instance_id as to_id
+    from
+      oci_core_vnic_attachment as a,
+      subnet_list as s
+    where
+      s.subnet_id = a.subnet_id
+      and a.instance_id = any($1);
+  EOQ
+
+  param "compute_instance_ids" {}
+}
+
 edge "vcn_local_peering_gateway_to_vcn_vcn" {
   title = "vcn"
 
@@ -73,6 +98,24 @@ edge "vcn_nat_gateway_vcn_vcn" {
   EOQ
 
   param "vcn_nat_gateway_ids" {}
+}
+
+edge "vcn_network_load_balancer_to_compute_instance" {
+  title = "routes to"
+
+  sql = <<-EOQ
+    select
+      n.id as from_id,
+      a.instance_id as to_id
+    from
+      oci_core_vnic_attachment as a,
+      oci_core_network_load_balancer as n
+    where
+      n.subnet_id = a.subnet_id
+      and a.instance_id = any($1);
+  EOQ
+
+  param "compute_instance_ids" {}
 }
 
 edge "vcn_network_security_group_to_compute_instance" {

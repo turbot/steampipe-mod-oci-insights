@@ -46,69 +46,30 @@ edge "compute_instance_to_compute_image" {
   param "compute_instance_ids" {}
 }
 
-edge "compute_instance_to_vcn_load_balancer" {
-  title = "load balancer"
-
-  sql = <<-EOQ
-    with subnet_list as (
-      select
-        jsonb_array_elements_text(subnet_ids) as subnet_id,
-        id
-      from
-        oci_core_load_balancer
-    )
-    select
-      a.instance_id as from_id,
-      s.id as to_id
-    from
-      oci_core_vnic_attachment as a,
-      subnet_list as s
-    where
-      s.subnet_id = a.subnet_id
-      and a.instance_id = any($1);
-  EOQ
-
-  param "compute_instance_ids" {}
-}
-
-edge "compute_instance_to_vcn_network_load_balancer" {
-  title = "network load balancer"
-
-  sql = <<-EOQ
-    select
-      a.instance_id as from_id,
-      n.id as to_id
-    from
-      oci_core_vnic_attachment as a,
-      oci_core_network_load_balancer as n
-    where
-      n.subnet_id = a.subnet_id
-      and a.instance_id = any($1);
-  EOQ
-
-  param "compute_instance_ids" {}
-}
-
 edge "compute_instance_to_vcn_network_security_group" {
   title = "nsg"
 
   sql = <<-EOQ
-    with network_security_groups as (
+    with vnic_attachment_nsg as (
       select
         jsonb_array_elements_text(nsg_ids) as n_id,
-        instance_id
+        instance_id,
+        vnic_id
       from
         oci_core_vnic_attachment
     )
     select
-      instance_id as from_id,
+      coalesce(
+        va.vnic_id,
+        va.instance_id
+      ) as from_id,
       n_id as to_id
     from
-      oci_core_network_security_group,
-      network_security_groups
+      oci_core_network_security_group as n,
+      vnic_attachment_nsg as va
     where
-      id = n_id
-      and instance_id = any($1)
+      n.id = va.n_id
+      and va.instance_id = any($1)
   EOQ
 
   param "compute_instance_ids" {}
@@ -118,13 +79,25 @@ edge "compute_instance_to_vcn_subnet" {
   title = "subnet"
 
   sql = <<-EOQ
+    with vnic_attachment_nsg as (
+      select
+        jsonb_array_elements_text(nsg_ids) as n_id,
+        instance_id,
+        vnic_id,
+        subnet_id
+      from
+        oci_core_vnic_attachment
+    )
     select
-      i.id as from_id,
+      coalesce(
+        v.n_id,
+        v.vnic_id
+      ) as from_id,
       s.id as to_id
     from
       oci_core_instance as i,
       oci_core_subnet as s,
-      oci_core_vnic_attachment as v
+      vnic_attachment_nsg as v
     where
       v.instance_id = i.id
       and v.subnet_id = s.id

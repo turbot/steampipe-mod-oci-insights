@@ -215,14 +215,14 @@ dashboard "compute_instance_detail" {
       }
 
       edge {
-        base = edge.compute_instance_to_vcn_load_balancer
+        base = edge.vcn_load_balancer_to_compute_instance
         args = {
           compute_instance_ids = [self.input.instance_id.value]
         }
       }
 
       edge {
-        base = edge.compute_instance_to_vcn_network_load_balancer
+        base = edge.vcn_network_load_balancer_to_compute_instance
         args = {
           compute_instance_ids = [self.input.instance_id.value]
         }
