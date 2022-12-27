@@ -29,3 +29,19 @@ edge "kms_key_to_kms_vault" {
 
   param "kms_key_ids" {}
 }
+
+edge "kms_vault_to_kms_key" {
+  title = "key"
+
+  sql = <<-EOQ
+    select
+      vault_id as from_id,
+      id as to_id
+    from
+      oci_kms_key
+    where
+      vault_id = any($1);
+  EOQ
+
+  param "kms_vault_ids" {}
+}

@@ -45,8 +45,8 @@ dashboard "block_storage_block_volume_detail" {
     args  = [self.input.block_volume_id.value]
   }
 
-  with "kms_key_versions" {
-    query = query.block_storage_block_volume_kms_key_versions
+  with "kms_vaults" {
+    query = query.block_storage_block_volume_kms_vaults
     args  = [self.input.block_volume_id.value]
   }
 
@@ -86,9 +86,9 @@ dashboard "block_storage_block_volume_detail" {
       }
 
       node {
-        base = node.kms_key_version
+        base = node.kms_vault
         args = {
-          kms_key_version_ids = with.kms_key_versions.rows[*].key_version_id
+          kms_vault_ids = with.kms_vaults.rows[*].key_vault_id
         }
       }
 
@@ -107,16 +107,16 @@ dashboard "block_storage_block_volume_detail" {
       }
 
       edge {
-        base = edge.blockstorage_block_volume_to_kms_key_version
+        base = edge.blockstorage_block_volume_to_kms_key_vault
         args = {
           blockstorage_block_volume_ids = [self.input.block_volume_id.value]
         }
       }
 
       edge {
-        base = edge.kms_key_version_to_kms_key
+        base = edge.kms_vault_to_kms_key
         args = {
-          kms_key_version_ids = with.kms_key_versions.rows[*].key_version_id
+          kms_vault_ids = with.kms_vaults.rows[*].key_vault_id
         }
       }
 
@@ -290,10 +290,10 @@ query "block_storage_block_volume_kms_keys" {
   EOQ
 }
 
-query "block_storage_block_volume_kms_key_versions" {
+query "block_storage_block_volume_kms_vaults" {
   sql = <<EOQ
     select
-      k.current_key_version as key_version_id
+      k.vault_id as key_vault_id
     from
       oci_core_volume as v,
       oci_kms_key as k

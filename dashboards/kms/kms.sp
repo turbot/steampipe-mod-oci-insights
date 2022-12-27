@@ -18,6 +18,6 @@ category "kms_key_version" {
 
 category "kms_vault" {
   title = "KMS Vault"
-  icon  = "hard_drive"
+  icon  = "key"
   color = local.security_color
 }
