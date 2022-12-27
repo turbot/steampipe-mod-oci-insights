@@ -18,20 +18,52 @@ dashboard "filestorage_filesystem_detail" {
       width = 2
 
       query = query.filestorage_filesystem_cloned
-      args = {
-        id = self.input.filesystem_id.value
-      }
+      args = [self.input.filesystem_id.value]
     }
 
     card {
       query = query.filestorage_filesystem_snapshot
       width = 2
 
-      args = {
-        id = self.input.filesystem_id.value
-      }
+      args = [self.input.filesystem_id.value]
     }
 
+  }
+
+  with "file_storage_snapshots" {
+    query = query.file_storage_file_system_file_storage_snapshots
+    args  = [self.input.filesystem_id.value]
+  }
+
+  container {
+
+    graph {
+      title     = "Relationships"
+      type      = "graph"
+      direction = "TD"
+
+      node {
+        base = node.file_storage_file_system
+        args = {
+          file_storage_file_system_ids = [self.input.filesystem_id.value]
+        }
+      }
+
+      node {
+        base = node.file_storage_snapshot
+        args = {
+          file_storage_snapshot_ids = with.file_storage_snapshots.rows[*].snapshot_id
+        }
+      }
+
+      edge {
+        base = edge.file_storage_file_system_to_file_storage_snapshot
+        args = {
+          file_storage_file_system_ids = [self.input.filesystem_id.value]
+        }
+      }
+
+    }
   }
 
   container {
@@ -44,9 +76,7 @@ dashboard "filestorage_filesystem_detail" {
         type  = "line"
         width = 6
         query = query.filestorage_filesystem_overview
-        args = {
-          id = self.input.filesystem_id.value
-        }
+        args = [self.input.filesystem_id.value]
 
       }
 
@@ -54,9 +84,7 @@ dashboard "filestorage_filesystem_detail" {
         title = "Tags"
         width = 6
         query = query.filestorage_filesystem_tag
-        args = {
-          id = self.input.filesystem_id.value
-        }
+        args = [self.input.filesystem_id.value]
 
       }
     }
@@ -67,25 +95,19 @@ dashboard "filestorage_filesystem_detail" {
       table {
         title = "Snapshots Details"
         query = query.filestorage_filesystem_snapshot_detail
-        args = {
-          id = self.input.filesystem_id.value
-        }
+        args = [self.input.filesystem_id.value]
       }
 
       table {
         title = "Encryption Details"
         query = query.filestorage_filesystem_encryption
-        args = {
-          id = self.input.filesystem_id.value
-        }
+        args = [self.input.filesystem_id.value]
       }
 
       table {
         title = "Source Details"
         query = query.filestorage_filesystem_source
-        args = {
-          id = self.input.filesystem_id.value
-        }
+        args = [self.input.filesystem_id.value]
       }
     }
 
@@ -122,8 +144,6 @@ query "filestorage_filesystem_cloned" {
     where
       id = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "filestorage_filesystem_snapshot" {
@@ -135,8 +155,6 @@ query "filestorage_filesystem_snapshot" {
     where
       file_system_id = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "filestorage_filesystem_overview" {
@@ -152,8 +170,6 @@ query "filestorage_filesystem_overview" {
     where
       id = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "filestorage_filesystem_tag" {
@@ -173,8 +189,6 @@ query "filestorage_filesystem_tag" {
       jsondata,
       json_each_text(tags);
   EOQ
-
-  param "id" {}
 }
 
 query "filestorage_filesystem_snapshot_detail" {
@@ -188,8 +202,6 @@ query "filestorage_filesystem_snapshot_detail" {
     where
       file_system_id  = $1;
   EOQ
-
-  param "id" {}
 }
 
 
@@ -203,8 +215,6 @@ query "filestorage_filesystem_encryption" {
     where
       id  = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "filestorage_filesystem_source" {
@@ -217,6 +227,15 @@ query "filestorage_filesystem_source" {
     where
       id  = $1 ;
   EOQ
+}
 
-  param "id" {}
+query "file_storage_file_system_file_storage_snapshots" {
+  sql = <<-EOQ
+    select
+      id as snapshot_id
+    from
+      oci_file_storage_snapshot
+    where
+      file_system_id  = $1 ;
+  EOQ
 }
