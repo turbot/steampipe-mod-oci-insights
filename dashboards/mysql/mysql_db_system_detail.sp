@@ -18,20 +18,128 @@ dashboard "mysql_db_system_detail" {
       width = 2
 
       query = query.mysql_db_system_mysql_version
-      args = {
-        id = self.input.db_system_id.value
-      }
+      args = [self.input.db_system_id.value]
     }
 
     card {
       width = 2
 
       query = query.mysql_db_system_backup
-      args = {
-        id = self.input.db_system_id.value
-      }
+      args = [self.input.db_system_id.value]
     }
 
+  }
+
+  with "mysql_backups" {
+    query = query.mysql_db_system_mysql_backups
+    args  = [self.input.db_system_id.value]
+  }
+
+  with "mysql_channels" {
+    query = query.mysql_db_system_mysql_channels
+    args  = [self.input.db_system_id.value]
+  }
+
+  with "mysql_configurations" {
+    query = query.mysql_db_system_mysql_configurations
+    args  = [self.input.db_system_id.value]
+  }
+
+  with "vcn_subnets" {
+    query = query.mysql_db_system_vcn_subnets
+    args  = [self.input.db_system_id.value]
+  }
+
+  with "vcn_vcns" {
+    query = query.mysql_db_system_vcn_vcns
+    args  = [self.input.db_system_id.value]
+  }
+
+  container {
+
+    graph {
+      title     = "Relationships"
+      type      = "graph"
+      direction = "TD"
+
+      node {
+        base = node.mysql_backup
+        args = {
+          mysql_backup_ids = with.mysql_backups.rows[*].backup_id
+        }
+      }
+
+      node {
+        base = node.mysql_channel
+        args = {
+          mysql_channel_ids = with.mysql_channels.rows[*].channel_id
+        }
+      }
+
+      node {
+        base = node.mysql_configuration
+        args = {
+          mysql_configuration_ids = with.mysql_configurations.rows[*].configuration_id
+        }
+      }
+
+      node {
+        base = node.mysql_db_system
+        args = {
+          mysql_db_system_ids = [self.input.db_system_id.value]
+        }
+      }
+
+      node {
+        base = node.vcn_subnet
+        args = {
+          vcn_subnet_ids = with.vcn_subnets.rows[*].subnet_id
+        }
+      }
+
+      node {
+        base = node.vcn_vcn
+        args = {
+          vcn_vcn_ids = with.vcn_vcns.rows[*].vcn_id
+        }
+      }
+
+      edge {
+        base = edge.mysql_db_system_to_mysql_backup
+        args = {
+          mysql_db_system_ids = [self.input.db_system_id.value]
+        }
+      }
+
+      edge {
+        base = edge.mysql_db_system_to_mysql_channel
+        args = {
+          mysql_db_system_ids = [self.input.db_system_id.value]
+        }
+      }
+
+      edge {
+        base = edge.mysql_db_system_to_mysql_configuration
+        args = {
+          mysql_db_system_ids = [self.input.db_system_id.value]
+        }
+      }
+
+      edge {
+        base = edge.mysql_db_system_to_vcn_subnet
+        args = {
+          vcn_subnet_ids = with.vcn_subnets.rows[*].subnet_id
+        }
+      }
+
+      edge {
+        base = edge.mysql_db_system_to_vcn_vcn
+        args = {
+          mysql_db_system_ids = [self.input.db_system_id.value]
+        }
+      }
+
+    }
   }
 
   container {
@@ -44,9 +152,7 @@ dashboard "mysql_db_system_detail" {
         type  = "line"
         width = 6
         query = query.mysql_db_system_overview
-        args = {
-          id = self.input.db_system_id.value
-        }
+        args = [self.input.db_system_id.value]
 
       }
 
@@ -54,9 +160,7 @@ dashboard "mysql_db_system_detail" {
         title = "Tags"
         width = 6
         query = query.mysql_db_system_tag
-        args = {
-          id = self.input.db_system_id.value
-        }
+        args = [self.input.db_system_id.value]
 
       }
     }
@@ -67,9 +171,7 @@ dashboard "mysql_db_system_detail" {
       table {
         title = "Backup Policy"
         query = query.mysql_db_system_backup_policy
-        args = {
-          id = self.input.db_system_id.value
-        }
+        args = [self.input.db_system_id.value]
       }
     }
 
@@ -78,9 +180,7 @@ dashboard "mysql_db_system_detail" {
       table {
         title = "Endpoint Details"
         query = query.mysql_db_system_endpoint
-        args = {
-          id = self.input.db_system_id.value
-        }
+        args = [self.input.db_system_id.value]
       }
     }
 
@@ -91,9 +191,7 @@ dashboard "mysql_db_system_detail" {
         type  = "line"
         width = 6
         query = query.mysql_db_system_connection
-        args = {
-          id = self.input.db_system_id.value
-        }
+        args = [self.input.db_system_id.value]
       }
     }
 
@@ -118,7 +216,7 @@ query "mysql_db_system_input" {
       s.lifecycle_state <> 'DELETED'
     order by
       s.display_name;
-EOQ
+  EOQ
 }
 
 query "mysql_db_system_mysql_version" {
@@ -130,8 +228,6 @@ query "mysql_db_system_mysql_version" {
     where
       id = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "mysql_db_system_backup" {
@@ -146,8 +242,6 @@ query "mysql_db_system_backup" {
     where
       s.id = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "mysql_db_system_overview" {
@@ -162,8 +256,6 @@ query "mysql_db_system_overview" {
     where
       id = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "mysql_db_system_tag" {
@@ -183,8 +275,6 @@ query "mysql_db_system_tag" {
       jsondata,
       json_each_text(tags);
   EOQ
-
-  param "id" {}
 }
 
 query "mysql_db_system_backup_policy" {
@@ -197,8 +287,6 @@ query "mysql_db_system_backup_policy" {
     where
       id  = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "mysql_db_system_endpoint" {
@@ -216,8 +304,6 @@ query "mysql_db_system_endpoint" {
     where
       id = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "mysql_db_system_connection" {
@@ -231,6 +317,61 @@ query "mysql_db_system_connection" {
       timestamp >= current_date - interval '7 day' and id = $1
     order by timestamp;
   EOQ
+}
 
-  param "id" {}
+query "mysql_db_system_mysql_backups" {
+  sql = <<-EOQ
+    select
+      id as backup_id
+    from
+      oci_mysql_backup
+    where
+      db_system_id = $1
+  EOQ
+}
+
+query "mysql_db_system_mysql_configurations" {
+  sql = <<-EOQ
+    select
+      configuration_id
+    from
+      oci_mysql_db_system
+    where
+      id = $1
+  EOQ
+}
+
+query "mysql_db_system_mysql_channels" {
+  sql = <<-EOQ
+    select
+      id as channel_id
+    from
+      oci_mysql_channel
+    where
+      target ->> 'dbSystemId' = $1
+  EOQ
+}
+
+query "mysql_db_system_vcn_vcns" {
+  sql = <<-EOQ
+    select
+      s.vcn_id as vcn_id
+    from
+      oci_mysql_db_system as m,
+      oci_core_subnet as s
+    where
+      m.subnet_id = s.id
+      and m.id = $1
+  EOQ
+}
+
+query "mysql_db_system_vcn_subnets" {
+  sql = <<-EOQ
+    select
+      subnet_id
+    from
+      oci_mysql_db_system as m
+    where
+      m.id = $1
+  EOQ
 }
