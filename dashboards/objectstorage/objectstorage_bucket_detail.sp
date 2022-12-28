@@ -18,29 +18,40 @@ dashboard "objectstorage_bucket_detail" {
       width = 2
 
       query = query.objectstorage_bucket_read_only
-      args = {
-        id = self.input.bucket_id.value
-      }
+      args = [self.input.bucket_id.value]
     }
 
     card {
       width = 2
 
       query = query.objectstorage_bucket_versioning
-      args = {
-        id = self.input.bucket_id.value
-      }
+      args = [self.input.bucket_id.value]
     }
 
     card {
       query = query.objectstorage_bucket_public_access
       width = 2
 
-      args = {
-        id = self.input.bucket_id.value
-      }
+      args = [self.input.bucket_id.value]
     }
 
+  }
+
+  container {
+
+    graph {
+      title     = "Relationships"
+      type      = "graph"
+      direction = "TD"
+
+      node {
+        base = node.objectstorage_bucket
+        args = {
+          objectstorage_bucket_ids = [self.input.bucket_id.value]
+        }
+      }
+
+    }
   }
 
   container {
@@ -53,9 +64,7 @@ dashboard "objectstorage_bucket_detail" {
         type  = "line"
         width = 6
         query = query.objectstorage_bucket_overview
-        args = {
-          id = self.input.bucket_id.value
-        }
+        args = [self.input.bucket_id.value]
 
       }
 
@@ -63,9 +72,7 @@ dashboard "objectstorage_bucket_detail" {
         title = "Tags"
         width = 6
         query = query.objectstorage_bucket_tag
-        args = {
-          id = self.input.bucket_id.value
-        }
+        args = [self.input.bucket_id.value]
 
       }
     }
@@ -76,17 +83,13 @@ dashboard "objectstorage_bucket_detail" {
       table {
         title = "Encryption Details"
         query = query.objectstorage_bucket_encryption
-        args = {
-          id = self.input.bucket_id.value
-        }
+        args = [self.input.bucket_id.value]
       }
 
       table {
         title = "Public Access"
         query = query.objectstorage_bucket_access
-        args = {
-          id = self.input.bucket_id.value
-        }
+        args = [self.input.bucket_id.value]
       }
 
     }
@@ -96,9 +99,7 @@ dashboard "objectstorage_bucket_detail" {
       table {
         title = "Object Lifecycle Policy"
         query = query.objectstorage_bucket_object_lifecycle_policy
-        args = {
-          id = self.input.bucket_id.value
-        }
+        args = [self.input.bucket_id.value]
       }
 
     }
@@ -135,8 +136,6 @@ query "objectstorage_bucket_read_only" {
     where
       id = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "objectstorage_bucket_versioning" {
@@ -150,8 +149,6 @@ query "objectstorage_bucket_versioning" {
     where
       id = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "objectstorage_bucket_public_access" {
@@ -165,8 +162,6 @@ query "objectstorage_bucket_public_access" {
     where
       id = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "objectstorage_bucket_overview" {
@@ -183,8 +178,6 @@ query "objectstorage_bucket_overview" {
   where
     id = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "objectstorage_bucket_tag" {
@@ -204,8 +197,6 @@ query "objectstorage_bucket_tag" {
      jsondata,
      json_each_text(tags);
   EOQ
-
-  param "id" {}
 }
 
 query "objectstorage_bucket_encryption" {
@@ -218,8 +209,6 @@ query "objectstorage_bucket_encryption" {
    where
      id  = $1
   EOQ
-
-  param "id" {}
 }
 
 query "objectstorage_bucket_access" {
@@ -231,8 +220,6 @@ query "objectstorage_bucket_access" {
   where
     id = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "objectstorage_bucket_object_lifecycle_policy" {
@@ -251,6 +238,4 @@ query "objectstorage_bucket_object_lifecycle_policy" {
   where
     id = $1 and jsonb_typeof(object_lifecycle_policy -> 'items') = 'array';
   EOQ
-
-  param "id" {}
 }
