@@ -18,7 +18,7 @@ dashboard "filestorage_filesystem_detail" {
       width = 2
 
       query = query.filestorage_filesystem_cloned
-      args = [self.input.filesystem_id.value]
+      args  = [self.input.filesystem_id.value]
     }
 
     card {
@@ -30,8 +30,8 @@ dashboard "filestorage_filesystem_detail" {
 
   }
 
-  with "file_storage_snapshots" {
-    query = query.file_storage_file_system_file_storage_snapshots
+  with "filestorage_snapshots" {
+    query = query.filestorage_file_system_filestorage_snapshots
     args  = [self.input.filesystem_id.value]
   }
 
@@ -43,23 +43,23 @@ dashboard "filestorage_filesystem_detail" {
       direction = "TD"
 
       node {
-        base = node.file_storage_file_system
+        base = node.filestorage_file_system
         args = {
-          file_storage_file_system_ids = [self.input.filesystem_id.value]
+          filestorage_file_system_ids = [self.input.filesystem_id.value]
         }
       }
 
       node {
-        base = node.file_storage_snapshot
+        base = node.filestorage_snapshot
         args = {
-          file_storage_snapshot_ids = with.file_storage_snapshots.rows[*].snapshot_id
+          filestorage_snapshot_ids = with.filestorage_snapshots.rows[*].snapshot_id
         }
       }
 
       edge {
-        base = edge.file_storage_file_system_to_file_storage_snapshot
+        base = edge.filestorage_file_system_to_filestorage_snapshot
         args = {
-          file_storage_file_system_ids = [self.input.filesystem_id.value]
+          filestorage_file_system_ids = [self.input.filesystem_id.value]
         }
       }
 
@@ -76,7 +76,7 @@ dashboard "filestorage_filesystem_detail" {
         type  = "line"
         width = 6
         query = query.filestorage_filesystem_overview
-        args = [self.input.filesystem_id.value]
+        args  = [self.input.filesystem_id.value]
 
       }
 
@@ -84,7 +84,7 @@ dashboard "filestorage_filesystem_detail" {
         title = "Tags"
         width = 6
         query = query.filestorage_filesystem_tag
-        args = [self.input.filesystem_id.value]
+        args  = [self.input.filesystem_id.value]
 
       }
     }
@@ -95,19 +95,19 @@ dashboard "filestorage_filesystem_detail" {
       table {
         title = "Snapshots Details"
         query = query.filestorage_filesystem_snapshot_detail
-        args = [self.input.filesystem_id.value]
+        args  = [self.input.filesystem_id.value]
       }
 
       table {
         title = "Encryption Details"
         query = query.filestorage_filesystem_encryption
-        args = [self.input.filesystem_id.value]
+        args  = [self.input.filesystem_id.value]
       }
 
       table {
         title = "Source Details"
         query = query.filestorage_filesystem_source
-        args = [self.input.filesystem_id.value]
+        args  = [self.input.filesystem_id.value]
       }
     }
 
@@ -229,7 +229,7 @@ query "filestorage_filesystem_source" {
   EOQ
 }
 
-query "file_storage_file_system_file_storage_snapshots" {
+query "filestorage_file_system_filestorage_snapshots" {
   sql = <<-EOQ
     select
       id as snapshot_id

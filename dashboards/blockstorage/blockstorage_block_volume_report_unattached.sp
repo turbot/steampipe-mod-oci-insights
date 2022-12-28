@@ -1,4 +1,4 @@
-dashboard "block_storage_block_volume_unattached_report" {
+dashboard "blockstorage_block_volume_unattached_report" {
 
   title         = "OCI Block Storage Block Volume Unattached Report"
   documentation = file("./dashboards/blockstorage/docs/blockstorage_block_volume_report_unattached.md")
@@ -11,7 +11,7 @@ dashboard "block_storage_block_volume_unattached_report" {
   container {
 
     card {
-      sql   = query.block_storage_block_volume_unattached_count.sql
+      sql   = query.blockstorage_block_volume_unattached_count.sql
       width = 2
     }
   }
@@ -22,15 +22,15 @@ dashboard "block_storage_block_volume_unattached_report" {
     }
 
     column "Name" {
-      href = "${dashboard.block_storage_block_volume_detail.url_path}?input.volume_id={{.OCID | @uri}}"
+      href = "${dashboard.blockstorage_block_volume_detail.url_path}?input.volume_id={{.OCID | @uri}}"
     }
 
-    sql = query.block_storage_block_volume_unattached_report.sql
+    sql = query.blockstorage_block_volume_unattached_report.sql
   }
 
 }
 
-query "block_storage_block_volume_unattached_count" {
+query "blockstorage_block_volume_unattached_count" {
   sql = <<-EOQ
    select
       count(*) as value,
@@ -48,7 +48,7 @@ query "block_storage_block_volume_unattached_count" {
   EOQ
 }
 
-query "block_storage_block_volume_unattached_report" {
+query "blockstorage_block_volume_unattached_report" {
   sql = <<-EOQ
       select
         v.display_name as "Name",

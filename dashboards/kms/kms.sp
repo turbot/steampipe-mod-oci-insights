@@ -6,6 +6,7 @@ locals {
 
 category "kms_key" {
   title = "KMS Key"
+  href  = "/oci_insights.dashboard.kms_key_detail?input.key_id={{.properties.'ID' | @uri}}"
   icon  = "key"
   color = local.security_color
 }

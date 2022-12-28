@@ -143,7 +143,7 @@ edge "vcn_network_security_group_to_compute_instance" {
   param "compute_instance_ids" {}
 }
 
-edge "vcn_network_security_group_to_file_storage_mount_target" {
+edge "vcn_network_security_group_to_filestorage_mount_target" {
   title = "mount target"
 
   sql = <<-EOQ
@@ -152,7 +152,7 @@ edge "vcn_network_security_group_to_file_storage_mount_target" {
         jsonb_array_elements_text(nsg_ids) as n_id,
         id
       from
-        oci_file_storage_mount_target
+        oci_filestorage_mount_target
     )
     select
       n.id as from_id,
@@ -165,7 +165,7 @@ edge "vcn_network_security_group_to_file_storage_mount_target" {
       and s.id = any($1)
   EOQ
 
-  param "file_storage_mount_target_ids" {}
+  param "filestorage_mount_target_ids" {}
 }
 
 edge "vcn_network_security_group_to_vcn_load_balancer" {

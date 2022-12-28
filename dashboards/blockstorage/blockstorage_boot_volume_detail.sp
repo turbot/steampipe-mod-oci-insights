@@ -1,4 +1,4 @@
-dashboard "block_storage_boot_volume_detail" {
+dashboard "blockstorage_boot_volume_detail" {
 
   title = "OCI Block Storage Boot Volume Detail"
 
@@ -8,7 +8,7 @@ dashboard "block_storage_boot_volume_detail" {
 
   input "boot_volume_id" {
     title = "Select a boot volume:"
-    query = query.block_storage_boot_volume_input
+    query = query.blockstorage_boot_volume_input
     width = 4
   }
 
@@ -16,7 +16,7 @@ dashboard "block_storage_boot_volume_detail" {
 
     card {
       width = 2
-      query = query.block_storage_boot_volume_storage
+      query = query.blockstorage_boot_volume_storage
       args = {
         id = self.input.boot_volume_id.value
       }
@@ -24,7 +24,7 @@ dashboard "block_storage_boot_volume_detail" {
 
     card {
       width = 2
-      query = query.block_storage_boot_volume_vpu
+      query = query.blockstorage_boot_volume_vpu
       args = {
         id = self.input.boot_volume_id.value
       }
@@ -41,7 +41,7 @@ dashboard "block_storage_boot_volume_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-        query = query.block_storage_boot_volume_overview
+        query = query.blockstorage_boot_volume_overview
         args = {
           id = self.input.boot_volume_id.value
         }
@@ -51,7 +51,7 @@ dashboard "block_storage_boot_volume_detail" {
       table {
         title = "Tags"
         width = 6
-        query = query.block_storage_boot_volume_tags
+        query = query.blockstorage_boot_volume_tags
         args = {
           id = self.input.boot_volume_id.value
         }
@@ -64,7 +64,7 @@ dashboard "block_storage_boot_volume_detail" {
 
       table {
         title = "Attached To"
-        query = query.block_storage_boot_volume_attached_instances
+        query = query.blockstorage_boot_volume_attached_instances
         args = {
           id = self.input.boot_volume_id.value
         }
@@ -80,7 +80,7 @@ dashboard "block_storage_boot_volume_detail" {
 
       table {
         title = "Encryption Details"
-        query = query.block_storage_boot_volume_encryption
+        query = query.blockstorage_boot_volume_encryption
         args = {
           id = self.input.boot_volume_id.value
         }
@@ -90,7 +90,7 @@ dashboard "block_storage_boot_volume_detail" {
   }
 }
 
-query "block_storage_boot_volume_input" {
+query "blockstorage_boot_volume_input" {
   sql = <<EOQ
     select
       v.display_name as label,
@@ -111,7 +111,7 @@ query "block_storage_boot_volume_input" {
   EOQ
 }
 
-query "block_storage_boot_volume_storage" {
+query "blockstorage_boot_volume_storage" {
   sql = <<-EOQ
     select
       size_in_gbs as "Storage (GB)"
@@ -124,7 +124,7 @@ query "block_storage_boot_volume_storage" {
   param "id" {}
 }
 
-query "block_storage_boot_volume_vpu" {
+query "blockstorage_boot_volume_vpu" {
   sql = <<-EOQ
     select
       vpus_per_gb as "VPUs"
@@ -137,7 +137,7 @@ query "block_storage_boot_volume_vpu" {
   param "id" {}
 }
 
-query "block_storage_boot_volume_overview" {
+query "blockstorage_boot_volume_overview" {
   sql = <<EOQ
     select
       display_name as "Name",
@@ -156,7 +156,7 @@ query "block_storage_boot_volume_overview" {
   param "id" {}
 }
 
-query "block_storage_boot_volume_tags" {
+query "blockstorage_boot_volume_tags" {
   sql = <<EOQ
     with jsondata as (
       select
@@ -177,7 +177,7 @@ query "block_storage_boot_volume_tags" {
   param "id" {}
 }
 
-query "block_storage_boot_volume_attached_instances" {
+query "blockstorage_boot_volume_attached_instances" {
   sql = <<EOQ
     select
       i.id as "Instance ID",
@@ -194,7 +194,7 @@ query "block_storage_boot_volume_attached_instances" {
   param "id" {}
 }
 
-query "block_storage_boot_volume_encryption" {
+query "blockstorage_boot_volume_encryption" {
   sql = <<EOQ
     select
       case when kms_key_id is not null and kms_key_id <> '' then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",

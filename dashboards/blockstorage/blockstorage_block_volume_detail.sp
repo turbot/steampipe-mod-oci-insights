@@ -1,4 +1,4 @@
-dashboard "block_storage_block_volume_detail" {
+dashboard "blockstorage_block_volume_detail" {
 
   title = "OCI Block Storage Block Volume Detail"
 
@@ -8,7 +8,7 @@ dashboard "block_storage_block_volume_detail" {
 
   input "block_volume_id" {
     title = "Select a block volume:"
-    query = query.block_storage_block_volume_input
+    query = query.blockstorage_block_volume_input
     width = 4
   }
 
@@ -17,36 +17,36 @@ dashboard "block_storage_block_volume_detail" {
     card {
       width = 2
 
-      query = query.block_storage_block_volume_storage
-      args = [self.input.block_volume_id.value]
+      query = query.blockstorage_block_volume_storage
+      args  = [self.input.block_volume_id.value]
     }
 
     card {
       width = 2
 
-      query = query.block_storage_block_volume_vpu
-      args = [self.input.block_volume_id.value]
+      query = query.blockstorage_block_volume_vpu
+      args  = [self.input.block_volume_id.value]
     }
 
   }
 
   with "blockstorage_block_volume_backups" {
-    query = query.block_storage_block_volume_blockstorage_block_volume_backups
+    query = query.blockstorage_block_volume_blockstorage_block_volume_backups
     args  = [self.input.block_volume_id.value]
   }
 
   with "compute_instances" {
-    query = query.block_storage_block_volume_compute_instances
+    query = query.blockstorage_block_volume_compute_instances
     args  = [self.input.block_volume_id.value]
   }
 
   with "kms_keys" {
-    query = query.block_storage_block_volume_kms_keys
+    query = query.blockstorage_block_volume_kms_keys
     args  = [self.input.block_volume_id.value]
   }
 
   with "kms_vaults" {
-    query = query.block_storage_block_volume_kms_vaults
+    query = query.blockstorage_block_volume_kms_vaults
     args  = [self.input.block_volume_id.value]
   }
 
@@ -132,16 +132,16 @@ dashboard "block_storage_block_volume_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-        query = query.block_storage_block_volume_overview
-        args = [self.input.block_volume_id.value]
+        query = query.blockstorage_block_volume_overview
+        args  = [self.input.block_volume_id.value]
 
       }
 
       table {
         title = "Tags"
         width = 6
-        query = query.block_storage_block_volume_tags
-        args = [self.input.block_volume_id.value]
+        query = query.blockstorage_block_volume_tags
+        args  = [self.input.block_volume_id.value]
 
       }
     }
@@ -151,8 +151,8 @@ dashboard "block_storage_block_volume_detail" {
 
       table {
         title = "Attached To"
-        query = query.block_storage_block_volume_attached_instances
-        args = [self.input.block_volume_id.value]
+        query = query.blockstorage_block_volume_attached_instances
+        args  = [self.input.block_volume_id.value]
 
         column "Instance ID" {
           display = "none"
@@ -165,15 +165,15 @@ dashboard "block_storage_block_volume_detail" {
 
       table {
         title = "Encryption Details"
-        query = query.block_storage_block_volume_encryption
-        args = [self.input.block_volume_id.value]
+        query = query.blockstorage_block_volume_encryption
+        args  = [self.input.block_volume_id.value]
       }
     }
 
   }
 }
 
-query "block_storage_block_volume_input" {
+query "blockstorage_block_volume_input" {
   sql = <<EOQ
     select
       v.display_name as label,
@@ -194,7 +194,7 @@ query "block_storage_block_volume_input" {
   EOQ
 }
 
-query "block_storage_block_volume_storage" {
+query "blockstorage_block_volume_storage" {
   sql = <<-EOQ
     select
       size_in_gbs as "Storage (GB)"
@@ -205,7 +205,7 @@ query "block_storage_block_volume_storage" {
   EOQ
 }
 
-query "block_storage_block_volume_vpu" {
+query "blockstorage_block_volume_vpu" {
   sql = <<-EOQ
     select
       vpus_per_gb as "VPUs"
@@ -216,7 +216,7 @@ query "block_storage_block_volume_vpu" {
   EOQ
 }
 
-query "block_storage_block_volume_overview" {
+query "blockstorage_block_volume_overview" {
   sql = <<EOQ
     select
       display_name as "Name",
@@ -233,7 +233,7 @@ query "block_storage_block_volume_overview" {
   EOQ
 }
 
-query "block_storage_block_volume_tags" {
+query "blockstorage_block_volume_tags" {
   sql = <<EOQ
     with jsondata as (
       select
@@ -252,7 +252,7 @@ query "block_storage_block_volume_tags" {
   EOQ
 }
 
-query "block_storage_block_volume_attached_instances" {
+query "blockstorage_block_volume_attached_instances" {
   sql = <<EOQ
     select
       i.id as "Instance ID",
@@ -267,7 +267,7 @@ query "block_storage_block_volume_attached_instances" {
   EOQ
 }
 
-query "block_storage_block_volume_encryption" {
+query "blockstorage_block_volume_encryption" {
   sql = <<EOQ
     select
       case when kms_key_id is not null and kms_key_id <> '' then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
@@ -279,7 +279,7 @@ query "block_storage_block_volume_encryption" {
   EOQ
 }
 
-query "block_storage_block_volume_kms_keys" {
+query "blockstorage_block_volume_kms_keys" {
   sql = <<EOQ
     select
       kms_key_id
@@ -290,7 +290,7 @@ query "block_storage_block_volume_kms_keys" {
   EOQ
 }
 
-query "block_storage_block_volume_kms_vaults" {
+query "blockstorage_block_volume_kms_vaults" {
   sql = <<EOQ
     select
       k.vault_id as key_vault_id
@@ -303,7 +303,7 @@ query "block_storage_block_volume_kms_vaults" {
   EOQ
 }
 
-query "block_storage_block_volume_compute_instances" {
+query "blockstorage_block_volume_compute_instances" {
   sql = <<EOQ
     select
       instance_id
@@ -314,7 +314,7 @@ query "block_storage_block_volume_compute_instances" {
   EOQ
 }
 
-query "block_storage_block_volume_blockstorage_block_volume_backups" {
+query "blockstorage_block_volume_blockstorage_block_volume_backups" {
   sql = <<EOQ
     select
       id as backup_id

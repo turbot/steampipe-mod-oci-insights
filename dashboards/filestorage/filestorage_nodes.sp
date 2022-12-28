@@ -1,5 +1,5 @@
-node "file_storage_file_system" {
-  category = category.file_storage_file_system
+node "filestorage_file_system" {
+  category = category.filestorage_file_system
 
   sql = <<-EOQ
     select
@@ -19,11 +19,11 @@ node "file_storage_file_system" {
       id = any($1);
   EOQ
 
-  param "file_storage_file_system_ids" {}
+  param "filestorage_file_system_ids" {}
 }
 
-node "file_storage_mount_target" {
-  category = category.file_storage_mount_target
+node "filestorage_mount_target" {
+  category = category.filestorage_mount_target
 
   sql = <<-EOQ
     select
@@ -43,11 +43,11 @@ node "file_storage_mount_target" {
       id = any($1);
   EOQ
 
-  param "file_storage_mount_target_ids" {}
+  param "filestorage_mount_target_ids" {}
 }
 
-node "file_storage_snapshot" {
-  category = category.file_storage_snapshot
+node "filestorage_snapshot" {
+  category = category.filestorage_snapshot
 
   sql = <<-EOQ
     select
@@ -67,5 +67,5 @@ node "file_storage_snapshot" {
       id = any($1);
   EOQ
 
-  param "file_storage_snapshot_ids" {}
+  param "filestorage_snapshot_ids" {}
 }

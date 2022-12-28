@@ -1,4 +1,4 @@
-edge "file_storage_file_system_to_file_storage_snapshot" {
+edge "filestorage_file_system_to_filestorage_snapshot" {
   title = "snapshot"
 
   sql = <<-EOQ
@@ -11,5 +11,5 @@ edge "file_storage_file_system_to_file_storage_snapshot" {
       file_system_id = any($1);
   EOQ
 
-  param "file_storage_file_system_ids" {}
+  param "filestorage_file_system_ids" {}
 }

@@ -10,17 +10,17 @@ dashboard "filestorage_filesystem_dashboard" {
   container {
 
     card {
-      sql   =  query.filestorage_filesystem_count.sql
+      sql   = query.filestorage_filesystem_count.sql
       width = 2
     }
 
     card {
-      sql   =  query.filestorage_filesystem_cloned_count.sql
+      sql   = query.filestorage_filesystem_cloned_count.sql
       width = 2
     }
 
     card {
-      sql   =  query.filestorage_filesystem_snapshot_count.sql
+      sql   = query.filestorage_filesystem_snapshot_count.sql
       width = 2
     }
 
@@ -31,28 +31,28 @@ dashboard "filestorage_filesystem_dashboard" {
 
     chart {
       title = "File Systems by Tenancy"
-      sql   =  query.filestorage_filesystem_by_tenancy.sql
+      sql   = query.filestorage_filesystem_by_tenancy.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "File Systems by Compartment"
-      sql   =  query.filestorage_filesystem_by_compartment.sql
+      sql   = query.filestorage_filesystem_by_compartment.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "File Systems by Region"
-      sql   =  query.filestorage_filesystem_by_region.sql
+      sql   = query.filestorage_filesystem_by_region.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "File Systems Age"
-      sql   =  query.filestorage_filesystem_by_creation_month.sql
+      sql   = query.filestorage_filesystem_by_creation_month.sql
       type  = "column"
       width = 3
     }

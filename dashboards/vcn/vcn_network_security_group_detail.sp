@@ -1,6 +1,6 @@
 dashboard "vcn_network_security_group_detail" {
 
-  title = "OCI VCN Network Security Group Detail"
+  title         = "OCI VCN Network Security Group Detail"
   documentation = file("./dashboards/vcn/docs/vcn_network_security_group_detail.md")
 
   tags = merge(local.vcn_common_tags, {
@@ -19,20 +19,20 @@ dashboard "vcn_network_security_group_detail" {
       width = 2
 
       query = query.vcn_network_security_group_ingress_ssh
-      args = [self.input.security_group_id.value]
+      args  = [self.input.security_group_id.value]
     }
 
     card {
       width = 2
 
       query = query.vcn_network_security_group_ingress_rdp
-      args = [self.input.security_group_id.value]
+      args  = [self.input.security_group_id.value]
     }
 
   }
 
-  with "file_storage_mount_targets" {
-    query = query.vcn_network_security_group_file_storage_mount_targets
+  with "filestorage_mount_targets" {
+    query = query.vcn_network_security_group_filestorage_mount_targets
     args  = [self.input.security_group_id.value]
   }
 
@@ -69,9 +69,9 @@ dashboard "vcn_network_security_group_detail" {
       direction = "TD"
 
       node {
-        base = node.file_storage_mount_target
+        base = node.filestorage_mount_target
         args = {
-          file_storage_mount_target_ids = with.file_storage_mount_targets.rows[*].mount_target_id
+          filestorage_mount_target_ids = with.filestorage_mount_targets.rows[*].mount_target_id
         }
       }
 
@@ -125,9 +125,9 @@ dashboard "vcn_network_security_group_detail" {
       }
 
       edge {
-        base = edge.vcn_network_security_group_to_file_storage_mount_target
+        base = edge.vcn_network_security_group_to_filestorage_mount_target
         args = {
-          file_storage_mount_target_ids = with.file_storage_mount_targets.rows[*].mount_target_id
+          filestorage_mount_target_ids = with.filestorage_mount_targets.rows[*].mount_target_id
         }
       }
 
@@ -172,7 +172,7 @@ dashboard "vcn_network_security_group_detail" {
         type  = "line"
         width = 6
         query = query.vcn_network_security_group_overview
-        args = [self.input.security_group_id.value]
+        args  = [self.input.security_group_id.value]
 
       }
 
@@ -181,7 +181,7 @@ dashboard "vcn_network_security_group_detail" {
         width = 6
 
         query = query.vcn_network_security_group_tag
-        args = [self.input.security_group_id.value]
+        args  = [self.input.security_group_id.value]
 
       }
 
@@ -193,13 +193,13 @@ dashboard "vcn_network_security_group_detail" {
       table {
         title = "Ingress Rules"
         query = query.vcn_network_security_group_ingress_rule
-        args = [self.input.security_group_id.value]
+        args  = [self.input.security_group_id.value]
       }
 
       table {
         title = "Egress Rules"
         query = query.vcn_network_security_group_egress_rule
-        args = [self.input.security_group_id.value]
+        args  = [self.input.security_group_id.value]
       }
 
     }
@@ -438,14 +438,14 @@ query "vcn_network_security_group_vcn_network_load_balancers" {
   EOQ
 }
 
-query "vcn_network_security_group_file_storage_mount_targets" {
+query "vcn_network_security_group_filestorage_mount_targets" {
   sql = <<-EOQ
     with network_security_groups as (
       select
         jsonb_array_elements_text(nsg_ids) as n_id,
         id
       from
-        oci_file_storage_mount_target
+        oci_filestorage_mount_target
     )
     select
       s.id as mount_target_id
