@@ -150,6 +150,8 @@ dashboard "kms_key_detail" {
   }
 }
 
+# Input queries
+
 query "kms_key_input" {
   sql = <<EOQ
     select
@@ -168,8 +170,45 @@ query "kms_key_input" {
       k.lifecycle_state <> 'DELETED'
     order by
       k.name;
-EOQ
+  EOQ
 }
+
+# With queries
+
+query "kms_kms_vaults" {
+  sql = <<-EOQ
+    select
+      vault_id
+    from
+      oci_kms_key
+    where
+      id = $1;
+  EOQ
+}
+
+query "kms_kms_key_versions" {
+  sql = <<-EOQ
+    select
+      current_key_version
+    from
+      oci_kms_key
+    where
+      id = $1;
+  EOQ
+}
+
+query "kms_blockstorage_block_volumes" {
+  sql = <<-EOQ
+    select
+      id as block_volume_id
+    from
+      oci_core_volume
+    where
+      kms_key_id = $1;
+  EOQ
+}
+
+# Card queries
 
 query "kms_key_disabled" {
   sql = <<-EOQ
@@ -198,6 +237,8 @@ query "kms_key_protection_mode" {
 
   param "id" {}
 }
+
+# Other detail page queries
 
 query "kms_key_overview" {
   sql = <<-EOQ
@@ -251,37 +292,4 @@ query "kms_key_detail" {
   EOQ
 
   param "id" {}
-}
-
-query "kms_kms_vaults" {
-  sql = <<-EOQ
-    select
-      vault_id
-    from
-      oci_kms_key
-    where
-      id = $1;
-  EOQ
-}
-
-query "kms_kms_key_versions" {
-  sql = <<-EOQ
-    select
-      current_key_version
-    from
-      oci_kms_key
-    where
-      id = $1;
-  EOQ
-}
-
-query "kms_blockstorage_block_volumes" {
-  sql = <<-EOQ
-    select
-      id as block_volume_id
-    from
-      oci_core_volume
-    where
-      kms_key_id = $1;
-  EOQ
 }

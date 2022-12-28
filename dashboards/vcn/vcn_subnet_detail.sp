@@ -23,6 +23,11 @@ dashboard "vcn_subnet_detail" {
 
   }
 
+  with "compute_instances" {
+    query = query.vcn_subnet_compute_instances
+    args  = [self.input.subnet_id.value]
+  }
+
   with "identity_availability_domains" {
     query = query.vcn_subnet_identity_availability_domains
     args  = [self.input.subnet_id.value]
@@ -30,11 +35,6 @@ dashboard "vcn_subnet_detail" {
 
   with "regional_identity_availability_domains" {
     query = query.vcn_subnet_regional_identity_availability_domains
-    args  = [self.input.subnet_id.value]
-  }
-
-  with "compute_instances" {
-    query = query.vcn_subnet_compute_instances
     args  = [self.input.subnet_id.value]
   }
 
@@ -81,6 +81,13 @@ dashboard "vcn_subnet_detail" {
       direction = "TD"
 
       node {
+        base = node.compute_instance
+        args = {
+          compute_instance_ids = with.compute_instances.rows[*].compute_instance_id
+        }
+      }
+
+      node {
         base = node.identity_availability_domain
         args = {
           availability_domain_ids = with.identity_availability_domains.rows[*].availability_domain_id
@@ -91,13 +98,6 @@ dashboard "vcn_subnet_detail" {
         base = node.regional_identity_availability_domain
         args = {
           availability_domain_ids = with.regional_identity_availability_domains.rows[*].availability_domain_id
-        }
-      }
-
-      node {
-        base = node.compute_instance
-        args = {
-          compute_instance_ids = with.compute_instances.rows[*].compute_instance_id
         }
       }
 
@@ -267,6 +267,8 @@ dashboard "vcn_subnet_detail" {
   }
 }
 
+# Input queries
+
 query "vcn_subnet_input" {
   sql = <<-EOQ
     select
@@ -285,72 +287,10 @@ query "vcn_subnet_input" {
       s.lifecycle_state <> 'TERMINATED'
     order by
       s.display_name;
-EOQ
-}
-
-query "vcn_subnet_overview" {
-  sql = <<-EOQ
-    select
-      display_name as "Name",
-      time_created as "Time Created",
-      subnet_domain_name as "Subnet Domain Name",
-      region as "Region",
-      id as "OCID",
-      compartment_id as "Compartment ID"
-    from
-      oci_core_subnet
-    where
-      id = $1 and lifecycle_state <> 'TERMINATED';
   EOQ
 }
 
-query "vcn_subnet_tag" {
-  sql = <<-EOQ
-    with jsondata as (
-      select
-        tags::json as tags
-      from
-        oci_core_subnet
-      where
-        id = $1 and lifecycle_state <> 'TERMINATED'
-    )
-    select
-      key as "Key",
-      value as "Value"
-    from
-      jsondata,
-      json_each_text(tags)
-    order by
-      key;
-  EOQ
-}
-
-query "vcn_subnet_flow_logs" {
-  sql = <<-EOQ
-    select
-      case when is_enabled then 'Enabled' else 'Disabled' end as value,
-      'Flow Logs' as label,
-      case when is_enabled then 'ok' else 'alert' end as type
-    from
-      oci_core_subnet as s
-      left join oci_logging_log as l
-      on s.id = l.configuration -> 'source' ->> 'resource'
-    where
-      s.id = $1 and s.lifecycle_state <> 'TERMINATED';
-  EOQ
-}
-
-query "vcn_subnet_cidr_block" {
-  sql = <<-EOQ
-    select
-      cidr_block as "IPv4 CIDR Block",
-      ipv6_cidr_block as "IPv6 CIDR Block"
-    from
-      oci_core_subnet
-    where
-      id  = $1 and lifecycle_state <> 'TERMINATED';
-  EOQ
-}
+# With queries
 
 query "vcn_subnet_vcn_dhcp_options" {
   sql = <<-EOQ
@@ -489,5 +429,73 @@ query "vcn_subnet_regional_identity_availability_domains" {
       s.region = a.region
       and s.availability_domain is null
       and s.id = $1;
+  EOQ
+}
+
+# Card queries
+
+query "vcn_subnet_flow_logs" {
+  sql = <<-EOQ
+    select
+      case when is_enabled then 'Enabled' else 'Disabled' end as value,
+      'Flow Logs' as label,
+      case when is_enabled then 'ok' else 'alert' end as type
+    from
+      oci_core_subnet as s
+      left join oci_logging_log as l
+      on s.id = l.configuration -> 'source' ->> 'resource'
+    where
+      s.id = $1 and s.lifecycle_state <> 'TERMINATED';
+  EOQ
+}
+
+# Other detail page queries
+
+query "vcn_subnet_overview" {
+  sql = <<-EOQ
+    select
+      display_name as "Name",
+      time_created as "Time Created",
+      subnet_domain_name as "Subnet Domain Name",
+      region as "Region",
+      id as "OCID",
+      compartment_id as "Compartment ID"
+    from
+      oci_core_subnet
+    where
+      id = $1 and lifecycle_state <> 'TERMINATED';
+  EOQ
+}
+
+query "vcn_subnet_tag" {
+  sql = <<-EOQ
+    with jsondata as (
+      select
+        tags::json as tags
+      from
+        oci_core_subnet
+      where
+        id = $1 and lifecycle_state <> 'TERMINATED'
+    )
+    select
+      key as "Key",
+      value as "Value"
+    from
+      jsondata,
+      json_each_text(tags)
+    order by
+      key;
+  EOQ
+}
+
+query "vcn_subnet_cidr_block" {
+  sql = <<-EOQ
+    select
+      cidr_block as "IPv4 CIDR Block",
+      ipv6_cidr_block as "IPv6 CIDR Block"
+    from
+      oci_core_subnet
+    where
+      id  = $1 and lifecycle_state <> 'TERMINATED';
   EOQ
 }

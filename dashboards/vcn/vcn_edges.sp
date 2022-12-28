@@ -84,7 +84,7 @@ edge "vcn_local_peering_gateway_to_vcn_vcn" {
   param "vcn_local_peering_gateway_ids" {}
 }
 
-edge "vcn_nat_gateway_vcn_vcn" {
+edge "vcn_nat_gateway_to_vcn_vcn" {
   title = "vcn"
 
   sql = <<-EOQ

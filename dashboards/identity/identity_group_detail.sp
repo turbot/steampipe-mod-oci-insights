@@ -94,6 +94,8 @@ dashboard "identity_group_detail" {
   }
   }
 
+# input queries
+
 query "identity_group_input" {
   sql = <<-EOQ
     select
@@ -110,6 +112,31 @@ query "identity_group_input" {
   EOQ
 }
 
+# With queries
+
+query "identity_group_identity_users" {
+  sql = <<-EOQ
+    with user_group_id as (
+      select
+        jsonb_array_elements(user_groups) ->> 'groupId' as g_id,
+        name,
+        id
+      from
+        oci_identity_user
+    )
+    select
+      u.id as user_id
+    from
+      oci_identity_group as g,
+      user_group_id as u
+    where
+      g.id = u.g_id
+      and g.id = $1
+  EOQ
+}
+
+# Card queries
+
 query "identity_group_lifecycle_state" {
   sql = <<-EOQ
     select
@@ -121,6 +148,8 @@ query "identity_group_lifecycle_state" {
       id = $1;
   EOQ
 }
+
+# Other detail page queries
 
 query "identity_group_overview" {
   sql = <<-EOQ
@@ -158,26 +187,3 @@ query "identity_group_user" {
       and g.id = $1
   EOQ
 }
-
-query "identity_group_identity_users" {
-  sql = <<-EOQ
-    with user_group_id as (
-      select
-        jsonb_array_elements(user_groups) ->> 'groupId' as g_id,
-        name,
-        id
-      from
-        oci_identity_user
-    )
-    select
-      u.id as user_id
-    from
-      oci_identity_group as g,
-      user_group_id as u
-    where
-      g.id = u.g_id
-      and g.id = $1
-  EOQ
-}
-
-

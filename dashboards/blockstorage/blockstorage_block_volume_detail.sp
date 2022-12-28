@@ -173,6 +173,8 @@ dashboard "blockstorage_block_volume_detail" {
   }
 }
 
+# Input queries
+
 query "blockstorage_block_volume_input" {
   sql = <<EOQ
     select
@@ -193,6 +195,56 @@ query "blockstorage_block_volume_input" {
       v.display_name;
   EOQ
 }
+
+# With queries
+
+query "blockstorage_block_volume_blockstorage_block_volume_backups" {
+  sql = <<EOQ
+    select
+      id as backup_id
+    from
+      oci_core_volume_backup
+    where
+      volume_id  = $1;
+  EOQ
+}
+
+query "blockstorage_block_volume_compute_instances" {
+  sql = <<EOQ
+    select
+      instance_id
+    from
+      oci_core_volume_attachment
+    where
+      volume_id  = $1;
+  EOQ
+}
+
+query "blockstorage_block_volume_kms_keys" {
+  sql = <<EOQ
+    select
+      kms_key_id
+    from
+      oci_core_volume
+    where
+      id  = $1;
+  EOQ
+}
+
+query "blockstorage_block_volume_kms_vaults" {
+  sql = <<EOQ
+    select
+      k.vault_id as key_vault_id
+    from
+      oci_core_volume as v,
+      oci_kms_key as k
+    where
+      k.id = v.kms_key_id
+      and v.id  = $1;
+  EOQ
+}
+
+# Card queries
 
 query "blockstorage_block_volume_storage" {
   sql = <<-EOQ
@@ -215,6 +267,8 @@ query "blockstorage_block_volume_vpu" {
       id = $1;
   EOQ
 }
+
+# Other detail page queries
 
 query "blockstorage_block_volume_overview" {
   sql = <<EOQ
@@ -276,51 +330,5 @@ query "blockstorage_block_volume_encryption" {
       oci_core_volume
     where
       id  = $1;
-  EOQ
-}
-
-query "blockstorage_block_volume_kms_keys" {
-  sql = <<EOQ
-    select
-      kms_key_id
-    from
-      oci_core_volume
-    where
-      id  = $1;
-  EOQ
-}
-
-query "blockstorage_block_volume_kms_vaults" {
-  sql = <<EOQ
-    select
-      k.vault_id as key_vault_id
-    from
-      oci_core_volume as v,
-      oci_kms_key as k
-    where
-      k.id = v.kms_key_id
-      and v.id  = $1;
-  EOQ
-}
-
-query "blockstorage_block_volume_compute_instances" {
-  sql = <<EOQ
-    select
-      instance_id
-    from
-      oci_core_volume_attachment
-    where
-      volume_id  = $1;
-  EOQ
-}
-
-query "blockstorage_block_volume_blockstorage_block_volume_backups" {
-  sql = <<EOQ
-    select
-      id as backup_id
-    from
-      oci_core_volume_backup
-    where
-      volume_id  = $1;
   EOQ
 }

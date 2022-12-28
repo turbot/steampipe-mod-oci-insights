@@ -107,6 +107,8 @@ dashboard "objectstorage_bucket_detail" {
   }
 }
 
+# Input queries
+
 query "objectstorage_bucket_input" {
   sql = <<EOQ
     select
@@ -123,8 +125,12 @@ query "objectstorage_bucket_input" {
       left join oci_identity_tenancy as t on b.tenant_id = t.id
     order by
       b.name;
-EOQ
+  EOQ
 }
+
+# With queries
+
+# card queries
 
 query "objectstorage_bucket_read_only" {
   sql = <<-EOQ
@@ -163,6 +169,8 @@ query "objectstorage_bucket_public_access" {
       id = $1;
   EOQ
 }
+
+# Other detail page queries
 
 query "objectstorage_bucket_overview" {
   sql = <<-EOQ

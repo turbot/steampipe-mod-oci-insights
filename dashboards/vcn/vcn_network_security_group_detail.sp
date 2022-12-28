@@ -31,13 +31,13 @@ dashboard "vcn_network_security_group_detail" {
 
   }
 
-  with "filestorage_mount_targets" {
-    query = query.vcn_network_security_group_filestorage_mount_targets
+  with "compute_instances" {
+    query = query.vcn_network_security_group_compute_instances
     args  = [self.input.security_group_id.value]
   }
 
-  with "compute_instances" {
-    query = query.vcn_network_security_group_compute_instances
+  with "filestorage_mount_targets" {
+    query = query.vcn_network_security_group_filestorage_mount_targets
     args  = [self.input.security_group_id.value]
   }
 
@@ -69,16 +69,16 @@ dashboard "vcn_network_security_group_detail" {
       direction = "TD"
 
       node {
-        base = node.filestorage_mount_target
+        base = node.compute_instance
         args = {
-          filestorage_mount_target_ids = with.filestorage_mount_targets.rows[*].mount_target_id
+          compute_instance_ids = with.compute_instances.rows[*].compute_instance_id
         }
       }
 
       node {
-        base = node.compute_instance
+        base = node.filestorage_mount_target
         args = {
-          compute_instance_ids = with.compute_instances.rows[*].compute_instance_id
+          filestorage_mount_target_ids = with.filestorage_mount_targets.rows[*].mount_target_id
         }
       }
 
@@ -208,6 +208,8 @@ dashboard "vcn_network_security_group_detail" {
 
 }
 
+# Input queries
+
 query "vcn_network_security_group_input" {
   sql = <<-EOQ
     select
@@ -229,143 +231,7 @@ query "vcn_network_security_group_input" {
   EOQ
 }
 
-query "vcn_network_security_group_ingress_ssh" {
-  sql = <<-EOQ
-    with non_compliant_rules as (
-      select
-        id,
-        count(*) as num_noncompliant_rules
-      from
-        oci_core_network_security_group,
-        jsonb_array_elements(rules) as r
-      where
-        r ->> 'direction' = 'INGRESS'
-        and r ->> 'sourceType' = 'CIDR_BLOCK'
-        and r ->> 'source' = '0.0.0.0/0'
-        and (
-        r ->> 'protocol' = 'all'
-        or (
-        (r -> 'tcpOptions' -> 'destinationPortRange' ->> 'min')::integer <= 22
-        and (r -> 'tcpOptions' -> 'destinationPortRange' ->> 'max')::integer >= 22
-        )
-      )
-      and lifecycle_state <> 'TERMINATED'
-      group by id
-      )
-      select
-        case when non_compliant_rules.id is null then 'Restricted' else 'Unrestricted' end as value,
-        'Ingress SSH' as label,
-        case when non_compliant_rules.id is null then 'ok' else 'alert' end as type
-      from
-        oci_core_network_security_group as nsg
-        left join non_compliant_rules on non_compliant_rules.id = nsg.id
-      where
-        nsg.id = $1 and nsg.lifecycle_state <> 'TERMINATED';
-  EOQ
-}
-
-query "vcn_network_security_group_ingress_rdp" {
-  sql = <<-EOQ
-    with non_compliant_rules as (
-      select
-        id,
-        count(*) as num_noncompliant_rules
-      from
-        oci_core_network_security_group,
-        jsonb_array_elements(rules) as r
-      where
-        r ->> 'direction' = 'INGRESS'
-        and r ->> 'sourceType' = 'CIDR_BLOCK'
-        and r ->> 'source' = '0.0.0.0/0'
-        and (
-        r ->> 'protocol' = 'all'
-        or (
-        (r -> 'tcpOptions' -> 'destinationPortRange' ->> 'min')::integer <= 3389
-        and (r -> 'tcpOptions' -> 'destinationPortRange' ->> 'max')::integer >= 3389
-        )
-      )
-      and lifecycle_state <> 'TERMINATED'
-      group by id
-      )
-      select
-        case when non_compliant_rules.id is null then 'Restricted' else 'Unrestricted' end as value,
-        'Ingress RDP' as label,
-        case when non_compliant_rules.id is null then 'ok' else 'alert' end as type
-      from
-        oci_core_network_security_group as nsg
-        left join non_compliant_rules on non_compliant_rules.id = nsg.id
-      where
-        nsg.id = $1 and nsg.lifecycle_state <> 'TERMINATED';
-  EOQ
-}
-
-query "vcn_network_security_group_overview" {
-  sql = <<-EOQ
-    select
-      display_name as "Name",
-      time_created as "Time Created",
-      region as "Region",
-      id as "OCID",
-      compartment_id as "Compartment ID"
-    from
-      oci_core_network_security_group
-    where
-      id = $1 and lifecycle_state <> 'TERMINATED';
-  EOQ
-}
-
-query "vcn_network_security_group_tag" {
-  sql = <<-EOQ
-    with jsondata as (
-      select
-        tags::json as tags
-      from
-        oci_core_network_security_group
-      where
-        id = $1 and lifecycle_state <> 'TERMINATED'
-    )
-    select
-      key as "Key",
-      value as "Value"
-    from
-      jsondata,
-      json_each_text(tags)
-    order by
-      key;
-  EOQ
-}
-
-query "vcn_network_security_group_ingress_rule" {
-  sql = <<-EOQ
-    select
-      r ->> 'protocol' as "Protocol",
-      r ->> 'source' as "Source",
-      r ->> 'isStateless' as "Stateless",
-      r ->> 'isValid' as "Valid"
-    from
-      oci_core_network_security_group,
-      jsonb_array_elements(rules) as r
-    where
-    r ->> 'direction' = 'INGRESS' and
-      id  = $1 and lifecycle_state <> 'TERMINATED';
-  EOQ
-}
-
-query "vcn_network_security_group_egress_rule" {
-  sql = <<-EOQ
-    select
-      r ->> 'protocol' as "Protocol",
-      r ->> 'destination' as "Destination",
-      r ->> 'isStateless' as "Stateless",
-      r ->> 'isValid' as "Valid"
-    from
-      oci_core_network_security_group,
-      jsonb_array_elements(rules) as r
-    where
-      r ->> 'direction' = 'EGRESS' and
-      id  = $1 and lifecycle_state <> 'TERMINATED';
-  EOQ
-}
+# With queries
 
 query "vcn_network_security_group_vcn_vcns" {
   sql = <<-EOQ
@@ -475,5 +341,147 @@ query "vcn_network_security_group_compute_instances" {
     where
       id = n_id
       and id = $1
+  EOQ
+}
+
+# Card queries
+
+query "vcn_network_security_group_ingress_ssh" {
+  sql = <<-EOQ
+    with non_compliant_rules as (
+      select
+        id,
+        count(*) as num_noncompliant_rules
+      from
+        oci_core_network_security_group,
+        jsonb_array_elements(rules) as r
+      where
+        r ->> 'direction' = 'INGRESS'
+        and r ->> 'sourceType' = 'CIDR_BLOCK'
+        and r ->> 'source' = '0.0.0.0/0'
+        and (
+        r ->> 'protocol' = 'all'
+        or (
+        (r -> 'tcpOptions' -> 'destinationPortRange' ->> 'min')::integer <= 22
+        and (r -> 'tcpOptions' -> 'destinationPortRange' ->> 'max')::integer >= 22
+        )
+      )
+      and lifecycle_state <> 'TERMINATED'
+      group by id
+      )
+      select
+        case when non_compliant_rules.id is null then 'Restricted' else 'Unrestricted' end as value,
+        'Ingress SSH' as label,
+        case when non_compliant_rules.id is null then 'ok' else 'alert' end as type
+      from
+        oci_core_network_security_group as nsg
+        left join non_compliant_rules on non_compliant_rules.id = nsg.id
+      where
+        nsg.id = $1 and nsg.lifecycle_state <> 'TERMINATED';
+  EOQ
+}
+
+query "vcn_network_security_group_ingress_rdp" {
+  sql = <<-EOQ
+    with non_compliant_rules as (
+      select
+        id,
+        count(*) as num_noncompliant_rules
+      from
+        oci_core_network_security_group,
+        jsonb_array_elements(rules) as r
+      where
+        r ->> 'direction' = 'INGRESS'
+        and r ->> 'sourceType' = 'CIDR_BLOCK'
+        and r ->> 'source' = '0.0.0.0/0'
+        and (
+        r ->> 'protocol' = 'all'
+        or (
+        (r -> 'tcpOptions' -> 'destinationPortRange' ->> 'min')::integer <= 3389
+        and (r -> 'tcpOptions' -> 'destinationPortRange' ->> 'max')::integer >= 3389
+        )
+      )
+      and lifecycle_state <> 'TERMINATED'
+      group by id
+      )
+      select
+        case when non_compliant_rules.id is null then 'Restricted' else 'Unrestricted' end as value,
+        'Ingress RDP' as label,
+        case when non_compliant_rules.id is null then 'ok' else 'alert' end as type
+      from
+        oci_core_network_security_group as nsg
+        left join non_compliant_rules on non_compliant_rules.id = nsg.id
+      where
+        nsg.id = $1 and nsg.lifecycle_state <> 'TERMINATED';
+  EOQ
+}
+
+# Other detail page queries
+
+query "vcn_network_security_group_overview" {
+  sql = <<-EOQ
+    select
+      display_name as "Name",
+      time_created as "Time Created",
+      region as "Region",
+      id as "OCID",
+      compartment_id as "Compartment ID"
+    from
+      oci_core_network_security_group
+    where
+      id = $1 and lifecycle_state <> 'TERMINATED';
+  EOQ
+}
+
+query "vcn_network_security_group_tag" {
+  sql = <<-EOQ
+    with jsondata as (
+      select
+        tags::json as tags
+      from
+        oci_core_network_security_group
+      where
+        id = $1 and lifecycle_state <> 'TERMINATED'
+    )
+    select
+      key as "Key",
+      value as "Value"
+    from
+      jsondata,
+      json_each_text(tags)
+    order by
+      key;
+  EOQ
+}
+
+query "vcn_network_security_group_ingress_rule" {
+  sql = <<-EOQ
+    select
+      r ->> 'protocol' as "Protocol",
+      r ->> 'source' as "Source",
+      r ->> 'isStateless' as "Stateless",
+      r ->> 'isValid' as "Valid"
+    from
+      oci_core_network_security_group,
+      jsonb_array_elements(rules) as r
+    where
+    r ->> 'direction' = 'INGRESS' and
+      id  = $1 and lifecycle_state <> 'TERMINATED';
+  EOQ
+}
+
+query "vcn_network_security_group_egress_rule" {
+  sql = <<-EOQ
+    select
+      r ->> 'protocol' as "Protocol",
+      r ->> 'destination' as "Destination",
+      r ->> 'isStateless' as "Stateless",
+      r ->> 'isValid' as "Valid"
+    from
+      oci_core_network_security_group,
+      jsonb_array_elements(rules) as r
+    where
+      r ->> 'direction' = 'EGRESS' and
+      id  = $1 and lifecycle_state <> 'TERMINATED';
   EOQ
 }

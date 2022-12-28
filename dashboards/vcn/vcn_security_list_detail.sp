@@ -133,6 +133,8 @@ dashboard "vcn_security_list_detail" {
 
 }
 
+# Input queries
+
 query "vcn_security_list_input" {
   sql = <<EOQ
     select
@@ -151,8 +153,43 @@ query "vcn_security_list_input" {
       l.lifecycle_state <> 'TERMINATED'
     order by
       l.display_name;
-EOQ
+  EOQ
 }
+
+# With queries
+
+query "vcn_security_list_vcn_vcns" {
+  sql = <<-EOQ
+    select
+      vcn_id
+    from
+      oci_core_security_list
+    where
+      id = $1
+  EOQ
+}
+
+query "vcn_security_list_vcn_subnets" {
+  sql = <<-EOQ
+    with subnet_security_lists as (
+      select
+        jsonb_array_elements_text(security_list_ids) as s_id,
+        id as subnet_id
+      from
+        oci_core_subnet
+      )
+      select
+        subnet_id
+      from
+        oci_core_security_list as sl,
+        subnet_security_lists as ssl
+      where
+        sl.id = ssl.s_id
+        and sl.id = $1
+  EOQ
+}
+
+# Card queries
 
 query "vcn_security_list_ingress_ssh" {
   sql = <<-EOQ
@@ -224,6 +261,8 @@ query "vcn_security_list_ingress_rdp" {
   EOQ
 }
 
+# Other detail page queries
+
 query "vcn_security_list_overview" {
   sql = <<-EOQ
     select
@@ -285,36 +324,5 @@ query "vcn_network_security_list_egress_rule" {
       jsonb_array_elements(egress_security_rules) as r
     where
       id  = $1 and lifecycle_state <> 'TERMINATED';
-  EOQ
-}
-
-query "vcn_security_list_vcn_vcns" {
-  sql = <<-EOQ
-    select
-      vcn_id
-    from
-      oci_core_security_list
-    where
-      id = $1
-  EOQ
-}
-
-query "vcn_security_list_vcn_subnets" {
-  sql = <<-EOQ
-    with subnet_security_lists as (
-      select
-        jsonb_array_elements_text(security_list_ids) as s_id,
-        id as subnet_id
-      from
-        oci_core_subnet
-      )
-      select
-        subnet_id
-      from
-        oci_core_security_list as sl,
-        subnet_security_lists as ssl
-      where
-        sl.id = ssl.s_id
-        and sl.id = $1
   EOQ
 }

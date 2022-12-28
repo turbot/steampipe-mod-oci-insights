@@ -19,27 +19,6 @@ node "identity_availability_domain" {
   param "availability_domain_ids" {}
 }
 
-node "regional_identity_availability_domain" {
-  category = category.availability_domain
-
-  sql = <<-EOQ
-    select
-      id as id,
-      title as title,
-      jsonb_build_object(
-        'ID', id,
-        'Display Name', name,
-        'Region', region
-      ) as properties
-    from
-      oci_identity_availability_domain
-    where
-      id = any($1);
-  EOQ
-
-  param "availability_domain_ids" {}
-}
-
 node "identity_group" {
   category = category.identity_group
 
@@ -61,7 +40,6 @@ node "identity_group" {
 
   param "identity_group_ids" {}
 }
-
 
 node "identity_user" {
   category = category.identity_user
@@ -85,4 +63,25 @@ node "identity_user" {
   EOQ
 
   param "identity_user_ids" {}
+}
+
+node "regional_identity_availability_domain" {
+  category = category.availability_domain
+
+  sql = <<-EOQ
+    select
+      id as id,
+      title as title,
+      jsonb_build_object(
+        'ID', id,
+        'Display Name', name,
+        'Region', region
+      ) as properties
+    from
+      oci_identity_availability_domain
+    where
+      id = any($1);
+  EOQ
+
+  param "availability_domain_ids" {}
 }

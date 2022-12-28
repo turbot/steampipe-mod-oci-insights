@@ -114,6 +114,8 @@ dashboard "identity_user_detail" {
   }
 }
 
+# Input queries
+
 query "identity_user_input" {
   sql = <<-EOQ
     select
@@ -127,8 +129,23 @@ query "identity_user_input" {
       left join oci_identity_tenancy as t on u.tenant_id = t.id
     order by
       u.name;
-EOQ
+  EOQ
 }
+
+# With queries
+
+query "identity_user_identity_groups" {
+  sql = <<-EOQ
+    select
+      jsonb_array_elements(user_groups)->> 'groupId' as group_id
+    from
+      oci_identity_user
+    where
+      id  = $1
+  EOQ
+}
+
+# Card queries
 
 query "identity_user_email" {
   sql = <<-EOQ
@@ -153,6 +170,8 @@ query "identity_user_mfa" {
       id = $1;
   EOQ
 }
+
+# other detail page queries
 
 query "identity_user_overview" {
   sql = <<-EOQ
@@ -227,15 +246,3 @@ query "identity_user_group" {
       u.id  = $1
   EOQ
 }
-
-query "identity_user_identity_groups" {
-  sql = <<-EOQ
-    select
-      jsonb_array_elements(user_groups)->> 'groupId' as group_id
-    from
-      oci_identity_user
-    where
-      id  = $1
-  EOQ
-}
-

@@ -114,6 +114,8 @@ dashboard "filestorage_filesystem_detail" {
   }
 }
 
+# Input queries
+
 query "filestorage_filesystem_input" {
   sql = <<EOQ
     select
@@ -132,8 +134,23 @@ query "filestorage_filesystem_input" {
       s.lifecycle_state <> 'DELETED'
     order by
       s.display_name;
-EOQ
+  EOQ
 }
+
+# With queries
+
+query "filestorage_file_system_filestorage_snapshots" {
+  sql = <<-EOQ
+    select
+      id as snapshot_id
+    from
+      oci_file_storage_snapshot
+    where
+      file_system_id  = $1 ;
+  EOQ
+}
+
+# Card queries
 
 query "filestorage_filesystem_cloned" {
   sql = <<-EOQ
@@ -156,6 +173,8 @@ query "filestorage_filesystem_snapshot" {
       file_system_id = $1;
   EOQ
 }
+
+# Other detail page queries
 
 query "filestorage_filesystem_overview" {
   sql = <<-EOQ
@@ -204,7 +223,6 @@ query "filestorage_filesystem_snapshot_detail" {
   EOQ
 }
 
-
 query "filestorage_filesystem_encryption" {
   sql = <<-EOQ
     select
@@ -226,16 +244,5 @@ query "filestorage_filesystem_source" {
       oci_file_storage_file_system
     where
       id  = $1 ;
-  EOQ
-}
-
-query "filestorage_file_system_filestorage_snapshots" {
-  sql = <<-EOQ
-    select
-      id as snapshot_id
-    from
-      oci_file_storage_snapshot
-    where
-      file_system_id  = $1 ;
   EOQ
 }

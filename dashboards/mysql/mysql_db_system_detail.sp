@@ -198,6 +198,8 @@ dashboard "mysql_db_system_detail" {
   }
 }
 
+# Input queries
+
 query "mysql_db_system_input" {
   sql = <<EOQ
     select
@@ -218,6 +220,67 @@ query "mysql_db_system_input" {
       s.display_name;
   EOQ
 }
+
+# With queries
+
+query "mysql_db_system_mysql_backups" {
+  sql = <<-EOQ
+    select
+      id as backup_id
+    from
+      oci_mysql_backup
+    where
+      db_system_id = $1
+  EOQ
+}
+
+query "mysql_db_system_mysql_configurations" {
+  sql = <<-EOQ
+    select
+      configuration_id
+    from
+      oci_mysql_db_system
+    where
+      id = $1
+  EOQ
+}
+
+query "mysql_db_system_mysql_channels" {
+  sql = <<-EOQ
+    select
+      id as channel_id
+    from
+      oci_mysql_channel
+    where
+      target ->> 'dbSystemId' = $1
+  EOQ
+}
+
+query "mysql_db_system_vcn_vcns" {
+  sql = <<-EOQ
+    select
+      s.vcn_id as vcn_id
+    from
+      oci_mysql_db_system as m,
+      oci_core_subnet as s
+    where
+      m.subnet_id = s.id
+      and m.id = $1
+  EOQ
+}
+
+query "mysql_db_system_vcn_subnets" {
+  sql = <<-EOQ
+    select
+      subnet_id
+    from
+      oci_mysql_db_system as m
+    where
+      m.id = $1
+  EOQ
+}
+
+# Card queries
 
 query "mysql_db_system_mysql_version" {
   sql = <<-EOQ
@@ -243,6 +306,8 @@ query "mysql_db_system_backup" {
       s.id = $1;
   EOQ
 }
+
+# Other detail page queries
 
 query "mysql_db_system_overview" {
   sql = <<-EOQ
@@ -316,62 +381,5 @@ query "mysql_db_system_connection" {
     where
       timestamp >= current_date - interval '7 day' and id = $1
     order by timestamp;
-  EOQ
-}
-
-query "mysql_db_system_mysql_backups" {
-  sql = <<-EOQ
-    select
-      id as backup_id
-    from
-      oci_mysql_backup
-    where
-      db_system_id = $1
-  EOQ
-}
-
-query "mysql_db_system_mysql_configurations" {
-  sql = <<-EOQ
-    select
-      configuration_id
-    from
-      oci_mysql_db_system
-    where
-      id = $1
-  EOQ
-}
-
-query "mysql_db_system_mysql_channels" {
-  sql = <<-EOQ
-    select
-      id as channel_id
-    from
-      oci_mysql_channel
-    where
-      target ->> 'dbSystemId' = $1
-  EOQ
-}
-
-query "mysql_db_system_vcn_vcns" {
-  sql = <<-EOQ
-    select
-      s.vcn_id as vcn_id
-    from
-      oci_mysql_db_system as m,
-      oci_core_subnet as s
-    where
-      m.subnet_id = s.id
-      and m.id = $1
-  EOQ
-}
-
-query "mysql_db_system_vcn_subnets" {
-  sql = <<-EOQ
-    select
-      subnet_id
-    from
-      oci_mysql_db_system as m
-    where
-      m.id = $1
   EOQ
 }
