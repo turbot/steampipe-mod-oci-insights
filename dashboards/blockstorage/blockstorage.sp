@@ -23,3 +23,15 @@ category "blockstorage_boot_volume" {
   icon  = "hard_drive"
   color = local.storage_color
 }
+
+category "blockstorage_boot_volume_backup" {
+  title = "Blockstorage Boot Volume Backup"
+  icon  = "settings_backup_restore"
+  color = local.storage_color
+}
+
+category "blockstorage_boot_volume_replica" {
+  title = "Blockstorage Boot Volume Replica"
+  icon  = "text:replica"
+  color = local.storage_color
+}

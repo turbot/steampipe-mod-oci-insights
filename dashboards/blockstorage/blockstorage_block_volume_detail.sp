@@ -107,7 +107,7 @@ dashboard "blockstorage_block_volume_detail" {
       }
 
       edge {
-        base = edge.blockstorage_block_volume_to_kms_key_vault
+        base = edge.blockstorage_block_volume_to_kms_vault
         args = {
           blockstorage_block_volume_ids = [self.input.block_volume_id.value]
         }

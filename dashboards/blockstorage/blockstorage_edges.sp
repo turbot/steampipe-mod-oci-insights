@@ -48,7 +48,7 @@ edge "blockstorage_block_volume_to_kms_key_version" {
   param "blockstorage_block_volume_ids" {}
 }
 
-edge "blockstorage_block_volume_to_kms_key_vault" {
+edge "blockstorage_block_volume_to_kms_vault" {
   title = "key vault"
 
   sql = <<-EOQ
@@ -64,4 +64,70 @@ edge "blockstorage_block_volume_to_kms_key_vault" {
   EOQ
 
   param "blockstorage_block_volume_ids" {}
+}
+
+edge "blockstorage_boot_volume_backup_to_compute_image" {
+  title = "image"
+
+  sql = <<-EOQ
+    select
+      id as from_id,
+      image_id as to_id
+    from
+      oci_core_boot_volume_backup
+    where
+      id = any($1);
+  EOQ
+
+  param "blockstorage_boot_volume_backup_ids" {}
+}
+
+edge "blockstorage_boot_volume_to_blockstorage_boot_volume_backup" {
+  title = "backup"
+
+  sql = <<-EOQ
+    select
+      boot_volume_id as from_id,
+      id as to_id
+    from
+      oci_core_boot_volume_backup
+    where
+      boot_volume_id = any($1);
+  EOQ
+
+  param "blockstorage_boot_volume_ids" {}
+}
+
+edge "blockstorage_boot_volume_to_blockstorage_boot_volume_replica" {
+  title = "replica"
+
+  sql = <<-EOQ
+    select
+      boot_volume_id as from_id,
+      id as to_id
+    from
+      oci_core_boot_volume_replica
+    where
+      boot_volume_id = any($1);
+  EOQ
+
+  param "blockstorage_boot_volume_ids" {}
+}
+
+edge "blockstorage_boot_volume_to_kms_vault" {
+  title = "key vault"
+
+  sql = <<-EOQ
+    select
+      v.id as from_id,
+      k.vault_id as to_id
+    from
+      oci_core_boot_volume as v,
+      oci_kms_key as k
+    where
+      k.id = v.kms_key_id
+      and v.id = any($1);
+  EOQ
+
+  param "blockstorage_boot_volume_ids" {}
 }
