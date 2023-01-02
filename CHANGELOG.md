@@ -30,8 +30,8 @@ _What's new?_
 
 - New dashboards added:
   - [Autonomous Database Detail](https://hub.steampipe.io/mods/turbot/oci_insights/dashboards/dashboard.oci_database_autonomous_database_detail) ([#39](https://github.com/turbot/steampipe-mod-oci-insights/pull/39))
-  - [Block Storage Block Volume Detail](https://hub.steampipe.io/mods/turbot/oci_insights/dashboards/dashboard.oci_blockstorage_block_volume_detail) ([#39](https://github.com/turbot/steampipe-mod-oci-insights/pull/39))
-  - [Block Storage Boot Volume Detail](https://hub.steampipe.io/mods/turbot/oci_insights/dashboards/dashboard.oci_blockstorage_boot_volume_detail) ([#39](https://github.com/turbot/steampipe-mod-oci-insights/pull/39))
+  - [Block Storage Block Volume Detail](https://hub.steampipe.io/mods/turbot/oci_insights/dashboards/dashboard.oci_block_storage_block_volume_detail) ([#39](https://github.com/turbot/steampipe-mod-oci-insights/pull/39))
+  - [Block Storage Boot Volume Detail](https://hub.steampipe.io/mods/turbot/oci_insights/dashboards/dashboard.oci_block_storage_boot_volume_detail) ([#39](https://github.com/turbot/steampipe-mod-oci-insights/pull/39))
   - [Compute Instance Detail](https://hub.steampipe.io/mods/turbot/oci_insights/dashboards/dashboard.oci_compute_instance_detail) ([#39](https://github.com/turbot/steampipe-mod-oci-insights/pull/39))
   - [File Storage File System Detail](https://hub.steampipe.io/mods/turbot/oci_insights/dashboards/dashboard.oci_filestorage_filesystem_detail) ([#39](https://github.com/turbot/steampipe-mod-oci-insights/pull/39))
   - [Identity User Detail](https://hub.steampipe.io/mods/turbot/oci_insights/dashboards/dashboard.oci_identity_user_detail) ([#39](https://github.com/turbot/steampipe-mod-oci-insights/pull/39))
