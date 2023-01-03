@@ -13,7 +13,7 @@ category "kms_key" {
 
 category "kms_key_version" {
   title = "KMS Key Version"
-  icon  = "hard_drive"
+  icon  = "key"
   color = local.security_color
 }
 
