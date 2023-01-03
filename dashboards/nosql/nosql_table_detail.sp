@@ -18,21 +18,69 @@ dashboard "nosql_table_detail" {
       width = 2
 
       query = query.nosql_table_state
-      args = {
-        id = self.input.table_id.value
-      }
+      args = [self.input.table_id.value]
     }
 
     card {
       width = 2
 
       query = query.nosql_table_auto_reclaimable
-      args = {
-        id = self.input.table_id.value
+      args = [self.input.table_id.value]
+    }
+  }
+
+  with "nosql_table_parents" {
+    query = query.nosql_table_nosql_table_parents
+    args  = [self.input.table_id.value]
+  }
+
+  with "nosql_table_children" {
+    query = query.nosql_table_nosql_table_children
+    args  = [self.input.table_id.value]
+  }
+
+  container {
+
+    graph {
+      title     = "Relationships"
+      type      = "graph"
+      direction = "TD"
+
+      node {
+        base = node.nosql_table
+        args = {
+          nosql_table_ids = [self.input.table_id.value]
+        }
+      }
+
+      node {
+        base = node.nosql_table
+        args = {
+          nosql_table_ids = with.nosql_table_parents.rows[*].parent_table_id
+        }
+      }
+
+      node {
+        base = node.nosql_table
+        args = {
+          nosql_table_ids = with.nosql_table_children.rows[*].child_table_id
+        }
+      }
+
+      edge {
+        base = edge.nosql_table_parent_to_nosql_table
+        args = {
+          nosql_table_ids = with.nosql_table_parents.rows[*].parent_table_id
+        }
+      }
+
+      edge {
+        base = edge.nosql_table_parent_to_nosql_table
+        args = {
+          nosql_table_ids = [self.input.table_id.value]
+        }
       }
     }
-
-
   }
 
   container {
@@ -45,9 +93,7 @@ dashboard "nosql_table_detail" {
         type  = "line"
         width = 6
         query = query.nosql_table_overview
-        args = {
-          id = self.input.table_id.value
-        }
+        args = [self.input.table_id.value]
 
       }
 
@@ -55,9 +101,7 @@ dashboard "nosql_table_detail" {
         title = "Tags"
         width = 6
         query = query.nosql_table_tag
-        args = {
-          id = self.input.table_id.value
-        }
+        args = [self.input.table_id.value]
 
       }
     }
@@ -68,17 +112,13 @@ dashboard "nosql_table_detail" {
       table {
         title = "Table Limits"
         query = query.nosql_table_limits
-        args = {
-          id = self.input.table_id.value
-        }
+        args = [self.input.table_id.value]
       }
 
       table {
         title = "Column Details"
         query = query.nosql_table_column
-        args = {
-          id = self.input.table_id.value
-        }
+        args = [self.input.table_id.value]
       }
 
     }
@@ -92,9 +132,7 @@ dashboard "nosql_table_detail" {
         type  = "line"
         width = 6
         query = query.nosql_table_read_throttle
-        args = {
-          id = self.input.table_id.value
-        }
+        args = [self.input.table_id.value]
       }
 
       chart {
@@ -102,15 +140,15 @@ dashboard "nosql_table_detail" {
         type  = "line"
         width = 6
         query = query.nosql_table_write_throttle
-        args = {
-          id = self.input.table_id.value
-        }
+        args = [self.input.table_id.value]
       }
 
     }
 
   }
 }
+
+# Input queries
 
 query "nosql_table_input" {
   sql = <<EOQ
@@ -130,8 +168,82 @@ query "nosql_table_input" {
       n.lifecycle_state <> 'DELETED'
     order by
       n.name;
-EOQ
+  EOQ
 }
+
+# With queries
+
+query "nosql_table_nosql_table_parents" {
+  sql = <<EOQ
+    with parent_name as (
+      select
+        split_part(c_name, '.', (array_length(string_to_array(c_name, '.'),1)-1)) as parent_table_name,
+        c_name,
+        id as child_id
+      from (
+        select
+          name as c_name,
+          id
+        from
+          oci_nosql_table
+        ) as a
+      where
+        (array_length(string_to_array(c_name, '.'),1)-1) > 0
+    ),
+    all_parent_name as (
+      select
+        split_part(pn.c_name, pn.parent_table_name, 1) || parent_table_name as parent_name,
+        child_id
+      from
+        parent_name as pn
+    )
+    select
+      p.id as parent_table_id
+    from
+      oci_nosql_table as p,
+      all_parent_name as pn
+    where
+      p.name = pn.parent_name
+      and pn.child_id = $1;
+  EOQ
+}
+
+query "nosql_table_nosql_table_children" {
+  sql = <<EOQ
+    with parent_name as (
+      select
+        split_part(c_name, '.', (array_length(string_to_array(c_name, '.'),1)-1)) as parent_table_name,
+        c_name,
+        id as child_id
+      from (
+        select
+          name as c_name,
+          id
+        from
+          oci_nosql_table
+        ) as a
+      where
+        (array_length(string_to_array(c_name, '.'),1)-1) > 0
+    ),
+    all_parent_name as (
+      select
+        split_part(pn.c_name, pn.parent_table_name, 1) || parent_table_name as parent_name,
+        child_id
+      from
+        parent_name as pn
+    )
+    select
+      pn.child_id as child_table_id
+    from
+      oci_nosql_table as p
+      left join all_parent_name as pn on p.name = pn.parent_name
+    where
+      pn.child_id is not null
+      and p.id like $1;
+  EOQ
+}
+
+# Card queries
 
 query "nosql_table_state" {
   sql = <<-EOQ
@@ -142,8 +254,6 @@ query "nosql_table_state" {
     where
       id = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "nosql_table_auto_reclaimable" {
@@ -155,9 +265,9 @@ query "nosql_table_auto_reclaimable" {
     where
       id = $1;
   EOQ
-
-  param "id" {}
 }
+
+# Other detail page queries
 
 query "nosql_table_overview" {
   sql = <<-EOQ
@@ -173,8 +283,6 @@ query "nosql_table_overview" {
     where
       id = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "nosql_table_tag" {
@@ -194,8 +302,6 @@ query "nosql_table_tag" {
       jsondata,
       json_each_text(tags);
   EOQ
-
-  param "id" {}
 }
 
 query "nosql_table_limits" {
@@ -209,8 +315,6 @@ query "nosql_table_limits" {
     where
       id  = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "nosql_table_column" {
@@ -226,8 +330,6 @@ query "nosql_table_column" {
     where
       id = $1;
   EOQ
-
-  param "id" {}
 }
 
 query "nosql_table_read_throttle" {
@@ -242,8 +344,6 @@ query "nosql_table_read_throttle" {
       d.timestamp >= current_date - interval '7 day' and t.id = $1
     order by d.timestamp;
   EOQ
-
-  param "id" {}
 }
 
 query "nosql_table_write_throttle" {
@@ -258,6 +358,4 @@ query "nosql_table_write_throttle" {
       d.timestamp >= current_date - interval '7 day' and t.id = $1
     order by d.timestamp;
   EOQ
-
-  param "id" {}
 }

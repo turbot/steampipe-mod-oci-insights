@@ -94,7 +94,7 @@ dashboard "nosql_table_dashboard" {
 query "nosql_table_count" {
   sql = <<-EOQ
   select
-    count(*) as "NoSQL Tables"
+    count(*) as "Tables"
   from
     oci_nosql_table
   where
