@@ -192,19 +192,19 @@ query "nosql_table_nosql_table_parents" {
     ),
     all_parent_name as (
       select
-        split_part(pn.c_name, pn.parent_table_name, 1) || parent_table_name as parent_name,
+        split_part(p.c_name, p.parent_table_name, 1) || parent_table_name as parent_name,
         child_id
       from
-        parent_name as pn
+        parent_name as p
     )
     select
-      p.id as parent_table_id
+      t.id as parent_table_id
     from
-      oci_nosql_table as p,
-      all_parent_name as pn
+      oci_nosql_table as t,
+      all_parent_name as p
     where
-      p.name = pn.parent_name
-      and pn.child_id = $1;
+      t.name = p.parent_name
+      and p.child_id = $1;
   EOQ
 }
 
@@ -227,19 +227,19 @@ query "nosql_table_nosql_table_children" {
     ),
     all_parent_name as (
       select
-        split_part(pn.c_name, pn.parent_table_name, 1) || parent_table_name as parent_name,
+        split_part(p.c_name, p.parent_table_name, 1) || parent_table_name as parent_name,
         child_id
       from
-        parent_name as pn
+        parent_name as p
     )
     select
-      pn.child_id as child_table_id
+      p.child_id as child_table_id
     from
-      oci_nosql_table as p
-      left join all_parent_name as pn on p.name = pn.parent_name
+      oci_nosql_table as t
+      left join all_parent_name as p on t.name = p.parent_name
     where
-      pn.child_id is not null
-      and p.id like $1;
+      p.child_id is not null
+      and t.id like $1;
   EOQ
 }
 
