@@ -84,6 +84,23 @@ edge "vcn_local_peering_gateway_to_vcn_vcn" {
   param "vcn_local_peering_gateway_ids" {}
 }
 
+edge "vcn_nat_gateway_to_vcn_public_ip" {
+  title = "public ip"
+
+  sql = <<-EOQ
+    select
+      assigned_entity_id as from_id,
+      id as to_id
+    from
+      oci_core_public_ip
+    where
+      assigned_entity_type = 'NAT_GATEWAY'
+      and assigned_entity_id = any($1);
+  EOQ
+
+  param "vcn_nat_gateway_ids" {}
+}
+
 edge "vcn_nat_gateway_to_vcn_vcn" {
   title = "vcn"
 

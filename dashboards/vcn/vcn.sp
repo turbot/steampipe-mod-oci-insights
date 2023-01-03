@@ -53,6 +53,13 @@ category "vcn_network_security_group" {
   color = local.networking_color
 }
 
+category "vcn_public_ip" {
+  title = "VCN Public IP"
+  href  = "/oci_insights.dashboard.vcn_public_ip_detail?input.public_ip_id={{.properties.'ID' | @uri}}"
+  icon  = "swipe_right_alt"
+  color = local.networking_color
+}
+
 category "vcn_route_table" {
   title = "VCN Route Table"
   icon  = "table_rows"
@@ -75,7 +82,7 @@ category "vcn_service_gateway" {
 category "vcn_subnet" {
   title = "VCN Subnet"
   href  = "/oci_insights.dashboard.vcn_subnet_detail?input.subnet_id={{.properties.'Subnet ID' | @uri}}"
-  icon  = "share"
+  icon  = "lan"
   color = local.networking_color
 }
 

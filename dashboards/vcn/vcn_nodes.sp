@@ -195,6 +195,30 @@ node "vcn_network_security_group" {
   param "vcn_network_security_group_ids" {}
 }
 
+node "vcn_public_ip" {
+  category = category.vcn_public_ip
+
+  sql = <<-EOQ
+    select
+      id as id,
+      title as title,
+      jsonb_build_object(
+        'ID', id,
+        'Display Name', display_name,
+        'Time Created', time_created,
+        'Lifecycle State', lifecycle_state,
+        'Scope', scope,
+        'compartment ID', compartment_id
+      ) as properties
+    from
+      oci_core_public_ip
+    where
+      id = any($1);
+  EOQ
+
+  param "vcn_public_ip_ids" {}
+}
+
 node "vcn_route_table" {
   category = category.vcn_route_table
 
