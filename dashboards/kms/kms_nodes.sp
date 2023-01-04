@@ -72,3 +72,27 @@ node "kms_vault" {
 
   param "kms_vault_ids" {}
 }
+
+node "kms_vault_secret" {
+  category = category.kms_vault_secret
+
+  sql = <<-EOQ
+    select
+      id as id,
+      title as title,
+      jsonb_build_object(
+        'ID', id,
+        'Display Name', name,
+        'Lifecycle State', lifecycle_state,
+        'Time Created', time_created,
+        'Compartment ID', compartment_id,
+        'Region', region
+      ) as properties
+    from
+      oci_vault_secret
+    where
+      id = any($1);
+  EOQ
+
+  param "kms_vault_secret_ids" {}
+}

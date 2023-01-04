@@ -22,3 +22,9 @@ category "kms_vault" {
   icon  = "key"
   color = local.security_color
 }
+
+category "kms_vault_secret" {
+  title = "KMS Vault Secret"
+  icon  = "enhanced_encryption"
+  color = local.security_color
+}
