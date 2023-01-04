@@ -114,6 +114,24 @@ edge "blockstorage_boot_volume_to_blockstorage_boot_volume_replica" {
   param "blockstorage_boot_volume_ids" {}
 }
 
+edge "blockstorage_boot_volume_to_kms_key_version" {
+  title = "key version"
+
+  sql = <<-EOQ
+    select
+      b.id as from_id,
+      k.current_key_version as to_id
+    from
+      oci_core_boot_volume as b,
+      oci_kms_key as k
+    where
+      k.id = b.kms_key_id
+      and b.id = any($1);
+  EOQ
+
+  param "blockstorage_boot_volume_ids" {}
+}
+
 edge "blockstorage_boot_volume_to_kms_vault" {
   title = "key vault"
 
