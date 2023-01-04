@@ -1,7 +1,7 @@
 dashboard "kms_vault_dashboard" {
 
   title         = "OCI KMS Vault Dashboard"
-  # documentation = file("./dashboards/kms/docs/kms_vault_dashboard.md")
+  documentation = file("./dashboards/kms/docs/kms_vault_dashboard.md")
 
   tags = merge(local.kms_common_tags, {
     type = "Dashboard"
@@ -13,11 +13,6 @@ dashboard "kms_vault_dashboard" {
       sql   = query.kms_vault_count.sql
       width = 2
     }
-
-    # card {
-    #   sql   = query.kms_hsm_key_count.sql
-    #   width = 2
-    # }
 
     card {
       sql   = query.kms_vault_disabled_count.sql
