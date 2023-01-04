@@ -374,12 +374,13 @@ edge "vcn_subnet_to_vcn_route_table" {
 
   sql = <<-EOQ
     select
-      id as from_id,
-      route_table_id as to_id
+      coalesce(s.id, r.vcn_id ) as from_id,
+      r.id as to_id
     from
-      oci_core_subnet
+      oci_core_route_table as r
+      left join oci_core_subnet as s on r.id = s.route_table_id
     where
-      route_table_id = any($1);
+      r.id = any($1);
   EOQ
 
   param "vcn_route_table_ids" {}
