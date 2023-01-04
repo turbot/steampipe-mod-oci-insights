@@ -29,12 +29,6 @@ dashboard "vcn_public_ip_detail" {
 
     card {
       width = 2
-      query = query.vcn_public_ip_lifecycle_state
-      args  = [self.input.public_ip_id.value]
-    }
-
-    card {
-      width = 2
       query = query.vcn_public_ip_public_ip_address
       args  = [self.input.public_ip_id.value]
     }
@@ -156,19 +150,6 @@ query "vcn_public_ip_lifetime" {
     select
       'Lifetime' as label,
       lifetime as value
-    from
-      oci_core_public_ip
-    where
-      id = $1;
-  EOQ
-
-}
-
-query "vcn_public_ip_lifecycle_state" {
-  sql = <<-EOQ
-    select
-      'lifecycle State' as label,
-      lifecycle_state as value
     from
       oci_core_public_ip
     where
