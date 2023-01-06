@@ -24,7 +24,7 @@ category "mysql_configuration" {
 
 category "mysql_db_system" {
   title = "MYSQL DB System"
-  href  = "/oci_insights.dashboard.mysql_db_system_detail?input.db_system_id={{.properties.'ID' | @uri}}"
   color = local.database_color
+  href  = "/oci_insights.dashboard.mysql_db_system_detail?input.db_system_id={{.properties.'ID' | @uri}}"
   icon  = "database"
 }
