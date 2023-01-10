@@ -40,6 +40,11 @@ dashboard "blockstorage_block_volume_detail" {
     args  = [self.input.block_volume_id.value]
   }
 
+  with "blockstorage_block_volume_replica" {
+    query = query.blockstorage_block_volume_blockstorage_block_volume_replica
+    args  = [self.input.block_volume_id.value]
+  }
+
   with "compute_instances" {
     query = query.blockstorage_block_volume_compute_instances
     args  = [self.input.block_volume_id.value]
@@ -84,6 +89,13 @@ dashboard "blockstorage_block_volume_detail" {
       }
 
       node {
+        base = node.blockstorage_block_volume_replica
+        args = {
+          blockstorage_block_volume_replica_ids = with.blockstorage_block_volume_replica.rows[*].replica_volume_id
+        }
+      }
+
+      node {
         base = node.compute_instance
         args = {
           compute_instance_ids = with.compute_instances.rows[*].instance_id
@@ -113,6 +125,13 @@ dashboard "blockstorage_block_volume_detail" {
 
       edge {
         base = edge.blockstorage_block_volume_to_blockstorage_block_volume_backup
+        args = {
+          blockstorage_block_volume_ids = [self.input.block_volume_id.value]
+        }
+      }
+
+      edge {
+        base = edge.blockstorage_block_volume_to_blockstorage_block_volume_replica
         args = {
           blockstorage_block_volume_ids = [self.input.block_volume_id.value]
         }
@@ -238,6 +257,17 @@ query "blockstorage_block_volume_blockstorage_block_volume_backups" {
       oci_core_volume_backup
     where
       volume_id  = $1;
+  EOQ
+}
+
+query "blockstorage_block_volume_blockstorage_block_volume_replica" {
+  sql = <<EOQ
+    select
+      id as replica_volume_id
+    from
+      oci_core_block_volume_replica
+    where
+      block_volume_id  = $1;
   EOQ
 }
 
