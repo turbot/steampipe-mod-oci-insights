@@ -1,3 +1,21 @@
+edge "blockstorage_block_volume_backup_to_blockstorage_block_volume_backup_policy" {
+  title = "backup policy"
+
+  sql = <<-EOQ
+    select
+      b.id as from_id,
+      v.volume_backup_policy_id as to_id
+    from
+      oci_core_volume_backup as b,
+      oci_core_volume as v
+    where
+      v.volume_backup_policy_id is not null
+      and b.id = any($1);
+  EOQ
+
+  param "blockstorage_block_volume_backup_ids" {}
+}
+
 edge "blockstorage_block_volume_to_blockstorage_block_volume_backup" {
   title = "backup"
 
@@ -7,22 +25,6 @@ edge "blockstorage_block_volume_to_blockstorage_block_volume_backup" {
       id as to_id
     from
       oci_core_volume_backup
-    where
-      volume_id = any($1);
-  EOQ
-
-  param "blockstorage_block_volume_ids" {}
-}
-
-edge "blockstorage_block_volume_to_compute_instance" {
-  title = "mounts"
-
-  sql = <<-EOQ
-    select
-      instance_id as from_id,
-      volume_id as to_id
-    from
-      oci_core_volume_attachment
     where
       volume_id = any($1);
   EOQ

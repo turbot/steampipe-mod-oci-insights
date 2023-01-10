@@ -30,6 +30,11 @@ dashboard "blockstorage_block_volume_detail" {
 
   }
 
+  with "blockstorage_block_volume_backup_policies" {
+    query = query.blockstorage_block_volume_blockstorage_block_volume_backup_policies
+    args  = [self.input.block_volume_id.value]
+  }
+
   with "blockstorage_block_volume_backups" {
     query = query.blockstorage_block_volume_blockstorage_block_volume_backups
     args  = [self.input.block_volume_id.value]
@@ -72,6 +77,13 @@ dashboard "blockstorage_block_volume_detail" {
       }
 
       node {
+        base = node.blockstorage_block_volume_backup_policy
+        args = {
+          blockstorage_block_volume_backup_policy_ids = with.blockstorage_block_volume_backup_policies.rows[*].backup_policy_id
+        }
+      }
+
+      node {
         base = node.compute_instance
         args = {
           compute_instance_ids = with.compute_instances.rows[*].instance_id
@@ -93,6 +105,13 @@ dashboard "blockstorage_block_volume_detail" {
       }
 
       edge {
+        base = edge.blockstorage_block_volume_backup_to_blockstorage_block_volume_backup_policy
+        args = {
+          blockstorage_block_volume_backup_ids = with.blockstorage_block_volume_backups.rows[*].backup_id
+        }
+      }
+
+      edge {
         base = edge.blockstorage_block_volume_to_blockstorage_block_volume_backup
         args = {
           blockstorage_block_volume_ids = [self.input.block_volume_id.value]
@@ -100,9 +119,9 @@ dashboard "blockstorage_block_volume_detail" {
       }
 
       edge {
-        base = edge.blockstorage_block_volume_to_compute_instance
+        base = edge.compute_instance_to_blockstorage_block_volume
         args = {
-          blockstorage_block_volume_ids = [self.input.block_volume_id.value]
+          compute_instance_ids = with.compute_instances.rows[*].instance_id
         }
       }
 
@@ -198,6 +217,19 @@ query "blockstorage_block_volume_input" {
 
 # With queries
 
+query "blockstorage_block_volume_blockstorage_block_volume_backup_policies" {
+  sql = <<EOQ
+    select
+      p.id as backup_policy_id
+    from
+      oci_core_volume as v,
+      oci_core_volume_backup_policy as p
+    where
+      v.volume_backup_policy_id = p.id
+      and v.id  = $1;
+  EOQ
+}
+
 query "blockstorage_block_volume_blockstorage_block_volume_backups" {
   sql = <<EOQ
     select
@@ -216,7 +248,8 @@ query "blockstorage_block_volume_compute_instances" {
     from
       oci_core_volume_attachment
     where
-      volume_id  = $1;
+      instance_id is not null
+      and volume_id  = $1;
   EOQ
 }
 
@@ -227,7 +260,8 @@ query "blockstorage_block_volume_kms_keys" {
     from
       oci_core_volume
     where
-      id  = $1;
+      kms_key_id is not null
+      and id  = $1;
   EOQ
 }
 

@@ -236,6 +236,13 @@ dashboard "compute_instance_detail" {
       }
 
       edge {
+        base = edge.compute_instance_to_vcn_primary_vnic
+        args = {
+          compute_instance_ids = [self.input.instance_id.value]
+        }
+      }
+
+      edge {
         base = edge.compute_instance_to_vcn_vnic
         args = {
           compute_instance_ids = [self.input.instance_id.value]

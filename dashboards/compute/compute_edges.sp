@@ -1,5 +1,5 @@
 edge "compute_instance_to_blockstorage_block_volume" {
-  title = "block volume"
+  title = "mounts"
 
   sql = <<-EOQ
     select
@@ -15,7 +15,7 @@ edge "compute_instance_to_blockstorage_block_volume" {
 }
 
 edge "compute_instance_to_blockstorage_boot_volume" {
-  title = "boot volume"
+  title = "mounts"
 
   sql = <<-EOQ
     select
@@ -107,6 +107,24 @@ edge "compute_instance_to_vcn_subnet" {
   param "compute_instance_ids" {}
 }
 
+edge "compute_instance_to_vcn_primary_vnic" {
+  title = "primary vnic"
+
+  sql = <<-EOQ
+    select
+      instance_id as from_id,
+      vnic_id as to_id
+    from
+      oci_core_vnic_attachment
+    where
+      is_primary = true
+      and lifecycle_state = 'ATTACHED'
+      and instance_id = any($1);
+  EOQ
+
+  param "compute_instance_ids" {}
+}
+
 edge "compute_instance_to_vcn_vnic" {
   title = "vnic"
 
@@ -117,7 +135,8 @@ edge "compute_instance_to_vcn_vnic" {
     from
       oci_core_vnic_attachment
     where
-      lifecycle_state = 'ATTACHED'
+      is_primary = false
+      and lifecycle_state = 'ATTACHED'
       and instance_id = any($1);
   EOQ
 

@@ -17,6 +17,12 @@ category "blockstorage_block_volume_backup" {
   icon  = "settings_backup_restore"
 }
 
+category "blockstorage_block_volume_backup_policy" {
+  title = "Blockstorage Block Volume Backup Policy"
+  color = local.storage_color
+  icon  = "text:BP"
+}
+
 category "blockstorage_boot_volume" {
   title = "Blockstorage Boot Volume"
   color = local.storage_color
