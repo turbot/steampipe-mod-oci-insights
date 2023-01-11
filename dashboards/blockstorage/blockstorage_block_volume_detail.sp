@@ -35,6 +35,11 @@ dashboard "blockstorage_block_volume_detail" {
     args  = [self.input.block_volume_id.value]
   }
 
+  with "blockstorage_block_volume_default_backup_policies" {
+    query = query.blockstorage_block_volume_blockstorage_block_volume_default_backup_policies
+    args  = [self.input.block_volume_id.value]
+  }
+
   with "blockstorage_block_volume_clone" {
     query = query.to_blockstorage_block_volume_clone
     args  = [self.input.block_volume_id.value]
@@ -113,6 +118,13 @@ dashboard "blockstorage_block_volume_detail" {
       }
 
       node {
+        base = node.blockstorage_block_volume_default_backup_policy
+        args = {
+          blockstorage_block_volume_default_backup_policy_ids = with.blockstorage_block_volume_default_backup_policies.rows[*].backup_policy_id
+        }
+      }
+
+      node {
         base = node.blockstorage_block_volume_replica
         args = {
           blockstorage_block_volume_replica_ids = with.blockstorage_block_volume_replica.rows[*].replica_volume_id
@@ -141,9 +153,16 @@ dashboard "blockstorage_block_volume_detail" {
       }
 
       edge {
-        base = edge.blockstorage_block_volume_backup_to_blockstorage_block_volume_backup_policy
+        base = edge.blockstorage_block_volume_backup_policy_to_blockstorage_block_volume_backup
         args = {
-          blockstorage_block_volume_backup_ids = with.blockstorage_block_volume_backups.rows[*].backup_id
+          blockstorage_block_volume_backup_policy_ids = with.blockstorage_block_volume_backup_policies.rows[*].backup_policy_id
+        }
+      }
+
+      edge {
+        base = edge.blockstorage_block_volume_default_backup_policy_to_blockstorage_block_volume_backup
+        args = {
+          blockstorage_block_volume_default_backup_policy_ids = with.blockstorage_block_volume_default_backup_policies.rows[*].backup_policy_id
         }
       }
 
@@ -155,12 +174,26 @@ dashboard "blockstorage_block_volume_detail" {
       }
 
       edge {
+        base = edge.blockstorage_block_volume_to_blockstorage_block_volume_backup_policy
+        args = {
+          blockstorage_block_volume_ids = [self.input.block_volume_id.value]
+        }
+      }
+
+      edge {
+        base = edge.blockstorage_block_volume_to_blockstorage_block_volume_default_backup_policy
+        args = {
+          blockstorage_block_volume_ids = [self.input.block_volume_id.value]
+        }
+      }
+
+      edge {
         base = edge.blockstorage_block_volume_to_blockstorage_block_volume_clone
         args = {
           blockstorage_block_volume_ids = [self.input.block_volume_id.value]
         }
       }
-      
+
       edge {
         base = edge.blockstorage_block_volume_to_blockstorage_block_volume_clone
         args = {
@@ -281,6 +314,19 @@ query "blockstorage_block_volume_blockstorage_block_volume_backup_policies" {
     from
       oci_core_volume as v,
       oci_core_volume_backup_policy as p
+    where
+      v.volume_backup_policy_id = p.id
+      and v.id  = $1;
+  EOQ
+}
+
+query "blockstorage_block_volume_blockstorage_block_volume_default_backup_policies" {
+  sql = <<EOQ
+    select
+      p.id as backup_policy_id
+    from
+      oci_core_volume as v,
+      oci_core_volume_default_backup_policy as p
     where
       v.volume_backup_policy_id = p.id
       and v.id  = $1;

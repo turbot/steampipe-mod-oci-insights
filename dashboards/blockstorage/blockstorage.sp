@@ -23,6 +23,12 @@ category "blockstorage_block_volume_backup_policy" {
   icon  = "text:BP"
 }
 
+category "blockstorage_block_volume_default_backup_policy" {
+  title = "Blockstorage Block Volume Default Backup Policy"
+  color = local.storage_color
+  icon  = "text:BP"
+}
+
 category "blockstorage_boot_volume" {
   title = "Blockstorage Boot Volume"
   color = local.storage_color
