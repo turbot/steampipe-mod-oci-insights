@@ -31,10 +31,10 @@ dashboard "kms_vault_dashboard" {
       width = 3
 
       series "count" {
-        point "active" {
+        point "ok" {
           color = "ok"
         }
-        point "deleted" {
+        point "disabled" {
           color = "alert"
         }
       }
@@ -46,17 +46,24 @@ dashboard "kms_vault_dashboard" {
     title = "Analysis"
 
     chart {
+      title = "Vaults by Type"
+      sql   = query.kms_vault_by_type.sql
+      type  = "column"
+      width = 4
+    }
+
+    chart {
       title = "Vaults by Tenancy"
       sql   = query.kms_vault_by_tenancy.sql
       type  = "column"
-      width = 3
+      width = 4
     }
 
     chart {
       title = "Vaults by Compartment"
       sql   = query.kms_vault_by_compartment.sql
       type  = "column"
-      width = 3
+      width = 4
     }
 
 
@@ -64,14 +71,14 @@ dashboard "kms_vault_dashboard" {
       title = "Vaults by Region"
       sql   = query.kms_vault_by_region.sql
       type  = "column"
-      width = 3
+      width = 4
     }
 
     chart {
       title = "Vaults by Age"
       sql   = query.kms_vault_by_creation_month.sql
       type  = "column"
-      width = 3
+      width = 4
     }
 
   }
@@ -104,16 +111,30 @@ query "kms_vault_disabled_count" {
 query "kms_vault_lifecycle_state" {
   sql = <<-EOQ
     select
-      case when lifecycle_state = 'DELETED' then 'deleted' else 'active' end as status,
+      case when lifecycle_state = 'DISABLED' then 'disabled' else 'ok' end as status,
       count(*)
     from
       oci_kms_vault
+    where
+      lifecycle_state <> 'DELETED'
     group by
       status;
   EOQ
 }
 
 # # Analysis Queries
+
+query "kms_vault_by_type" {
+  sql = <<-EOQ
+    select
+      vault_type,
+      count(k.*) as total
+    from
+      oci_kms_vault as k
+    group by
+      vault_type;
+  EOQ
+}
 
 query "kms_vault_by_tenancy" {
   sql = <<-EOQ

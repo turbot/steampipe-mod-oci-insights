@@ -1,7 +1,7 @@
 dashboard "kms_vault_detail" {
 
   title         = "OCI KMS Vault Detail"
-  # documentation = file("./dashboards/kms/docs/kms_vault_detail.md")
+  documentation = file("./dashboards/kms/docs/kms_vault_detail.md")
 
   tags = merge(local.kms_common_tags, {
     type = "Detail"
