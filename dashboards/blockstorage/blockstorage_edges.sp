@@ -32,6 +32,23 @@ edge "blockstorage_block_volume_to_blockstorage_block_volume_backup" {
   param "blockstorage_block_volume_ids" {}
 }
 
+edge "blockstorage_block_volume_to_blockstorage_block_volume_clone" {
+  title = "clone block volume"
+
+  sql = <<-EOQ
+    select
+      source_details ->> 'id' as from_id,
+      id as to_id
+    from
+      oci_core_volume
+    where
+      id = any($1)
+      and source_details is not null;
+  EOQ
+
+  param "blockstorage_block_volume_ids" {}
+}
+
 edge "blockstorage_block_volume_to_blockstorage_block_volume_replica" {
   title = "replica"
 
