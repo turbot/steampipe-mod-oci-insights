@@ -41,3 +41,9 @@ category "blockstorage_boot_volume_replica" {
   color = local.storage_color
   icon  = "text:replica"
 }
+
+category "blockstorage_block_volume_replica" {
+  title = "Blockstorage Block Volume Replica"
+  color = local.storage_color
+  icon  = "text:replica"
+}
