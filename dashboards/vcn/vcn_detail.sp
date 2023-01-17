@@ -431,54 +431,45 @@ dashboard "vcn_detail" {
 
     }
 
-    container {
+    container{
 
-      table {
-        title = "Security List Details"
-        width = 6
-        query = query.vcn_security_list
-        args = [self.input.vcn_id.value]
-        column "OCID" {
-          display = "none"
+      title = "Security Lists"
+
+        flow {
+          query = query.vcn_nsl_ingress_rule_sankey
+          title = "Ingress Security List"
+          width = 6
+          args = [self.input.vcn_id.value]
         }
-        column "Name" {
-          href = "${dashboard.vcn_security_list_detail.url_path}?input.security_list_id={{.OCID | @uri}}"
+
+        flow {
+          query = query.vcn_nsl_egress_rule_sankey
+          title = "Egress Security List"
+          width = 6
+          args = [self.input.vcn_id.value]
         }
+
+        table {
+          title = "Security List Details"
+          width = 12
+          query = query.vcn_security_list
+          args = [self.input.vcn_id.value]
+          column "OCID" {
+            display = "none"
+          }
+          column "Name" {
+            href = "${dashboard.vcn_security_list_detail.url_path}?input.security_list_id={{.OCID | @uri}}"
+          }
       }
+
+    }
+
+    container {
+
+      title = "Network Security Groups & Gateways"
 
       table {
-        title = "Gateways"
-        width = 6
-        query = query.vcn_gateways_table
-        args = [self.input.vcn_id.value]
-      }
-
-    }
-
-    container {
-      title = "Security List Ingress Analysis"
-
-      flow {
-        query = query.vcn_nsl_ingress_rule_sankey
-        args = [self.input.vcn_id.value]
-      }
-
-    }
-
-    container {
-      title = "Security List Egress Analysis"
-
-      flow {
-        query = query.vcn_nsl_egress_rule_sankey
-        args = [self.input.vcn_id.value]
-      }
-
-    }
-
-    container {
-
-      table {
-        title = "Network Security Group Details"
+        title = "Network Security Groups"
         width = 6
         query = query.vcn_security_group
         args = [self.input.vcn_id.value]
@@ -488,6 +479,13 @@ dashboard "vcn_detail" {
         column "Name" {
           href = "${dashboard.vcn_network_security_group_detail.url_path}?input.security_group_id={{.OCID | @uri}}"
         }
+      }
+
+      table {
+        title = "Gateways"
+        width = 6
+        query = query.vcn_gateways_table
+        args = [self.input.vcn_id.value]
       }
     }
 

@@ -17,14 +17,24 @@ dashboard "vcn_network_security_group_detail" {
 
     card {
       width = 2
+      query = query.vcn_network_security_group_ingress_rules_count
+      args  = [self.input.security_group_id.value]
+    }
 
+    card {
+      width = 2
+      query = query.vcn_network_security_group_egress_rules_count
+      args  = [self.input.security_group_id.value]
+    }
+
+    card {
+      width = 2
       query = query.vcn_network_security_group_ingress_ssh
       args  = [self.input.security_group_id.value]
     }
 
     card {
       width = 2
-
       query = query.vcn_network_security_group_ingress_rdp
       args  = [self.input.security_group_id.value]
     }
@@ -188,16 +198,39 @@ dashboard "vcn_network_security_group_detail" {
     }
 
     container {
+
       width = 6
 
       table {
+        title = "Associated to"
+        query = query.vcn_network_security_group_assoc
+        args  = [self.input.security_group_id.value]
+
+        column "link" {
+          display = "none"
+        }
+
+        column "Title" {
+          href = "{{ .link }}"
+        }
+
+      }
+
+    }
+
+    container {
+      width = 12
+
+      table {
         title = "Ingress Rules"
+        width = 6
         query = query.vcn_network_security_group_ingress_rule
         args  = [self.input.security_group_id.value]
       }
 
       table {
         title = "Egress Rules"
+        width = 6
         query = query.vcn_network_security_group_egress_rule
         args  = [self.input.security_group_id.value]
       }
@@ -311,7 +344,7 @@ query "vcn_network_security_group_filestorage_mount_targets" {
         jsonb_array_elements_text(nsg_ids) as n_id,
         id
       from
-        oci_filestorage_mount_target
+        oci_file_storage_mount_target
     )
     select
       s.id as mount_target_id
@@ -346,6 +379,36 @@ query "vcn_network_security_group_compute_instances" {
 
 # Card queries
 
+query "vcn_network_security_group_ingress_rules_count" {
+  sql = <<-EOQ
+    select
+      'Ingress Rules' as label,
+      count(*) as value
+    from
+      oci_core_network_security_group,
+      jsonb_array_elements(rules) as r
+    where
+      r ->> 'direction' = 'INGRESS'
+      and id = $1;
+  EOQ
+
+}
+
+query "vcn_network_security_group_egress_rules_count" {
+  sql = <<-EOQ
+    select
+      'Egress Rules' as label,
+      count(*) as value
+    from
+      oci_core_network_security_group,
+      jsonb_array_elements(rules) as r
+    where
+      r ->> 'direction' = 'EGRESS'
+      and id = $1;
+  EOQ
+
+}
+
 query "vcn_network_security_group_ingress_ssh" {
   sql = <<-EOQ
     with non_compliant_rules as (
@@ -379,6 +442,7 @@ query "vcn_network_security_group_ingress_ssh" {
       where
         nsg.id = $1 and nsg.lifecycle_state <> 'TERMINATED';
   EOQ
+
 }
 
 query "vcn_network_security_group_ingress_rdp" {
@@ -414,6 +478,7 @@ query "vcn_network_security_group_ingress_rdp" {
       where
         nsg.id = $1 and nsg.lifecycle_state <> 'TERMINATED';
   EOQ
+
 }
 
 # Other detail page queries
@@ -452,6 +517,73 @@ query "vcn_network_security_group_tag" {
     order by
       key;
   EOQ
+}
+
+query "vcn_network_security_group_assoc" {
+  sql = <<-EOQ
+
+  with nsg_vnic_attachment as (
+    select
+      jsonb_array_elements_text(nsg_ids) as n_id,
+      instance_id as instance_id
+    from
+      oci_core_vnic_attachment
+  )
+
+  -- Compute Instance
+  select
+    i.title as "Title",
+    'oci_core_instance' as "Type",
+    i.id as "ID",
+    '${dashboard.compute_instance_detail.url_path}?input.instance_id=' || i.id  as link
+  from
+    nsg_vnic_attachment as g
+    left join oci_core_network_security_group as nsg on g.n_id = nsg.id
+    left join oci_core_instance as i on i.id = g.instance_id
+  where
+    nsg.id = $1
+
+    -- File Storage Mount Target
+    union all
+    select
+      title as "Title",
+      'oci_file_storage_mount_target' as "Type",
+      id as "ID",
+      null as link
+    from
+      oci_file_storage_mount_target,
+      jsonb_array_elements_text(nsg_ids) as sg
+    where
+      sg = $1
+
+    -- Load Balancer
+    union all
+    select
+      title as "Title",
+      'oci_core_load_balancer' as "Type",
+      id as "ID",
+      null as link
+    from
+      oci_core_load_balancer,
+      jsonb_array_elements_text(network_security_group_ids) as sg
+    where
+      sg = $1
+
+    -- Network Load Balancer
+    union all
+    select
+      title as "Title",
+      'oci_core_network_load_balancer' as "Type",
+      id as "ID",
+      null as link
+    from
+      oci_core_network_load_balancer,
+      jsonb_array_elements_text(network_security_group_ids) as sg
+    where
+      sg = $1
+
+  EOQ
+
 }
 
 query "vcn_network_security_group_ingress_rule" {

@@ -169,7 +169,7 @@ edge "vcn_network_security_group_to_filestorage_mount_target" {
         jsonb_array_elements_text(nsg_ids) as n_id,
         id
       from
-        oci_filestorage_mount_target
+        oci_file_storage_mount_target
     )
     select
       n.id as from_id,
