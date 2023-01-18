@@ -327,34 +327,24 @@ query "vcn_subnet_vcn_vcns" {
 
 query "vcn_subnet_vcn_load_balancers" {
   sql = <<-EOQ
-    with subnet_list as (
-      select
-        id as subnet_id
-      from
-        oci_core_subnet
-      where
-        id = $1
-      )
-      select
-        id as load_balancer_id
-      from
-        oci_core_load_balancer,
-        jsonb_array_elements_text(subnet_ids) as s
-      where
-        s in (select subnet_id from subnet_list);
+    select
+      id as load_balancer_id
+    from
+      oci_core_load_balancer,
+      jsonb_array_elements_text(subnet_ids) as sid
+    where
+      sid = $1;
   EOQ
 }
 
 query "vcn_subnet_vcn_network_load_balancers" {
   sql = <<-EOQ
     select
-      n.id as network_load_balancer_id
+      id as network_load_balancer_id
     from
-      oci_core_network_load_balancer as n,
-      oci_core_subnet as s
+      oci_core_network_load_balancer
     where
-      s.id = n.subnet_id
-      and s.id = $1;
+      subnet_id = $1;
   EOQ
 }
 
@@ -372,36 +362,24 @@ query "vcn_subnet_vcn_flow_logs" {
 
 query "vcn_subnet_vcn_security_lists" {
   sql = <<-EOQ
-    with subnet_security_lists as (
-      select
-        jsonb_array_elements_text(security_list_ids) as s_id
-      from
-        oci_core_subnet
-      where
-        id = $1
-      )
-      select
-        sl.id as security_list_id
-      from
-        oci_core_security_list as sl,
-        subnet_security_lists as ssl
-      where
-        sl.id = ssl.s_id
+    select
+      sid as security_list_id
+    from
+      oci_core_subnet,
+      jsonb_array_elements_text(security_list_ids) as sid
+    where
+      id = $1
   EOQ
 }
 
 query "vcn_subnet_compute_instances" {
   sql = <<-EOQ
     select
-      i.id as compute_instance_id
+      instance_id as compute_instance_id
     from
-      oci_core_instance as i,
-      oci_core_subnet as s,
-      oci_core_vnic_attachment as v
+      oci_core_vnic_attachment
     where
-      v.instance_id = i.id
-      and v.subnet_id = s.id
-      and s.id = $1;
+      subnet_id = $1;
   EOQ
 }
 

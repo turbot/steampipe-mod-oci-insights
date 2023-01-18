@@ -521,15 +521,12 @@ query "vcn_input" {
 query "vcn_compute_instances" {
   sql = <<-EOQ
     select
-      i.id as compute_instance_id
+      a.instance_id as compute_instance_id
     from
-      oci_core_instance as i,
-      oci_core_subnet as s,
-      oci_core_vnic_attachment as v
+      oci_core_vnic_attachment as a,
+      oci_core_subnet as s
     where
-      v.instance_id = i.id
-      and v.subnet_id = s.id
-      and i.lifecycle_state = 'RUNNING'
+      a.subnet_id = s.id
       and s.vcn_id = $1;
   EOQ
 }
@@ -580,21 +577,16 @@ query "vcn_network_security_groups" {
 
 query "vcn_vcn_load_balancers" {
   sql = <<-EOQ
-    with subnet_list as (
-      select
-        id as subnet_id
-      from
-        oci_core_subnet
-      where
-        vcn_id = $1
-      )
-      select
-        id as load_balancer_id
-      from
-        oci_core_load_balancer,
-        jsonb_array_elements_text(subnet_ids) as s
-      where
-        s in (select subnet_id from subnet_list);
+    select
+      lb.id as load_balancer_id
+    from
+      oci_core_load_balancer as lb,
+      jsonb_array_elements_text(subnet_ids) as sid,
+      oci_core_subnet as s
+    where
+      sid = s.id
+      and s.vcn_id = $1;
+
   EOQ
 }
 

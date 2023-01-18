@@ -171,21 +171,13 @@ query "vcn_security_list_vcn_vcns" {
 
 query "vcn_security_list_vcn_subnets" {
   sql = <<-EOQ
-    with subnet_security_lists as (
-      select
-        jsonb_array_elements_text(security_list_ids) as s_id,
-        id as subnet_id
-      from
-        oci_core_subnet
-      )
-      select
-        subnet_id
-      from
-        oci_core_security_list as sl,
-        subnet_security_lists as ssl
-      where
-        sl.id = ssl.s_id
-        and sl.id = $1
+    select
+      id as subnet_id
+    from
+      oci_core_subnet,
+      jsonb_array_elements_text(security_list_ids) as sid
+    where
+      sid = $1;
   EOQ
 }
 

@@ -279,101 +279,61 @@ query "vcn_network_security_group_vcn_vcns" {
 
 query "vcn_network_security_group_vcn_vnics" {
   sql = <<-EOQ
-    with network_security_groups as (
-      select
-        jsonb_array_elements_text(nsg_ids) as n_id,
-        vnic_id
-      from
-        oci_core_vnic_attachment
-    )
     select
       vnic_id
     from
-      oci_core_network_security_group,
-      network_security_groups
+      oci_core_vnic_attachment,
+      jsonb_array_elements_text(nsg_ids) as nid
     where
-      id = n_id
-      and id = $1
+      nid = $1;
   EOQ
 }
 
 query "vcn_network_security_group_vcn_load_balancers" {
   sql = <<-EOQ
-    with nsg_list as (
-      select
-        id as nsg_id
-      from
-        oci_core_network_security_group
-      where
-        id = $1
-      )
-      select
-        id as load_balancer_id
-      from
-        oci_core_load_balancer,
-        jsonb_array_elements_text(network_security_group_ids) as s
-      where
-        s in (select nsg_id from nsg_list);
+    select
+      id as load_balancer_id
+    from
+      oci_core_load_balancer,
+      jsonb_array_elements_text(network_security_group_ids) as nid
+    where
+      nid = $1;
   EOQ
 }
 
 query "vcn_network_security_group_vcn_network_load_balancers" {
   sql = <<-EOQ
-    with nsg_list as (
-      select
-        id as nsg_id
-      from
-        oci_core_network_security_group
-      where
-        id = $1
-      )
-      select
-        id as network_load_balancer_id
-      from
-        oci_core_network_load_balancer,
-        jsonb_array_elements_text(network_security_group_ids) as s
-      where
-        s in (select nsg_id from nsg_list);
+    select
+      id as network_load_balancer_id
+    from
+      oci_core_network_load_balancer,
+      jsonb_array_elements_text(network_security_group_ids) as nid
+    where
+      nid = $1;
   EOQ
 }
 
 query "vcn_network_security_group_filestorage_mount_targets" {
   sql = <<-EOQ
-    with network_security_groups as (
-      select
-        jsonb_array_elements_text(nsg_ids) as n_id,
-        id
-      from
-        oci_file_storage_mount_target
-    )
     select
-      s.id as mount_target_id
+      id as mount_target_id
     from
-      oci_core_network_security_group as n,
-      network_security_groups as s
+      oci_file_storage_mount_target,
+      jsonb_array_elements_text(nsg_ids) as nid
     where
-      n.id = n_id
-      and n.id = $1
+      nid = $1;
   EOQ
 }
 
 query "vcn_network_security_group_compute_instances" {
   sql = <<-EOQ
-    with network_security_groups as (
-      select
-        jsonb_array_elements_text(nsg_ids) as n_id,
-        instance_id
-      from
-        oci_core_vnic_attachment
-    )
     select
       instance_id as compute_instance_id
     from
-      oci_core_network_security_group,
-      network_security_groups
+      oci_core_vnic_attachment,
+      jsonb_array_elements_text(nsg_ids) as nid
     where
-      id = n_id
-      and id = $1
+      nid = $1
   EOQ
 }
 

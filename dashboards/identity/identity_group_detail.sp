@@ -116,22 +116,13 @@ query "identity_group_input" {
 
 query "identity_group_identity_users" {
   sql = <<-EOQ
-    with user_group_id as (
-      select
-        jsonb_array_elements(user_groups) ->> 'groupId' as g_id,
-        name,
-        id
-      from
-        oci_identity_user
-    )
     select
-      u.id as user_id
+      id as user_id
     from
-      oci_identity_group as g,
-      user_group_id as u
+      oci_identity_user,
+      jsonb_array_elements(user_groups) as gid
     where
-      g.id = u.g_id
-      and g.id = $1
+      gid ->> 'groupId' = $1;
   EOQ
 }
 

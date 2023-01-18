@@ -304,6 +304,8 @@ dashboard "compute_instance_detail" {
 
 }
 
+# Input queries
+
 query "compute_instance_input" {
   sql = <<EOQ
     select
@@ -324,6 +326,138 @@ query "compute_instance_input" {
       i.display_name;
   EOQ
 }
+
+# With queries
+
+query "compute_instance_vcn_subnets" {
+  sql = <<-EOQ
+    select
+      subnet_id
+    from
+      oci_core_vnic_attachment
+    where
+      instance_id = $1;
+  EOQ
+}
+
+query "compute_instance_vcn_vcns" {
+  sql = <<-EOQ
+    select
+      s.vcn_id as vcn_id
+    from
+      oci_core_subnet as s,
+      oci_core_vnic_attachment as v
+    where
+      s.id = v.subnet_id
+      and v.instance_id = $1;
+  EOQ
+}
+
+query "compute_instance_blockstorage_boot_volumes" {
+  sql = <<-EOQ
+    select
+      boot_volume_id
+    from
+      oci_core_boot_volume_attachment
+    where
+      instance_id = $1;
+  EOQ
+}
+
+query "compute_instance_blockstorage_block_volumes" {
+  sql = <<-EOQ
+    select
+      volume_id as block_volume_id
+    from
+      oci_core_volume_attachment
+    where
+      instance_id = $1;
+  EOQ
+}
+
+query "compute_instance_vcn_network_security_groups" {
+  sql = <<-EOQ
+    select
+      nid as nsg_id
+    from
+      oci_core_vnic_attachment,
+      jsonb_array_elements_text(nsg_ids) as nid
+    where
+      instance_id = $1;
+  EOQ
+}
+
+query "compute_instance_vcn_vnics" {
+  sql = <<-EOQ
+    select
+      vnic_id
+    from
+      oci_core_vnic_attachment
+    where
+      lifecycle_state = 'ATTACHED'
+      and instance_id = $1
+  EOQ
+}
+
+query "compute_instance_vcn_load_balancers" {
+  sql = <<-EOQ
+    select
+      lb.id as lb_id
+    from
+      oci_core_vnic_attachment as a,
+      oci_core_load_balancer as lb,
+      jsonb_array_elements_text(subnet_ids) as sid
+    where
+      a.subnet_id = sid
+      and a.instance_id = $1;
+  EOQ
+}
+
+query "compute_instance_vcn_network_load_balancers" {
+  sql = <<-EOQ
+    select
+      n.id as nlb_id
+    from
+      oci_core_vnic_attachment as a,
+      oci_core_network_load_balancer as n
+    where
+      n.subnet_id = a.subnet_id
+      and a.instance_id = $1;
+  EOQ
+}
+
+query "compute_instance_autoscaling_auto_scaling_configurations" {
+  sql = <<-EOQ
+    with intance_pool_id as (
+      select
+        tags ->> 'oci:compute:instancepool' as instance_pool_id,
+        id
+      from
+        oci_core_instance
+    )
+    select
+      a.id as auto_scaling_config_id
+    from
+      oci_autoscaling_auto_scaling_configuration as a,
+      intance_pool_id as i
+    where
+      instance_pool_id = resource ->> 'id'
+      and i.id = $1
+  EOQ
+}
+
+query "compute_instance_compute_images" {
+  sql = <<-EOQ
+    select
+      source_details ->> 'imageId' as image_id
+    from
+      oci_core_instance
+    where
+      id = $1
+  EOQ
+}
+
+# Card queries
 
 query "compute_instance_state" {
   sql = <<-EOQ
@@ -459,153 +593,5 @@ query "compute_instance_vnic" {
       oci_core_vnic_attachment
     where
       instance_id = $1 and public_ip is not null;
-  EOQ
-}
-
-query "compute_instance_vcn_subnets" {
-  sql = <<-EOQ
-    select
-      s.id as subnet_id
-    from
-      oci_core_instance as i,
-      oci_core_subnet as s,
-      oci_core_vnic_attachment as v
-    where
-      v.instance_id = i.id
-      and v.subnet_id = s.id
-      and i.id = $1;
-  EOQ
-}
-
-query "compute_instance_vcn_vcns" {
-  sql = <<-EOQ
-    select
-      s.vcn_id as vcn_id
-    from
-      oci_core_instance as i,
-      oci_core_subnet as s,
-      oci_core_vnic_attachment as v
-    where
-      v.instance_id = i.id
-      and v.subnet_id = s.id
-      and i.id = $1;
-  EOQ
-}
-
-query "compute_instance_blockstorage_boot_volumes" {
-  sql = <<-EOQ
-    select
-      boot_volume_id
-    from
-      oci_core_boot_volume_attachment
-    where
-      instance_id = $1;
-  EOQ
-}
-
-query "compute_instance_blockstorage_block_volumes" {
-  sql = <<-EOQ
-    select
-      volume_id as block_volume_id
-    from
-      oci_core_volume_attachment
-    where
-      instance_id = $1;
-  EOQ
-}
-
-query "compute_instance_vcn_network_security_groups" {
-  sql = <<-EOQ
-    with network_security_groups as (
-      select
-        jsonb_array_elements_text(nsg_ids) as n_id,
-        instance_id
-      from
-        oci_core_vnic_attachment
-    )
-    select
-      n_id as nsg_id
-    from
-      oci_core_network_security_group,
-      network_security_groups
-    where
-      id = n_id
-      and instance_id = $1
-  EOQ
-}
-
-query "compute_instance_vcn_vnics" {
-  sql = <<-EOQ
-    select
-      vnic_id
-    from
-      oci_core_vnic_attachment
-    where
-      lifecycle_state = 'ATTACHED'
-      and instance_id = $1
-  EOQ
-}
-
-query "compute_instance_vcn_load_balancers" {
-  sql = <<-EOQ
-    with subnet_list as (
-      select
-        jsonb_array_elements_text(subnet_ids) as subnet_id,
-        id
-      from
-        oci_core_load_balancer
-    )
-    select
-      s.id as lb_id
-    from
-      oci_core_vnic_attachment as a,
-      subnet_list as s
-    where
-      s.subnet_id = a.subnet_id
-      and a.instance_id = $1;
-  EOQ
-}
-
-query "compute_instance_vcn_network_load_balancers" {
-  sql = <<-EOQ
-    select
-      n.id as nlb_id
-    from
-      oci_core_vnic_attachment as a,
-      oci_core_network_load_balancer as n
-    where
-      n.subnet_id = a.subnet_id
-      and a.instance_id = $1;
-  EOQ
-}
-
-query "compute_instance_autoscaling_auto_scaling_configurations" {
-  sql = <<-EOQ
-    with intance_pool_id as (
-      select
-        tags ->> 'oci:compute:instancepool' as instance_pool_id,
-        id
-      from
-        oci_core_instance
-    )
-    select
-      a.id as auto_scaling_config_id
-    from
-      oci_autoscaling_auto_scaling_configuration as a,
-      intance_pool_id as i
-    where
-      instance_pool_id = resource ->> 'id'
-      and i.id = $1
-  EOQ
-}
-
-query "compute_instance_compute_images" {
-  sql = <<-EOQ
-    select
-      source_details ->> 'imageId' as image_id
-    from
-      oci_core_instance
-    where
-      id = $1
   EOQ
 }
