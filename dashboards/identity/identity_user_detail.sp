@@ -35,12 +35,49 @@ dashboard "identity_user_detail" {
     args  = [self.input.user_id.value]
   }
 
+  with "identity_api_key_for_identity_user" {
+    query = query.identity_api_key_for_identity_user
+    args  = [self.input.user_id.value]
+  }
+
+  with "identity_auth_token_for_identity_user" {
+    query = query.identity_auth_token_for_identity_user
+    args  = [self.input.user_id.value]
+  }
+
+  with "identity_customer_secret_key_for_identity_user" {
+    query = query.identity_customer_secret_key_for_identity_user
+    args  = [self.input.user_id.value]
+  }
+
+
   container {
 
     graph {
       title     = "Relationships"
       type      = "graph"
       direction = "TD"
+
+      node {
+        base = node.identity_api_key
+        args = {
+          identity_api_key_ids = with.identity_api_key_for_identity_user.rows[*].api_key_id
+        }
+      }
+
+      node {
+        base = node.identity_auth_token
+        args = {
+          identity_auth_token_ids = with.identity_auth_token_for_identity_user.rows[*].auth_token_id
+        }
+      }
+
+      node {
+        base = node.identity_customer_secret_key
+        args = {
+          identity_customer_secret_key_ids = with.identity_customer_secret_key_for_identity_user.rows[*].customer_secret_key_id
+        }
+      }
 
       node {
         base = node.identity_group
@@ -60,6 +97,27 @@ dashboard "identity_user_detail" {
         base = edge.identity_group_to_identity_user
         args = {
           identity_group_ids = with.identity_groups_for_identity_user.rows[*].group_id
+        }
+      }
+
+      edge {
+        base = edge.identity_user_to_identity_api_key
+        args = {
+          identity_api_key_ids = with.identity_api_key_for_identity_user.rows[*].api_key_id
+        }
+      }
+
+      edge {
+        base = edge.identity_user_to_identity_auth_token
+        args = {
+          identity_auth_token_ids = with.identity_auth_token_for_identity_user.rows[*].auth_token_id
+        }
+      }
+
+      edge {
+        base = edge.identity_user_to_identity_customer_secret_key
+        args = {
+          identity_customer_secret_key_ids = with.identity_customer_secret_key_for_identity_user.rows[*].customer_secret_key_id
         }
       }
 
@@ -108,6 +166,11 @@ dashboard "identity_user_detail" {
         title = "Group Details"
         query = query.identity_user_group
         args = [self.input.user_id.value]
+
+
+        column "Group Name" {
+          href = "/oci_insights.dashboard.identity_group_detail?input.group_id={{.ID | @uri}}"
+        }
       }
     }
 
@@ -142,6 +205,41 @@ query "identity_groups_for_identity_user" {
       oci_identity_user
     where
       id  = $1
+  EOQ
+}
+
+query "identity_api_key_for_identity_user" {
+  sql = <<-EOQ
+    select
+      key_id as api_key_id
+    from
+      oci_identity_api_key
+    where
+      key_id is not null
+      and user_id  = $1
+  EOQ
+}
+
+query "identity_auth_token_for_identity_user" {
+  sql = <<-EOQ
+    select
+      id as auth_token_id
+    from
+      oci_identity_auth_token
+    where
+      id is not null
+      and user_id = $1
+  EOQ
+}
+
+query "identity_customer_secret_key_for_identity_user" {
+  sql = <<-EOQ
+    select
+      id as customer_secret_key_id
+    from
+      oci_identity_customer_secret_key
+    where
+      user_id = $1
   EOQ
 }
 
@@ -237,7 +335,8 @@ query "identity_user_group" {
   sql = <<-EOQ
     select
       i.name as "Group Name",
-      i.time_created as "Time Created"
+      i.time_created as "Time Created",
+      i.id as "ID"
     from
       oci_identity_user as u,
       jsonb_array_elements(user_groups) as g

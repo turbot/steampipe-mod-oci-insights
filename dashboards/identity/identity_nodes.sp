@@ -1,3 +1,72 @@
+node "identity_api_key" {
+  category = category.identity_api_key
+
+  sql = <<-EOQ
+    select
+      key_id as id,
+      title as title,
+      jsonb_build_object(
+        'ID', key_id,
+        'Fingerprint', fingerprint,
+        'Lifecycle State', lifecycle_state,
+        'Time Created',time_created,
+        'tenant_id', tenant_id
+      ) as properties
+    from
+      oci_identity_api_key
+    where
+      key_id = any($1);
+  EOQ
+
+  param "identity_api_key_ids" {}
+}
+
+node "identity_auth_token" {
+  category = category.identity_auth_token
+
+  sql = <<-EOQ
+    select
+      id as id,
+      title as title,
+      jsonb_build_object(
+        'ID', id,
+        'Description', description,
+        'Lifecycle State', lifecycle_state,
+        'Time Created',time_created,
+        'tenant_id', tenant_id
+      ) as properties
+    from
+      oci_identity_auth_token
+    where
+      id = any($1);
+  EOQ
+
+  param "identity_auth_token_ids" {}
+}
+
+node "identity_customer_secret_key" {
+  category = category.identity_customer_secret_key
+
+  sql = <<-EOQ
+    select
+      id as id,
+      title as title,
+      jsonb_build_object(
+        'ID', id,
+        'Display Name', display_name,
+        'Lifecycle State', lifecycle_state,
+        'Time Created',time_created,
+        'tenant_id', tenant_id
+      ) as properties
+    from
+      oci_identity_customer_secret_key
+    where
+      id = any($1);
+  EOQ
+
+  param "identity_customer_secret_key_ids" {}
+}
+
 node "identity_availability_domain" {
   category = category.availability_domain
 

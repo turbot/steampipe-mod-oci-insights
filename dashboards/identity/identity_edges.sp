@@ -61,3 +61,51 @@ edge "identity_group_to_identity_user" {
 
   param "identity_group_ids" {}
 }
+
+edge "identity_user_to_identity_api_key" {
+  title = "api ley"
+
+  sql = <<-EOQ
+    select
+      user_id as from_id,
+      key_id as to_id
+    from
+      oci_identity_api_key
+    where
+      key_id = any($1);
+  EOQ
+
+  param "identity_api_key_ids" {}
+}
+
+edge "identity_user_to_identity_auth_token" {
+  title = "auth token"
+
+  sql = <<-EOQ
+    select
+      user_id as from_id,
+      id as to_id
+    from
+      oci_identity_auth_token
+    where
+      id = any($1);
+  EOQ
+
+  param "identity_auth_token_ids" {}
+}
+
+edge "identity_user_to_identity_customer_secret_key" {
+  title = "customer secret key"
+
+  sql = <<-EOQ
+    select
+      user_id as from_id,
+      id as to_id
+    from
+      oci_identity_customer_secret_key
+    where
+      id = any($1);
+  EOQ
+
+  param "identity_customer_secret_key_ids" {}
+}
