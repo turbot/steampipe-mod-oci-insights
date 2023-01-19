@@ -190,7 +190,7 @@ dashboard "blockstorage_block_volume_detail" {
       edge {
         base = edge.blockstorage_block_volume_to_blockstorage_block_volume_clone
         args = {
-          blockstorage_block_volume_ids = with.source_blockstorage_block_volume_clones_for_blockstorage_block_volume.rows[*].volume_id
+          blockstorage_block_volume_ids = with.target_blockstorage_block_volume_clones_for_blockstorage_block_volume.rows[*].volume_id
         }
       }
 

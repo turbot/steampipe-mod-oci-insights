@@ -28,6 +28,11 @@ dashboard "blockstorage_boot_volume_detail" {
 
   }
 
+  with "blockstorage_boot_volume_backup_policies_for_blockstorage_boot_volume" {
+    query = query.blockstorage_boot_volume_backup_policies_for_blockstorage_boot_volume
+    args  = [self.input.boot_volume_id.value]
+  }
+
   with "blockstorage_boot_volume_backups_for_blockstorage_boot_volume" {
     query = query.blockstorage_boot_volume_backups_for_blockstorage_boot_volume
     args  = [self.input.boot_volume_id.value]
@@ -35,6 +40,11 @@ dashboard "blockstorage_boot_volume_detail" {
 
   with "blockstorage_boot_volume_replicas_for_blockstorage_boot_volume" {
     query = query.blockstorage_boot_volume_replicas_for_blockstorage_boot_volume
+    args  = [self.input.boot_volume_id.value]
+  }
+
+  with "blockstorage_boot_volume_default_backup_policies_for_blockstorage_boot_volume" {
+    query = query.blockstorage_boot_volume_default_backup_policies_for_blockstorage_boot_volume
     args  = [self.input.boot_volume_id.value]
   }
 
@@ -58,6 +68,16 @@ dashboard "blockstorage_boot_volume_detail" {
     args  = [self.input.boot_volume_id.value]
   }
 
+  with "source_blockstorage_boot_volume_clones_for_blockstorage_boot_volume" {
+    query = query.source_blockstorage_boot_volume_clones_for_blockstorage_boot_volume
+    args  = [self.input.boot_volume_id.value]
+  }
+
+  with "target_blockstorage_boot_volume_clones_for_blockstorage_boot_volume" {
+    query = query.target_blockstorage_boot_volume_clones_for_blockstorage_boot_volume
+    args  = [self.input.boot_volume_id.value]
+  }
+
   container {
 
     graph {
@@ -73,9 +93,37 @@ dashboard "blockstorage_boot_volume_detail" {
       }
 
       node {
+        base = node.blockstorage_boot_volume
+        args = {
+          blockstorage_boot_volume_ids = with.target_blockstorage_boot_volume_clones_for_blockstorage_boot_volume.rows[*].volume_id
+        }
+      }
+
+      node {
+        base = node.blockstorage_boot_volume
+        args = {
+          blockstorage_boot_volume_ids = with.source_blockstorage_boot_volume_clones_for_blockstorage_boot_volume.rows[*].volume_id
+        }
+      }
+
+      node {
         base = node.blockstorage_boot_volume_backup
         args = {
           blockstorage_boot_volume_backup_ids = with.blockstorage_boot_volume_backups_for_blockstorage_boot_volume.rows[*].backup_id
+        }
+      }
+
+      node {
+        base = node.blockstorage_boot_volume_backup_policy
+        args = {
+          blockstorage_boot_volume_backup_policy_ids = with.blockstorage_boot_volume_backup_policies_for_blockstorage_boot_volume.rows[*].backup_policy_id
+        }
+      }
+
+      node {
+        base = node.blockstorage_boot_volume_default_backup_policy
+        args = {
+          blockstorage_boot_volume_default_backup_policy_ids = with.blockstorage_boot_volume_default_backup_policies_for_blockstorage_boot_volume.rows[*].backup_policy_id
         }
       }
 
@@ -115,6 +163,20 @@ dashboard "blockstorage_boot_volume_detail" {
       }
 
       edge {
+        base = edge.blockstorage_boot_volume_backup_policy_to_blockstorage_boot_volume_backup
+        args = {
+          blockstorage_boot_volume_backup_policy_ids = with.blockstorage_boot_volume_backup_policies_for_blockstorage_boot_volume.rows[*].backup_policy_id
+        }
+      }
+
+      edge {
+        base = edge.blockstorage_boot_volume_default_backup_policy_to_blockstorage_boot_volume_backup
+        args = {
+          blockstorage_boot_volume_default_backup_policy_ids = with.blockstorage_boot_volume_default_backup_policies_for_blockstorage_boot_volume.rows[*].backup_policy_id
+        }
+      }
+
+      edge {
         base = edge.blockstorage_boot_volume_backup_to_compute_image
         args = {
           blockstorage_boot_volume_backup_ids = with.blockstorage_boot_volume_backups_for_blockstorage_boot_volume.rows[*].backup_id
@@ -125,6 +187,27 @@ dashboard "blockstorage_boot_volume_detail" {
         base = edge.blockstorage_boot_volume_to_blockstorage_boot_volume_backup
         args = {
           blockstorage_boot_volume_ids = [self.input.boot_volume_id.value]
+        }
+      }
+
+      edge {
+        base = edge.blockstorage_boot_volume_to_blockstorage_boot_volume_backup_policy
+        args = {
+          blockstorage_boot_volume_ids = [self.input.boot_volume_id.value]
+        }
+      }
+
+       edge {
+        base = edge.blockstorage_boot_volume_to_blockstorage_boot_volume_clone
+        args = {
+          blockstorage_boot_volume_ids = [self.input.boot_volume_id.value]
+        }
+      }
+
+      edge {
+        base = edge.blockstorage_boot_volume_to_blockstorage_boot_volume_clone
+        args = {
+          blockstorage_boot_volume_ids = with.target_blockstorage_boot_volume_clones_for_blockstorage_boot_volume.rows[*].volume_id
         }
       }
 
@@ -248,6 +331,19 @@ query "blockstorage_boot_volume_input" {
 
 # With queries
 
+query "blockstorage_boot_volume_backup_policies_for_blockstorage_boot_volume" {
+  sql = <<EOQ
+    select
+      p.id as backup_policy_id
+    from
+      oci_core_boot_volume as v,
+      oci_core_volume_backup_policy as p
+    where
+      v.volume_backup_policy_id = p.id
+      and v.id  = $1;
+  EOQ
+}
+
 query "blockstorage_boot_volume_backups_for_blockstorage_boot_volume" {
   sql = <<EOQ
     select
@@ -256,6 +352,19 @@ query "blockstorage_boot_volume_backups_for_blockstorage_boot_volume" {
       oci_core_boot_volume_backup
     where
       boot_volume_id = $1;
+  EOQ
+}
+
+query "blockstorage_boot_volume_default_backup_policies_for_blockstorage_boot_volume" {
+  sql = <<EOQ
+    select
+      p.id as backup_policy_id
+    from
+      oci_core_boot_volume as v,
+      oci_core_volume_default_backup_policy as p
+    where
+      v.volume_backup_policy_id = p.id
+      and v.id  = $1;
   EOQ
 }
 
@@ -314,6 +423,29 @@ query "kms_vaults_for_blockstorage_boot_volume" {
     where
       k.id = v.kms_key_id
       and v.id = $1;
+  EOQ
+}
+
+query "source_blockstorage_boot_volume_clones_for_blockstorage_boot_volume" {
+  sql = <<EOQ
+    select
+      source_details ->> 'id' as volume_id
+    from
+      oci_core_boot_volume as v
+    where
+      source_details is not null
+      and id = $1;
+  EOQ
+}
+
+query "target_blockstorage_boot_volume_clones_for_blockstorage_boot_volume" {
+  sql = <<EOQ
+    select
+      id as volume_id
+    from
+      oci_core_boot_volume as v
+    where
+      source_details ->> 'id' = $1;
   EOQ
 }
 

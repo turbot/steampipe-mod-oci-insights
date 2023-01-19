@@ -160,6 +160,52 @@ node "blockstorage_boot_volume_backup" {
   param "blockstorage_boot_volume_backup_ids" {}
 }
 
+node "blockstorage_boot_volume_backup_policy" {
+  category = category.blockstorage_boot_volume_backup_policy
+
+  sql = <<-EOQ
+    select
+      id as id,
+      title as title,
+      jsonb_build_object(
+        'ID', id,
+        'Time Created', time_created,
+        'Compartment ID', compartment_id,
+        'Region', region
+      ) as properties
+    from
+      oci_core_volume_backup_policy
+    where
+      id = any($1);
+  EOQ
+
+  param "blockstorage_boot_volume_backup_policy_ids" {}
+}
+
+node "blockstorage_boot_volume_default_backup_policy" {
+  category = category.blockstorage_boot_volume_default_backup_policy
+
+  sql = <<-EOQ
+    select
+      id as id,
+      title as title,
+      jsonb_build_object(
+        'ID', id,
+        'Backup Type', jsonb_array_elements(schedules)->'backupType',
+        'Backup Offset Type', jsonb_array_elements(schedules)->'offsetType',
+        'Time Created', time_created,
+        'Compartment ID', compartment_id,
+        'Region', region
+      ) as properties
+    from
+      oci_core_volume_default_backup_policy
+    where
+      id = any($1);
+  EOQ
+
+  param "blockstorage_boot_volume_default_backup_policy_ids" {}
+}
+
 node "blockstorage_boot_volume_replica" {
   category = category.blockstorage_boot_volume_replica
 

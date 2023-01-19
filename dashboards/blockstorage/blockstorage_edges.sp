@@ -162,6 +162,26 @@ edge "blockstorage_block_volume_to_kms_vault" {
   param "blockstorage_block_volume_ids" {}
 }
 
+edge "blockstorage_boot_volume_backup_policy_to_blockstorage_boot_volume_backup" {
+  title = "backup"
+
+  sql = <<-EOQ
+    select
+      v.volume_backup_policy_id as from_id,
+      b.id as to_id
+    from
+      oci_core_volume_backup as b,
+      oci_core_boot_volume as v,
+      oci_core_volume_backup_policy as p
+    where
+      v.volume_backup_policy_id is not null
+      and v.volume_backup_policy_id = p.id
+      and p.id = any($1);
+  EOQ
+
+  param "blockstorage_boot_volume_backup_policy_ids" {}
+}
+
 edge "blockstorage_boot_volume_backup_to_compute_image" {
   title = "image"
 
@@ -178,6 +198,26 @@ edge "blockstorage_boot_volume_backup_to_compute_image" {
   param "blockstorage_boot_volume_backup_ids" {}
 }
 
+edge "blockstorage_boot_volume_default_backup_policy_to_blockstorage_boot_volume_backup" {
+  title = "backup"
+
+  sql = <<-EOQ
+    select
+      v.volume_backup_policy_id as from_id,
+      b.id as to_id
+    from
+      oci_core_volume_backup as b,
+      oci_core_boot_volume as v,
+      oci_core_volume_default_backup_policy as p
+    where
+      v.volume_backup_policy_id is not null
+      and v.volume_backup_policy_id = p.id
+      and p.id = any($1);
+  EOQ
+
+  param "blockstorage_boot_volume_default_backup_policy_ids" {}
+}
+
 edge "blockstorage_boot_volume_to_blockstorage_boot_volume_backup" {
   title = "backup"
 
@@ -189,6 +229,40 @@ edge "blockstorage_boot_volume_to_blockstorage_boot_volume_backup" {
       oci_core_boot_volume_backup
     where
       boot_volume_id = any($1);
+  EOQ
+
+  param "blockstorage_boot_volume_ids" {}
+}
+
+edge "blockstorage_boot_volume_to_blockstorage_boot_volume_backup_policy" {
+  title = "uses"
+
+  sql = <<-EOQ
+    select
+      id as from_id,
+      volume_backup_policy_id as to_id
+    from
+      oci_core_boot_volume
+    where
+      volume_backup_policy_id is not null
+      and id = any($1);
+  EOQ
+
+  param "blockstorage_boot_volume_ids" {}
+}
+
+edge "blockstorage_boot_volume_to_blockstorage_boot_volume_clone" {
+  title = "clone boot volume"
+
+  sql = <<-EOQ
+    select
+      source_details ->> 'id' as from_id,
+      id as to_id
+    from
+      oci_core_boot_volume
+    where
+      id = any($1)
+      and source_details is not null;
   EOQ
 
   param "blockstorage_boot_volume_ids" {}

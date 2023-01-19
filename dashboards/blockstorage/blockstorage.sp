@@ -42,6 +42,18 @@ category "blockstorage_boot_volume_backup" {
   icon  = "settings_backup_restore"
 }
 
+category "blockstorage_boot_volume_backup_policy" {
+  title = "Blockstorage Boot Volume Backup Policy"
+  color = local.storage_color
+  icon  = "text:BP"
+}
+
+category "blockstorage_boot_volume_default_backup_policy" {
+  title = "Blockstorage Boot Volume Default Backup Policy"
+  color = local.storage_color
+  icon  = "text:BP"
+}
+
 category "blockstorage_boot_volume_replica" {
   title = "Blockstorage Boot Volume Replica"
   color = local.storage_color
