@@ -45,53 +45,53 @@ dashboard "compute_instance_detail" {
     }
   }
 
-  with "autoscaling_auto_scaling_configurations" {
-    query = query.compute_instance_autoscaling_auto_scaling_configurations
+  with "autoscaling_auto_scaling_configurations_for_compute_instance" {
+    query = query.autoscaling_auto_scaling_configurations_for_compute_instance
     args  = [self.input.instance_id.value]
   }
 
-  with "blockstorage_block_volumes" {
-    query = query.compute_instance_blockstorage_block_volumes
+  with "blockstorage_block_volumes_for_compute_instance" {
+    query = query.blockstorage_block_volumes_for_compute_instance
     args  = [self.input.instance_id.value]
   }
 
-  with "blockstorage_boot_volumes" {
-    query = query.compute_instance_blockstorage_boot_volumes
+  with "blockstorage_boot_volumes_for_compute_instance" {
+    query = query.blockstorage_boot_volumes_for_compute_instance
     args  = [self.input.instance_id.value]
   }
 
-  with "compute_images" {
-    query = query.compute_instance_compute_images
+  with "compute_images_for_compute_instance" {
+    query = query.compute_images_for_compute_instance
     args  = [self.input.instance_id.value]
   }
 
-  with "vcn_load_balancers" {
-    query = query.compute_instance_vcn_load_balancers
+  with "vcn_load_balancers_for_compute_instance" {
+    query = query.vcn_load_balancers_for_compute_instance
     args  = [self.input.instance_id.value]
   }
 
-  with "vcn_network_load_balancers" {
-    query = query.compute_instance_vcn_network_load_balancers
+  with "vcn_network_load_balancers_for_compute_instance" {
+    query = query.vcn_network_load_balancers_for_compute_instance
     args  = [self.input.instance_id.value]
   }
 
-  with "vcn_network_security_groups" {
-    query = query.compute_instance_vcn_network_security_groups
+  with "vcn_network_security_groups_for_compute_instance" {
+    query = query.vcn_network_security_groups_for_compute_instance
     args  = [self.input.instance_id.value]
   }
 
-  with "vcn_subnets" {
-    query = query.compute_instance_vcn_subnets
+  with "vcn_subnets_for_compute_instance" {
+    query = query.vcn_subnets_for_compute_instance
     args  = [self.input.instance_id.value]
   }
 
-  with "vcn_vcns" {
-    query = query.compute_instance_vcn_vcns
+  with "vcn_vcns_for_compute_instance" {
+    query = query.vcn_vcns_for_compute_instance
     args  = [self.input.instance_id.value]
   }
 
-  with "vcn_vnics" {
-    query = query.compute_instance_vcn_vnics
+  with "vcn_vnics_for_compute_instance" {
+    query = query.vcn_vnics_for_compute_instance
     args  = [self.input.instance_id.value]
   }
 
@@ -105,28 +105,28 @@ dashboard "compute_instance_detail" {
       node {
         base = node.autoscaling_auto_scaling_configuration
         args = {
-          autoscaling_auto_scaling_configuration_ids = with.autoscaling_auto_scaling_configurations.rows[*].auto_scaling_config_id
+          autoscaling_auto_scaling_configuration_ids = with.autoscaling_auto_scaling_configurations_for_compute_instance.rows[*].auto_scaling_config_id
         }
       }
 
       node {
         base = node.blockstorage_block_volume
         args = {
-          blockstorage_block_volume_ids = with.blockstorage_block_volumes.rows[*].block_volume_id
+          blockstorage_block_volume_ids = with.blockstorage_block_volumes_for_compute_instance.rows[*].block_volume_id
         }
       }
 
       node {
         base = node.blockstorage_boot_volume
         args = {
-          blockstorage_boot_volume_ids = with.blockstorage_boot_volumes.rows[*].boot_volume_id
+          blockstorage_boot_volume_ids = with.blockstorage_boot_volumes_for_compute_instance.rows[*].boot_volume_id
         }
       }
 
       node {
         base = node.compute_image
         args = {
-          compute_image_ids = with.compute_images.rows[*].image_id
+          compute_image_ids = with.compute_images_for_compute_instance.rows[*].image_id
         }
       }
 
@@ -140,42 +140,42 @@ dashboard "compute_instance_detail" {
       node {
         base = node.vcn_network_security_group
         args = {
-          vcn_network_security_group_ids = with.vcn_network_security_groups.rows[*].nsg_id
+          vcn_network_security_group_ids = with.vcn_network_security_groups_for_compute_instance.rows[*].nsg_id
         }
       }
 
       node {
         base = node.vcn_load_balancer
         args = {
-          vcn_load_balancer_ids = with.vcn_load_balancers.rows[*].lb_id
+          vcn_load_balancer_ids = with.vcn_load_balancers_for_compute_instance.rows[*].lb_id
         }
       }
 
       node {
         base = node.vcn_network_load_balancer
         args = {
-          vcn_network_load_balancer_ids = with.vcn_network_load_balancers.rows[*].nlb_id
+          vcn_network_load_balancer_ids = with.vcn_network_load_balancers_for_compute_instance.rows[*].nlb_id
         }
       }
 
       node {
         base = node.vcn_subnet
         args = {
-          vcn_subnet_ids = with.vcn_subnets.rows[*].subnet_id
+          vcn_subnet_ids = with.vcn_subnets_for_compute_instance.rows[*].subnet_id
         }
       }
 
       node {
         base = node.vcn_vcn
         args = {
-          vcn_vcn_ids = with.vcn_vcns.rows[*].vcn_id
+          vcn_vcn_ids = with.vcn_vcns_for_compute_instance.rows[*].vcn_id
         }
       }
 
       node {
         base = node.vcn_vnic
         args = {
-          vcn_vnic_ids = with.vcn_vnics.rows[*].vnic_id
+          vcn_vnic_ids = with.vcn_vnics_for_compute_instance.rows[*].vnic_id
         }
       }
 
@@ -217,14 +217,14 @@ dashboard "compute_instance_detail" {
       edge {
         base = edge.vcn_load_balancer_to_compute_instance
         args = {
-          compute_instance_ids = [self.input.instance_id.value]
+          vcn_load_balancer_ids = with.vcn_load_balancers_for_compute_instance.rows[*].lb_id
         }
       }
 
       edge {
         base = edge.vcn_network_load_balancer_to_compute_instance
         args = {
-          compute_instance_ids = [self.input.instance_id.value]
+          vcn_network_load_balancer_ids = with.vcn_network_load_balancers_for_compute_instance.rows[*].nlb_id
         }
       }
 
@@ -252,7 +252,7 @@ dashboard "compute_instance_detail" {
       edge {
         base = edge.vcn_subnet_to_vcn_vcn
         args = {
-          vcn_subnet_ids = with.vcn_subnets.rows[*].subnet_id
+          vcn_subnet_ids = with.vcn_subnets_for_compute_instance.rows[*].subnet_id
         }
       }
 
@@ -329,7 +329,7 @@ query "compute_instance_input" {
 
 # With queries
 
-query "compute_instance_vcn_subnets" {
+query "vcn_subnets_for_compute_instance" {
   sql = <<-EOQ
     select
       subnet_id
@@ -340,7 +340,7 @@ query "compute_instance_vcn_subnets" {
   EOQ
 }
 
-query "compute_instance_vcn_vcns" {
+query "vcn_vcns_for_compute_instance" {
   sql = <<-EOQ
     select
       s.vcn_id as vcn_id
@@ -353,7 +353,7 @@ query "compute_instance_vcn_vcns" {
   EOQ
 }
 
-query "compute_instance_blockstorage_boot_volumes" {
+query "blockstorage_boot_volumes_for_compute_instance" {
   sql = <<-EOQ
     select
       boot_volume_id
@@ -364,7 +364,7 @@ query "compute_instance_blockstorage_boot_volumes" {
   EOQ
 }
 
-query "compute_instance_blockstorage_block_volumes" {
+query "blockstorage_block_volumes_for_compute_instance" {
   sql = <<-EOQ
     select
       volume_id as block_volume_id
@@ -375,7 +375,7 @@ query "compute_instance_blockstorage_block_volumes" {
   EOQ
 }
 
-query "compute_instance_vcn_network_security_groups" {
+query "vcn_network_security_groups_for_compute_instance" {
   sql = <<-EOQ
     select
       nid as nsg_id
@@ -387,7 +387,7 @@ query "compute_instance_vcn_network_security_groups" {
   EOQ
 }
 
-query "compute_instance_vcn_vnics" {
+query "vcn_vnics_for_compute_instance" {
   sql = <<-EOQ
     select
       vnic_id
@@ -399,7 +399,7 @@ query "compute_instance_vcn_vnics" {
   EOQ
 }
 
-query "compute_instance_vcn_load_balancers" {
+query "vcn_load_balancers_for_compute_instance" {
   sql = <<-EOQ
     select
       lb.id as lb_id
@@ -413,7 +413,7 @@ query "compute_instance_vcn_load_balancers" {
   EOQ
 }
 
-query "compute_instance_vcn_network_load_balancers" {
+query "vcn_network_load_balancers_for_compute_instance" {
   sql = <<-EOQ
     select
       n.id as nlb_id
@@ -426,7 +426,7 @@ query "compute_instance_vcn_network_load_balancers" {
   EOQ
 }
 
-query "compute_instance_autoscaling_auto_scaling_configurations" {
+query "autoscaling_auto_scaling_configurations_for_compute_instance" {
   sql = <<-EOQ
     with intance_pool_id as (
       select
@@ -446,7 +446,7 @@ query "compute_instance_autoscaling_auto_scaling_configurations" {
   EOQ
 }
 
-query "compute_instance_compute_images" {
+query "compute_images_for_compute_instance" {
   sql = <<-EOQ
     select
       source_details ->> 'imageId' as image_id

@@ -34,23 +34,23 @@ dashboard "kms_key_detail" {
 
   }
 
-  with "blockstorage_block_volumes" {
-    query = query.kms_key_blockstorage_block_volumes
+  with "blockstorage_block_volumes_for_kms_key" {
+    query = query.blockstorage_block_volumes_for_kms_key
     args  = [self.input.key_id.value]
   }
 
-  with "blockstorage_boot_volumes" {
-    query = query.kms_key_blockstorage_boot_volumes
+  with "blockstorage_boot_volumes_for_kms_key" {
+    query = query.blockstorage_boot_volumes_for_kms_key
     args  = [self.input.key_id.value]
   }
 
-  with "kms_key_versions" {
-    query = query.kms_key_kms_key_versions
+  with "kms_key_versions_for_kms_key" {
+    query = query.kms_key_versions_for_kms_key
     args  = [self.input.key_id.value]
   }
 
-  with "kms_vaults" {
-    query = query.kms_key_kms_vaults
+  with "kms_vaults_for_kms_key" {
+    query = query.kms_vaults_for_kms_key
     args  = [self.input.key_id.value]
   }
 
@@ -64,14 +64,14 @@ dashboard "kms_key_detail" {
       node {
         base = node.blockstorage_block_volume
         args = {
-          blockstorage_block_volume_ids = with.blockstorage_block_volumes.rows[*].block_volume_id
+          blockstorage_block_volume_ids = with.blockstorage_block_volumes_for_kms_key.rows[*].block_volume_id
         }
       }
 
       node {
         base = node.blockstorage_boot_volume
         args = {
-          blockstorage_boot_volume_ids = with.blockstorage_boot_volumes.rows[*].boot_volume_id
+          blockstorage_boot_volume_ids = with.blockstorage_boot_volumes_for_kms_key.rows[*].boot_volume_id
         }
       }
 
@@ -85,35 +85,35 @@ dashboard "kms_key_detail" {
       node {
         base = node.kms_key_version
         args = {
-          kms_key_version_ids =  with.kms_key_versions.rows[*].current_key_version
+          kms_key_version_ids =  with.kms_key_versions_for_kms_key.rows[*].current_key_version
         }
       }
 
       node {
         base = node.kms_vault
         args = {
-          kms_vault_ids = with.kms_vaults.rows[*].vault_id
+          kms_vault_ids = with.kms_vaults_for_kms_key.rows[*].vault_id
         }
       }
 
       edge {
         base = edge.blockstorage_block_volume_to_kms_key_version
         args = {
-          blockstorage_block_volume_ids = with.blockstorage_block_volumes.rows[*].block_volume_id
+          blockstorage_block_volume_ids = with.blockstorage_block_volumes_for_kms_key.rows[*].block_volume_id
         }
       }
 
       edge {
         base = edge.blockstorage_boot_volume_to_kms_key_version
         args = {
-          blockstorage_boot_volume_ids = with.blockstorage_boot_volumes.rows[*].boot_volume_id
+          blockstorage_boot_volume_ids = with.blockstorage_boot_volumes_for_kms_key.rows[*].boot_volume_id
         }
       }
 
       edge {
         base = edge.kms_key_version_to_kms_key
         args = {
-          kms_key_version_ids =  with.kms_key_versions.rows[*].current_key_version
+          kms_key_version_ids =  with.kms_key_versions_for_kms_key.rows[*].current_key_version
         }
       }
 
@@ -194,29 +194,7 @@ query "kms_key_input" {
 
 # With queries
 
-query "kms_key_kms_vaults" {
-  sql = <<-EOQ
-    select
-      vault_id
-    from
-      oci_kms_key
-    where
-      id = $1;
-  EOQ
-}
-
-query "kms_key_kms_key_versions" {
-  sql = <<-EOQ
-    select
-      current_key_version
-    from
-      oci_kms_key
-    where
-      id = $1;
-  EOQ
-}
-
-query "kms_key_blockstorage_block_volumes" {
+query "blockstorage_block_volumes_for_kms_key" {
   sql = <<-EOQ
     select
       id as block_volume_id
@@ -227,7 +205,7 @@ query "kms_key_blockstorage_block_volumes" {
   EOQ
 }
 
-query "kms_key_blockstorage_boot_volumes" {
+query "blockstorage_boot_volumes_for_kms_key" {
   sql = <<-EOQ
     select
       id as boot_volume_id
@@ -235,6 +213,28 @@ query "kms_key_blockstorage_boot_volumes" {
       oci_core_boot_volume
     where
       kms_key_id = $1;
+  EOQ
+}
+
+query "kms_key_versions_for_kms_key" {
+  sql = <<-EOQ
+    select
+      current_key_version
+    from
+      oci_kms_key
+    where
+      id = $1;
+  EOQ
+}
+
+query "kms_vaults_for_kms_key" {
+  sql = <<-EOQ
+    select
+      vault_id
+    from
+      oci_kms_key
+    where
+      id = $1;
   EOQ
 }
 

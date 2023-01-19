@@ -50,26 +50,17 @@ edge "compute_instance_to_vcn_network_security_group" {
   title = "nsg"
 
   sql = <<-EOQ
-    with vnic_attachment_nsg as (
-      select
-        jsonb_array_elements_text(nsg_ids) as n_id,
-        instance_id,
-        vnic_id
-      from
-        oci_core_vnic_attachment
-    )
     select
       coalesce(
-        va.vnic_id,
-        va.instance_id
+        vnic_id,
+        instance_id
       ) as from_id,
-      n_id as to_id
+      nid as to_id
     from
-      oci_core_network_security_group as n,
-      vnic_attachment_nsg as va
+      oci_core_vnic_attachment,
+      jsonb_array_elements_text(nsg_ids) as nid
     where
-      n.id = va.n_id
-      and va.instance_id = any($1)
+      instance_id = any($1);
   EOQ
 
   param "compute_instance_ids" {}
@@ -79,29 +70,17 @@ edge "compute_instance_to_vcn_subnet" {
   title = "subnet"
 
   sql = <<-EOQ
-    with vnic_attachment_nsg as (
-      select
-        jsonb_array_elements_text(nsg_ids) as n_id,
-        instance_id,
-        vnic_id,
-        subnet_id
-      from
-        oci_core_vnic_attachment
-    )
     select
       coalesce(
-        v.n_id,
-        v.vnic_id
+        nid,
+        vnic_id
       ) as from_id,
-      s.id as to_id
+      subnet_id as to_id
     from
-      oci_core_instance as i,
-      oci_core_subnet as s,
-      vnic_attachment_nsg as v
+      oci_core_vnic_attachment,
+      jsonb_array_elements_text(nsg_ids) as nid
     where
-      v.instance_id = i.id
-      and v.subnet_id = s.id
-      and i.id = any($1);
+      instance_id = any($1);
   EOQ
 
   param "compute_instance_ids" {}

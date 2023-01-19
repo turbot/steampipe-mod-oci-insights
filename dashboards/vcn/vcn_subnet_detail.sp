@@ -23,53 +23,53 @@ dashboard "vcn_subnet_detail" {
 
   }
 
-  with "compute_instances" {
-    query = query.vcn_subnet_compute_instances
+  with "compute_instances_for_vcn_subnet" {
+    query = query.compute_instances_for_vcn_subnet
     args  = [self.input.subnet_id.value]
   }
 
-  with "identity_availability_domains" {
-    query = query.vcn_subnet_identity_availability_domains
+  with "identity_availability_domains_for_vcn_subnet" {
+    query = query.identity_availability_domains_for_vcn_subnet
     args  = [self.input.subnet_id.value]
   }
 
-  with "regional_identity_availability_domains" {
-    query = query.vcn_subnet_regional_identity_availability_domains
+  with "regional_identity_availability_domains_for_vcn_subnet" {
+    query = query.regional_identity_availability_domains_for_vcn_subnet
     args  = [self.input.subnet_id.value]
   }
 
-  with "vcn_dhcp_options" {
-    query = query.vcn_subnet_vcn_dhcp_options
+  with "vcn_dhcp_options_for_vcn_subnet" {
+    query = query.vcn_dhcp_options_for_vcn_subnet
     args  = [self.input.subnet_id.value]
   }
 
-  with "vcn_flow_logs" {
-    query = query.vcn_subnet_vcn_flow_logs
+  with "vcn_flow_logs_for_vcn_subnet" {
+    query = query.vcn_flow_logs_for_vcn_subnet
     args  = [self.input.subnet_id.value]
   }
 
-  with "vcn_load_balancers" {
-    query = query.vcn_subnet_vcn_load_balancers
+  with "vcn_load_balancers_for_vcn_subnet" {
+    query = query.vcn_load_balancers_for_vcn_subnet
     args  = [self.input.subnet_id.value]
   }
 
-  with "vcn_network_load_balancers" {
-    query = query.vcn_subnet_vcn_network_load_balancers
+  with "vcn_network_load_balancers_for_vcn_subnet" {
+    query = query.vcn_network_load_balancers_for_vcn_subnet
     args  = [self.input.subnet_id.value]
   }
 
-  with "vcn_route_tables" {
-    query = query.vcn_subnet_vcn_route_tables
+  with "vcn_route_tables_for_vcn_subnet" {
+    query = query.vcn_route_tables_for_vcn_subnet
     args  = [self.input.subnet_id.value]
   }
 
-  with "vcn_security_lists" {
-    query = query.vcn_subnet_vcn_security_lists
+  with "vcn_security_lists_for_vcn_subnet" {
+    query = query.vcn_security_lists_for_vcn_subnet
     args  = [self.input.subnet_id.value]
   }
 
-  with "vcn_vcns" {
-    query = query.vcn_subnet_vcn_vcns
+  with "vcn_vcns_for_vcn_subnet" {
+    query = query.vcn_vcns_for_vcn_subnet
     args  = [self.input.subnet_id.value]
   }
 
@@ -83,63 +83,63 @@ dashboard "vcn_subnet_detail" {
       node {
         base = node.compute_instance
         args = {
-          compute_instance_ids = with.compute_instances.rows[*].compute_instance_id
+          compute_instance_ids = with.compute_instances_for_vcn_subnet.rows[*].compute_instance_id
         }
       }
 
       node {
         base = node.identity_availability_domain
         args = {
-          availability_domain_ids = with.identity_availability_domains.rows[*].availability_domain_id
+          availability_domain_ids = with.identity_availability_domains_for_vcn_subnet.rows[*].availability_domain_id
         }
       }
 
       node {
         base = node.regional_identity_availability_domain
         args = {
-          availability_domain_ids = with.regional_identity_availability_domains.rows[*].availability_domain_id
+          availability_domain_ids = with.regional_identity_availability_domains_for_vcn_subnet.rows[*].availability_domain_id
         }
       }
 
       node {
         base = node.vcn_dhcp_option
         args = {
-          vcn_dhcp_option_ids = with.vcn_dhcp_options.rows[*].dhcp_options_id
+          vcn_dhcp_option_ids = with.vcn_dhcp_options_for_vcn_subnet.rows[*].dhcp_options_id
         }
       }
 
       node {
         base = node.vcn_flow_log
         args = {
-          vcn_flow_log_ids = with.vcn_flow_logs.rows[*].flow_log_id
+          vcn_flow_log_ids = with.vcn_flow_logs_for_vcn_subnet.rows[*].flow_log_id
         }
       }
 
       node {
         base = node.vcn_load_balancer
         args = {
-          vcn_load_balancer_ids = with.vcn_load_balancers.rows[*].load_balancer_id
+          vcn_load_balancer_ids = with.vcn_load_balancers_for_vcn_subnet.rows[*].load_balancer_id
         }
       }
 
       node {
         base = node.vcn_network_load_balancer
         args = {
-          vcn_network_load_balancer_ids = with.vcn_network_load_balancers.rows[*].network_load_balancer_id
+          vcn_network_load_balancer_ids = with.vcn_network_load_balancers_for_vcn_subnet.rows[*].network_load_balancer_id
         }
       }
 
       node {
         base = node.vcn_route_table
         args = {
-          vcn_route_table_ids = with.vcn_route_tables.rows[*].route_table_id
+          vcn_route_table_ids = with.vcn_route_tables_for_vcn_subnet.rows[*].route_table_id
         }
       }
 
       node {
         base = node.vcn_security_list
         args = {
-          vcn_security_list_ids = with.vcn_security_lists.rows[*].security_list_id
+          vcn_security_list_ids = with.vcn_security_lists_for_vcn_subnet.rows[*].security_list_id
         }
       }
 
@@ -153,28 +153,28 @@ dashboard "vcn_subnet_detail" {
       node {
         base = node.vcn_vcn
         args = {
-          vcn_vcn_ids = with.vcn_vcns.rows[*].vcn_id
+          vcn_vcn_ids = with.vcn_vcns_for_vcn_subnet.rows[*].vcn_id
         }
       }
 
       edge {
-        base = edge.vcn_availability_domain_to_vcn_regional_subnet
+        base = edge.identity_availability_domain_to_vcn_regional_subnet
         args = {
-          vcn_subnet_ids = [self.input.subnet_id.value]
+          availability_domain_ids = with.regional_identity_availability_domains_for_vcn_subnet.rows[*].availability_domain_id
         }
       }
 
       edge {
         base = edge.identity_availability_domain_to_vcn_subnet
         args = {
-          vcn_subnet_ids = [self.input.subnet_id.value]
+          availability_domain_ids = with.identity_availability_domains_for_vcn_subnet.rows[*].availability_domain_id
         }
       }
 
       edge {
         base = edge.vcn_subnet_to_compute_instance
         args = {
-          compute_instance_ids = with.compute_instances.rows[*].compute_instance_id
+          vcn_subnet_ids = [self.input.subnet_id.value]
         }
       }
 
@@ -188,7 +188,7 @@ dashboard "vcn_subnet_detail" {
       edge {
         base = edge.vcn_subnet_to_vcn_flow_log
         args = {
-          vcn_flow_log_ids = with.vcn_flow_logs.rows[*].flow_log_id
+          vcn_subnet_ids = [self.input.subnet_id.value]
         }
       }
 
@@ -202,28 +202,28 @@ dashboard "vcn_subnet_detail" {
       edge {
         base = edge.vcn_subnet_to_vcn_network_load_balancer
         args = {
-          vcn_network_load_balancer_ids = with.vcn_network_load_balancers.rows[*].network_load_balancer_id
+          vcn_subnet_ids = [self.input.subnet_id.value]
         }
       }
 
       edge {
         base = edge.vcn_subnet_to_vcn_route_table
         args = {
-          vcn_route_table_ids = with.vcn_route_tables.rows[*].route_table_id
+          vcn_route_table_ids = with.vcn_route_tables_for_vcn_subnet.rows[*].route_table_id
         }
       }
 
       edge {
         base = edge.vcn_subnet_to_vcn_security_list
         args = {
-          vcn_security_list_ids = with.vcn_security_lists.rows[*].security_list_id
+          vcn_subnet_ids = [self.input.subnet_id.value]
         }
       }
 
       edge {
         base = edge.vcn_vcn_to_identity_availability_domain
         args = {
-          vcn_vcn_ids = with.vcn_vcns.rows[*].vcn_id
+          vcn_vcn_ids = with.vcn_vcns_for_vcn_subnet.rows[*].vcn_id
         }
       }
 
@@ -292,87 +292,8 @@ query "vcn_subnet_input" {
 
 # With queries
 
-query "vcn_subnet_vcn_dhcp_options" {
-  sql = <<-EOQ
-    select
-      dhcp_options_id
-    from
-      oci_core_subnet
-    where
-      id  = $1;
-  EOQ
-}
 
-query "vcn_subnet_vcn_route_tables" {
-  sql = <<-EOQ
-    select
-      route_table_id
-    from
-      oci_core_subnet
-    where
-      id  = $1;
-  EOQ
-}
-
-query "vcn_subnet_vcn_vcns" {
-  sql = <<-EOQ
-    select
-      vcn_id
-    from
-      oci_core_subnet
-    where
-      id  = $1;
-  EOQ
-}
-
-query "vcn_subnet_vcn_load_balancers" {
-  sql = <<-EOQ
-    select
-      id as load_balancer_id
-    from
-      oci_core_load_balancer,
-      jsonb_array_elements_text(subnet_ids) as sid
-    where
-      sid = $1;
-  EOQ
-}
-
-query "vcn_subnet_vcn_network_load_balancers" {
-  sql = <<-EOQ
-    select
-      id as network_load_balancer_id
-    from
-      oci_core_network_load_balancer
-    where
-      subnet_id = $1;
-  EOQ
-}
-
-query "vcn_subnet_vcn_flow_logs" {
-  sql = <<-EOQ
-    select
-      id as flow_log_id
-    from
-      oci_logging_log
-    where
-      configuration -> 'source' ->> 'service' = 'flowlogs'
-      and configuration -> 'source' ->> 'resource' = $1;
-  EOQ
-}
-
-query "vcn_subnet_vcn_security_lists" {
-  sql = <<-EOQ
-    select
-      sid as security_list_id
-    from
-      oci_core_subnet,
-      jsonb_array_elements_text(security_list_ids) as sid
-    where
-      id = $1
-  EOQ
-}
-
-query "vcn_subnet_compute_instances" {
+query "compute_instances_for_vcn_subnet" {
   sql = <<-EOQ
     select
       instance_id as compute_instance_id
@@ -383,7 +304,7 @@ query "vcn_subnet_compute_instances" {
   EOQ
 }
 
-query "vcn_subnet_identity_availability_domains" {
+query "identity_availability_domains_for_vcn_subnet" {
   sql = <<-EOQ
     select
       a.id as availability_domain_id
@@ -396,7 +317,7 @@ query "vcn_subnet_identity_availability_domains" {
   EOQ
 }
 
-query "vcn_subnet_regional_identity_availability_domains" {
+query "regional_identity_availability_domains_for_vcn_subnet" {
   sql = <<-EOQ
     select
       a.id as availability_domain_id
@@ -407,6 +328,86 @@ query "vcn_subnet_regional_identity_availability_domains" {
       s.region = a.region
       and s.availability_domain is null
       and s.id = $1;
+  EOQ
+}
+
+query "vcn_dhcp_options_for_vcn_subnet" {
+  sql = <<-EOQ
+    select
+      dhcp_options_id
+    from
+      oci_core_subnet
+    where
+      id  = $1;
+  EOQ
+}
+
+query "vcn_flow_logs_for_vcn_subnet" {
+  sql = <<-EOQ
+    select
+      id as flow_log_id
+    from
+      oci_logging_log
+    where
+      configuration -> 'source' ->> 'service' = 'flowlogs'
+      and configuration -> 'source' ->> 'resource' = $1;
+  EOQ
+}
+
+query "vcn_load_balancers_for_vcn_subnet" {
+  sql = <<-EOQ
+    select
+      id as load_balancer_id
+    from
+      oci_core_load_balancer,
+      jsonb_array_elements_text(subnet_ids) as sid
+    where
+      sid = $1;
+  EOQ
+}
+
+query "vcn_network_load_balancers_for_vcn_subnet" {
+  sql = <<-EOQ
+    select
+      id as network_load_balancer_id
+    from
+      oci_core_network_load_balancer
+    where
+      subnet_id = $1;
+  EOQ
+}
+
+query "vcn_route_tables_for_vcn_subnet" {
+  sql = <<-EOQ
+    select
+      route_table_id
+    from
+      oci_core_subnet
+    where
+      id  = $1;
+  EOQ
+}
+
+query "vcn_security_lists_for_vcn_subnet" {
+  sql = <<-EOQ
+    select
+      sid as security_list_id
+    from
+      oci_core_subnet,
+      jsonb_array_elements_text(security_list_ids) as sid
+    where
+      id = $1
+  EOQ
+}
+
+query "vcn_vcns_for_vcn_subnet" {
+  sql = <<-EOQ
+    select
+      vcn_id
+    from
+      oci_core_subnet
+    where
+      id  = $1;
   EOQ
 }
 

@@ -7,6 +7,7 @@ locals {
 category "identity_group" {
   title = "Identity Group"
   color = local.iam_color
+  href  = "/oci_insights.dashboard.identity_group_detail?input.group_id={{.properties.'ID' | @uri}}"
   icon  = "group"
 }
 

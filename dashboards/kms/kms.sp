@@ -20,6 +20,7 @@ category "kms_key_version" {
 category "kms_vault" {
   title = "KMS Vault"
   color = local.security_color
+  href  = "/oci_insights.dashboard.kms_vault_detail?input.vault_id={{.properties.'ID' | @uri}}"
   icon  = "key"
 }
 

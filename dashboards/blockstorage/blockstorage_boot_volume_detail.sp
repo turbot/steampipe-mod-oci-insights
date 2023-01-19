@@ -28,33 +28,33 @@ dashboard "blockstorage_boot_volume_detail" {
 
   }
 
-  with "blockstorage_boot_volume_backups" {
-    query = query.blockstorage_boot_volume_blockstorage_boot_volume_backups
+  with "blockstorage_boot_volume_backups_for_blockstorage_boot_volume" {
+    query = query.blockstorage_boot_volume_backups_for_blockstorage_boot_volume
     args  = [self.input.boot_volume_id.value]
   }
 
-  with "blockstorage_boot_volume_replicas" {
-    query = query.blockstorage_boot_volume_blockstorage_boot_volume_replicas
+  with "blockstorage_boot_volume_replicas_for_blockstorage_boot_volume" {
+    query = query.blockstorage_boot_volume_replicas_for_blockstorage_boot_volume
     args  = [self.input.boot_volume_id.value]
   }
 
-  with "compute_images" {
-    query = query.blockstorage_boot_volume_compute_images
+  with "compute_images_for_blockstorage_boot_volume" {
+    query = query.compute_images_for_blockstorage_boot_volume
     args  = [self.input.boot_volume_id.value]
   }
 
-  with "compute_instances" {
-    query = query.blockstorage_boot_volume_compute_instances
+  with "compute_instances_for_blockstorage_boot_volume" {
+    query = query.compute_instances_for_blockstorage_boot_volume
     args  = [self.input.boot_volume_id.value]
   }
 
-  with "kms_keys" {
-    query = query.blockstorage_boot_volume_kms_keys
+  with "kms_keys_for_blockstorage_boot_volume" {
+    query = query.kms_keys_for_blockstorage_boot_volume
     args  = [self.input.boot_volume_id.value]
   }
 
-  with "kms_vaults" {
-    query = query.blockstorage_boot_volume_kms_vaults
+  with "kms_vaults_for_blockstorage_boot_volume" {
+    query = query.kms_vaults_for_blockstorage_boot_volume
     args  = [self.input.boot_volume_id.value]
   }
 
@@ -75,49 +75,49 @@ dashboard "blockstorage_boot_volume_detail" {
       node {
         base = node.blockstorage_boot_volume_backup
         args = {
-          blockstorage_boot_volume_backup_ids = with.blockstorage_boot_volume_backups.rows[*].backup_id
+          blockstorage_boot_volume_backup_ids = with.blockstorage_boot_volume_backups_for_blockstorage_boot_volume.rows[*].backup_id
         }
       }
 
       node {
         base = node.blockstorage_boot_volume_replica
         args = {
-          blockstorage_boot_volume_replica_ids = with.blockstorage_boot_volume_replicas.rows[*].replica_id
+          blockstorage_boot_volume_replica_ids = with.blockstorage_boot_volume_replicas_for_blockstorage_boot_volume.rows[*].replica_id
         }
       }
 
       node {
         base = node.compute_image
         args = {
-          compute_image_ids = with.compute_images.rows[*].image_id
+          compute_image_ids = with.compute_images_for_blockstorage_boot_volume.rows[*].image_id
         }
       }
 
       node {
         base = node.compute_instance
         args = {
-          compute_instance_ids = with.compute_instances.rows[*].instance_id
+          compute_instance_ids = with.compute_instances_for_blockstorage_boot_volume.rows[*].instance_id
         }
       }
 
       node {
         base = node.kms_key
         args = {
-          kms_key_ids = with.kms_keys.rows[*].kms_key_id
+          kms_key_ids = with.kms_keys_for_blockstorage_boot_volume.rows[*].kms_key_id
         }
       }
 
       node {
         base = node.kms_vault
         args = {
-          kms_vault_ids = with.kms_vaults.rows[*].key_vault_id
+          kms_vault_ids = with.kms_vaults_for_blockstorage_boot_volume.rows[*].key_vault_id
         }
       }
 
       edge {
         base = edge.blockstorage_boot_volume_backup_to_compute_image
         args = {
-          blockstorage_boot_volume_backup_ids = with.blockstorage_boot_volume_backups.rows[*].backup_id
+          blockstorage_boot_volume_backup_ids = with.blockstorage_boot_volume_backups_for_blockstorage_boot_volume.rows[*].backup_id
         }
       }
 
@@ -145,14 +145,14 @@ dashboard "blockstorage_boot_volume_detail" {
       edge {
         base = edge.compute_instance_to_blockstorage_boot_volume
         args = {
-          compute_instance_ids = with.compute_instances.rows[*].instance_id
+          compute_instance_ids = with.compute_instances_for_blockstorage_boot_volume.rows[*].instance_id
         }
       }
 
       edge {
         base = edge.kms_vault_to_kms_key
         args = {
-          kms_vault_ids = with.kms_vaults.rows[*].key_vault_id
+          kms_vault_ids = with.kms_vaults_for_blockstorage_boot_volume.rows[*].key_vault_id
         }
       }
 
@@ -248,7 +248,7 @@ query "blockstorage_boot_volume_input" {
 
 # With queries
 
-query "blockstorage_boot_volume_blockstorage_boot_volume_backups" {
+query "blockstorage_boot_volume_backups_for_blockstorage_boot_volume" {
   sql = <<EOQ
     select
       id as backup_id
@@ -259,7 +259,7 @@ query "blockstorage_boot_volume_blockstorage_boot_volume_backups" {
   EOQ
 }
 
-query "blockstorage_boot_volume_blockstorage_boot_volume_replicas" {
+query "blockstorage_boot_volume_replicas_for_blockstorage_boot_volume" {
   sql = <<EOQ
     select
       id as replica_id
@@ -270,7 +270,7 @@ query "blockstorage_boot_volume_blockstorage_boot_volume_replicas" {
   EOQ
 }
 
-query "blockstorage_boot_volume_compute_images" {
+query "compute_images_for_blockstorage_boot_volume" {
   sql = <<EOQ
     select
       image_id
@@ -281,7 +281,7 @@ query "blockstorage_boot_volume_compute_images" {
   EOQ
 }
 
-query "blockstorage_boot_volume_compute_instances" {
+query "compute_instances_for_blockstorage_boot_volume" {
   sql = <<EOQ
     select
       instance_id
@@ -292,7 +292,7 @@ query "blockstorage_boot_volume_compute_instances" {
   EOQ
 }
 
-query "blockstorage_boot_volume_kms_keys" {
+query "kms_keys_for_blockstorage_boot_volume" {
   sql = <<EOQ
     select
       kms_key_id
@@ -304,7 +304,7 @@ query "blockstorage_boot_volume_kms_keys" {
   EOQ
 }
 
-query "blockstorage_boot_volume_kms_vaults" {
+query "kms_vaults_for_blockstorage_boot_volume" {
   sql = <<EOQ
     select
       k.vault_id as key_vault_id

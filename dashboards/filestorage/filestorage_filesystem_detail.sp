@@ -30,23 +30,23 @@ dashboard "filestorage_filesystem_detail" {
 
   }
 
-  with "filestorage_mount_targets" {
-    query = query.filestorage_file_system_filestorage_mount_targets
+  with "filestorage_mount_targets_for_filestorage_file_system" {
+    query = query.filestorage_mount_targets_for_filestorage_file_system
     args  = [self.input.filesystem_id.value]
   }
 
-  with "filestorage_snapshots" {
-    query = query.filestorage_file_system_filestorage_snapshots
+  with "filestorage_snapshots_for_filestorage_file_system" {
+    query = query.filestorage_snapshots_for_filestorage_file_system
     args  = [self.input.filesystem_id.value]
   }
 
-  with "vcn_network_security_groups" {
-    query = query.filestorage_file_system_vcn_network_security_groups
+  with "vcn_network_security_groups_for_filestorage_file_system" {
+    query = query.vcn_network_security_groups_for_filestorage_file_system
     args  = [self.input.filesystem_id.value]
   }
 
-  with "vcn_subnets" {
-    query = query.filestorage_file_system_vcn_subnets
+  with "vcn_subnets_for_filestorage_file_system" {
+    query = query.vcn_subnets_for_filestorage_file_system
     args  = [self.input.filesystem_id.value]
   }
 
@@ -67,28 +67,28 @@ dashboard "filestorage_filesystem_detail" {
       node {
         base = node.filestorage_mount_target
         args = {
-          filestorage_mount_target_ids = with.filestorage_mount_targets.rows[*].mount_target_id
+          filestorage_mount_target_ids = with.filestorage_mount_targets_for_filestorage_file_system.rows[*].mount_target_id
         }
       }
 
       node {
         base = node.filestorage_snapshot
         args = {
-          filestorage_snapshot_ids = with.filestorage_snapshots.rows[*].snapshot_id
+          filestorage_snapshot_ids = with.filestorage_snapshots_for_filestorage_file_system.rows[*].snapshot_id
         }
       }
 
       node {
         base = node.vcn_network_security_group
         args = {
-          vcn_network_security_group_ids = with.vcn_network_security_groups.rows[*].security_group_id
+          vcn_network_security_group_ids = with.vcn_network_security_groups_for_filestorage_file_system.rows[*].security_group_id
         }
       }
 
       node {
         base = node.vcn_subnet
         args = {
-          vcn_subnet_ids = with.vcn_subnets.rows[*].subnet_id
+          vcn_subnet_ids = with.vcn_subnets_for_filestorage_file_system.rows[*].subnet_id
         }
       }
 
@@ -109,14 +109,14 @@ dashboard "filestorage_filesystem_detail" {
       edge {
         base = edge.filestorage_mount_target_to_vcn_network_security_group
         args = {
-          filestorage_mount_target_ids = with.filestorage_mount_targets.rows[*].mount_target_id
+          filestorage_mount_target_ids = with.filestorage_mount_targets_for_filestorage_file_system.rows[*].mount_target_id
         }
       }
 
       edge {
         base = edge.filestorage_mount_target_to_vcn_subnet
         args = {
-          filestorage_mount_target_ids = with.filestorage_mount_targets.rows[*].mount_target_id
+          filestorage_mount_target_ids = with.filestorage_mount_targets_for_filestorage_file_system.rows[*].mount_target_id
         }
       }
 
@@ -196,7 +196,7 @@ query "filestorage_filesystem_input" {
 
 # With queries
 
-query "filestorage_file_system_filestorage_mount_targets" {
+query "filestorage_mount_targets_for_filestorage_file_system" {
   sql = <<-EOQ
     with export_ids as (
       select
@@ -213,11 +213,10 @@ query "filestorage_file_system_filestorage_mount_targets" {
       oci_file_storage_mount_target as m
     where
       e.export_set_id = m.export_set_id;
-
   EOQ
 }
 
-query "filestorage_file_system_filestorage_snapshots" {
+query "filestorage_snapshots_for_filestorage_file_system" {
   sql = <<-EOQ
     select
       id as snapshot_id
@@ -228,7 +227,7 @@ query "filestorage_file_system_filestorage_snapshots" {
   EOQ
 }
 
-query "filestorage_file_system_vcn_network_security_groups" {
+query "vcn_network_security_groups_for_filestorage_file_system" {
   sql = <<-EOQ
     with file_system_export_ids as (
       select
@@ -242,12 +241,14 @@ query "filestorage_file_system_vcn_network_security_groups" {
       nid as security_group_id
     from
       file_system_export_ids as e,
-      oci_file_storage_mount_target,
-      jsonb_array_elements_text(nsg_ids) as nid;
+      oci_file_storage_mount_target as m,
+      jsonb_array_elements_text(nsg_ids) as nid
+    where
+      e.export_set_id = m.export_set_id;
   EOQ
 }
 
-query "filestorage_file_system_vcn_subnets" {
+query "vcn_subnets_for_filestorage_file_system" {
   sql = <<-EOQ
     with file_system_export_ids as (
       select

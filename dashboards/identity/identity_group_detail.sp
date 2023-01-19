@@ -23,8 +23,8 @@ dashboard "identity_group_detail" {
 
   }
 
-  with "identity_users" {
-    query = query.identity_group_identity_users
+  with "identity_users_for_identity_group" {
+    query = query.identity_users_for_identity_group
     args  = [self.input.group_id.value]
   }
 
@@ -45,14 +45,14 @@ dashboard "identity_group_detail" {
       node {
         base = node.identity_user
         args = {
-          identity_user_ids = with.identity_users.rows[*].user_id
+          identity_user_ids = with.identity_users_for_identity_group.rows[*].user_id
         }
       }
 
       edge {
         base = edge.identity_group_to_identity_user
         args = {
-          identity_user_ids = with.identity_users.rows[*].user_id
+          identity_group_ids = [self.input.group_id.value]
         }
       }
 
@@ -114,7 +114,7 @@ query "identity_group_input" {
 
 # With queries
 
-query "identity_group_identity_users" {
+query "identity_users_for_identity_group" {
   sql = <<-EOQ
     select
       id as user_id

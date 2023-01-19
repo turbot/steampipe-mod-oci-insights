@@ -29,13 +29,13 @@ dashboard "nosql_table_detail" {
     }
   }
 
-  with "nosql_table_parents" {
-    query = query.nosql_table_nosql_table_parents
+    with "nosql_table_children_for_nosql_table" {
+    query = query.nosql_table_children_for_nosql_table
     args  = [self.input.table_id.value]
   }
 
-  with "nosql_table_children" {
-    query = query.nosql_table_nosql_table_children
+  with "nosql_table_parents_for_nosql_table" {
+    query = query.nosql_table_parents_for_nosql_table
     args  = [self.input.table_id.value]
   }
 
@@ -56,21 +56,21 @@ dashboard "nosql_table_detail" {
       node {
         base = node.nosql_table
         args = {
-          nosql_table_ids = with.nosql_table_parents.rows[*].parent_table_id
+          nosql_table_ids = with.nosql_table_parents_for_nosql_table.rows[*].parent_table_id
         }
       }
 
       node {
         base = node.nosql_table
         args = {
-          nosql_table_ids = with.nosql_table_children.rows[*].child_table_id
+          nosql_table_ids = with.nosql_table_children_for_nosql_table.rows[*].child_table_id
         }
       }
 
       edge {
         base = edge.nosql_table_parent_to_nosql_table
         args = {
-          nosql_table_ids = with.nosql_table_parents.rows[*].parent_table_id
+          nosql_table_ids = with.nosql_table_parents_for_nosql_table.rows[*].parent_table_id
         }
       }
 
@@ -173,42 +173,7 @@ query "nosql_table_input" {
 
 # With queries
 
-query "nosql_table_nosql_table_parents" {
-  sql = <<EOQ
-    with parent_name as (
-      select
-        split_part(c_name, '.', (array_length(string_to_array(c_name, '.'),1)-1)) as parent_table_name,
-        c_name,
-        id as child_id
-      from (
-        select
-          name as c_name,
-          id
-        from
-          oci_nosql_table
-        ) as a
-      where
-        (array_length(string_to_array(c_name, '.'),1)-1) > 0
-    ),
-    all_parent_name as (
-      select
-        split_part(p.c_name, p.parent_table_name, 1) || parent_table_name as parent_name,
-        child_id
-      from
-        parent_name as p
-    )
-    select
-      t.id as parent_table_id
-    from
-      oci_nosql_table as t,
-      all_parent_name as p
-    where
-      t.name = p.parent_name
-      and p.child_id = $1;
-  EOQ
-}
-
-query "nosql_table_nosql_table_children" {
+query "nosql_table_children_for_nosql_table" {
   sql = <<EOQ
     with parent_name as (
       select
@@ -240,6 +205,41 @@ query "nosql_table_nosql_table_children" {
     where
       p.child_id is not null
       and t.id like $1;
+  EOQ
+}
+
+query "nosql_table_parents_for_nosql_table" {
+  sql = <<EOQ
+    with parent_name as (
+      select
+        split_part(c_name, '.', (array_length(string_to_array(c_name, '.'),1)-1)) as parent_table_name,
+        c_name,
+        id as child_id
+      from (
+        select
+          name as c_name,
+          id
+        from
+          oci_nosql_table
+        ) as a
+      where
+        (array_length(string_to_array(c_name, '.'),1)-1) > 0
+    ),
+    all_parent_name as (
+      select
+        split_part(p.c_name, p.parent_table_name, 1) || parent_table_name as parent_name,
+        child_id
+      from
+        parent_name as p
+    )
+    select
+      t.id as parent_table_id
+    from
+      oci_nosql_table as t,
+      all_parent_name as p
+    where
+      t.name = p.parent_name
+      and p.child_id = $1;
   EOQ
 }
 

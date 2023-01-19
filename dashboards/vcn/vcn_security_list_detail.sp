@@ -31,13 +31,13 @@ dashboard "vcn_security_list_detail" {
 
   }
 
-  with "vcn_subnets" {
-    query = query.vcn_security_list_vcn_subnets
+  with "vcn_subnets_for_vcn_security_list" {
+    query = query.vcn_subnets_for_vcn_security_list
     args  = [self.input.security_list_id.value]
   }
 
-  with "vcn_vcns" {
-    query = query.vcn_security_list_vcn_vcns
+  with "vcn_vcns_for_vcn_security_list" {
+    query = query.vcn_vcns_for_vcn_security_list
     args  = [self.input.security_list_id.value]
   }
 
@@ -58,28 +58,28 @@ dashboard "vcn_security_list_detail" {
       node {
         base = node.vcn_subnet
         args = {
-          vcn_subnet_ids = with.vcn_subnets.rows[*].subnet_id
+          vcn_subnet_ids = with.vcn_subnets_for_vcn_security_list.rows[*].subnet_id
         }
       }
 
       node {
         base = node.vcn_vcn
         args = {
-          vcn_vcn_ids = with.vcn_vcns.rows[*].vcn_id
+          vcn_vcn_ids = with.vcn_vcns_for_vcn_security_list.rows[*].vcn_id
         }
       }
 
       edge {
         base = edge.vcn_subnet_to_vcn_security_list
         args = {
-          vcn_security_list_ids = [self.input.security_list_id.value]
+          vcn_subnet_ids = with.vcn_subnets_for_vcn_security_list.rows[*].subnet_id
         }
       }
 
       edge {
         base = edge.vcn_vcn_to_vcn_security_list
         args = {
-          vcn_security_list_ids = [self.input.security_list_id.value]
+          vcn_vcn_ids = with.vcn_vcns_for_vcn_security_list.rows[*].vcn_id
         }
       }
 
@@ -158,18 +158,7 @@ query "vcn_security_list_input" {
 
 # With queries
 
-query "vcn_security_list_vcn_vcns" {
-  sql = <<-EOQ
-    select
-      vcn_id
-    from
-      oci_core_security_list
-    where
-      id = $1
-  EOQ
-}
-
-query "vcn_security_list_vcn_subnets" {
+query "vcn_subnets_for_vcn_security_list" {
   sql = <<-EOQ
     select
       id as subnet_id
@@ -178,6 +167,17 @@ query "vcn_security_list_vcn_subnets" {
       jsonb_array_elements_text(security_list_ids) as sid
     where
       sid = $1;
+  EOQ
+}
+
+query "vcn_vcns_for_vcn_security_list" {
+  sql = <<-EOQ
+    select
+      vcn_id
+    from
+      oci_core_security_list
+    where
+      id = $1
   EOQ
 }
 

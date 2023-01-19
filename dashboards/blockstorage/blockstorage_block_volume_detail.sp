@@ -30,48 +30,48 @@ dashboard "blockstorage_block_volume_detail" {
 
   }
 
-  with "blockstorage_block_volume_backup_policies" {
-    query = query.blockstorage_block_volume_blockstorage_block_volume_backup_policies
+  with "blockstorage_block_volume_backup_policies_for_blockstorage_block_volume" {
+    query = query.blockstorage_block_volume_backup_policies_for_blockstorage_block_volume
     args  = [self.input.block_volume_id.value]
   }
 
-  with "blockstorage_block_volume_default_backup_policies" {
-    query = query.blockstorage_block_volume_blockstorage_block_volume_default_backup_policies
+  with "blockstorage_block_volume_backups_for_blockstorage_block_volume" {
+    query = query.blockstorage_block_volume_backups_for_blockstorage_block_volume
     args  = [self.input.block_volume_id.value]
   }
 
-  with "blockstorage_block_volume_clone" {
-    query = query.to_blockstorage_block_volume_clone
+  with "blockstorage_block_volume_default_backup_policies_for_blockstorage_block_volume" {
+    query = query.blockstorage_block_volume_default_backup_policies_for_blockstorage_block_volume
     args  = [self.input.block_volume_id.value]
   }
 
-  with "from_blockstorage_block_volume_clone" {
-    query = query.from_blockstorage_block_volume_clone
+  with "blockstorage_block_volume_replicas_for_blockstorage_block_volume" {
+    query = query.blockstorage_block_volume_replicas_for_blockstorage_block_volume
     args  = [self.input.block_volume_id.value]
   }
 
-  with "blockstorage_block_volume_backups" {
-    query = query.blockstorage_block_volume_blockstorage_block_volume_backups
+  with "compute_instances_for_blockstorage_block_volume" {
+    query = query.compute_instances_for_blockstorage_block_volume
     args  = [self.input.block_volume_id.value]
   }
 
-  with "blockstorage_block_volume_replica" {
-    query = query.blockstorage_block_volume_blockstorage_block_volume_replica
+  with "kms_keys_for_blockstorage_block_volume" {
+    query = query.kms_keys_for_blockstorage_block_volume
     args  = [self.input.block_volume_id.value]
   }
 
-  with "compute_instances" {
-    query = query.blockstorage_block_volume_compute_instances
+  with "kms_vaults_for_blockstorage_block_volume" {
+    query = query.kms_vaults_for_blockstorage_block_volume
     args  = [self.input.block_volume_id.value]
   }
 
-  with "kms_keys" {
-    query = query.blockstorage_block_volume_kms_keys
+  with "source_blockstorage_block_volume_clones_for_blockstorage_block_volume" {
+    query = query.source_blockstorage_block_volume_clones_for_blockstorage_block_volume
     args  = [self.input.block_volume_id.value]
   }
 
-  with "kms_vaults" {
-    query = query.blockstorage_block_volume_kms_vaults
+  with "target_blockstorage_block_volume_clones_for_blockstorage_block_volume" {
+    query = query.target_blockstorage_block_volume_clones_for_blockstorage_block_volume
     args  = [self.input.block_volume_id.value]
   }
 
@@ -92,77 +92,77 @@ dashboard "blockstorage_block_volume_detail" {
       node {
         base = node.blockstorage_block_volume
         args = {
-          blockstorage_block_volume_ids = with.blockstorage_block_volume_clone.rows[*].volume_id
+          blockstorage_block_volume_ids = with.target_blockstorage_block_volume_clones_for_blockstorage_block_volume.rows[*].volume_id
         }
       }
 
       node {
         base = node.blockstorage_block_volume
         args = {
-          blockstorage_block_volume_ids = with.from_blockstorage_block_volume_clone.rows[*].volume_id
+          blockstorage_block_volume_ids = with.source_blockstorage_block_volume_clones_for_blockstorage_block_volume.rows[*].volume_id
         }
       }
 
       node {
         base = node.blockstorage_block_volume_backup
         args = {
-          blockstorage_block_volume_backup_ids = with.blockstorage_block_volume_backups.rows[*].backup_id
+          blockstorage_block_volume_backup_ids = with.blockstorage_block_volume_backups_for_blockstorage_block_volume.rows[*].backup_id
         }
       }
 
       node {
         base = node.blockstorage_block_volume_backup_policy
         args = {
-          blockstorage_block_volume_backup_policy_ids = with.blockstorage_block_volume_backup_policies.rows[*].backup_policy_id
+          blockstorage_block_volume_backup_policy_ids = with.blockstorage_block_volume_backup_policies_for_blockstorage_block_volume.rows[*].backup_policy_id
         }
       }
 
       node {
         base = node.blockstorage_block_volume_default_backup_policy
         args = {
-          blockstorage_block_volume_default_backup_policy_ids = with.blockstorage_block_volume_default_backup_policies.rows[*].backup_policy_id
+          blockstorage_block_volume_default_backup_policy_ids = with.blockstorage_block_volume_default_backup_policies_for_blockstorage_block_volume.rows[*].backup_policy_id
         }
       }
 
       node {
         base = node.blockstorage_block_volume_replica
         args = {
-          blockstorage_block_volume_replica_ids = with.blockstorage_block_volume_replica.rows[*].replica_volume_id
+          blockstorage_block_volume_replica_ids = with.blockstorage_block_volume_replicas_for_blockstorage_block_volume.rows[*].replica_volume_id
         }
       }
 
       node {
         base = node.compute_instance
         args = {
-          compute_instance_ids = with.compute_instances.rows[*].instance_id
+          compute_instance_ids = with.compute_instances_for_blockstorage_block_volume.rows[*].instance_id
         }
       }
 
       node {
         base = node.kms_key
         args = {
-          kms_key_ids = with.kms_keys.rows[*].kms_key_id
+          kms_key_ids = with.kms_keys_for_blockstorage_block_volume.rows[*].kms_key_id
         }
       }
 
       node {
         base = node.kms_vault
         args = {
-          kms_vault_ids = with.kms_vaults.rows[*].key_vault_id
+          kms_vault_ids = with.kms_vaults_for_blockstorage_block_volume.rows[*].key_vault_id
         }
       }
 
       edge {
         base = edge.blockstorage_block_volume_backup_policy_to_blockstorage_block_volume_backup
         args = {
-          blockstorage_block_volume_backup_policy_ids = with.blockstorage_block_volume_backup_policies.rows[*].backup_policy_id
+          blockstorage_block_volume_backup_policy_ids = with.blockstorage_block_volume_backup_policies_for_blockstorage_block_volume.rows[*].backup_policy_id
         }
       }
 
       edge {
         base = edge.blockstorage_block_volume_default_backup_policy_to_blockstorage_block_volume_backup
         args = {
-          blockstorage_block_volume_default_backup_policy_ids = with.blockstorage_block_volume_default_backup_policies.rows[*].backup_policy_id
+          blockstorage_block_volume_default_backup_policy_ids = with.blockstorage_block_volume_default_backup_policies_for_blockstorage_block_volume.rows[*].backup_policy_id
         }
       }
 
@@ -181,23 +181,23 @@ dashboard "blockstorage_block_volume_detail" {
       }
 
       edge {
+        base = edge.blockstorage_block_volume_to_blockstorage_block_volume_clone
+        args = {
+          blockstorage_block_volume_ids = [self.input.block_volume_id.value]
+        }
+      }
+
+      edge {
+        base = edge.blockstorage_block_volume_to_blockstorage_block_volume_clone
+        args = {
+          blockstorage_block_volume_ids = with.source_blockstorage_block_volume_clones_for_blockstorage_block_volume.rows[*].volume_id
+        }
+      }
+
+      edge {
         base = edge.blockstorage_block_volume_to_blockstorage_block_volume_default_backup_policy
         args = {
           blockstorage_block_volume_ids = [self.input.block_volume_id.value]
-        }
-      }
-
-      edge {
-        base = edge.blockstorage_block_volume_to_blockstorage_block_volume_clone
-        args = {
-          blockstorage_block_volume_ids = [self.input.block_volume_id.value]
-        }
-      }
-
-      edge {
-        base = edge.blockstorage_block_volume_to_blockstorage_block_volume_clone
-        args = {
-          blockstorage_block_volume_ids = with.blockstorage_block_volume_clone.rows[*].volume_id
         }
       }
 
@@ -209,13 +209,6 @@ dashboard "blockstorage_block_volume_detail" {
       }
 
       edge {
-        base = edge.compute_instance_to_blockstorage_block_volume
-        args = {
-          compute_instance_ids = with.compute_instances.rows[*].instance_id
-        }
-      }
-
-      edge {
         base = edge.blockstorage_block_volume_to_kms_vault
         args = {
           blockstorage_block_volume_ids = [self.input.block_volume_id.value]
@@ -223,9 +216,16 @@ dashboard "blockstorage_block_volume_detail" {
       }
 
       edge {
+        base = edge.compute_instance_to_blockstorage_block_volume
+        args = {
+          compute_instance_ids = with.compute_instances_for_blockstorage_block_volume.rows[*].instance_id
+        }
+      }
+
+      edge {
         base = edge.kms_vault_to_kms_key
         args = {
-          kms_vault_ids = with.kms_vaults.rows[*].key_vault_id
+          kms_vault_ids = with.kms_vaults_for_blockstorage_block_volume.rows[*].key_vault_id
         }
       }
 
@@ -307,7 +307,7 @@ query "blockstorage_block_volume_input" {
 
 # With queries
 
-query "blockstorage_block_volume_blockstorage_block_volume_backup_policies" {
+query "blockstorage_block_volume_backup_policies_for_blockstorage_block_volume" {
   sql = <<EOQ
     select
       p.id as backup_policy_id
@@ -320,7 +320,18 @@ query "blockstorage_block_volume_blockstorage_block_volume_backup_policies" {
   EOQ
 }
 
-query "blockstorage_block_volume_blockstorage_block_volume_default_backup_policies" {
+query "blockstorage_block_volume_backups_for_blockstorage_block_volume" {
+  sql = <<EOQ
+    select
+      id as backup_id
+    from
+      oci_core_volume_backup
+    where
+      volume_id  = $1;
+  EOQ
+}
+
+query "blockstorage_block_volume_default_backup_policies_for_blockstorage_block_volume" {
   sql = <<EOQ
     select
       p.id as backup_policy_id
@@ -333,18 +344,7 @@ query "blockstorage_block_volume_blockstorage_block_volume_default_backup_polici
   EOQ
 }
 
-query "blockstorage_block_volume_blockstorage_block_volume_backups" {
-  sql = <<EOQ
-    select
-      id as backup_id
-    from
-      oci_core_volume_backup
-    where
-      volume_id  = $1;
-  EOQ
-}
-
-query "blockstorage_block_volume_blockstorage_block_volume_replica" {
+query "blockstorage_block_volume_replicas_for_blockstorage_block_volume" {
   sql = <<EOQ
     select
       id as replica_volume_id
@@ -355,7 +355,7 @@ query "blockstorage_block_volume_blockstorage_block_volume_replica" {
   EOQ
 }
 
-query "blockstorage_block_volume_compute_instances" {
+query "compute_instances_for_blockstorage_block_volume" {
   sql = <<EOQ
     select
       instance_id
@@ -367,7 +367,7 @@ query "blockstorage_block_volume_compute_instances" {
   EOQ
 }
 
-query "blockstorage_block_volume_kms_keys" {
+query "kms_keys_for_blockstorage_block_volume" {
   sql = <<EOQ
     select
       kms_key_id
@@ -379,7 +379,7 @@ query "blockstorage_block_volume_kms_keys" {
   EOQ
 }
 
-query "blockstorage_block_volume_kms_vaults" {
+query "kms_vaults_for_blockstorage_block_volume" {
   sql = <<EOQ
     select
       k.vault_id as key_vault_id
@@ -391,7 +391,8 @@ query "blockstorage_block_volume_kms_vaults" {
       and v.id  = $1;
   EOQ
 }
-query "from_blockstorage_block_volume_clone" {
+
+query "source_blockstorage_block_volume_clones_for_blockstorage_block_volume" {
   sql = <<EOQ
     select
       source_details ->> 'id' as volume_id
@@ -403,7 +404,7 @@ query "from_blockstorage_block_volume_clone" {
   EOQ
 }
 
-query "to_blockstorage_block_volume_clone" {
+query "target_blockstorage_block_volume_clones_for_blockstorage_block_volume" {
   sql = <<EOQ
     select
       id as volume_id

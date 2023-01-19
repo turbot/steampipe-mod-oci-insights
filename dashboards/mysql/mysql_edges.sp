@@ -46,22 +46,6 @@ edge "mysql_db_system_to_mysql_configuration" {
   param "mysql_db_system_ids" {}
 }
 
-edge "mysql_db_system_to_vcn_subnet" {
-  title = "subnet"
-
-  sql = <<-EOQ
-    select
-      vcn_id as from_id,
-      id as to_id
-    from
-      oci_core_subnet as s
-    where
-      id = any($1);
-  EOQ
-
-  param "vcn_subnet_ids" {}
-}
-
 edge "mysql_db_system_to_vcn_vcn" {
   title = "vcn"
 

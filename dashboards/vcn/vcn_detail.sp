@@ -19,111 +19,111 @@ dashboard "vcn_detail" {
       width = 2
 
       query = query.vcn_ipv4_count
-      args = [self.input.vcn_id.value]
+      args  = [self.input.vcn_id.value]
     }
 
     card {
       width = 2
 
       query = query.vcn_ipv6_count
-      args = [self.input.vcn_id.value]
+      args  = [self.input.vcn_id.value]
     }
 
     card {
       width = 2
 
       query = query.vcn_attached_subnet_count
-      args = [self.input.vcn_id.value]
+      args  = [self.input.vcn_id.value]
     }
 
     card {
       width = 2
 
       query = query.vcn_attached_nsg_count
-      args = [self.input.vcn_id.value]
+      args  = [self.input.vcn_id.value]
     }
 
     card {
       width = 2
 
       query = query.vcn_attached_sl_count
-      args = [self.input.vcn_id.value]
+      args  = [self.input.vcn_id.value]
     }
 
   }
 
-  with "compute_instances" {
-    query = query.vcn_compute_instances
+  with "compute_instances_for_vcn_vcn" {
+    query = query.compute_instances_for_vcn_vcn
     args  = [self.input.vcn_id.value]
   }
 
-  with "identity_availability_domains" {
-    query = query.vcn_identity_availability_domains
+  with "identity_availability_domains_for_vcn_vcn" {
+    query = query.identity_availability_domains_for_vcn_vcn
     args  = [self.input.vcn_id.value]
   }
 
-  with "regional_identity_availability_domains" {
-    query = query.vcn_regional_identity_availability_domains
+  with "regional_identity_availability_domains_for_vcn_vcn" {
+    query = query.regional_identity_availability_domains_for_vcn_vcn
     args  = [self.input.vcn_id.value]
   }
 
-  with "vcn_dhcp_options" {
-    query = query.vcn_vcn_dhcp_options
+  with "vcn_dhcp_options_for_vcn_vcn" {
+    query = query.vcn_dhcp_options_for_vcn_vcn
     args  = [self.input.vcn_id.value]
   }
 
-  with "vcn_flow_logs" {
-    query = query.vcn_vcn_flow_logs
+  with "vcn_flow_logs_for_vcn_vcn" {
+    query = query.vcn_flow_logs_for_vcn_vcn
     args  = [self.input.vcn_id.value]
   }
 
-  with "vcn_internet_gateways" {
-    query = query.vcn_vcn_internet_gateways
+  with "vcn_internet_gateways_for_vcn_vcn" {
+    query = query.vcn_internet_gateways_for_vcn_vcn
     args  = [self.input.vcn_id.value]
   }
 
-  with "vcn_load_balancers" {
-    query = query.vcn_vcn_load_balancers
+  with "vcn_load_balancers_for_vcn_vcn" {
+    query = query.vcn_load_balancers_for_vcn_vcn
     args  = [self.input.vcn_id.value]
   }
 
-  with "vcn_local_peering_gateways" {
-    query = query.vcn_vcn_local_peering_gateways
+  with "vcn_local_peering_gateways_for_vcn_vcn" {
+    query = query.vcn_local_peering_gateways_for_vcn_vcn
     args  = [self.input.vcn_id.value]
   }
 
-  with "vcn_nat_gateways" {
-    query = query.vcn_nat_gateways
+  with "vcn_nat_gateways_for_vcn_vcn" {
+    query = query.vcn_nat_gateways_for_vcn_vcn
     args  = [self.input.vcn_id.value]
   }
 
-  with "vcn_network_load_balancers" {
-    query = query.vcn_network_load_balancers
+  with "vcn_network_load_balancers_for_vcn_vcn" {
+    query = query.vcn_network_load_balancers_for_vcn_vcn
     args  = [self.input.vcn_id.value]
   }
 
-  with "vcn_network_security_groups" {
-    query = query.vcn_network_security_groups
+  with "vcn_network_security_groups_for_vcn_vcn" {
+    query = query.vcn_network_security_groups_for_vcn_vcn
     args  = [self.input.vcn_id.value]
   }
 
-  with "vcn_route_tables" {
-    query = query.vcn_vcn_route_tables
+  with "vcn_route_tables_for_vcn_vcn" {
+    query = query.vcn_route_tables_for_vcn_vcn
     args  = [self.input.vcn_id.value]
   }
 
-  with "vcn_security_lists" {
-    query = query.vcn_vcn_security_lists
+  with "vcn_security_lists_for_vcn_vcn" {
+    query = query.vcn_security_lists_for_vcn_vcn
     args  = [self.input.vcn_id.value]
   }
 
-  with "vcn_service_gateways" {
-    query = query.vcn_vcn_service_gateways
+  with "vcn_service_gateways_for_vcn_vcn" {
+    query = query.vcn_service_gateways_for_vcn_vcn
     args  = [self.input.vcn_id.value]
   }
 
-  with "vcn_subnets" {
-    query = query.vcn_vcn_subnets
+  with "vcn_subnets_for_vcn_vcn" {
+    query = query.vcn_subnets_for_vcn_vcn
     args  = [self.input.vcn_id.value]
   }
 
@@ -137,105 +137,105 @@ dashboard "vcn_detail" {
       node {
         base = node.compute_instance
         args = {
-          compute_instance_ids = with.compute_instances.rows[*].compute_instance_id
+          compute_instance_ids = with.compute_instances_for_vcn_vcn.rows[*].compute_instance_id
         }
       }
 
       node {
         base = node.identity_availability_domain
         args = {
-          availability_domain_ids = with.identity_availability_domains.rows[*].availability_domain_id
+          availability_domain_ids = with.identity_availability_domains_for_vcn_vcn.rows[*].availability_domain_id
         }
       }
 
       node {
         base = node.regional_identity_availability_domain
         args = {
-          availability_domain_ids = with.regional_identity_availability_domains.rows[*].availability_domain_id
+          availability_domain_ids = with.regional_identity_availability_domains_for_vcn_vcn.rows[*].availability_domain_id
         }
       }
 
       node {
         base = node.vcn_dhcp_option
         args = {
-          vcn_dhcp_option_ids = with.vcn_dhcp_options.rows[*].dhcp_option_id
+          vcn_dhcp_option_ids = with.vcn_dhcp_options_for_vcn_vcn.rows[*].dhcp_option_id
         }
       }
 
       node {
         base = node.vcn_flow_log
         args = {
-          vcn_flow_log_ids = with.vcn_flow_logs.rows[*].flow_log_id
+          vcn_flow_log_ids = with.vcn_flow_logs_for_vcn_vcn.rows[*].flow_log_id
         }
       }
 
       node {
         base = node.vcn_internet_gateway
         args = {
-          vcn_internet_gateway_ids = with.vcn_internet_gateways.rows[*].internet_gateway_id
+          vcn_internet_gateway_ids = with.vcn_internet_gateways_for_vcn_vcn.rows[*].internet_gateway_id
         }
       }
 
       node {
         base = node.vcn_load_balancer
         args = {
-          vcn_load_balancer_ids = with.vcn_load_balancers.rows[*].load_balancer_id
+          vcn_load_balancer_ids = with.vcn_load_balancers_for_vcn_vcn.rows[*].load_balancer_id
         }
       }
 
       node {
         base = node.vcn_local_peering_gateway
         args = {
-          vcn_local_peering_gateway_ids = with.vcn_local_peering_gateways.rows[*].local_peering_gateway_id
+          vcn_local_peering_gateway_ids = with.vcn_local_peering_gateways_for_vcn_vcn.rows[*].local_peering_gateway_id
         }
       }
 
       node {
         base = node.vcn_nat_gateway
         args = {
-          vcn_nat_gateway_ids = with.vcn_nat_gateways.rows[*].nat_gateway_id
+          vcn_nat_gateway_ids = with.vcn_nat_gateways_for_vcn_vcn.rows[*].nat_gateway_id
         }
       }
 
       node {
         base = node.vcn_network_load_balancer
         args = {
-          vcn_network_load_balancer_ids = with.vcn_network_load_balancers.rows[*].network_load_balancer_id
+          vcn_network_load_balancer_ids = with.vcn_network_load_balancers_for_vcn_vcn.rows[*].network_load_balancer_id
         }
       }
 
       node {
         base = node.vcn_network_security_group
         args = {
-          vcn_network_security_group_ids = with.vcn_network_security_groups.rows[*].network_security_group_id
+          vcn_network_security_group_ids = with.vcn_network_security_groups_for_vcn_vcn.rows[*].network_security_group_id
         }
       }
 
       node {
         base = node.vcn_route_table
         args = {
-          vcn_route_table_ids = with.vcn_route_tables.rows[*].route_table_id
+          vcn_route_table_ids = with.vcn_route_tables_for_vcn_vcn.rows[*].route_table_id
         }
       }
 
       node {
         base = node.vcn_security_list
         args = {
-          vcn_security_list_ids = with.vcn_security_lists.rows[*].security_list_id
+          vcn_security_list_ids = with.vcn_security_lists_for_vcn_vcn.rows[*].security_list_id
         }
       }
 
       node {
         base = node.vcn_service_gateway
         args = {
-          vcn_service_gateway_ids = with.vcn_service_gateways.rows[*].service_gateway_id
+          vcn_service_gateway_ids = with.vcn_service_gateways_for_vcn_vcn.rows[*].service_gateway_id
         }
       }
 
       node {
         base = node.vcn_subnet
         args = {
-          vcn_subnet_ids = with.vcn_subnets.rows[*].subnet_id
+          vcn_subnet_ids = with.vcn_subnets_for_vcn_vcn.rows[*].subnet_id
         }
       }
 
@@ -249,77 +249,77 @@ dashboard "vcn_detail" {
       edge {
         base = edge.identity_availability_domain_to_vcn_subnet
         args = {
-          vcn_subnet_ids = with.vcn_subnets.rows[*].subnet_id
+          availability_domain_ids = with.identity_availability_domains_for_vcn_vcn.rows[*].availability_domain_id
         }
       }
 
       edge {
-        base = edge.vcn_availability_domain_to_vcn_regional_subnet
+        base = edge.identity_availability_domain_to_vcn_regional_subnet
         args = {
-          vcn_subnet_ids = with.vcn_subnets.rows[*].subnet_id
+          availability_domain_ids = with.regional_identity_availability_domains_for_vcn_vcn.rows[*].availability_domain_id
         }
       }
 
       edge {
         base = edge.vcn_internet_gateway_to_vcn_vcn
         args = {
-          vcn_internet_gateway_ids = with.vcn_internet_gateways.rows[*].internet_gateway_id
+          vcn_internet_gateway_ids = with.vcn_internet_gateways_for_vcn_vcn.rows[*].internet_gateway_id
         }
       }
 
       edge {
         base = edge.vcn_local_peering_gateway_to_vcn_vcn
         args = {
-          vcn_local_peering_gateway_ids = with.vcn_local_peering_gateways.rows[*].local_peering_gateway_id
+          vcn_local_peering_gateway_ids = with.vcn_local_peering_gateways_for_vcn_vcn.rows[*].local_peering_gateway_id
         }
       }
 
       edge {
         base = edge.vcn_nat_gateway_to_vcn_vcn
         args = {
-          vcn_nat_gateway_ids = with.vcn_nat_gateways.rows[*].nat_gateway_id
+          vcn_nat_gateway_ids = with.vcn_nat_gateways_for_vcn_vcn.rows[*].nat_gateway_id
         }
       }
 
       edge {
         base = edge.vcn_service_gateway_to_vcn_vcn
         args = {
-          vcn_service_gateway_ids = with.vcn_service_gateways.rows[*].service_gateway_id
+          vcn_service_gateway_ids = with.vcn_service_gateways_for_vcn_vcn.rows[*].service_gateway_id
         }
       }
 
       edge {
         base = edge.vcn_subnet_to_compute_instance
         args = {
-          compute_instance_ids = with.compute_instances.rows[*].compute_instance_id
+          vcn_subnet_ids = with.vcn_subnets_for_vcn_vcn.rows[*].subnet_id
         }
       }
 
       edge {
         base = edge.vcn_subnet_to_vcn_flow_log
         args = {
-          vcn_flow_log_ids = with.vcn_flow_logs.rows[*].flow_log_id
+          vcn_subnet_ids = with.vcn_subnets_for_vcn_vcn.rows[*].subnet_id
         }
       }
 
       edge {
         base = edge.vcn_subnet_to_vcn_load_balancer
         args = {
-          vcn_subnet_ids = with.vcn_subnets.rows[*].subnet_id
+          vcn_subnet_ids = with.vcn_subnets_for_vcn_vcn.rows[*].subnet_id
         }
       }
 
       edge {
         base = edge.vcn_subnet_to_vcn_network_load_balancer
         args = {
-          vcn_network_load_balancer_ids = with.vcn_network_load_balancers.rows[*].network_load_balancer_id
+          vcn_subnet_ids = with.vcn_subnets_for_vcn_vcn.rows[*].subnet_id
         }
       }
 
       edge {
         base = edge.vcn_subnet_to_vcn_route_table
         args = {
-          vcn_route_table_ids = with.vcn_route_tables.rows[*].route_table_id
+          vcn_route_table_ids = with.vcn_route_tables_for_vcn_vcn.rows[*].route_table_id
         }
       }
 
@@ -333,21 +333,21 @@ dashboard "vcn_detail" {
       edge {
         base = edge.vcn_vcn_to_vcn_dhcp_option
         args = {
-          vcn_dhcp_option_ids = with.vcn_dhcp_options.rows[*].dhcp_option_id
+          vcn_vcn_ids = [self.input.vcn_id.value]
         }
       }
 
       edge {
         base = edge.vcn_vcn_to_vcn_network_security_group
         args = {
-          vcn_network_security_group_ids = with.vcn_network_security_groups.rows[*].network_security_group_id
+          vcn_vcn_ids = [self.input.vcn_id.value]
         }
       }
 
       edge {
         base = edge.vcn_vcn_to_vcn_security_list
         args = {
-          vcn_security_list_ids = with.vcn_security_lists.rows[*].security_list_id
+          vcn_vcn_ids = [self.input.vcn_id.value]
         }
       }
     }
@@ -364,7 +364,7 @@ dashboard "vcn_detail" {
         type  = "line"
         width = 6
         query = query.vcn_overview
-        args = [self.input.vcn_id.value]
+        args  = [self.input.vcn_id.value]
 
       }
 
@@ -373,7 +373,7 @@ dashboard "vcn_detail" {
         width = 6
 
         query = query.vcn_tag
-        args = [self.input.vcn_id.value]
+        args  = [self.input.vcn_id.value]
       }
 
     }
@@ -384,13 +384,13 @@ dashboard "vcn_detail" {
       table {
         title = "CIDR Blocks"
         query = query.vcn_cidr_blocks
-        args = [self.input.vcn_id.value]
+        args  = [self.input.vcn_id.value]
       }
 
       table {
         title = "DHCP Options"
         query = query.vcn_dhcp_options
-        args = [self.input.vcn_id.value]
+        args  = [self.input.vcn_id.value]
       }
 
     }
@@ -400,7 +400,7 @@ dashboard "vcn_detail" {
 
       table {
         query = query.vcn_subnet
-        args = [self.input.vcn_id.value]
+        args  = [self.input.vcn_id.value]
         column "OCID" {
           display = "none"
         }
@@ -416,7 +416,7 @@ dashboard "vcn_detail" {
 
       flow {
         query = query.vcn_gateway_sankey
-        args = [self.input.vcn_id.value]
+        args  = [self.input.vcn_id.value]
       }
 
     }
@@ -426,40 +426,40 @@ dashboard "vcn_detail" {
       table {
         title = "Route Rules"
         query = query.vcn_route_table
-        args = [self.input.vcn_id.value]
+        args  = [self.input.vcn_id.value]
       }
 
     }
 
-    container{
+    container {
 
       title = "Security Lists"
 
-        flow {
-          query = query.vcn_nsl_ingress_rule_sankey
-          title = "Ingress Security List"
-          width = 6
-          args = [self.input.vcn_id.value]
-        }
+      flow {
+        query = query.vcn_nsl_ingress_rule_sankey
+        title = "Ingress Security List"
+        width = 6
+        args  = [self.input.vcn_id.value]
+      }
 
-        flow {
-          query = query.vcn_nsl_egress_rule_sankey
-          title = "Egress Security List"
-          width = 6
-          args = [self.input.vcn_id.value]
-        }
+      flow {
+        query = query.vcn_nsl_egress_rule_sankey
+        title = "Egress Security List"
+        width = 6
+        args  = [self.input.vcn_id.value]
+      }
 
-        table {
-          title = "Security List Details"
-          width = 12
-          query = query.vcn_security_list
-          args = [self.input.vcn_id.value]
-          column "OCID" {
-            display = "none"
-          }
-          column "Name" {
-            href = "${dashboard.vcn_security_list_detail.url_path}?input.security_list_id={{.OCID | @uri}}"
-          }
+      table {
+        title = "Security List Details"
+        width = 12
+        query = query.vcn_security_list
+        args  = [self.input.vcn_id.value]
+        column "OCID" {
+          display = "none"
+        }
+        column "Name" {
+          href = "${dashboard.vcn_security_list_detail.url_path}?input.security_list_id={{.OCID | @uri}}"
+        }
       }
 
     }
@@ -472,7 +472,7 @@ dashboard "vcn_detail" {
         title = "Network Security Groups"
         width = 6
         query = query.vcn_security_group
-        args = [self.input.vcn_id.value]
+        args  = [self.input.vcn_id.value]
         column "OCID" {
           display = "none"
         }
@@ -485,7 +485,7 @@ dashboard "vcn_detail" {
         title = "Gateways"
         width = 6
         query = query.vcn_gateways_table
-        args = [self.input.vcn_id.value]
+        args  = [self.input.vcn_id.value]
       }
     }
 
@@ -518,7 +518,7 @@ query "vcn_input" {
 
 # With queries
 
-query "vcn_compute_instances" {
+query "compute_instances_for_vcn_vcn" {
   sql = <<-EOQ
     select
       a.instance_id as compute_instance_id
@@ -531,18 +531,59 @@ query "vcn_compute_instances" {
   EOQ
 }
 
-query "vcn_vcn_subnets" {
+query "identity_availability_domains_for_vcn_vcn" {
   sql = <<-EOQ
     select
-      id as subnet_id
+      a.id as availability_domain_id
     from
-      oci_core_subnet
+      oci_identity_availability_domain as a,
+      oci_core_subnet as s
+    where
+      s.availability_domain = a.name
+      and s.vcn_id = $1;
+  EOQ
+}
+
+query "regional_identity_availability_domains_for_vcn_vcn" {
+  sql = <<-EOQ
+    select
+      a.id as availability_domain_id
+    from
+      oci_identity_availability_domain as a,
+      oci_core_subnet as s
+    where
+      s.region = a.region
+      and s.availability_domain is null
+      and s.vcn_id = $1;
+  EOQ
+}
+
+query "vcn_dhcp_options_for_vcn_vcn" {
+  sql = <<-EOQ
+    select
+      id as dhcp_option_id
+    from
+      oci_core_dhcp_options
     where
       vcn_id = $1;
   EOQ
 }
 
-query "vcn_vcn_internet_gateways" {
+query "vcn_flow_logs_for_vcn_vcn" {
+  sql = <<-EOQ
+    select
+      l.id as flow_log_id
+    from
+      oci_logging_log as l,
+      oci_core_subnet as s
+    where
+      configuration -> 'source' ->> 'service' = 'flowlogs'
+      and configuration -> 'source' ->> 'resource' = s.id
+      and s.vcn_id = $1;
+  EOQ
+}
+
+query "vcn_internet_gateways_for_vcn_vcn" {
   sql = <<-EOQ
     select
       id as internet_gateway_id
@@ -553,29 +594,7 @@ query "vcn_vcn_internet_gateways" {
   EOQ
 }
 
-query "vcn_nat_gateways" {
-  sql = <<-EOQ
-    select
-      id as nat_gateway_id
-    from
-      oci_core_nat_gateway
-    where
-      vcn_id = $1;
-  EOQ
-}
-
-query "vcn_network_security_groups" {
-  sql = <<-EOQ
-    select
-      id as network_security_group_id
-    from
-      oci_core_network_security_group
-    where
-      vcn_id = $1;
-  EOQ
-}
-
-query "vcn_vcn_load_balancers" {
+query "vcn_load_balancers_for_vcn_vcn" {
   sql = <<-EOQ
     select
       lb.id as load_balancer_id
@@ -590,40 +609,7 @@ query "vcn_vcn_load_balancers" {
   EOQ
 }
 
-query "vcn_vcn_route_tables" {
-  sql = <<-EOQ
-    select
-      id as route_table_id
-    from
-      oci_core_route_table
-    where
-      vcn_id = $1;
-  EOQ
-}
-
-query "vcn_vcn_dhcp_options" {
-  sql = <<-EOQ
-    select
-      id as dhcp_option_id
-    from
-      oci_core_dhcp_options
-    where
-      vcn_id = $1;
-  EOQ
-}
-
-query "vcn_vcn_security_lists" {
-  sql = <<-EOQ
-    select
-      id as security_list_id
-    from
-      oci_core_security_list
-    where
-      vcn_id = $1;
-  EOQ
-}
-
-query "vcn_vcn_local_peering_gateways" {
+query "vcn_local_peering_gateways_for_vcn_vcn" {
   sql = <<-EOQ
     select
       id as local_peering_gateway_id
@@ -634,18 +620,18 @@ query "vcn_vcn_local_peering_gateways" {
   EOQ
 }
 
-query "vcn_vcn_service_gateways" {
+query "vcn_nat_gateways_for_vcn_vcn" {
   sql = <<-EOQ
     select
-      id as service_gateway_id
+      id as nat_gateway_id
     from
-      oci_core_service_gateway
+      oci_core_nat_gateway
     where
       vcn_id = $1;
   EOQ
 }
 
-query "vcn_network_load_balancers" {
+query "vcn_network_load_balancers_for_vcn_vcn" {
   sql = <<-EOQ
     select
       n.id as network_load_balancer_id
@@ -658,44 +644,58 @@ query "vcn_network_load_balancers" {
   EOQ
 }
 
-query "vcn_vcn_flow_logs" {
+query "vcn_network_security_groups_for_vcn_vcn" {
   sql = <<-EOQ
     select
-      l.id as flow_log_id
+      id as network_security_group_id
     from
-      oci_logging_log as l,
-      oci_core_subnet as s
+      oci_core_network_security_group
     where
-      configuration -> 'source' ->> 'service' = 'flowlogs'
-      and configuration -> 'source' ->> 'resource' = s.id
-      and s.vcn_id = $1;
+      vcn_id = $1;
   EOQ
 }
 
-query "vcn_identity_availability_domains" {
+query "vcn_route_tables_for_vcn_vcn" {
   sql = <<-EOQ
     select
-      a.id as availability_domain_id
+      id as route_table_id
     from
-      oci_identity_availability_domain as a,
-      oci_core_subnet as s
+      oci_core_route_table
     where
-      s.availability_domain = a.name
-      and s.vcn_id = $1;
+      vcn_id = $1;
   EOQ
 }
 
-query "vcn_regional_identity_availability_domains" {
+query "vcn_security_lists_for_vcn_vcn" {
   sql = <<-EOQ
     select
-      a.id as availability_domain_id
+      id as security_list_id
     from
-      oci_identity_availability_domain as a,
-      oci_core_subnet as s
+      oci_core_security_list
     where
-      s.region = a.region
-      and s.availability_domain is null
-      and s.vcn_id = $1;
+      vcn_id = $1;
+  EOQ
+}
+
+query "vcn_service_gateways_for_vcn_vcn" {
+  sql = <<-EOQ
+    select
+      id as service_gateway_id
+    from
+      oci_core_service_gateway
+    where
+      vcn_id = $1;
+  EOQ
+}
+
+query "vcn_subnets_for_vcn_vcn" {
+  sql = <<-EOQ
+    select
+      id as subnet_id
+    from
+      oci_core_subnet
+    where
+      vcn_id = $1;
   EOQ
 }
 

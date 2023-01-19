@@ -30,8 +30,8 @@ dashboard "identity_user_detail" {
 
   }
 
-  with "identity_groups" {
-    query = query.identity_user_identity_groups
+  with "identity_groups_for_identity_user" {
+    query = query.identity_groups_for_identity_user
     args  = [self.input.user_id.value]
   }
 
@@ -45,7 +45,7 @@ dashboard "identity_user_detail" {
       node {
         base = node.identity_group
         args = {
-          identity_group_ids = with.identity_groups.rows[*].group_id
+          identity_group_ids = with.identity_groups_for_identity_user.rows[*].group_id
         }
       }
 
@@ -59,7 +59,7 @@ dashboard "identity_user_detail" {
       edge {
         base = edge.identity_group_to_identity_user
         args = {
-          identity_user_ids = [self.input.user_id.value]
+          identity_group_ids = with.identity_groups_for_identity_user.rows[*].group_id
         }
       }
 
@@ -134,7 +134,7 @@ query "identity_user_input" {
 
 # With queries
 
-query "identity_user_identity_groups" {
+query "identity_groups_for_identity_user" {
   sql = <<-EOQ
     select
       jsonb_array_elements(user_groups)->> 'groupId' as group_id

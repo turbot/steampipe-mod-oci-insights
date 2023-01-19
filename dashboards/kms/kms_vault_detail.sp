@@ -29,13 +29,13 @@ dashboard "kms_vault_detail" {
 
   }
 
-  with "kms_keys" {
-    query = query.kms_vault_kms_keys
+  with "kms_keys_for_kms_vault" {
+    query = query.kms_keys_for_kms_vault
     args  = [self.input.kms_vault_id.value]
   }
 
-  with "kms_vault_secrets" {
-    query = query.kms_vault_kms_vault_secrets
+  with "kms_vault_secrets_for_kms_vault" {
+    query = query.kms_vault_secrets_for_kms_vault
     args  = [self.input.kms_vault_id.value]
   }
 
@@ -56,14 +56,14 @@ dashboard "kms_vault_detail" {
       node {
         base = node.kms_key
         args = {
-          kms_key_ids = with.kms_keys.rows[*].kms_key_id
+          kms_key_ids = with.kms_keys_for_kms_vault.rows[*].kms_key_id
         }
       }
 
       node {
         base = node.kms_vault_secret
         args = {
-          kms_vault_secret_ids = with.kms_vault_secrets.rows[*].secret_id
+          kms_vault_secret_ids = with.kms_vault_secrets_for_kms_vault.rows[*].secret_id
         }
       }
 
@@ -77,7 +77,7 @@ dashboard "kms_vault_detail" {
       edge {
         base = edge.kms_key_to_kms_vault_secret
         args = {
-          kms_key_ids = with.kms_keys.rows[*].kms_key_id
+          kms_key_ids = with.kms_keys_for_kms_vault.rows[*].kms_key_id
         }
       }
     }
@@ -145,7 +145,7 @@ query "key_vault_input" {
 
 # with queries
 
-query "kms_vault_kms_keys" {
+query "kms_keys_for_kms_vault" {
   sql = <<-EOQ
     select
       id as kms_key_id
@@ -156,7 +156,7 @@ query "kms_vault_kms_keys" {
   EOQ
 }
 
-query "kms_vault_kms_vault_secrets" {
+query "kms_vault_secrets_for_kms_vault" {
   sql = <<-EOQ
     select
       id as secret_id

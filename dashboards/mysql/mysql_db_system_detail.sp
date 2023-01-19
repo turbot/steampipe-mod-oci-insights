@@ -30,28 +30,28 @@ dashboard "mysql_db_system_detail" {
 
   }
 
-  with "mysql_backups" {
-    query = query.mysql_db_system_mysql_backups
+  with "mysql_backups_for_mysql_db_system" {
+    query = query.mysql_backups_for_mysql_db_system
     args  = [self.input.db_system_id.value]
   }
 
-  with "mysql_channels" {
-    query = query.mysql_db_system_mysql_channels
+  with "mysql_channels_for_mysql_db_system" {
+    query = query.mysql_channels_for_mysql_db_system
     args  = [self.input.db_system_id.value]
   }
 
-  with "mysql_configurations" {
-    query = query.mysql_db_system_mysql_configurations
+  with "mysql_configurations_for_mysql_db_system" {
+    query = query.mysql_configurations_for_mysql_db_system
     args  = [self.input.db_system_id.value]
   }
 
-  with "vcn_subnets" {
-    query = query.mysql_db_system_vcn_subnets
+  with "vcn_subnets_for_mysql_db_system" {
+    query = query.vcn_subnets_for_mysql_db_system
     args  = [self.input.db_system_id.value]
   }
 
-  with "vcn_vcns" {
-    query = query.mysql_db_system_vcn_vcns
+  with "vcn_vcns_for_mysql_db_system" {
+    query = query.vcn_vcns_for_mysql_db_system
     args  = [self.input.db_system_id.value]
   }
 
@@ -65,21 +65,21 @@ dashboard "mysql_db_system_detail" {
       node {
         base = node.mysql_backup
         args = {
-          mysql_backup_ids = with.mysql_backups.rows[*].backup_id
+          mysql_backup_ids = with.mysql_backups_for_mysql_db_system.rows[*].backup_id
         }
       }
 
       node {
         base = node.mysql_channel
         args = {
-          mysql_channel_ids = with.mysql_channels.rows[*].channel_id
+          mysql_channel_ids = with.mysql_channels_for_mysql_db_system.rows[*].channel_id
         }
       }
 
       node {
         base = node.mysql_configuration
         args = {
-          mysql_configuration_ids = with.mysql_configurations.rows[*].configuration_id
+          mysql_configuration_ids = with.mysql_configurations_for_mysql_db_system.rows[*].configuration_id
         }
       }
 
@@ -93,14 +93,14 @@ dashboard "mysql_db_system_detail" {
       node {
         base = node.vcn_subnet
         args = {
-          vcn_subnet_ids = with.vcn_subnets.rows[*].subnet_id
+          vcn_subnet_ids = with.vcn_subnets_for_mysql_db_system.rows[*].subnet_id
         }
       }
 
       node {
         base = node.vcn_vcn
         args = {
-          vcn_vcn_ids = with.vcn_vcns.rows[*].vcn_id
+          vcn_vcn_ids = with.vcn_vcns_for_mysql_db_system.rows[*].vcn_id
         }
       }
 
@@ -126,9 +126,9 @@ dashboard "mysql_db_system_detail" {
       }
 
       edge {
-        base = edge.mysql_db_system_to_vcn_subnet
+        base = edge.vcn_vcn_to_vcn_subnet
         args = {
-          vcn_subnet_ids = with.vcn_subnets.rows[*].subnet_id
+          vcn_vcn_ids = with.vcn_vcns_for_mysql_db_system.rows[*].vcn_id
         }
       }
 
@@ -223,7 +223,7 @@ query "mysql_db_system_input" {
 
 # With queries
 
-query "mysql_db_system_mysql_backups" {
+query "mysql_backups_for_mysql_db_system" {
   sql = <<-EOQ
     select
       id as backup_id
@@ -234,7 +234,7 @@ query "mysql_db_system_mysql_backups" {
   EOQ
 }
 
-query "mysql_db_system_mysql_configurations" {
+query "mysql_configurations_for_mysql_db_system" {
   sql = <<-EOQ
     select
       configuration_id
@@ -245,7 +245,7 @@ query "mysql_db_system_mysql_configurations" {
   EOQ
 }
 
-query "mysql_db_system_mysql_channels" {
+query "mysql_channels_for_mysql_db_system" {
   sql = <<-EOQ
     select
       id as channel_id
@@ -256,7 +256,7 @@ query "mysql_db_system_mysql_channels" {
   EOQ
 }
 
-query "mysql_db_system_vcn_vcns" {
+query "vcn_vcns_for_mysql_db_system" {
   sql = <<-EOQ
     select
       s.vcn_id as vcn_id
@@ -269,7 +269,7 @@ query "mysql_db_system_vcn_vcns" {
   EOQ
 }
 
-query "mysql_db_system_vcn_subnets" {
+query "vcn_subnets_for_mysql_db_system" {
   sql = <<-EOQ
     select
       subnet_id

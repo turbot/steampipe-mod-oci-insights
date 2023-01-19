@@ -41,33 +41,33 @@ dashboard "vcn_network_security_group_detail" {
 
   }
 
-  with "compute_instances" {
-    query = query.vcn_network_security_group_compute_instances
+  with "compute_instances_for_vcn_network_security_group" {
+    query = query.compute_instances_for_vcn_network_security_group
     args  = [self.input.security_group_id.value]
   }
 
-  with "filestorage_mount_targets" {
-    query = query.vcn_network_security_group_filestorage_mount_targets
+  with "filestorage_mount_targets_for_vcn_network_security_group" {
+    query = query.filestorage_mount_targets_for_vcn_network_security_group
     args  = [self.input.security_group_id.value]
   }
 
-  with "vcn_load_balancers" {
-    query = query.vcn_network_security_group_vcn_load_balancers
+  with "vcn_load_balancers_for_vcn_network_security_group" {
+    query = query.vcn_load_balancers_for_vcn_network_security_group
     args  = [self.input.security_group_id.value]
   }
 
-  with "vcn_network_load_balancers" {
-    query = query.vcn_network_security_group_vcn_network_load_balancers
+  with "vcn_network_load_balancers_for_vcn_network_security_group" {
+    query = query.vcn_network_load_balancers_for_vcn_network_security_group
     args  = [self.input.security_group_id.value]
   }
 
-  with "vcn_vcns" {
-    query = query.vcn_network_security_group_vcn_vcns
+  with "vcn_vcns_for_vcn_network_security_group" {
+    query = query.vcn_vcns_for_vcn_network_security_group
     args  = [self.input.security_group_id.value]
   }
 
-  with "vcn_vnics" {
-    query = query.vcn_network_security_group_vcn_vnics
+  with "vcn_vnics_for_vcn_network_security_group" {
+    query = query.vcn_vnics_for_vcn_network_security_group
     args  = [self.input.security_group_id.value]
   }
 
@@ -81,28 +81,28 @@ dashboard "vcn_network_security_group_detail" {
       node {
         base = node.compute_instance
         args = {
-          compute_instance_ids = with.compute_instances.rows[*].compute_instance_id
+          compute_instance_ids = with.compute_instances_for_vcn_network_security_group.rows[*].compute_instance_id
         }
       }
 
       node {
         base = node.filestorage_mount_target
         args = {
-          filestorage_mount_target_ids = with.filestorage_mount_targets.rows[*].mount_target_id
+          filestorage_mount_target_ids = with.filestorage_mount_targets_for_vcn_network_security_group.rows[*].mount_target_id
         }
       }
 
       node {
         base = node.vcn_load_balancer
         args = {
-          vcn_load_balancer_ids = with.vcn_load_balancers.rows[*].load_balancer_id
+          vcn_load_balancer_ids = with.vcn_load_balancers_for_vcn_network_security_group.rows[*].load_balancer_id
         }
       }
 
       node {
         base = node.vcn_network_load_balancer
         args = {
-          vcn_network_load_balancer_ids = with.vcn_network_load_balancers.rows[*].network_load_balancer_id
+          vcn_network_load_balancer_ids = with.vcn_network_load_balancers_for_vcn_network_security_group.rows[*].network_load_balancer_id
         }
       }
 
@@ -116,28 +116,28 @@ dashboard "vcn_network_security_group_detail" {
       node {
         base = node.vcn_vcn
         args = {
-          vcn_vcn_ids = with.vcn_vcns.rows[*].vcn_id
+          vcn_vcn_ids = with.vcn_vcns_for_vcn_network_security_group.rows[*].vcn_id
         }
       }
 
       node {
         base = node.vcn_vnic
         args = {
-          vcn_vnic_ids = with.vcn_vnics.rows[*].vnic_id
+          vcn_vnic_ids = with.vcn_vnics_for_vcn_network_security_group.rows[*].vnic_id
         }
       }
 
       edge {
         base = edge.vcn_network_security_group_to_compute_instance
         args = {
-          compute_instance_ids = with.compute_instances.rows[*].compute_instance_id
+          vcn_network_security_group_ids = [self.input.security_group_id.value]
         }
       }
 
       edge {
         base = edge.vcn_network_security_group_to_filestorage_mount_target
         args = {
-          filestorage_mount_target_ids = with.filestorage_mount_targets.rows[*].mount_target_id
+          vcn_network_security_group_ids = [self.input.security_group_id.value]
         }
       }
 
@@ -158,14 +158,14 @@ dashboard "vcn_network_security_group_detail" {
       edge {
         base = edge.vcn_network_security_group_to_vcn_vnic
         args = {
-          vcn_vnic_ids = with.vcn_vnics.rows[*].vnic_id
+          vcn_network_security_group_ids = [self.input.security_group_id.value]
         }
       }
 
       edge {
         base = edge.vcn_vcn_to_vcn_network_security_group
         args = {
-          vcn_network_security_group_ids = [self.input.security_group_id.value]
+          vcn_vcn_ids = with.vcn_vcns_for_vcn_network_security_group.rows[*].vcn_id
         }
       }
     }
@@ -266,54 +266,19 @@ query "vcn_network_security_group_input" {
 
 # With queries
 
-query "vcn_network_security_group_vcn_vcns" {
+query "compute_instances_for_vcn_network_security_group" {
   sql = <<-EOQ
     select
-      vcn_id
-    from
-      oci_core_network_security_group
-    where
-      id = $1;
-  EOQ
-}
-
-query "vcn_network_security_group_vcn_vnics" {
-  sql = <<-EOQ
-    select
-      vnic_id
+      instance_id as compute_instance_id
     from
       oci_core_vnic_attachment,
       jsonb_array_elements_text(nsg_ids) as nid
     where
-      nid = $1;
+      nid = $1
   EOQ
 }
 
-query "vcn_network_security_group_vcn_load_balancers" {
-  sql = <<-EOQ
-    select
-      id as load_balancer_id
-    from
-      oci_core_load_balancer,
-      jsonb_array_elements_text(network_security_group_ids) as nid
-    where
-      nid = $1;
-  EOQ
-}
-
-query "vcn_network_security_group_vcn_network_load_balancers" {
-  sql = <<-EOQ
-    select
-      id as network_load_balancer_id
-    from
-      oci_core_network_load_balancer,
-      jsonb_array_elements_text(network_security_group_ids) as nid
-    where
-      nid = $1;
-  EOQ
-}
-
-query "vcn_network_security_group_filestorage_mount_targets" {
+query "filestorage_mount_targets_for_vcn_network_security_group" {
   sql = <<-EOQ
     select
       id as mount_target_id
@@ -325,15 +290,50 @@ query "vcn_network_security_group_filestorage_mount_targets" {
   EOQ
 }
 
-query "vcn_network_security_group_compute_instances" {
+query "vcn_load_balancers_for_vcn_network_security_group" {
   sql = <<-EOQ
     select
-      instance_id as compute_instance_id
+      id as load_balancer_id
+    from
+      oci_core_load_balancer,
+      jsonb_array_elements_text(network_security_group_ids) as nid
+    where
+      nid = $1;
+  EOQ
+}
+
+query "vcn_network_load_balancers_for_vcn_network_security_group" {
+  sql = <<-EOQ
+    select
+      id as network_load_balancer_id
+    from
+      oci_core_network_load_balancer,
+      jsonb_array_elements_text(network_security_group_ids) as nid
+    where
+      nid = $1;
+  EOQ
+}
+
+query "vcn_vcns_for_vcn_network_security_group" {
+  sql = <<-EOQ
+    select
+      vcn_id
+    from
+      oci_core_network_security_group
+    where
+      id = $1;
+  EOQ
+}
+
+query "vcn_vnics_for_vcn_network_security_group" {
+  sql = <<-EOQ
+    select
+      vnic_id
     from
       oci_core_vnic_attachment,
       jsonb_array_elements_text(nsg_ids) as nid
     where
-      nid = $1
+      nid = $1;
   EOQ
 }
 
