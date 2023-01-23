@@ -14,18 +14,18 @@ category "kms_key" {
 category "kms_key_version" {
   title = "KMS Key Version"
   color = local.security_color
-  icon  = "key"
+  icon  = "difference"
 }
 
 category "kms_vault" {
   title = "KMS Vault"
   color = local.security_color
-  href  = "/oci_insights.dashboard.kms_vault_detail?input.vault_id={{.properties.'ID' | @uri}}"
-  icon  = "key"
+  href  = "/oci_insights.dashboard.kms_vault_detail?input.kms_vault_id={{.properties.'ID' | @uri}}"
+  icon  = "shelves"
 }
 
 category "kms_vault_secret" {
   title = "KMS Vault Secret"
   color = local.security_color
-  icon  = "enhanced_encryption"
+  icon  = "password"
 }

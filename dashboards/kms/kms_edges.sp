@@ -35,12 +35,15 @@ edge "kms_key_version_to_kms_key" {
 
   sql = <<-EOQ
     select
-      current_key_version as from_id,
-      id as to_id
+      v.id as from_id,
+      k.id as to_id
     from
-      oci_kms_key
+      oci_kms_key_version as v
+      left join oci_kms_key as k on k.id = v.key_id
     where
-      current_key_version = any($1);
+      v.management_endpoint = k.management_endpoint
+      and v.region = k.region
+      and v.id = any($1);
   EOQ
 
   param "kms_key_version_ids" {}

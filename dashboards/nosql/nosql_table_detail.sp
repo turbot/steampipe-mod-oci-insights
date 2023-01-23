@@ -29,7 +29,7 @@ dashboard "nosql_table_detail" {
     }
   }
 
-    with "nosql_table_children_for_nosql_table" {
+  with "nosql_table_children_for_nosql_table" {
     query = query.nosql_table_children_for_nosql_table
     args  = [self.input.table_id.value]
   }

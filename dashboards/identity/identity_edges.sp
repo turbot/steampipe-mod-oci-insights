@@ -45,6 +45,25 @@ edge "identity_availability_domain_to_vcn_subnet" {
   param "availability_domain_ids" {}
 }
 
+edge "identity_group_to_identity_policy" {
+  title = "attaches"
+
+  sql = <<-EOQ
+    select
+      g.id as from_id,
+      p.id as to_id
+    from
+      oci_identity_policy as p,
+      jsonb_array_elements_text(statements) as s,
+      oci_identity_group as g
+    where
+      s ilike '%' || g.name || '%'
+      and g.id = any($1);
+  EOQ
+
+  param "identity_group_ids" {}
+}
+
 edge "identity_group_to_identity_user" {
   title = "has member"
 

@@ -109,7 +109,7 @@ dashboard "kms_vault_detail" {
       width = 6
 
       table {
-        title = "Endpoint Details"
+        title = "Endpoints"
         query = query.kms_vault_endpoints
         args  = [self.input.kms_vault_id.value]
       }

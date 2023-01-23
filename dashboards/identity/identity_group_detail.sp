@@ -28,6 +28,11 @@ dashboard "identity_group_detail" {
     args  = [self.input.group_id.value]
   }
 
+  with "identity_policies_for_identity_group" {
+    query = query.identity_policies_for_identity_group
+    args  = [self.input.group_id.value]
+  }
+
   container {
 
     graph {
@@ -49,8 +54,22 @@ dashboard "identity_group_detail" {
         }
       }
 
+      node {
+        base = node.identity_policy
+        args = {
+          identity_policy_ids = with.identity_policies_for_identity_group.rows[*].policy_id
+        }
+      }
+
       edge {
         base = edge.identity_group_to_identity_user
+        args = {
+          identity_group_ids = [self.input.group_id.value]
+        }
+      }
+
+      edge {
+        base = edge.identity_group_to_identity_policy
         args = {
           identity_group_ids = [self.input.group_id.value]
         }
@@ -76,7 +95,7 @@ dashboard "identity_group_detail" {
     }
   }
 
-    container {
+  container {
 
     title = "OCI Identity Group Analysis"
 
@@ -91,8 +110,17 @@ dashboard "identity_group_detail" {
       args  = [self.input.group_id.value]
     }
 
+    table {
+      title = "Policies"
+      width = 6
+      query = query.identity_policies_for_group
+      args  = [self.input.group_id.value]
+    }
+
+
   }
-  }
+
+}
 
 # input queries
 
@@ -123,6 +151,20 @@ query "identity_users_for_identity_group" {
       jsonb_array_elements(user_groups) as gid
     where
       gid ->> 'groupId' = $1;
+  EOQ
+}
+
+query "identity_policies_for_identity_group" {
+  sql = <<-EOQ
+    select
+      p.id as policy_id
+    from
+      oci_identity_policy as p,
+      jsonb_array_elements_text(statements) as s,
+      oci_identity_group as g
+    where
+      s ilike '%' || g.name || '%'
+      and g.id = $1;
   EOQ
 }
 
@@ -176,5 +218,20 @@ query "identity_group_user" {
     where
       g.id = u.g_id
       and g.id = $1
+  EOQ
+}
+
+query "identity_policies_for_group" {
+  sql = <<-EOQ
+    select
+      distinct p.name as "Policy Name",
+      p.id as "Policy ID"
+    from
+      oci_identity_policy as p,
+      jsonb_array_elements_text(statements) as s,
+      oci_identity_group as g
+    where
+      s ilike '%' || g.name || '%'
+      and g.id = $1;
   EOQ
 }

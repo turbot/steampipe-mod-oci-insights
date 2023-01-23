@@ -23,6 +23,12 @@ category "identity_group" {
   icon  = "group"
 }
 
+category "identity_policy" {
+  title = "Identity Policy"
+  color = local.iam_color
+  icon  = "rule_folder"
+}
+
 category "identity_user" {
   title = "Identity User"
   color = local.iam_color

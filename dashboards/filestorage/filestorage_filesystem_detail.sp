@@ -40,6 +40,16 @@ dashboard "filestorage_filesystem_detail" {
     args  = [self.input.filesystem_id.value]
   }
 
+  with "kms_keys_for_filestorage_file_system" {
+    query = query.kms_keys_for_filestorage_file_system
+    args  = [self.input.filesystem_id.value]
+  }
+
+  with "kms_vaults_for_filestorage_file_system" {
+    query = query.kms_vaults_for_filestorage_file_system
+    args  = [self.input.filesystem_id.value]
+  }
+
   with "vcn_network_security_groups_for_filestorage_file_system" {
     query = query.vcn_network_security_groups_for_filestorage_file_system
     args  = [self.input.filesystem_id.value]
@@ -79,6 +89,21 @@ dashboard "filestorage_filesystem_detail" {
       }
 
       node {
+        base = node.kms_key
+        args = {
+          kms_key_ids = with.kms_keys_for_filestorage_file_system.rows[*].kms_key_id
+        }
+      }
+
+      node {
+        base = node.kms_vault
+        args = {
+          kms_vault_ids = with.kms_vaults_for_filestorage_file_system.rows[*].vault_id
+        }
+      }
+
+
+      node {
         base = node.vcn_network_security_group
         args = {
           vcn_network_security_group_ids = with.vcn_network_security_groups_for_filestorage_file_system.rows[*].security_group_id
@@ -107,6 +132,13 @@ dashboard "filestorage_filesystem_detail" {
       }
 
       edge {
+        base = edge.filestorage_file_system_to_kms_vault
+        args = {
+          filestorage_file_system_ids = [self.input.filesystem_id.value]
+        }
+      }
+
+      edge {
         base = edge.filestorage_mount_target_to_vcn_network_security_group
         args = {
           filestorage_mount_target_ids = with.filestorage_mount_targets_for_filestorage_file_system.rows[*].mount_target_id
@@ -117,6 +149,13 @@ dashboard "filestorage_filesystem_detail" {
         base = edge.filestorage_mount_target_to_vcn_subnet
         args = {
           filestorage_mount_target_ids = with.filestorage_mount_targets_for_filestorage_file_system.rows[*].mount_target_id
+        }
+      }
+
+      edge {
+        base = edge.filestorage_file_system_to_kms_key
+        args = {
+          filestorage_file_system_ids = [self.input.filesystem_id.value]
         }
       }
 
@@ -224,6 +263,31 @@ query "filestorage_snapshots_for_filestorage_file_system" {
       oci_file_storage_snapshot
     where
       file_system_id  = $1 ;
+  EOQ
+}
+
+query "kms_keys_for_filestorage_file_system" {
+  sql = <<-EOQ
+    select
+      kms_key_id as kms_key_id
+    from
+      oci_file_storage_file_system
+    where
+      kms_key_id is not null
+      and id  = $1;
+  EOQ
+}
+
+query "kms_vaults_for_filestorage_file_system" {
+  sql = <<-EOQ
+    select
+      vault_id as vault_id
+    from
+      oci_file_storage_file_system as f
+      left join oci_kms_key as k on k.id = f.kms_key_id
+    where
+      vault_id is not null
+      and f.id  = $1;
   EOQ
 }
 

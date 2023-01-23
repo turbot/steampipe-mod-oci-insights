@@ -110,6 +110,29 @@ node "identity_group" {
   param "identity_group_ids" {}
 }
 
+node "identity_policy" {
+  category = category.identity_policy
+
+  sql = <<-EOQ
+    select
+      id as id,
+      title as title,
+      jsonb_build_object(
+        'ID', id,
+        'Time Created', time_created,
+        'Name', name,
+        'Description', description,
+        'Lifecycle State', lifecycle_state
+      ) as properties
+    from
+      oci_identity_policy
+    where
+      id = any($1);
+  EOQ
+
+  param "identity_policy_ids" {}
+}
+
 node "identity_user" {
   category = category.identity_user
 

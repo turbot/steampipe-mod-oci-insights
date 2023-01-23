@@ -44,6 +44,11 @@ dashboard "kms_key_detail" {
     args  = [self.input.key_id.value]
   }
 
+  with "file_storage_file_systems_for_kms_key" {
+    query = query.file_storage_file_systems_for_kms_key
+    args  = [self.input.key_id.value]
+  }
+
   with "kms_key_versions_for_kms_key" {
     query = query.kms_key_versions_for_kms_key
     args  = [self.input.key_id.value]
@@ -51,6 +56,11 @@ dashboard "kms_key_detail" {
 
   with "kms_vaults_for_kms_key" {
     query = query.kms_vaults_for_kms_key
+    args  = [self.input.key_id.value]
+  }
+
+  with "objectstorage_buckets_for_kms_key" {
+    query = query.objectstorage_buckets_for_kms_key
     args  = [self.input.key_id.value]
   }
 
@@ -76,6 +86,13 @@ dashboard "kms_key_detail" {
       }
 
       node {
+        base = node.filestorage_file_system
+        args = {
+          filestorage_file_system_ids = with.file_storage_file_systems_for_kms_key.rows[*].file_system_id
+        }
+      }
+
+      node {
         base = node.kms_key
         args = {
           kms_key_ids = [self.input.key_id.value]
@@ -85,7 +102,7 @@ dashboard "kms_key_detail" {
       node {
         base = node.kms_key_version
         args = {
-          kms_key_version_ids =  with.kms_key_versions_for_kms_key.rows[*].current_key_version
+          kms_key_version_ids =  with.kms_key_versions_for_kms_key.rows[*].kms_key_version_id
         }
       }
 
@@ -93,6 +110,13 @@ dashboard "kms_key_detail" {
         base = node.kms_vault
         args = {
           kms_vault_ids = with.kms_vaults_for_kms_key.rows[*].vault_id
+        }
+      }
+
+      node {
+        base = node.objectstorage_bucket
+        args = {
+          objectstorage_bucket_ids = with.objectstorage_buckets_for_kms_key.rows[*].bucket_id
         }
       }
 
@@ -111,9 +135,17 @@ dashboard "kms_key_detail" {
       }
 
       edge {
+        base = edge.filestorage_file_system_to_kms_key
+        args = {
+          filestorage_file_system_ids = with.file_storage_file_systems_for_kms_key.rows[*].file_system_id
+        }
+      }
+
+
+      edge {
         base = edge.kms_key_version_to_kms_key
         args = {
-          kms_key_version_ids =  with.kms_key_versions_for_kms_key.rows[*].current_key_version
+          kms_key_version_ids =  with.kms_key_versions_for_kms_key.rows[*].kms_key_version_id
         }
       }
 
@@ -121,6 +153,13 @@ dashboard "kms_key_detail" {
         base = edge.kms_key_to_kms_vault
         args = {
           kms_key_ids = [self.input.key_id.value]
+        }
+      }
+
+      edge {
+        base = edge.objectstorage_bucket_to_kms_key
+        args = {
+          objectstorage_bucket_ids = with.objectstorage_buckets_for_kms_key.rows[*].bucket_id
         }
       }
 
@@ -174,21 +213,25 @@ dashboard "kms_key_detail" {
 query "kms_key_input" {
   sql = <<EOQ
     select
-      k.name as label,
+     right(reverse(split_part(reverse(v.title), '.', 1)), 8) as label,
       k.id as value,
       json_build_object(
+        'Key Name', k.name,
         'c.name', coalesce(c.title, 'root'),
-        'k.region', region,
+        'k.region', v.region,
         't.name', t.name
       ) as tags
-    from
-      oci_kms_key as k
-      left join oci_identity_compartment as c on k.compartment_id = c.id
-      left join oci_identity_tenancy as t on k.tenant_id = t.id
-    where
-      k.lifecycle_state <> 'DELETED'
-    order by
-      k.name;
+      from
+        oci_kms_key as k
+        left join oci_identity_compartment as c on k.compartment_id = c.id
+        left join oci_kms_key_version as v on v.key_id = k.id
+        left join oci_identity_tenancy as t on k.tenant_id = t.id
+      where
+        k.lifecycle_state <> 'DELETED'
+        and v.management_endpoint = k.management_endpoint
+        and v.region = k.region
+      order by
+        v.title ;
   EOQ
 }
 
@@ -200,6 +243,17 @@ query "blockstorage_block_volumes_for_kms_key" {
       id as block_volume_id
     from
       oci_core_volume
+    where
+      kms_key_id = $1;
+  EOQ
+}
+
+query "file_storage_file_systems_for_kms_key" {
+  sql = <<-EOQ
+    select
+      id as file_system_id
+    from
+      oci_file_storage_file_system
     where
       kms_key_id = $1;
   EOQ
@@ -219,11 +273,14 @@ query "blockstorage_boot_volumes_for_kms_key" {
 query "kms_key_versions_for_kms_key" {
   sql = <<-EOQ
     select
-      current_key_version
+      v.id as kms_key_version_id
     from
-      oci_kms_key
+      oci_kms_key_version as v
+      left join oci_kms_key as k on k.id = v.key_id
     where
-      id = $1;
+      v.management_endpoint = k.management_endpoint
+      and v.region = k.region
+      and k.id = $1;
   EOQ
 }
 
@@ -235,6 +292,17 @@ query "kms_vaults_for_kms_key" {
       oci_kms_key
     where
       id = $1;
+  EOQ
+}
+
+query "objectstorage_buckets_for_kms_key" {
+  sql = <<-EOQ
+    select
+      id as bucket_id
+    from
+      oci_objectstorage_bucket
+    where
+      kms_key_id = $1;
   EOQ
 }
 

@@ -28,7 +28,7 @@ node "kms_key_version" {
   sql = <<-EOQ
     select
       v.id as id,
-      v.title as title,
+      case when k.current_key_version = v.id then 'current' || ' ['|| right(v.title,8) || ']' else 'older' || ' ['|| right(v.title,8) || ']' end as title,
       jsonb_build_object(
         'ID', v.id,
         'Lifecycle State', v.lifecycle_state,

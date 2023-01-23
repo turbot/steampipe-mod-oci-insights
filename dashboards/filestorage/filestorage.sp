@@ -7,7 +7,7 @@ locals {
 category "filestorage_file_system" {
   title = "File Storage File System"
   color = local.storage_color
-  href  = "/oci_insights.dashboard.filestorage_file_system_detail?input.filesystem_id={{.properties.'ID' | @uri}}"
+  href  = "/oci_insights.dashboard.filestorage_filesystem_detail?input.filesystem_id={{.properties.'ID' | @uri}}"
   icon  = "home_storage"
 }
 

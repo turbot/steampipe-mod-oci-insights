@@ -37,6 +37,16 @@ dashboard "objectstorage_bucket_detail" {
 
   }
 
+  with "kms_keys_for_objectstorage_bucket" {
+    query = query.kms_keys_for_objectstorage_bucket
+    args  = [self.input.bucket_id.value]
+  }
+
+  with "kms_vaults_for_objectstorage_bucket" {
+    query = query.kms_vaults_for_objectstorage_bucket
+    args  = [self.input.bucket_id.value]
+  }
+
   container {
 
     graph {
@@ -46,6 +56,34 @@ dashboard "objectstorage_bucket_detail" {
 
       node {
         base = node.objectstorage_bucket
+        args = {
+          objectstorage_bucket_ids = [self.input.bucket_id.value]
+        }
+      }
+
+      node {
+        base = node.kms_key
+        args = {
+          kms_key_ids = with.kms_keys_for_objectstorage_bucket.rows[*].kms_key_id
+        }
+      }
+
+      node {
+        base = node.kms_vault
+        args = {
+          kms_vault_ids = with.kms_vaults_for_objectstorage_bucket.rows[*].vault_id
+        }
+      }
+
+      edge {
+        base = edge.kms_key_to_kms_vault
+        args = {
+          kms_key_ids = with.kms_keys_for_objectstorage_bucket.rows[*].kms_key_id
+        }
+      }
+
+      edge {
+        base = edge.objectstorage_bucket_to_kms_key
         args = {
           objectstorage_bucket_ids = [self.input.bucket_id.value]
         }
@@ -245,5 +283,32 @@ query "objectstorage_bucket_object_lifecycle_policy" {
     jsonb_array_elements(object_lifecycle_policy -> 'items') as i
   where
     id = $1 and jsonb_typeof(object_lifecycle_policy -> 'items') = 'array';
+  EOQ
+}
+
+#with queries
+
+query "kms_keys_for_objectstorage_bucket" {
+  sql = <<-EOQ
+    select
+      kms_key_id as kms_key_id
+    from
+      oci_objectstorage_bucket
+    where
+      kms_key_id is not null
+      and id = $1;
+  EOQ
+}
+
+query "kms_vaults_for_objectstorage_bucket" {
+  sql = <<-EOQ
+    select
+      vault_id as vault_id
+    from
+      oci_objectstorage_bucket as b
+      left join oci_kms_key as k on k.id = b.kms_key_id
+    where
+      vault_id is not null
+      and b.id = $1;
   EOQ
 }

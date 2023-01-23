@@ -78,8 +78,7 @@ node "blockstorage_block_volume_default_backup_policy" {
         'Backup Type', jsonb_array_elements(schedules)->'backupType',
         'Backup Offset Type', jsonb_array_elements(schedules)->'offsetType',
         'Time Created', time_created,
-        'Compartment ID', compartment_id,
-        'Region', region
+        'Tenant ID', tenant_id
       ) as properties
     from
       oci_core_volume_default_backup_policy
@@ -194,8 +193,7 @@ node "blockstorage_boot_volume_default_backup_policy" {
         'Backup Type', jsonb_array_elements(schedules)->'backupType',
         'Backup Offset Type', jsonb_array_elements(schedules)->'offsetType',
         'Time Created', time_created,
-        'Compartment ID', compartment_id,
-        'Region', region
+        'Tenant ID', tenant_id
       ) as properties
     from
       oci_core_volume_default_backup_policy
