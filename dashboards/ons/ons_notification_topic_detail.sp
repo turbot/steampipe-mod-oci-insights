@@ -1,6 +1,6 @@
 dashboard "ons_notification_topic_detail" {
 
-  title = "OCI Notification Topic Detail"
+  title = "OCI ONS Notification Topic Detail"
 
   tags = merge(local.ons_common_tags, {
     type = "Detail"
