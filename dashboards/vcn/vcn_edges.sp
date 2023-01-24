@@ -382,22 +382,6 @@ edge "vcn_vcn_to_vcn_security_list" {
   param "vcn_vcn_ids" {}
 }
 
-edge "vcn_vcn_to_vcn_subnet" {
-  title = "subnet"
-
-  sql = <<-EOQ
-    select
-      vcn_id as from_id,
-      id as to_id
-    from
-      oci_core_subnet as s
-    where
-      vcn_id = any($1);
-  EOQ
-
-  param "vcn_vcn_ids" {}
-}
-
 edge "vcn_subnet_to_vcn_vcn" {
   title = "vcn"
 

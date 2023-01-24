@@ -65,6 +65,11 @@ dashboard "compute_instance_detail" {
     args  = [self.input.instance_id.value]
   }
 
+  with "ons_notification_topics_for_compute_instance" {
+    query = query.ons_notification_topics_for_compute_instance
+    args  = [self.input.instance_id.value]
+  }
+
   with "vcn_load_balancers_for_compute_instance" {
     query = query.vcn_load_balancers_for_compute_instance
     args  = [self.input.instance_id.value]
@@ -138,6 +143,13 @@ dashboard "compute_instance_detail" {
       }
 
       node {
+        base = node.ons_notification_topic
+        args = {
+          ons_notification_topic_ids = with.ons_notification_topics_for_compute_instance.rows[*].topic_id
+        }
+      }
+
+      node {
         base = node.vcn_network_security_group
         args = {
           vcn_network_security_group_ids = with.vcn_network_security_groups_for_compute_instance.rows[*].nsg_id
@@ -202,6 +214,13 @@ dashboard "compute_instance_detail" {
 
       edge {
         base = edge.compute_instance_to_compute_image
+        args = {
+          compute_instance_ids = [self.input.instance_id.value]
+        }
+      }
+
+      edge {
+        base = edge.compute_instance_to_ons_notification_topic
         args = {
           compute_instance_ids = [self.input.instance_id.value]
         }
@@ -396,6 +415,26 @@ query "vcn_vnics_for_compute_instance" {
     where
       lifecycle_state = 'ATTACHED'
       and instance_id = $1
+  EOQ
+}
+
+query "ons_notification_topics_for_compute_instance" {
+  sql = <<-EOQ
+    with jsondata as (
+      select
+        topic_id,
+        tags::json as tags
+      from
+        oci_ons_notification_topic
+    )
+    select
+      topic_id as topic_id
+    from
+      jsondata,
+      json_each_text(tags)
+    where
+      key = 'CTX_NOTIFICATIONS_COMPUTE_ID'
+      and value = $1
   EOQ
 }
 

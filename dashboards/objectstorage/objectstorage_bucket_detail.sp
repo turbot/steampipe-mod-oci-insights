@@ -37,6 +37,16 @@ dashboard "objectstorage_bucket_detail" {
 
   }
 
+  with "identity_users_for_objectstorage_bucket" {
+    query = query.identity_users_for_objectstorage_bucket
+    args  = [self.input.bucket_id.value]
+  }
+
+  with "objectstorage_objects_for_objectstorage_bucket" {
+    query = query.objectstorage_objects_for_objectstorage_bucket
+    args  = [self.input.bucket_id.value]
+  }
+
   with "kms_keys_for_objectstorage_bucket" {
     query = query.kms_keys_for_objectstorage_bucket
     args  = [self.input.bucket_id.value]
@@ -55,9 +65,23 @@ dashboard "objectstorage_bucket_detail" {
       direction = "TD"
 
       node {
+        base = node.identity_user
+        args = {
+          identity_user_ids = with.identity_users_for_objectstorage_bucket.rows[*].user_id
+        }
+      }
+
+      node {
         base = node.objectstorage_bucket
         args = {
           objectstorage_bucket_ids = [self.input.bucket_id.value]
+        }
+      }
+
+      node {
+        base = node.objectstorage_object
+        args = {
+          objectstorage_object_ids = with.objectstorage_objects_for_objectstorage_bucket.rows[*].object_name
         }
       }
 
@@ -76,14 +100,28 @@ dashboard "objectstorage_bucket_detail" {
       }
 
       edge {
-        base = edge.kms_key_to_kms_vault
+        base = edge.objectstorage_bucket_to_kms_key
         args = {
-          kms_key_ids = with.kms_keys_for_objectstorage_bucket.rows[*].kms_key_id
+          objectstorage_bucket_ids = [self.input.bucket_id.value]
         }
       }
 
       edge {
-        base = edge.objectstorage_bucket_to_kms_key
+        base = edge.objectstorage_bucket_to_kms_vault
+        args = {
+          objectstorage_bucket_ids = [self.input.bucket_id.value]
+        }
+      }
+
+      edge {
+        base = edge.objectstorage_bucket_to_identity_user
+        args = {
+          objectstorage_bucket_ids = [self.input.bucket_id.value]
+        }
+      }
+
+      edge {
+        base = edge.objectstorage_bucket_to_objectstorage_object
         args = {
           objectstorage_bucket_ids = [self.input.bucket_id.value]
         }
@@ -122,6 +160,10 @@ dashboard "objectstorage_bucket_detail" {
         title = "Encryption Details"
         query = query.objectstorage_bucket_encryption
         args = [self.input.bucket_id.value]
+
+        column "KMS Key ID" {
+          href = "${dashboard.kms_key_detail.url_path}?input.key_id={{.'KMS Key ID' | @uri}}"
+        }
       }
 
       table {
@@ -287,6 +329,30 @@ query "objectstorage_bucket_object_lifecycle_policy" {
 }
 
 #with queries
+
+
+query "identity_users_for_objectstorage_bucket" {
+  sql = <<-EOQ
+    select
+      created_by as user_id
+    from
+      oci_objectstorage_bucket
+    where
+      id = $1;
+  EOQ
+}
+
+query "objectstorage_objects_for_objectstorage_bucket" {
+  sql = <<-EOQ
+    select
+      o.name as object_name
+    from
+      oci_objectstorage_object as o
+      left join oci_objectstorage_bucket as b on b.name = o.bucket_name
+    where
+      b.id = $1;
+  EOQ
+}
 
 query "kms_keys_for_objectstorage_bucket" {
   sql = <<-EOQ

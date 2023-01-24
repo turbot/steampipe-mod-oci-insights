@@ -126,14 +126,14 @@ dashboard "mysql_db_system_detail" {
       }
 
       edge {
-        base = edge.vcn_vcn_to_vcn_subnet
+        base = edge.vcn_subnet_to_vcn_vcn
         args = {
-          vcn_vcn_ids = with.vcn_vcns_for_mysql_db_system.rows[*].vcn_id
+          vcn_subnet_ids = with.vcn_subnets_for_mysql_db_system.rows[*].subnet_id
         }
       }
 
       edge {
-        base = edge.mysql_db_system_to_vcn_vcn
+        base = edge.mysql_db_system_to_vcn_subnet
         args = {
           mysql_db_system_ids = [self.input.db_system_id.value]
         }

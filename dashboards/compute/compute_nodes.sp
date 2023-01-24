@@ -31,7 +31,7 @@ node "compute_instance" {
       id as id,
       title as title,
       jsonb_build_object(
-        'Instance ID', id,
+        'ID', id,
         'Display Name', display_name,
         'Lifecycle State', lifecycle_state,
         'Launch Mode', launch_mode,

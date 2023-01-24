@@ -46,13 +46,13 @@ edge "mysql_db_system_to_mysql_configuration" {
   param "mysql_db_system_ids" {}
 }
 
-edge "mysql_db_system_to_vcn_vcn" {
-  title = "vcn"
+edge "mysql_db_system_to_vcn_subnet" {
+  title = "subnet"
 
   sql = <<-EOQ
     select
       m.id as from_id,
-      s.vcn_id as to_id
+      s.id as to_id
     from
       oci_mysql_db_system as m,
       oci_core_subnet as s
