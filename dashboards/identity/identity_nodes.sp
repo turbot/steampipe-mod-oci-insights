@@ -10,7 +10,7 @@ node "identity_api_key" {
         'Fingerprint', fingerprint,
         'Lifecycle State', lifecycle_state,
         'Time Created',time_created,
-        'tenant_id', tenant_id
+        'Tenant ID', tenant_id
       ) as properties
     from
       oci_identity_api_key
@@ -33,7 +33,7 @@ node "identity_auth_token" {
         'Description', description,
         'Lifecycle State', lifecycle_state,
         'Time Created',time_created,
-        'tenant_id', tenant_id
+        'Tenant ID', tenant_id
       ) as properties
     from
       oci_identity_auth_token
@@ -56,7 +56,7 @@ node "identity_customer_secret_key" {
         'Display Name', display_name,
         'Lifecycle State', lifecycle_state,
         'Time Created',time_created,
-        'tenant_id', tenant_id
+        'Tenant ID', tenant_id
       ) as properties
     from
       oci_identity_customer_secret_key
@@ -99,7 +99,8 @@ node "identity_group" {
         'ID', id,
         'Create Time', time_created,
         'Display Name', name,
-        'Lifecycle State', lifecycle_state
+        'Lifecycle State', lifecycle_state,
+        'Tenant ID', tenant_id
       ) as properties
     from
       oci_identity_group
@@ -122,7 +123,8 @@ node "identity_policy" {
         'Time Created', time_created,
         'Name', name,
         'Description', description,
-        'Lifecycle State', lifecycle_state
+        'Lifecycle State', lifecycle_state,
+        'Tenant ID', tenant_id
       ) as properties
     from
       oci_identity_policy
@@ -146,7 +148,8 @@ node "identity_user" {
         'Lifecycle State', lifecycle_state,
         'Create Time', time_created,
         'Display Name', name,
-        'User Type', user_type
+        'User Type', user_type,
+        'Tenant ID', tenant_id
       ) as properties
     from
       oci_identity_user

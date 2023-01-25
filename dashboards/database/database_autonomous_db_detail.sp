@@ -1,6 +1,6 @@
 dashboard "database_autonomous_database_detail" {
 
-  title = "OCI Autonomous Database Detail"
+  title = "OCI Database Autonomous DB Detail"
 
   tags = merge(local.database_common_tags, {
     type = "Detail"
@@ -41,6 +41,29 @@ dashboard "database_autonomous_database_detail" {
       }
     }
 
+  }
+
+  container {
+
+    graph {
+      title     = "Relationships"
+      type      = "graph"
+      direction = "TD"
+
+      node {
+        base = node.database_autonomous_database
+        args = {
+          database_autonomous_database_ids = [self.input.db_id.value]
+        }
+      }
+      # edge {
+      #   base = edge.nosql_table_parent_to_nosql_table
+      #   args = {
+      #     nosql_table_ids = with.nosql_table_children_for_nosql_table.rows[*].child_table_id
+      #   }
+      # }
+
+    }
   }
 
   container {

@@ -17,7 +17,7 @@ edge "autoscaling_auto_scaling_configuration_to_compute_instance" {
       intance_pool_id as i
     where
       instance_pool_id = resource ->> 'id'
-      and i.id = any($1)
+      and i.id = any($1);
   EOQ
 
   param "compute_instance_ids" {}

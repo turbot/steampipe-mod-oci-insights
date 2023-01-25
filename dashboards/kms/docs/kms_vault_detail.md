@@ -1,4 +1,6 @@
 This dashboard answers the following questions:
 
-- How many keys are in each tenancy, compartment and region?
-- How many keys are in disabled state?
+- How is the vault configured?
+- What tags are applied?
+- What endpoints vault is using?
+- What relationships does the vault have with other resources?

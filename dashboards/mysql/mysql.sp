@@ -5,25 +5,25 @@ locals {
 }
 
 category "mysql_backup" {
-  title = "MYSQL Backup"
+  title = "MySQL Backup"
   color = local.database_color
   icon  = "settings_backup_restore"
 }
 
 category "mysql_channel" {
-  title = "MYSQL Channel"
+  title = "MySQL Channel"
   color = local.database_color
   icon  = "text:channel"
 }
 
 category "mysql_configuration" {
-  title = "MYSQL Configuration"
+  title = "MySQL Configuration"
   color = local.database_color
   icon  = "text:config"
 }
 
 category "mysql_db_system" {
-  title = "MYSQL DB System"
+  title = "MySQL DB System"
   color = local.database_color
   href  = "/oci_insights.dashboard.mysql_db_system_detail?input.db_system_id={{.properties.'ID' | @uri}}"
   icon  = "database"

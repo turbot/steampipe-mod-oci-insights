@@ -1,6 +1,7 @@
 dashboard "identity_user_detail" {
 
   title = "OCI Identity User Detail"
+  documentation = file("./dashboards/identity/docs/identity_user_detail.md")
 
   tags = merge(local.identity_common_tags, {
     type = "Detail"
@@ -204,7 +205,7 @@ query "identity_groups_for_identity_user" {
     from
       oci_identity_user
     where
-      id  = $1
+      id  = $1;
   EOQ
 }
 
@@ -216,7 +217,7 @@ query "identity_api_key_for_identity_user" {
       oci_identity_api_key
     where
       key_id is not null
-      and user_id  = $1
+      and user_id  = $1;
   EOQ
 }
 
@@ -228,7 +229,7 @@ query "identity_auth_token_for_identity_user" {
       oci_identity_auth_token
     where
       id is not null
-      and user_id = $1
+      and user_id = $1;
   EOQ
 }
 
@@ -239,7 +240,7 @@ query "identity_customer_secret_key_for_identity_user" {
     from
       oci_identity_customer_secret_key
     where
-      user_id = $1
+      user_id = $1;
   EOQ
 }
 
@@ -327,7 +328,7 @@ query "identity_user_password" {
     from
       oci_identity_user
     where
-      id  = $1
+      id  = $1;
   EOQ
 }
 
@@ -342,6 +343,6 @@ query "identity_user_group" {
       jsonb_array_elements(user_groups) as g
       inner join oci_identity_group as i on i.id = g ->> 'groupId'
     where
-      u.id  = $1
+      u.id  = $1;
   EOQ
 }

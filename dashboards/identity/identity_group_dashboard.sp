@@ -129,8 +129,8 @@ query "identity_groups_without_users" {
 query "identity_groups_by_tenancy" {
   sql = <<-EOQ
     select
-      t.name as "tenancy",
-      count(g.*) as "total"
+      t.name as "Tenancy",
+      count(g.*) as "Total"
     from
       oci_identity_group as g,
       oci_identity_tenancy as t

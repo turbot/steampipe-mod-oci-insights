@@ -551,6 +551,6 @@ query "blockstorage_boot_volume_backup_policy" {
       oci_core_boot_volume as v
     where
       p.id = v.volume_backup_policy_id
-      and v.id = $1
+      and v.id = $1;
   EOQ
 }

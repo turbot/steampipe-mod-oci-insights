@@ -1,6 +1,7 @@
 dashboard "identity_group_detail" {
 
   title = "OCI Identity Group Detail"
+  documentation = file("./dashboards/identity/docs/identity_group_detail.md")
 
   tags = merge(local.identity_common_tags, {
     type = "Detail"
@@ -191,7 +192,7 @@ query "identity_group_overview" {
       time_created as "Time Created",
       inactive_status as "Inactive Status",
       id as "Group ID",
-      tenant_id as "Tenancy ID"
+      tenant_id as "Tenant ID"
     from
       oci_identity_group
     where

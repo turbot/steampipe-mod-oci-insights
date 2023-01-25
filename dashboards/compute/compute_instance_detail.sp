@@ -481,7 +481,7 @@ query "autoscaling_auto_scaling_configurations_for_compute_instance" {
       intance_pool_id as i
     where
       instance_pool_id = resource ->> 'id'
-      and i.id = $1
+      and i.id = $1;
   EOQ
 }
 
@@ -492,7 +492,7 @@ query "compute_images_for_compute_instance" {
     from
       oci_core_instance
     where
-      id = $1
+      id = $1;
   EOQ
 }
 

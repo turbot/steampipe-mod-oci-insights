@@ -232,8 +232,7 @@ query "kms_vault_tags" {
     from
       jsondata,
       json_each_text(tags);
-    EOQ
-
+  EOQ
 }
 
 query "kms_vault_endpoints" {
@@ -246,5 +245,4 @@ query "kms_vault_endpoints" {
     where
       id = $1;
   EOQ
-
 }
