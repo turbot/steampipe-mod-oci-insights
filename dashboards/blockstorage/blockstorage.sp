@@ -20,13 +20,13 @@ category "blockstorage_block_volume_backup" {
 category "blockstorage_block_volume_backup_policy" {
   title = "Blockstorage Block Volume Backup Policy"
   color = local.storage_color
-  icon  = "text:BP"
+  icon  = "rule_folder"
 }
 
 category "blockstorage_block_volume_default_backup_policy" {
   title = "Blockstorage Block Volume Default Backup Policy"
   color = local.storage_color
-  icon  = "text:BP"
+  icon  = "rule_folder"
 }
 
 category "blockstorage_boot_volume" {
@@ -45,23 +45,23 @@ category "blockstorage_boot_volume_backup" {
 category "blockstorage_boot_volume_backup_policy" {
   title = "Blockstorage Boot Volume Backup Policy"
   color = local.storage_color
-  icon  = "text:BP"
+  icon  = "rule_folder"
 }
 
 category "blockstorage_boot_volume_default_backup_policy" {
   title = "Blockstorage Boot Volume Default Backup Policy"
   color = local.storage_color
-  icon  = "text:BP"
+  icon  = "rule_folder"
 }
 
 category "blockstorage_boot_volume_replica" {
   title = "Blockstorage Boot Volume Replica"
   color = local.storage_color
-  icon  = "text:replica"
+  icon  = "home_storage"
 }
 
 category "blockstorage_block_volume_replica" {
   title = "Blockstorage Block Volume Replica"
   color = local.storage_color
-  icon  = "text:replica"
+  icon  = "home_storage"
 }

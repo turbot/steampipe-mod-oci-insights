@@ -13,13 +13,13 @@ category "mysql_backup" {
 category "mysql_channel" {
   title = "MySQL Channel"
   color = local.database_color
-  icon  = "text:channel"
+  icon  = "move_up"
 }
 
 category "mysql_configuration" {
   title = "MySQL Configuration"
   color = local.database_color
-  icon  = "text:config"
+  icon  = "description"
 }
 
 category "mysql_db_system" {

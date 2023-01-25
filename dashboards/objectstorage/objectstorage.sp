@@ -14,5 +14,5 @@ category "objectstorage_bucket" {
 category "objectstorage_object" {
   title = "Object Storage Oject"
   color = local.storage_color
-  icon  = "cleaning_bucket"
+  icon  = "data_object"
 }

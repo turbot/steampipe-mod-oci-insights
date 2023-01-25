@@ -7,7 +7,7 @@ locals {
 category "vcn_dhcp_option" {
   title = "VCN DHCP Option"
   color = local.networking_color
-  icon  = "text:DHCP"
+  icon  = "dns"
 }
 
 category "vcn_flow_log" {
@@ -70,7 +70,7 @@ category "vcn_security_list" {
   title = "VCN Security List"
   color = local.networking_color
   href  = "/oci_insights.dashboard.vcn_security_list_detail?input.security_list_id={{.properties.'ID' | @uri}}"
-  icon  = "text:SL"
+  icon  = "enhanced_encryption"
 }
 
 category "vcn_service_gateway" {

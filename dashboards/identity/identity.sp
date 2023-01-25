@@ -7,13 +7,13 @@ locals {
 category "identity_api_key" {
   title = "Identity API Key"
   color = local.iam_color
-  icon  = "vpn_key"
+  icon  = "key"
 }
 
 category "identity_auth_token" {
   title = "Identity Auth Token"
   color = local.iam_color
-  icon  = "vpn_key"
+  icon  = "generating_tokens"
 }
 
 category "identity_group" {
@@ -39,5 +39,5 @@ category "identity_user" {
 category "identity_customer_secret_key" {
   title = "Identity Customer Secret Key"
   color = local.iam_color
-  icon  = "vpn_key"
+  icon  = "password"
 }
