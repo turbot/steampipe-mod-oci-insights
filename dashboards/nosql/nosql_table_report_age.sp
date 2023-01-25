@@ -1,4 +1,4 @@
-dashboard "oci_nosql_table_age_report" {
+dashboard "nosql_table_age_report" {
 
   title         = "OCI NoSQL Table Age Report"
   documentation = file("./dashboards/nosql/docs/nosql_table_report_age.md")
@@ -11,36 +11,36 @@ dashboard "oci_nosql_table_age_report" {
   container {
 
     card {
-      sql   = query.oci_nosql_table_count.sql
+      sql   = query.nosql_table_count.sql
       width = 2
     }
 
     card {
-      sql   = query.oci_nosql_table_24_hrs.sql
-      width = 2
-      type  = "info"
-    }
-
-    card {
-      sql   = query.oci_nosql_table_30_days.sql
+      sql   = query.nosql_table_24_hrs.sql
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_nosql_table_90_days.sql
+      sql   = query.nosql_table_30_days.sql
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_nosql_table_365_days.sql
+      sql   = query.nosql_table_90_days.sql
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_nosql_table_1_year.sql
+      sql   = query.nosql_table_365_days.sql
+      width = 2
+      type  = "info"
+    }
+
+    card {
+      sql   = query.nosql_table_1_year.sql
       width = 2
       type  = "info"
     }
@@ -54,15 +54,15 @@ dashboard "oci_nosql_table_age_report" {
     }
 
     column "Name" {
-      href = "${dashboard.oci_nosql_table_detail.url_path}?input.table_id={{.OCID | @uri}}"
+      href = "${dashboard.nosql_table_detail.url_path}?input.table_id={{.OCID | @uri}}"
     }
 
-    sql = query.oci_nosql_table_age_report.sql
+    sql = query.nosql_table_age_report.sql
   }
 
 }
 
-query "oci_nosql_table_24_hrs" {
+query "nosql_table_24_hrs" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -74,7 +74,7 @@ query "oci_nosql_table_24_hrs" {
   EOQ
 }
 
-query "oci_nosql_table_30_days" {
+query "nosql_table_30_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -86,7 +86,7 @@ query "oci_nosql_table_30_days" {
   EOQ
 }
 
-query "oci_nosql_table_90_days" {
+query "nosql_table_90_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -98,7 +98,7 @@ query "oci_nosql_table_90_days" {
   EOQ
 }
 
-query "oci_nosql_table_365_days" {
+query "nosql_table_365_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -110,7 +110,7 @@ query "oci_nosql_table_365_days" {
   EOQ
 }
 
-query "oci_nosql_table_1_year" {
+query "nosql_table_1_year" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -122,7 +122,7 @@ query "oci_nosql_table_1_year" {
   EOQ
 }
 
-query "oci_nosql_table_age_report" {
+query "nosql_table_age_report" {
   sql = <<-EOQ
     select
       n.name as "Name",

@@ -1,4 +1,4 @@
-dashboard "oci_database_autonomous_database_age_report" {
+dashboard "database_autonomous_database_age_report" {
 
   title         = "OCI Database Autonomous DB Age Report"
   documentation = file("./dashboards/database/docs/database_autonomous_db_report_age.md")
@@ -11,36 +11,36 @@ dashboard "oci_database_autonomous_database_age_report" {
   container {
 
     card {
-      sql   = query.oci_database_autonomous_db_count.sql
+      sql   = query.database_autonomous_db_count.sql
       width = 2
     }
 
     card {
-      sql   = query.oci_database_autonomous_db_24_hrs.sql
-      width = 2
-      type  = "info"
-    }
-
-    card {
-      sql   = query.oci_database_autonomous_db_30_days.sql
+      sql   = query.database_autonomous_db_24_hrs.sql
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_database_autonomous_db_90_days.sql
+      sql   = query.database_autonomous_db_30_days.sql
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_database_autonomous_db_365_days.sql
+      sql   = query.database_autonomous_db_90_days.sql
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_database_autonomous_db_1_year.sql
+      sql   = query.database_autonomous_db_365_days.sql
+      width = 2
+      type  = "info"
+    }
+
+    card {
+      sql   = query.database_autonomous_db_1_year.sql
       width = 2
       type  = "info"
     }
@@ -53,15 +53,15 @@ dashboard "oci_database_autonomous_database_age_report" {
     }
 
     column "Name" {
-      href = "${dashboard.oci_database_autonomous_database_detail.url_path}?input.db_id={{.OCID | @uri}}"
+      href = "${dashboard.database_autonomous_database_detail.url_path}?input.db_id={{.OCID | @uri}}"
     }
 
-    sql = query.oci_database_autonomous_db_age_report.sql
+    sql = query.database_autonomous_db_age_report.sql
   }
 
 }
 
-query "oci_database_autonomous_db_24_hrs" {
+query "database_autonomous_db_24_hrs" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -73,7 +73,7 @@ query "oci_database_autonomous_db_24_hrs" {
   EOQ
 }
 
-query "oci_database_autonomous_db_30_days" {
+query "database_autonomous_db_30_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -85,7 +85,7 @@ query "oci_database_autonomous_db_30_days" {
   EOQ
 }
 
-query "oci_database_autonomous_db_90_days" {
+query "database_autonomous_db_90_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -97,7 +97,7 @@ query "oci_database_autonomous_db_90_days" {
   EOQ
 }
 
-query "oci_database_autonomous_db_365_days" {
+query "database_autonomous_db_365_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -109,7 +109,7 @@ query "oci_database_autonomous_db_365_days" {
   EOQ
 }
 
-query "oci_database_autonomous_db_1_year" {
+query "database_autonomous_db_1_year" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -121,7 +121,7 @@ query "oci_database_autonomous_db_1_year" {
   EOQ
 }
 
-query "oci_database_autonomous_db_age_report" {
+query "database_autonomous_db_age_report" {
   sql = <<-EOQ
     select
       d.display_name as "Name",

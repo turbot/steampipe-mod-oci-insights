@@ -1,7 +1,7 @@
-dashboard "oci_compartment_report" {
+dashboard "compartment_report" {
 
   title         = "OCI Compartment Report"
-  documentation = file("./dashboards/oci/docs/oci_compartment_report.md")
+  documentation = file("./dashboards/oci/docs/compartment_report.md")
 
   tags = merge(local.oci_common_tags, {
     type     = "Report"
@@ -11,19 +11,19 @@ dashboard "oci_compartment_report" {
   container {
 
     card {
-      query = query.oci_compartment_count
+      query = query.compartment_count
       width = 2
     }
 
   }
 
   table {
-    query = query.oci_compartment_table
+    query = query.compartment_table
   }
 
 }
 
-query "oci_compartment_count" {
+query "compartment_count" {
   sql = <<-EOQ
     select
       count(*) as "Compartments"
@@ -34,7 +34,7 @@ query "oci_compartment_count" {
   EOQ
 }
 
-query "oci_compartment_table" {
+query "compartment_table" {
   sql = <<-EOQ
     select
       c.name as "Name",

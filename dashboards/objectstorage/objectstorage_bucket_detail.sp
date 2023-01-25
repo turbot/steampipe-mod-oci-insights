@@ -1,4 +1,4 @@
-dashboard "oci_objectstorage_bucket_detail" {
+dashboard "objectstorage_bucket_detail" {
 
   title = "OCI Object Storage Bucket Detail"
 
@@ -8,7 +8,7 @@ dashboard "oci_objectstorage_bucket_detail" {
 
   input "bucket_id" {
     title = "Select a bucket:"
-    query = query.oci_objectstorage_bucket_input
+    query = query.objectstorage_bucket_input
     width = 4
   }
 
@@ -17,30 +17,117 @@ dashboard "oci_objectstorage_bucket_detail" {
     card {
       width = 2
 
-      query = query.oci_objectstorage_bucket_read_only
-      args = {
-        id = self.input.bucket_id.value
-      }
+      query = query.objectstorage_bucket_read_only
+      args = [self.input.bucket_id.value]
     }
 
     card {
       width = 2
 
-      query = query.oci_objectstorage_bucket_versioning
-      args = {
-        id = self.input.bucket_id.value
-      }
+      query = query.objectstorage_bucket_versioning
+      args = [self.input.bucket_id.value]
     }
 
     card {
-      query = query.oci_objectstorage_bucket_public_access
+      query = query.objectstorage_bucket_public_access
       width = 2
 
-      args = {
-        id = self.input.bucket_id.value
-      }
+      args = [self.input.bucket_id.value]
     }
 
+  }
+
+  with "identity_users_for_objectstorage_bucket" {
+    query = query.identity_users_for_objectstorage_bucket
+    args  = [self.input.bucket_id.value]
+  }
+
+  with "objectstorage_objects_for_objectstorage_bucket" {
+    query = query.objectstorage_objects_for_objectstorage_bucket
+    args  = [self.input.bucket_id.value]
+  }
+
+  with "kms_keys_for_objectstorage_bucket" {
+    query = query.kms_keys_for_objectstorage_bucket
+    args  = [self.input.bucket_id.value]
+  }
+
+  with "kms_vaults_for_objectstorage_bucket" {
+    query = query.kms_vaults_for_objectstorage_bucket
+    args  = [self.input.bucket_id.value]
+  }
+
+  container {
+
+    graph {
+      title     = "Relationships"
+      type      = "graph"
+      direction = "TD"
+
+      node {
+        base = node.identity_user
+        args = {
+          identity_user_ids = with.identity_users_for_objectstorage_bucket.rows[*].user_id
+        }
+      }
+
+      node {
+        base = node.objectstorage_bucket
+        args = {
+          objectstorage_bucket_ids = [self.input.bucket_id.value]
+        }
+      }
+
+      node {
+        base = node.objectstorage_object
+        args = {
+          objectstorage_object_ids = with.objectstorage_objects_for_objectstorage_bucket.rows[*].object_name
+        }
+      }
+
+      node {
+        base = node.kms_key
+        args = {
+          kms_key_ids = with.kms_keys_for_objectstorage_bucket.rows[*].kms_key_id
+        }
+      }
+
+      node {
+        base = node.kms_vault
+        args = {
+          kms_vault_ids = with.kms_vaults_for_objectstorage_bucket.rows[*].vault_id
+        }
+      }
+
+      edge {
+        base = edge.objectstorage_bucket_to_kms_key
+        args = {
+          objectstorage_bucket_ids = [self.input.bucket_id.value]
+        }
+      }
+
+      edge {
+        base = edge.objectstorage_bucket_to_kms_vault
+        args = {
+          objectstorage_bucket_ids = [self.input.bucket_id.value]
+        }
+      }
+
+      edge {
+        base = edge.objectstorage_bucket_to_identity_user
+        args = {
+          objectstorage_bucket_ids = [self.input.bucket_id.value]
+        }
+      }
+
+      edge {
+        base = edge.objectstorage_bucket_to_objectstorage_object
+        args = {
+          objectstorage_bucket_ids = [self.input.bucket_id.value]
+        }
+      }
+
+    }
   }
 
   container {
@@ -52,20 +139,16 @@ dashboard "oci_objectstorage_bucket_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-        query = query.oci_objectstorage_bucket_overview
-        args = {
-          id = self.input.bucket_id.value
-        }
+        query = query.objectstorage_bucket_overview
+        args = [self.input.bucket_id.value]
 
       }
 
       table {
         title = "Tags"
         width = 6
-        query = query.oci_objectstorage_bucket_tag
-        args = {
-          id = self.input.bucket_id.value
-        }
+        query = query.objectstorage_bucket_tag
+        args = [self.input.bucket_id.value]
 
       }
     }
@@ -75,18 +158,18 @@ dashboard "oci_objectstorage_bucket_detail" {
 
       table {
         title = "Encryption Details"
-        query = query.oci_objectstorage_bucket_encryption
-        args = {
-          id = self.input.bucket_id.value
+        query = query.objectstorage_bucket_encryption
+        args = [self.input.bucket_id.value]
+
+        column "KMS Key ID" {
+          href = "${dashboard.kms_key_detail.url_path}?input.key_id={{.'KMS Key ID' | @uri}}"
         }
       }
 
       table {
         title = "Public Access"
-        query = query.oci_objectstorage_bucket_access
-        args = {
-          id = self.input.bucket_id.value
-        }
+        query = query.objectstorage_bucket_access
+        args = [self.input.bucket_id.value]
       }
 
     }
@@ -95,10 +178,8 @@ dashboard "oci_objectstorage_bucket_detail" {
 
       table {
         title = "Object Lifecycle Policy"
-        query = query.oci_objectstorage_bucket_object_lifecycle_policy
-        args = {
-          id = self.input.bucket_id.value
-        }
+        query = query.objectstorage_bucket_object_lifecycle_policy
+        args = [self.input.bucket_id.value]
       }
 
     }
@@ -106,7 +187,9 @@ dashboard "oci_objectstorage_bucket_detail" {
   }
 }
 
-query "oci_objectstorage_bucket_input" {
+# Input queries
+
+query "objectstorage_bucket_input" {
   sql = <<EOQ
     select
       b.name as label,
@@ -122,10 +205,14 @@ query "oci_objectstorage_bucket_input" {
       left join oci_identity_tenancy as t on b.tenant_id = t.id
     order by
       b.name;
-EOQ
+  EOQ
 }
 
-query "oci_objectstorage_bucket_read_only" {
+# With queries
+
+# card queries
+
+query "objectstorage_bucket_read_only" {
   sql = <<-EOQ
     select
       case when is_read_only then 'Enabled' else 'Disabled' end as value,
@@ -135,11 +222,9 @@ query "oci_objectstorage_bucket_read_only" {
     where
       id = $1;
   EOQ
-
-  param "id" {}
 }
 
-query "oci_objectstorage_bucket_versioning" {
+query "objectstorage_bucket_versioning" {
   sql = <<-EOQ
     select
       case when versioning = 'Disabled' then 'Disabled' else 'Enabled' end as value,
@@ -150,11 +235,9 @@ query "oci_objectstorage_bucket_versioning" {
     where
       id = $1;
   EOQ
-
-  param "id" {}
 }
 
-query "oci_objectstorage_bucket_public_access" {
+query "objectstorage_bucket_public_access" {
   sql = <<-EOQ
     select
       case when public_access_type <> 'NoPublicAccess' then 'Enabled' else 'Disabled' end as value,
@@ -165,11 +248,11 @@ query "oci_objectstorage_bucket_public_access" {
     where
       id = $1;
   EOQ
-
-  param "id" {}
 }
 
-query "oci_objectstorage_bucket_overview" {
+# Other detail page queries
+
+query "objectstorage_bucket_overview" {
   sql = <<-EOQ
    select
     name as "Name",
@@ -183,11 +266,9 @@ query "oci_objectstorage_bucket_overview" {
   where
     id = $1;
   EOQ
-
-  param "id" {}
 }
 
-query "oci_objectstorage_bucket_tag" {
+query "objectstorage_bucket_tag" {
   sql = <<-EOQ
    with jsondata as (
    select
@@ -204,11 +285,9 @@ query "oci_objectstorage_bucket_tag" {
      jsondata,
      json_each_text(tags);
   EOQ
-
-  param "id" {}
 }
 
-query "oci_objectstorage_bucket_encryption" {
+query "objectstorage_bucket_encryption" {
   sql = <<-EOQ
    select
      case when kms_key_id is not null and kms_key_id <> '' then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
@@ -218,11 +297,9 @@ query "oci_objectstorage_bucket_encryption" {
    where
      id  = $1
   EOQ
-
-  param "id" {}
 }
 
-query "oci_objectstorage_bucket_access" {
+query "objectstorage_bucket_access" {
   sql = <<-EOQ
    select
     public_access_type as "Public Access Type"
@@ -231,11 +308,9 @@ query "oci_objectstorage_bucket_access" {
   where
     id = $1;
   EOQ
-
-  param "id" {}
 }
 
-query "oci_objectstorage_bucket_object_lifecycle_policy" {
+query "objectstorage_bucket_object_lifecycle_policy" {
   sql = <<-EOQ
    select
     i ->> 'name' as "Name",
@@ -251,6 +326,55 @@ query "oci_objectstorage_bucket_object_lifecycle_policy" {
   where
     id = $1 and jsonb_typeof(object_lifecycle_policy -> 'items') = 'array';
   EOQ
+}
 
-  param "id" {}
+#with queries
+
+
+query "identity_users_for_objectstorage_bucket" {
+  sql = <<-EOQ
+    select
+      created_by as user_id
+    from
+      oci_objectstorage_bucket
+    where
+      id = $1;
+  EOQ
+}
+
+query "objectstorage_objects_for_objectstorage_bucket" {
+  sql = <<-EOQ
+    select
+      o.name as object_name
+    from
+      oci_objectstorage_object as o
+      left join oci_objectstorage_bucket as b on b.name = o.bucket_name
+    where
+      b.id = $1;
+  EOQ
+}
+
+query "kms_keys_for_objectstorage_bucket" {
+  sql = <<-EOQ
+    select
+      kms_key_id as kms_key_id
+    from
+      oci_objectstorage_bucket
+    where
+      kms_key_id is not null
+      and id = $1;
+  EOQ
+}
+
+query "kms_vaults_for_objectstorage_bucket" {
+  sql = <<-EOQ
+    select
+      vault_id as vault_id
+    from
+      oci_objectstorage_bucket as b
+      left join oci_kms_key as k on k.id = b.kms_key_id
+    where
+      vault_id is not null
+      and b.id = $1;
+  EOQ
 }

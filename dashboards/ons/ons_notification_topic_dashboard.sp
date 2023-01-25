@@ -1,4 +1,4 @@
-dashboard "oci_ons_notification_topic_dashboard" {
+dashboard "ons_notification_topic_dashboard" {
 
   title         = "OCI ONS Notification Topic Dashboard"
   documentation = file("./dashboards/ons/docs/ons_notification_topic_dashboard.md")
@@ -10,12 +10,12 @@ dashboard "oci_ons_notification_topic_dashboard" {
   container {
 
     card {
-      sql   = query.oci_ons_notification_topic_count.sql
+      sql   = query.ons_notification_topic_count.sql
       width = 2
     }
 
     card {
-      sql   = query.oci_ons_notification_topic_unused_count.sql
+      sql   = query.ons_notification_topic_unused_count.sql
       width = 2
     }
   }
@@ -26,7 +26,7 @@ dashboard "oci_ons_notification_topic_dashboard" {
 
     chart {
       title = "Subscriptions Status"
-      sql   = query.oci_ons_notification_topic_by_subscription.sql
+      sql   = query.ons_notification_topic_by_subscription.sql
       type  = "donut"
       width = 4
 
@@ -47,28 +47,28 @@ dashboard "oci_ons_notification_topic_dashboard" {
 
     chart {
       title = "Topics by Tenancy"
-      sql   = query.oci_ons_notification_topic_by_tenancy.sql
+      sql   = query.ons_notification_topic_by_tenancy.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Topics by Compartment"
-      sql   = query.oci_ons_notification_topic_by_compartment.sql
+      sql   = query.ons_notification_topic_by_compartment.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Topics by Region"
-      sql   = query.oci_ons_notification_topic_by_region.sql
+      sql   = query.ons_notification_topic_by_region.sql
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Topics by Age"
-      sql   = query.oci_ons_notification_topic_by_creation_month.sql
+      sql   = query.ons_notification_topic_by_creation_month.sql
       type  = "column"
       width = 3
     }
@@ -78,13 +78,13 @@ dashboard "oci_ons_notification_topic_dashboard" {
 
 # Card Queries
 
-query "oci_ons_notification_topic_count" {
+query "ons_notification_topic_count" {
   sql = <<-EOQ
     select count(*) as "Topics" from oci_ons_notification_topic;
   EOQ
 }
 
-query "oci_ons_notification_topic_unused_count" {
+query "ons_notification_topic_unused_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -100,7 +100,7 @@ query "oci_ons_notification_topic_unused_count" {
 
 # Assessment Queries
 
-query "oci_ons_notification_topic_by_subscription" {
+query "ons_notification_topic_by_subscription" {
   sql = <<-EOQ
     select
       case when s.id is null then 'no subscriptions' else 'with subscriptions' end as status,
@@ -115,7 +115,7 @@ query "oci_ons_notification_topic_by_subscription" {
 
 # Analysis Queries
 
-query "oci_ons_notification_topic_by_tenancy" {
+query "ons_notification_topic_by_tenancy" {
   sql = <<-EOQ
     select
       c.title as "Tenancy",
@@ -132,7 +132,7 @@ query "oci_ons_notification_topic_by_tenancy" {
   EOQ
 }
 
-query "oci_ons_notification_topic_by_compartment" {
+query "ons_notification_topic_by_compartment" {
   sql = <<-EOQ
     with compartments as (
       select
@@ -166,7 +166,7 @@ query "oci_ons_notification_topic_by_compartment" {
   EOQ
 }
 
-query "oci_ons_notification_topic_by_region" {
+query "ons_notification_topic_by_region" {
   sql = <<-EOQ
     select
     region as "Region",
@@ -180,7 +180,7 @@ query "oci_ons_notification_topic_by_region" {
   EOQ
 }
 
-query "oci_ons_notification_topic_by_creation_month" {
+query "ons_notification_topic_by_creation_month" {
   sql = <<-EOQ
     with topics as (
       select

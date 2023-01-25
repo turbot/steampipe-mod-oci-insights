@@ -1,4 +1,4 @@
-dashboard "oci_block_storage_block_volume_age_report" {
+dashboard "blockstorage_block_volume_age_report" {
 
   title         = "OCI Block Storage Block Volume Age Report"
   documentation = file("./dashboards/blockstorage/docs/blockstorage_block_volume_report_age.md")
@@ -11,36 +11,36 @@ dashboard "oci_block_storage_block_volume_age_report" {
   container {
 
     card {
-      sql   = query.oci_block_storage_block_volume_count.sql
+      sql   = query.blockstorage_block_volume_count.sql
       width = 2
     }
 
     card {
-      sql   = query.oci_block_storage_block_volume_24_hrs.sql
-      width = 2
-      type  = "info"
-    }
-
-    card {
-      sql   = query.oci_block_storage_block_volume_30_days.sql
+      sql   = query.blockstorage_block_volume_24_hrs.sql
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_block_storage_block_volume_90_days.sql
+      sql   = query.blockstorage_block_volume_30_days.sql
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_block_storage_block_volume_365_days.sql
+      sql   = query.blockstorage_block_volume_90_days.sql
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_block_storage_block_volume_1_year.sql
+      sql   = query.blockstorage_block_volume_365_days.sql
+      width = 2
+      type  = "info"
+    }
+
+    card {
+      sql   = query.blockstorage_block_volume_1_year.sql
       width = 2
       type  = "info"
     }
@@ -53,15 +53,15 @@ dashboard "oci_block_storage_block_volume_age_report" {
     }
 
     column "Name" {
-      href = "${dashboard.oci_block_storage_block_volume_detail.url_path}?input.volume_id={{.OCID | @uri}}"
+      href = "${dashboard.blockstorage_block_volume_detail.url_path}?input.volume_id={{.OCID | @uri}}"
     }
 
-    sql = query.oci_block_storage_block_volume_age_report.sql
+    sql = query.blockstorage_block_volume_age_report.sql
   }
 
 }
 
-query "oci_block_storage_block_volume_24_hrs" {
+query "blockstorage_block_volume_24_hrs" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -73,7 +73,7 @@ query "oci_block_storage_block_volume_24_hrs" {
   EOQ
 }
 
-query "oci_block_storage_block_volume_30_days" {
+query "blockstorage_block_volume_30_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -85,7 +85,7 @@ query "oci_block_storage_block_volume_30_days" {
   EOQ
 }
 
-query "oci_block_storage_block_volume_90_days" {
+query "blockstorage_block_volume_90_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -97,7 +97,7 @@ query "oci_block_storage_block_volume_90_days" {
   EOQ
 }
 
-query "oci_block_storage_block_volume_365_days" {
+query "blockstorage_block_volume_365_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -109,7 +109,7 @@ query "oci_block_storage_block_volume_365_days" {
   EOQ
 }
 
-query "oci_block_storage_block_volume_1_year" {
+query "blockstorage_block_volume_1_year" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -121,7 +121,7 @@ query "oci_block_storage_block_volume_1_year" {
   EOQ
 }
 
-query "oci_block_storage_block_volume_age_report" {
+query "blockstorage_block_volume_age_report" {
   sql = <<-EOQ
     select
       v.display_name as "Name",

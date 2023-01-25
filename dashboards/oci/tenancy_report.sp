@@ -1,7 +1,7 @@
-dashboard "oci_tenancy_report" {
+dashboard "tenancy_report" {
 
   title         = "OCI Tenancy Report"
-  documentation = file("./dashboards/oci/docs/oci_tenancy_report.md")
+  documentation = file("./dashboards/oci/docs/tenancy_report.md")
 
   tags = merge(local.oci_common_tags, {
     type     = "Report"
@@ -11,19 +11,19 @@ dashboard "oci_tenancy_report" {
   container {
 
     card {
-      query = query.oci_tenancy_count
+      query = query.tenancy_count
       width = 2
     }
 
   }
 
   table {
-    query = query.oci_tenancy_table
+    query = query.tenancy_table
   }
 
 }
 
-query "oci_tenancy_count" {
+query "tenancy_count" {
   sql = <<-EOQ
     select
       count(*) as "Tenancies"
@@ -32,7 +32,7 @@ query "oci_tenancy_count" {
   EOQ
 }
 
-query "oci_tenancy_table" {
+query "tenancy_table" {
   sql = <<-EOQ
     select
       name as "Name",

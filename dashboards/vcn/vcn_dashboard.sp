@@ -26,16 +26,16 @@ dashboard "oci_vcn_dashboard" {
     title = "Assessments"
 
     chart {
-      title = "Subnets Status"
+      title = "Empty VCNs (No Subnets)"
       sql   = query.oci_vcn_no_subnet.sql
       type  = "donut"
       width = 3
 
       series "count" {
-        point "with subnets" {
+        point "non-empty" {
           color = "ok"
         }
-        point "no subnets" {
+        point "empty" {
           color = "alert"
         }
       }
@@ -91,7 +91,7 @@ query "oci_vcn_no_subnet_count" {
   sql = <<-EOQ
     select
       count(*) as value,
-      'No Subnets' as label,
+      'VCNs Without Subnets' as label,
       case when count(*) = 0 then 'ok' else 'alert' end as type
     from
       oci_core_vcn as vcn
@@ -105,10 +105,10 @@ query "oci_vcn_no_subnet_count" {
 query "oci_vcn_no_subnet" {
   sql = <<-EOQ
     select
-      case when s.id is null then 'no subnets' else 'with subnets' end as status,
+      case when s.id is null then 'empty' else 'non-empty' end as status,
       count(distinct v.id)
     from
-       oci_core_vcn v
+      oci_core_vcn v
       left join oci_core_subnet s on s.vcn_id = v.id
     where
       v.lifecycle_state <> 'TERMINATED'

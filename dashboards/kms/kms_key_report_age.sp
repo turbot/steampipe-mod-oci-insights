@@ -1,4 +1,4 @@
-dashboard "oci_kms_key_age_report" {
+dashboard "kms_key_age_report" {
 
   title         = "OCI KMS Key Age Report"
   documentation = file("./dashboards/kms/docs/kms_key_report_age.md")
@@ -11,36 +11,36 @@ dashboard "oci_kms_key_age_report" {
   container {
 
     card {
-      sql   = query.oci_kms_key_count.sql
+      sql   = query.kms_key_count.sql
       width = 2
     }
 
     card {
-      sql   = query.oci_kms_key_24_hrs.sql
-      width = 2
-      type  = "info"
-    }
-
-    card {
-      sql   = query.oci_kms_key_30_days.sql
+      sql   = query.kms_key_24_hrs.sql
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_kms_key_90_days.sql
+      sql   = query.kms_key_30_days.sql
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_kms_key_365_days.sql
+      sql   = query.kms_key_90_days.sql
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_kms_key_1_year.sql
+      sql   = query.kms_key_365_days.sql
+      width = 2
+      type  = "info"
+    }
+
+    card {
+      sql   = query.kms_key_1_year.sql
       width = 2
       type  = "info"
     }
@@ -53,15 +53,15 @@ dashboard "oci_kms_key_age_report" {
     }
 
     column "Name" {
-      href = "${dashboard.oci_kms_key_detail.url_path}?input.key_id={{.OCID | @uri}}"
+      href = "${dashboard.kms_key_detail.url_path}?input.key_id={{.OCID | @uri}}"
     }
 
-    sql = query.oci_kms_key_age_report.sql
+    sql = query.kms_key_age_report.sql
   }
 
 }
 
-query "oci_kms_key_24_hrs" {
+query "kms_key_24_hrs" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -73,7 +73,7 @@ query "oci_kms_key_24_hrs" {
   EOQ
 }
 
-query "oci_kms_key_30_days" {
+query "kms_key_30_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -85,7 +85,7 @@ query "oci_kms_key_30_days" {
   EOQ
 }
 
-query "oci_kms_key_90_days" {
+query "kms_key_90_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -97,7 +97,7 @@ query "oci_kms_key_90_days" {
   EOQ
 }
 
-query "oci_kms_key_365_days" {
+query "kms_key_365_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -109,7 +109,7 @@ query "oci_kms_key_365_days" {
   EOQ
 }
 
-query "oci_kms_key_1_year" {
+query "kms_key_1_year" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -121,7 +121,7 @@ query "oci_kms_key_1_year" {
   EOQ
 }
 
-query "oci_kms_key_age_report" {
+query "kms_key_age_report" {
   sql = <<-EOQ
     select
       k.name as "Name",

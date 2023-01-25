@@ -1,6 +1,6 @@
-dashboard "oci_ons_notification_topic_detail" {
+dashboard "ons_notification_topic_detail" {
 
-  title = "OCI Notification Topic Detail"
+  title = "OCI ONS Notification Topic Detail"
 
   tags = merge(local.ons_common_tags, {
     type = "Detail"
@@ -8,7 +8,7 @@ dashboard "oci_ons_notification_topic_detail" {
 
   input "topic_id" {
     title = "Select a topic:"
-    query = query.oci_ons_notification_topic_input
+    query = query.ons_notification_topic_input
     width = 4
   }
 
@@ -17,10 +17,67 @@ dashboard "oci_ons_notification_topic_detail" {
     card {
       width = 2
 
-      query = query.oci_ons_notification_topic_state
+      query = query.ons_notification_topic_state
       args = {
         id = self.input.topic_id.value
       }
+    }
+  }
+
+
+  with "compute_instances_for_ons_notification_topic" {
+    query = query.compute_instances_for_ons_notification_topic
+    args  = [self.input.topic_id.value]
+  }
+
+  with "ons_subscriptions_for_ons_notification_topic" {
+    query = query.ons_subscriptions_for_ons_notification_topic
+    args  = [self.input.topic_id.value]
+  }
+
+
+  container {
+
+    graph {
+      title     = "Relationships"
+      type      = "graph"
+      direction = "TD"
+
+      node {
+        base = node.ons_notification_topic
+        args = {
+          ons_notification_topic_ids = [self.input.topic_id.value]
+        }
+      }
+
+      node {
+        base = node.compute_instance
+        args = {
+          compute_instance_ids = with.compute_instances_for_ons_notification_topic.rows[*].instance_id
+        }
+      }
+
+      node {
+        base = node.ons_subscription
+        args = {
+          ons_subscription_ids = with.ons_subscriptions_for_ons_notification_topic.rows[*].ons_subscription_id
+        }
+      }
+
+      edge {
+        base = edge.compute_instance_to_ons_notification_topic
+        args = {
+          compute_instance_ids = with.compute_instances_for_ons_notification_topic.rows[*].instance_id
+        }
+      }
+
+      edge {
+        base = edge.ons_notification_topic_to_ons_subscription
+        args = {
+          ons_notification_topic_ids = [self.input.topic_id.value]
+        }
+      }
+
     }
   }
 
@@ -33,7 +90,7 @@ dashboard "oci_ons_notification_topic_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-        query = query.oci_ons_notification_topic_overview
+        query = query.ons_notification_topic_overview
         args = {
           id = self.input.topic_id.value
         }
@@ -43,7 +100,7 @@ dashboard "oci_ons_notification_topic_detail" {
       table {
         title = "Tags"
         width = 6
-        query = query.oci_ons_notification_topic_tag
+        query = query.ons_notification_topic_tag
         args = {
           id = self.input.topic_id.value
         }
@@ -56,7 +113,7 @@ dashboard "oci_ons_notification_topic_detail" {
 
       table {
         title = "Subscription Details"
-        query = query.oci_ons_notification_topic_subscription
+        query = query.ons_notification_topic_subscription
         args = {
           id = self.input.topic_id.value
         }
@@ -66,7 +123,7 @@ dashboard "oci_ons_notification_topic_detail" {
   }
 }
 
-query "oci_ons_notification_topic_input" {
+query "ons_notification_topic_input" {
   sql = <<EOQ
     select
       n.name as label,
@@ -85,7 +142,7 @@ query "oci_ons_notification_topic_input" {
 EOQ
 }
 
-query "oci_ons_notification_topic_state" {
+query "ons_notification_topic_state" {
   sql = <<-EOQ
     select
       initcap(lifecycle_state) as "Lifecycle State"
@@ -98,7 +155,7 @@ query "oci_ons_notification_topic_state" {
   param "id" {}
 }
 
-query "oci_ons_notification_topic_overview" {
+query "ons_notification_topic_overview" {
   sql = <<-EOQ
     select
       name as "Topic Name",
@@ -115,7 +172,7 @@ query "oci_ons_notification_topic_overview" {
   param "id" {}
 }
 
-query "oci_ons_notification_topic_tag" {
+query "ons_notification_topic_tag" {
   sql = <<-EOQ
     with jsondata as (
     select
@@ -136,7 +193,7 @@ query "oci_ons_notification_topic_tag" {
   param "id" {}
 }
 
-query "oci_ons_notification_topic_subscription" {
+query "ons_notification_topic_subscription" {
   sql = <<-EOQ
     select
       endpoint as "Endpoint",
@@ -150,4 +207,37 @@ query "oci_ons_notification_topic_subscription" {
   EOQ
 
   param "id" {}
+}
+
+#with queries
+
+query "ons_subscriptions_for_ons_notification_topic" {
+  sql = <<-EOQ
+    select
+      id as ons_subscription_id
+    from
+      oci_ons_subscription
+    where
+      topic_id = $1;
+  EOQ
+}
+
+query "compute_instances_for_ons_notification_topic" {
+  sql = <<-EOQ
+    with jsondata as (
+      select
+        tags::json as tags
+      from
+        oci_ons_notification_topic
+      where
+        topic_id = $1
+    )
+    select
+      value as instance_id
+    from
+      jsondata,
+      json_each_text(tags)
+    where
+      key = 'CTX_NOTIFICATIONS_COMPUTE_ID';
+  EOQ
 }
