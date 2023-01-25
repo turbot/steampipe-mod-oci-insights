@@ -99,10 +99,10 @@ dashboard "objectstorage_bucket_detail" {
         }
       }
 
-      edge {
-        base = edge.objectstorage_bucket_to_kms_key
+     edge {
+        base = edge.kms_vault_to_kms_key
         args = {
-          objectstorage_bucket_ids = [self.input.bucket_id.value]
+          kms_vault_ids = with.kms_vaults_for_objectstorage_bucket.rows[*].vault_id
         }
       }
 

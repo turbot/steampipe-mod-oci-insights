@@ -46,7 +46,7 @@ edge "filestorage_file_system_to_kms_key" {
 
   sql = <<-EOQ
     select
-      k.vault_id as from_id,
+      f.id as from_id,
       f.kms_key_id as to_id
     from
       oci_file_storage_file_system as f

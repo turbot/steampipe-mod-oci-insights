@@ -3,8 +3,8 @@ edge "objectstorage_bucket_to_kms_key" {
 
   sql = <<-EOQ
     select
-      vault_id as from_id,
-      kms_key_id as to_id
+      b.id as from_id,
+      b.kms_key_id as to_id
     from
       oci_objectstorage_bucket as b
       left join oci_kms_key as k on k.id = b.kms_key_id

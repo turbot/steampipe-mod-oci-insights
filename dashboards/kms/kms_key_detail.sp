@@ -44,6 +44,11 @@ dashboard "kms_key_detail" {
     args  = [self.input.key_id.value]
   }
 
+  with "database_autonomous_databases_for_kms_key" {
+    query = query.database_autonomous_databases_for_kms_key
+    args  = [self.input.key_id.value]
+  }
+
   with "file_storage_file_systems_for_kms_key" {
     query = query.file_storage_file_systems_for_kms_key
     args  = [self.input.key_id.value]
@@ -82,6 +87,13 @@ dashboard "kms_key_detail" {
         base = node.blockstorage_boot_volume
         args = {
           blockstorage_boot_volume_ids = with.blockstorage_boot_volumes_for_kms_key.rows[*].boot_volume_id
+        }
+      }
+
+      node {
+        base = node.database_autonomous_database
+        args = {
+          database_autonomous_database_ids = with.database_autonomous_databases_for_kms_key.rows[*].autonomous_database_id
         }
       }
 
@@ -133,6 +145,13 @@ dashboard "kms_key_detail" {
           blockstorage_boot_volume_ids = with.blockstorage_boot_volumes_for_kms_key.rows[*].boot_volume_id
         }
       }
+
+      # edge {
+      #   base = edge.database_autonomous_database_to_kms_key
+      #   args = {
+      #     database_autonomous_database_ids = with.database_autonomous_databases_for_kms_key.rows[*].autonomous_database_id
+      #   }
+      # }
 
       edge {
         base = edge.filestorage_file_system_to_kms_key
@@ -265,6 +284,17 @@ query "blockstorage_boot_volumes_for_kms_key" {
       id as boot_volume_id
     from
       oci_core_boot_volume
+    where
+      kms_key_id = $1;
+  EOQ
+}
+
+query "database_autonomous_databases_for_kms_key" {
+  sql = <<-EOQ
+    select
+      id as autonomous_database_id
+    from
+      oci_database_autonomous_database
     where
       kms_key_id = $1;
   EOQ

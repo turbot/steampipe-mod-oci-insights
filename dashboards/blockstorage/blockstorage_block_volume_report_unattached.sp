@@ -22,7 +22,7 @@ dashboard "blockstorage_block_volume_unattached_report" {
     }
 
     column "Name" {
-      href = "${dashboard.blockstorage_block_volume_detail.url_path}?input.volume_id={{.OCID | @uri}}"
+      href = "${dashboard.blockstorage_block_volume_detail.url_path}?input.block_volume_id={{.OCID | @uri}}"
     }
 
     sql = query.blockstorage_block_volume_unattached_report.sql

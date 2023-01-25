@@ -43,6 +43,16 @@ dashboard "database_autonomous_database_detail" {
 
   }
 
+  with "kms_vaults_for_database_autonomous_database" {
+    query = query.kms_vaults_for_database_autonomous_database
+    args  = [self.input.db_id.value]
+  }
+
+  with "kms_keys_for_database_autonomous_database" {
+    query = query.kms_keys_for_database_autonomous_database
+    args  = [self.input.db_id.value]
+  }
+
   container {
 
     graph {
@@ -56,13 +66,34 @@ dashboard "database_autonomous_database_detail" {
           database_autonomous_database_ids = [self.input.db_id.value]
         }
       }
-      # edge {
-      #   base = edge.nosql_table_parent_to_nosql_table
-      #   args = {
-      #     nosql_table_ids = with.nosql_table_children_for_nosql_table.rows[*].child_table_id
-      #   }
-      # }
 
+      node {
+        base = node.kms_key
+        args = {
+          kms_key_ids = with.kms_keys_for_database_autonomous_database.rows[*].kms_key_id
+        }
+      }
+
+      node {
+        base = node.kms_vault
+        args = {
+          kms_vault_ids = with.kms_vaults_for_database_autonomous_database.rows[*].vault_id
+        }
+      }
+
+      edge {
+        base = edge.database_autonomous_database_to_kms_key
+        args = {
+          database_autonomous_database_ids = [self.input.db_id.value]
+        }
+      }
+
+      edge {
+        base = edge.database_autonomous_database_to_kms_vault
+        args = {
+          database_autonomous_database_ids = [self.input.db_id.value]
+        }
+      }
     }
   }
 
@@ -298,4 +329,28 @@ query "database_autonomous_database_access_detail" {
   EOQ
 
   param "id" {}
+}
+
+#with queries
+
+query "kms_vaults_for_database_autonomous_database" {
+  sql = <<-EOQ
+    select
+      vault_id as vault_id
+    from
+      oci_database_autonomous_database
+    where
+      id = $1;
+  EOQ
+}
+
+query "kms_keys_for_database_autonomous_database" {
+  sql = <<-EOQ
+    select
+      kms_key_id as kms_key_id
+    from
+      oci_database_autonomous_database
+    where
+      id = $1;
+  EOQ
 }
