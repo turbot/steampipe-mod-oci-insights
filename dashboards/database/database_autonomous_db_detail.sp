@@ -53,6 +53,21 @@ dashboard "database_autonomous_database_detail" {
     args  = [self.input.db_id.value]
   }
 
+  with "vcn_network_security_groups_for_database_autonomous_database" {
+    query = query.vcn_network_security_groups_for_database_autonomous_database
+    args  = [self.input.db_id.value]
+  }
+
+  with "vcn_subnets_for_database_autonomous_database" {
+    query = query.vcn_subnets_for_database_autonomous_database
+    args  = [self.input.db_id.value]
+  }
+
+  with "vcn_vcns_for_database_autonomous_database" {
+    query = query.vcn_vcns_for_database_autonomous_database
+    args  = [self.input.db_id.value]
+  }
+
   container {
 
     graph {
@@ -81,6 +96,27 @@ dashboard "database_autonomous_database_detail" {
         }
       }
 
+      node {
+        base = node.vcn_network_security_group
+        args = {
+          vcn_network_security_group_ids =  with.vcn_network_security_groups_for_database_autonomous_database.rows[*].nsg_id
+        }
+      }
+
+      node {
+        base = node.vcn_subnet
+        args = {
+          vcn_subnet_ids = with.vcn_subnets_for_database_autonomous_database.rows[*].subnet_id
+        }
+      }
+
+      node {
+        base = node.vcn_vcn
+        args = {
+          vcn_vcn_ids = with.vcn_vcns_for_database_autonomous_database.rows[*].vcn_id
+        }
+      }
+
       edge {
         base = edge.database_autonomous_database_to_kms_key
         args = {
@@ -94,6 +130,28 @@ dashboard "database_autonomous_database_detail" {
           database_autonomous_database_ids = [self.input.db_id.value]
         }
       }
+
+      edge {
+        base = edge.database_autonomous_database_to_vcn_network_security_group
+        args = {
+          database_autonomous_database_ids = [self.input.db_id.value]
+        }
+      }
+
+      edge {
+        base = edge.database_autonomous_database_to_vcn_subnet
+        args = {
+          database_autonomous_database_ids = [self.input.db_id.value]
+        }
+      }
+
+      edge {
+        base = edge.vcn_subnet_to_vcn_vcn
+        args = {
+          vcn_subnet_ids = with.vcn_subnets_for_database_autonomous_database.rows[*].subnet_id
+        }
+      }
+
     }
   }
 
@@ -350,6 +408,42 @@ query "kms_keys_for_database_autonomous_database" {
       kms_key_id as kms_key_id
     from
       oci_database_autonomous_database
+    where
+      id = $1;
+  EOQ
+}
+
+query "vcn_subnets_for_database_autonomous_database" {
+  sql = <<-EOQ
+    select
+      subnet_id as subnet_id
+    from
+      oci_database_autonomous_database
+    where
+      id = $1;
+  EOQ
+}
+
+query "vcn_vcns_for_database_autonomous_database" {
+  sql = <<-EOQ
+    select
+      s.vcn_id as vcn_id
+    from
+      oci_database_autonomous_database as d
+      left join oci_core_subnet as s on s.id = d.subnet_id
+    where
+      d.subnet_id is not null
+      and d.id = $1;
+  EOQ
+}
+
+query "vcn_network_security_groups_for_database_autonomous_database" {
+  sql = <<-EOQ
+    select
+      nid as nsg_id
+    from
+      oci_database_autonomous_database,
+      jsonb_array_elements_text(nsg_ids) as nid
     where
       id = $1;
   EOQ
