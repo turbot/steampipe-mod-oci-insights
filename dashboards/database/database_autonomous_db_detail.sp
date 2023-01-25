@@ -420,7 +420,8 @@ query "vcn_subnets_for_database_autonomous_database" {
     from
       oci_database_autonomous_database
     where
-      id = $1;
+      subnet_id is not null
+      and id = $1;
   EOQ
 }
 
