@@ -11,17 +11,17 @@ dashboard "kms_key_dashboard" {
 
     card {
       sql   = query.kms_key_count.sql
-      width = 2
+      width = 3
     }
 
     card {
       sql   = query.kms_hsm_key_count.sql
-      width = 2
+      width = 3
     }
 
     card {
       sql   = query.kms_key_disabled_count.sql
-      width = 2
+      width = 3
     }
 
   }

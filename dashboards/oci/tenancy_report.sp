@@ -12,7 +12,7 @@ dashboard "tenancy_report" {
 
     card {
       query = query.tenancy_count
-      width = 2
+      width = 3
     }
 
   }

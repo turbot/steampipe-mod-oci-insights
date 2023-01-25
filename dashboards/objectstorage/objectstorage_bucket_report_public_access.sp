@@ -12,17 +12,17 @@ dashboard "objectstorage_bucket_public_access_report" {
 
     card {
       sql   = query.objectstorage_bucket_count.sql
-      width = 2
+      width = 3
     }
 
     card {
       sql   = query.objectstorage_bucket_public_access_count.sql
-      width = 2
+      width = 3
     }
 
     card {
       sql   = query.objectstorage_bucket_read_only_access_count.sql
-      width = 2
+      width = 3
     }
 
   }

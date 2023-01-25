@@ -16,7 +16,7 @@ dashboard "vcn_subnet_detail" {
   container {
 
     card {
-      width = 2
+      width = 3
       query = query.vcn_subnet_flow_logs
       args  = [self.input.subnet_id.value]
     }

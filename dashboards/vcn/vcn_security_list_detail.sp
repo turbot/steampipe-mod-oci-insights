@@ -16,14 +16,14 @@ dashboard "vcn_security_list_detail" {
   container {
 
     card {
-      width = 2
+      width = 3
 
       query = query.vcn_security_list_ingress_ssh
       args = [self.input.security_list_id.value]
     }
 
     card {
-      width = 2
+      width = 3
 
       query = query.vcn_security_list_ingress_rdp
       args = [self.input.security_list_id.value]

@@ -11,17 +11,17 @@ dashboard "blockstorage_block_volume_dashboard" {
 
     card {
       sql   = query.blockstorage_block_volume_count.sql
-      width = 2
+      width = 3
     }
 
     card {
       sql   = query.blockstorage_block_volume_storage_total.sql
-      width = 2
+      width = 3
     }
 
     card {
       sql   = query.blockstorage_block_volume_with_no_backups_count.sql
-      width = 2
+      width = 3
     }
 
   }

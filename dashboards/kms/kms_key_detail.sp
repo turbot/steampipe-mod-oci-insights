@@ -15,7 +15,7 @@ dashboard "kms_key_detail" {
   container {
 
     card {
-      width = 2
+      width = 3
 
       query = query.kms_key_disabled
       args = {
@@ -25,7 +25,7 @@ dashboard "kms_key_detail" {
 
     card {
       query = query.kms_key_protection_mode
-      width = 2
+      width = 3
 
       args = {
         id = self.input.key_id.value

@@ -11,7 +11,7 @@ dashboard "nosql_table_dashboard" {
 
     card {
       sql   = query.nosql_table_count.sql
-      width = 2
+      width = 3
     }
 
   }

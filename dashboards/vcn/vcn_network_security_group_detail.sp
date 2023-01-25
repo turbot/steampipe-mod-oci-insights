@@ -16,25 +16,25 @@ dashboard "vcn_network_security_group_detail" {
   container {
 
     card {
-      width = 2
+      width = 3
       query = query.vcn_network_security_group_ingress_rules_count
       args  = [self.input.security_group_id.value]
     }
 
     card {
-      width = 2
+      width = 3
       query = query.vcn_network_security_group_egress_rules_count
       args  = [self.input.security_group_id.value]
     }
 
     card {
-      width = 2
+      width = 3
       query = query.vcn_network_security_group_ingress_ssh
       args  = [self.input.security_group_id.value]
     }
 
     card {
-      width = 2
+      width = 3
       query = query.vcn_network_security_group_ingress_rdp
       args  = [self.input.security_group_id.value]
     }

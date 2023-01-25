@@ -11,22 +11,22 @@ dashboard "compute_instance_dashboard" {
 
     card {
       query = query.compute_instance_count
-      width = 2
+      width = 3
     }
 
     card {
       query = query.compute_instance_total_cores
-      width = 2
+      width = 3
     }
 
     card {
       query = query.compute_instance_public_instance_count
-      width = 2
+      width = 3
     }
 
     card {
       query = query.compute_instance_monitoring_disabled_count
-      width = 2
+      width = 3
     }
 
   }

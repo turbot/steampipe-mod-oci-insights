@@ -12,17 +12,17 @@ dashboard "blockstorage_block_volume_encryption_report" {
 
     card {
       sql   = query.blockstorage_block_volume_count.sql
-      width = 2
+      width = 3
     }
 
     card {
       sql   = query.blockstorage_block_volume_default_encrypted_volumes_count.sql
-      width = 2
+      width = 3
     }
 
     card {
       sql   = query.blockstorage_block_volume_customer_managed_encryption_count.sql
-      width = 2
+      width = 23
     }
 
   }

@@ -15,7 +15,7 @@ dashboard "filestorage_filesystem_detail" {
   container {
 
     card {
-      width = 2
+      width = 3
 
       query = query.filestorage_filesystem_cloned
       args  = [self.input.filesystem_id.value]
@@ -23,7 +23,7 @@ dashboard "filestorage_filesystem_detail" {
 
     card {
       query = query.filestorage_filesystem_snapshot
-      width = 2
+      width = 3
 
       args = [self.input.filesystem_id.value]
     }

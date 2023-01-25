@@ -13,13 +13,13 @@ dashboard "identity_group_dashboard" {
     # Analysis
     card {
       query = query.identity_group_count
-      width = 2
+      width = 3
     }
 
     # Assessments
     card {
       query = query.identity_groups_without_users_count
-      width = 2
+      width = 3
     }
 
   }

@@ -12,12 +12,12 @@ dashboard "objectstorage_bucket_logging_report" {
 
     card {
       sql   = query.objectstorage_bucket_count.sql
-      width = 2
+      width = 3
     }
 
     card {
       sql   = query.objectstorage_bucket_logging_disabled_count.sql
-      width = 2
+      width = 3
     }
   }
 

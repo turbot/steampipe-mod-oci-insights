@@ -11,22 +11,22 @@ dashboard "mysql_backup_dashboard" {
 
     card {
       sql   = query.mysql_backup_count.sql
-      width = 2
+      width = 3
     }
 
     card {
       sql   = query.mysql_backup_storage_total.sql
-      width = 2
+      width = 3
     }
 
     card {
       sql   = query.mysql_automatic_backup_count.sql
-      width = 2
+      width = 3
     }
 
     card {
       sql   = query.mysql_full_backup_count.sql
-      width = 2
+      width = 3
     }
 
   }

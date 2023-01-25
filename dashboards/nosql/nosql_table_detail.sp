@@ -15,14 +15,14 @@ dashboard "nosql_table_detail" {
   container {
 
     card {
-      width = 2
+      width = 3
 
       query = query.nosql_table_state
       args = [self.input.table_id.value]
     }
 
     card {
-      width = 2
+      width = 3
 
       query = query.nosql_table_auto_reclaimable
       args = [self.input.table_id.value]

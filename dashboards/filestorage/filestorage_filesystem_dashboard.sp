@@ -11,17 +11,17 @@ dashboard "filestorage_filesystem_dashboard" {
 
     card {
       sql   = query.filestorage_filesystem_count.sql
-      width = 2
+      width = 3
     }
 
     card {
       sql   = query.filestorage_filesystem_cloned_count.sql
-      width = 2
+      width = 3
     }
 
     card {
       sql   = query.filestorage_filesystem_snapshot_count.sql
-      width = 2
+      width = 3
     }
 
   }

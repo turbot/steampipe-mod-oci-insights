@@ -15,7 +15,7 @@ dashboard "database_autonomous_database_detail" {
   container {
 
     card {
-      width = 2
+      width = 3
 
       query = query.database_autonomous_database_core
       args = {
@@ -24,7 +24,7 @@ dashboard "database_autonomous_database_detail" {
     }
 
     card {
-      width = 2
+      width = 3
 
       query = query.database_autonomous_database_data_guard
       args = {
@@ -33,7 +33,7 @@ dashboard "database_autonomous_database_detail" {
     }
 
     card {
-      width = 2
+      width = 3
 
       query = query.database_autonomous_db_operations_insights
       args = {

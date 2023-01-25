@@ -12,17 +12,17 @@ dashboard "objectstorage_bucket_encryption_report" {
 
     card {
       sql   = query.objectstorage_bucket_count.sql
-      width = 2
+      width = 3
     }
 
     card {
       sql   = query.objectstorage_bucket_report_customer_managed_encryption_count.sql
-      width = 2
+      width = 3
     }
 
     card {
       sql   = query.objectstorage_bucket_default_encryption_count.sql
-      width = 2
+      width = 3
     }
 
   }

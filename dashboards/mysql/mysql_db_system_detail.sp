@@ -15,14 +15,14 @@ dashboard "mysql_db_system_detail" {
   container {
 
     card {
-      width = 2
+      width = 3
 
       query = query.mysql_db_system_mysql_version
       args = [self.input.db_system_id.value]
     }
 
     card {
-      width = 2
+      width = 3
 
       query = query.mysql_db_system_backup
       args = [self.input.db_system_id.value]

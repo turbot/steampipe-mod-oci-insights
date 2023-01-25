@@ -11,12 +11,12 @@ dashboard "ons_subscription_dashboard" {
 
     card {
       sql   = query.ons_subscription_count.sql
-      width = 2
+      width = 3
     }
 
     card {
       sql   = query.ons_subscription_unused_count.sql
-      width = 2
+      width = 3
     }
 
   }

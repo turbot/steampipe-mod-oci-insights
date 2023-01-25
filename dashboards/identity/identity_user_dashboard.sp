@@ -11,17 +11,17 @@ dashboard "identity_user_dashboard" {
 
     card {
       sql   = query.identity_user_count.sql
-      width = 2
+      width = 3
     }
 
     card {
       sql   = query.identity_user_not_attached_to_group.sql
-      width = 2
+      width = 3
     }
 
     card {
       sql   = query.identity_user_mfa_disabled_count.sql
-      width = 2
+      width = 3
       href  = dashboard.identity_user_mfa_report.url_path
     }
 

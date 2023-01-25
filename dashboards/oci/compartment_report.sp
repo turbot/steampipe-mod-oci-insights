@@ -12,7 +12,7 @@ dashboard "compartment_report" {
 
     card {
       query = query.compartment_count
-      width = 2
+      width = 3
     }
 
   }

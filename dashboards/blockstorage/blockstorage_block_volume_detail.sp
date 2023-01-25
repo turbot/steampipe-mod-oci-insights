@@ -15,14 +15,14 @@ dashboard "blockstorage_block_volume_detail" {
   container {
 
     card {
-      width = 2
+      width = 3
 
       query = query.blockstorage_block_volume_storage
       args  = [self.input.block_volume_id.value]
     }
 
     card {
-      width = 2
+      width = 3
 
       query = query.blockstorage_block_volume_vpu
       args  = [self.input.block_volume_id.value]

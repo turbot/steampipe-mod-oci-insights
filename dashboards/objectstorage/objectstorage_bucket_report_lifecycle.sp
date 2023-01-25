@@ -12,12 +12,12 @@ dashboard "objectstorage_bucket_lifecycle_report" {
 
     card {
       sql   = query.objectstorage_bucket_count.sql
-      width = 2
+      width = 3
     }
 
     card {
       sql   = query.objectstorage_bucket_versioning_disabled_count.sql
-      width = 2
+      width = 3
     }
 
   }

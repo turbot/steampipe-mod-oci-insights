@@ -16,7 +16,7 @@ dashboard "identity_user_detail" {
   container {
 
     card {
-      width = 2
+      width = 3
 
       query = query.identity_user_email
       args = [self.input.user_id.value]
@@ -24,7 +24,7 @@ dashboard "identity_user_detail" {
 
     card {
       query = query.identity_user_mfa
-      width = 2
+      width = 3
 
       args = [self.input.user_id.value]
     }

@@ -16,13 +16,13 @@ dashboard "kms_vault_detail" {
   container {
 
     card {
-      width = 2
+      width = 3
       query = query.kms_vault_disabled
       args  = [self.input.kms_vault_id.value]
     }
 
     card {
-      width = 2
+      width = 3
       query = query.kms_vault_type
       args  = [self.input.kms_vault_id.value]
     }

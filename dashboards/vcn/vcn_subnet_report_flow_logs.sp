@@ -11,13 +11,13 @@ dashboard "oci_vcn_subnet_flow_logs_report" {
   container {
 
     card {
-      width = 2
+      width = 3
       sql   = query.oci_vcn_subnet_count.sql
     }
 
     card {
       sql   = query.oci_vcn_subnet_flow_logs_not_configured_count.sql
-      width = 2
+      width = 3
     }
 
   }

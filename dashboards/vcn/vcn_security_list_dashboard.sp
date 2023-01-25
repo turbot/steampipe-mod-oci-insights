@@ -10,19 +10,19 @@ dashboard "oci_vcn_network_security_list_dashboard" {
   container {
 
     card {
-      width = 2
+      width = 3
 
       sql = query.oci_vcn_security_list_count.sql
     }
 
     card {
-      width = 2
+      width = 3
 
       sql = query.oci_vcn_security_list_unrestricted_ingress_ssh_count.sql
     }
 
     card {
-      width = 2
+      width = 3
 
       sql = query.oci_vcn_security_list_unrestricted_ingress_rdp_count.sql
     }

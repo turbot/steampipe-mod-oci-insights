@@ -15,7 +15,7 @@ dashboard "ons_notification_topic_detail" {
   container {
 
     card {
-      width = 2
+      width = 3
 
       query = query.ons_notification_topic_state
       args = {

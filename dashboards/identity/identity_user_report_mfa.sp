@@ -11,12 +11,12 @@ dashboard "identity_user_mfa_report" {
 
     card {
       sql   = query.identity_user_count.sql
-      width = 2
+      width = 3
     }
 
     card {
       sql   = query.identity_user_mfa_disabled_count.sql
-      width = 2
+      width = 3
     }
 
   }

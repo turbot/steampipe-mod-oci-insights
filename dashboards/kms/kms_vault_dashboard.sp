@@ -11,12 +11,12 @@ dashboard "kms_vault_dashboard" {
 
     card {
       sql   = query.kms_vault_count.sql
-      width = 2
+      width = 3
     }
 
     card {
       sql   = query.kms_vault_disabled_count.sql
-      width = 2
+      width = 3
     }
 
   }

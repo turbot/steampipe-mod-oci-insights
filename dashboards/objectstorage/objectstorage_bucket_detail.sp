@@ -15,14 +15,14 @@ dashboard "objectstorage_bucket_detail" {
   container {
 
     card {
-      width = 2
+      width = 3
 
       query = query.objectstorage_bucket_read_only
       args = [self.input.bucket_id.value]
     }
 
     card {
-      width = 2
+      width = 3
 
       query = query.objectstorage_bucket_versioning
       args = [self.input.bucket_id.value]
@@ -30,7 +30,7 @@ dashboard "objectstorage_bucket_detail" {
 
     card {
       query = query.objectstorage_bucket_public_access
-      width = 2
+      width = 3
 
       args = [self.input.bucket_id.value]
     }

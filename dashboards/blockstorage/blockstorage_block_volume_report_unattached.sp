@@ -12,7 +12,7 @@ dashboard "blockstorage_block_volume_unattached_report" {
 
     card {
       sql   = query.blockstorage_block_volume_unattached_count.sql
-      width = 2
+      width = 3
     }
   }
 

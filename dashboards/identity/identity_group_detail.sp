@@ -16,7 +16,7 @@ dashboard "identity_group_detail" {
   container {
 
     card {
-      width = 2
+      width = 3
 
       query = query.identity_group_lifecycle_state
       args = [self.input.group_id.value]

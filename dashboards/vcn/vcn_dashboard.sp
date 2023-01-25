@@ -11,12 +11,12 @@ dashboard "oci_vcn_dashboard" {
 
     card {
       sql   = query.oci_vcn_count.sql
-      width = 2
+      width = 3
     }
 
     card {
       sql   = query.oci_vcn_no_subnet_count.sql
-      width = 2
+      width = 3
     }
 
   }
