@@ -11,36 +11,36 @@ dashboard "ons_subscription_age_report" {
   container {
 
     card {
-      sql   = query.ons_subscription_count.sql
+      query = query.ons_subscription_count
       width = 2
     }
 
     card {
-      sql   = query.ons_subscription_24_hrs.sql
-      width = 2
-      type  = "info"
-    }
-
-    card {
-      sql   = query.ons_subscription_30_days.sql
+      query = query.ons_subscription_24_hrs
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.ons_subscription_90_days.sql
+      query = query.ons_subscription_30_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.ons_subscription_365_days.sql
+      query = query.ons_subscription_90_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.ons_subscription_1_year.sql
+      query = query.ons_subscription_365_days
+      width = 2
+      type  = "info"
+    }
+
+    card {
+      query = query.ons_subscription_1_year
       width = 2
       type  = "info"
     }
@@ -53,7 +53,7 @@ dashboard "ons_subscription_age_report" {
       display = "none"
     }
 
-    sql = query.ons_subscription_age_report.sql
+    query = query.ons_subscription_age_report
   }
 
 }

@@ -12,11 +12,11 @@ dashboard "oci_vcn_subnet_flow_logs_report" {
 
     card {
       width = 3
-      sql   = query.oci_vcn_subnet_count.sql
+      query = query.oci_vcn_subnet_count
     }
 
     card {
-      sql   = query.oci_vcn_subnet_flow_logs_not_configured_count.sql
+      query = query.oci_vcn_subnet_flow_logs_not_configured_count
       width = 3
     }
 
@@ -31,7 +31,7 @@ dashboard "oci_vcn_subnet_flow_logs_report" {
       href = "${dashboard.vcn_subnet_detail.url_path}?input.subnet_id={{.OCID | @uri}}"
     }
 
-    sql = query.oci_vcn_subnet_flow_logs_report.sql
+    query = query.oci_vcn_subnet_flow_logs_report
   }
 
 }

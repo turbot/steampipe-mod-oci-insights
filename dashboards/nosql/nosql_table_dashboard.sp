@@ -10,7 +10,7 @@ dashboard "nosql_table_dashboard" {
   container {
 
     card {
-      sql   = query.nosql_table_count.sql
+      query = query.nosql_table_count
       width = 3
     }
 
@@ -21,28 +21,28 @@ dashboard "nosql_table_dashboard" {
 
     chart {
       title = "Tables by Tenancy"
-      sql   = query.nosql_table_by_tenancy.sql
+      query = query.nosql_table_by_tenancy
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Tables by Compartment"
-      sql   = query.nosql_table_by_compartment.sql
+      query = query.nosql_table_by_compartment
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Tables by Region"
-      sql   = query.nosql_table_by_region.sql
+      query = query.nosql_table_by_region
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Tables by Age"
-      sql   = query.nosql_table_by_creation_month.sql
+      query = query.nosql_table_by_creation_month
       type  = "column"
       width = 3
     }
@@ -54,14 +54,14 @@ dashboard "nosql_table_dashboard" {
 
   #   chart {
   #     title = "Top 10 Storage - Last 7 days"
-  #     sql   = query.nosql_table_top10_storage_past_week.sql
+  #     query  = query.nosql_table_top10_storage_past_week
   #     type  = "line"
   #     width = 6
   #   }
 
   #   chart {
   #     title = "Average Max Daily Storage - Last 30 days"
-  #     sql   = query.nosql_table_by_storage_utilization_category.sql
+  #     query  = query.nosql_table_by_storage_utilization_category
   #     type  = "column"
   #     width = 6
   #   }
@@ -73,14 +73,14 @@ dashboard "nosql_table_dashboard" {
 
     chart {
       title = "Top 10 Average Read Throttle Count - Last 7 days"
-      query   = query.nosql_table_top_10_read_throttle_count_avg
+      query = query.nosql_table_top_10_read_throttle_count_avg
       type  = "line"
       width = 6
     }
 
     chart {
       title = "Top 10 Average Write Throttle Count - Last 7 days"
-      query   = query.nosql_table_top_10_write_throttle_count_avg
+      query = query.nosql_table_top_10_write_throttle_count_avg
       type  = "column"
       width = 6
     }

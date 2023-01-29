@@ -10,17 +10,17 @@ dashboard "blockstorage_boot_volume_dashboard" {
   container {
 
     card {
-      sql   = query.blockstorage_boot_volume_count.sql
+      query = query.blockstorage_boot_volume_count
       width = 3
     }
 
     card {
-      sql   = query.blockstorage_boot_volume_storage_total.sql
+      query = query.blockstorage_boot_volume_storage_total
       width = 3
     }
 
     card {
-      sql   = query.blockstorage_boot_volume_with_no_backups_count.sql
+      query = query.blockstorage_boot_volume_with_no_backups_count
       width = 3
     }
 
@@ -32,7 +32,7 @@ dashboard "blockstorage_boot_volume_dashboard" {
 
     chart {
       title = "Backup Policy Status"
-      sql   = query.blockstorage_boot_volume_with_backups.sql
+      query = query.blockstorage_boot_volume_with_backups
       type  = "donut"
       width = 3
 
@@ -54,35 +54,35 @@ dashboard "blockstorage_boot_volume_dashboard" {
 
     chart {
       title = "Boot Volumes by Tenancy"
-      sql   = query.blockstorage_boot_volume_by_tenancy.sql
+      query = query.blockstorage_boot_volume_by_tenancy
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Boot Volumes by Compartment"
-      sql   = query.blockstorage_boot_volume_by_compartment.sql
+      query = query.blockstorage_boot_volume_by_compartment
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Boot Volumes by Region"
-      sql   = query.blockstorage_boot_volume_by_region.sql
+      query = query.blockstorage_boot_volume_by_region
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Boot Volumes by Age"
-      sql   = query.blockstorage_boot_volume_by_creation_month.sql
+      query = query.blockstorage_boot_volume_by_creation_month
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Boot Volumes by Encryption Type"
-      sql   = query.blockstorage_boot_volume_by_encryption_status.sql
+      query = query.blockstorage_boot_volume_by_encryption_status
       type  = "column"
       width = 4
     }
@@ -93,7 +93,7 @@ dashboard "blockstorage_boot_volume_dashboard" {
 
     chart {
       title = "Storage by Tenancy (GB)"
-      sql   = query.blockstorage_boot_volume_storage_by_tenancy.sql
+      query = query.blockstorage_boot_volume_storage_by_tenancy
       type  = "column"
       width = 4
 
@@ -104,7 +104,7 @@ dashboard "blockstorage_boot_volume_dashboard" {
 
     chart {
       title = "Storage by Compartment (GB)"
-      sql   = query.blockstorage_boot_volume_storage_by_compartment.sql
+      query = query.blockstorage_boot_volume_storage_by_compartment
       type  = "column"
       width = 4
 
@@ -115,7 +115,7 @@ dashboard "blockstorage_boot_volume_dashboard" {
 
     chart {
       title = "Storage by Region (GB)"
-      sql   = query.blockstorage_boot_volume_storage_by_region.sql
+      query = query.blockstorage_boot_volume_storage_by_region
       type  = "column"
       width = 4
 
@@ -126,7 +126,7 @@ dashboard "blockstorage_boot_volume_dashboard" {
 
     chart {
       title = "Storage by Age (GB)"
-      sql   = query.blockstorage_boot_volume_storage_by_creation_month.sql
+      query = query.blockstorage_boot_volume_storage_by_creation_month
       type  = "column"
       width = 4
 
@@ -137,7 +137,7 @@ dashboard "blockstorage_boot_volume_dashboard" {
 
     chart {
       title = "Storage by Encryption Type (GB)"
-      sql   = query.blockstorage_boot_volume_storage_by_encryption_type.sql
+      query = query.blockstorage_boot_volume_storage_by_encryption_type
       type  = "column"
       width = 4
 
@@ -156,14 +156,14 @@ dashboard "blockstorage_boot_volume_dashboard" {
       title = "Top 10 Average Read IOPS - Last 7 days"
       type  = "line"
       width = 6
-      sql   = query.blockstorage_boot_volume_top_10_read_ops_avg.sql
+      query = query.blockstorage_boot_volume_top_10_read_ops_avg
     }
 
     chart {
       title = "Top 10 Average Write IOPS - Last 7 days"
       type  = "line"
       width = 6
-      sql   = query.blockstorage_boot_volume_top_10_write_ops_avg.sql
+      query = query.blockstorage_boot_volume_top_10_write_ops_avg
     }
 
   }

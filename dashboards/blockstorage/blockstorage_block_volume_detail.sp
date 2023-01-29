@@ -276,6 +276,16 @@ dashboard "blockstorage_block_volume_detail" {
         title = "Encryption Details"
         query = query.blockstorage_block_volume_encryption
         args  = [self.input.block_volume_id.value]
+
+        column "Key Name" {
+          href = "${dashboard.kms_key_detail.url_path}?input.key_id={{.'KMS Key ID' | @uri}}"
+        }
+      }
+
+      table {
+        title = "Backup Policy Schedules"
+        query = query.blockstorage_block_volume_backup_policy_schedules
+        args  = [self.input.block_volume_id.value]
       }
     }
 
@@ -297,7 +307,7 @@ query "blockstorage_block_volume_input" {
     from
       oci_core_volume as v
       left join oci_identity_compartment as c on v.compartment_id = c.id
-      left join oci_identity_tenancy as t on v.tenant_id = t.id
+      left join oci_identity_tenancy as t on v.compartment_id = t.id
     where
       v.lifecycle_state <> 'TERMINATED'
     order by
@@ -495,11 +505,52 @@ query "blockstorage_block_volume_attached_instances" {
 query "blockstorage_block_volume_encryption" {
   sql = <<EOQ
     select
+      k.name as "Key Name",
       case when kms_key_id is not null and kms_key_id <> '' then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
       kms_key_id as "KMS Key ID"
     from
-      oci_core_volume
+      oci_core_volume as v
+      left join oci_kms_key as k
+      on v.kms_key_id = k.id
     where
-      id  = $1;
+      v.id  = $1;
+  EOQ
+}
+
+query "blockstorage_block_volume_backup_policy_schedules" {
+  sql = <<EOQ
+    select
+      s ->> 'period' as "Period",
+      s ->> 'timeZone' as "Time Zone",
+      s ->> 'hourOfDay' as "Hour Of Day",
+      s ->> 'backupType' as "Backup Type",
+      s ->> 'dayOfMonth' as "Day Of Month",
+      s ->> 'offsetType' as "Offset Type",
+      s ->> 'offsetSeconds' as "Offset Seconds",
+      s ->> 'retentionSeconds' as "Retention Seconds"
+    from
+      oci_core_volume as v,
+      oci_core_volume_backup_policy as p,
+      jsonb_array_elements(schedules) as s
+    where
+      p.id = v.volume_backup_policy_id
+      and v.id = $1
+    union
+      select
+      s ->> 'period' as "Period",
+      s ->> 'timeZone' as "Time Zone",
+      s ->> 'hourOfDay' as "Hour Of Day",
+      s ->> 'backupType' as "Backup Type",
+      s ->> 'dayOfMonth' as "Day Of Month",
+      s ->> 'offsetType' as "Offset Type",
+      s ->> 'offsetSeconds' as "Offset Seconds",
+      s ->> 'retentionSeconds' as "Retention Seconds"
+    from
+      oci_core_volume as v,
+      oci_core_volume_default_backup_policy as p,
+      jsonb_array_elements(schedules) as s
+    where
+      p.id = v.volume_backup_policy_id
+      and v.id = $1;
   EOQ
 }

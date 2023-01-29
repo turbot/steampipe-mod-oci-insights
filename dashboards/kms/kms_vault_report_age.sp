@@ -11,36 +11,36 @@ dashboard "kms_vault_age_report" {
   container {
 
     card {
-      sql   = query.kms_vault_count.sql
+      query = query.kms_vault_count
       width = 2
     }
 
     card {
-      sql   = query.kms_vault_24_hrs.sql
-      width = 2
-      type  = "info"
-    }
-
-    card {
-      sql   = query.kms_vault_30_days.sql
+      query = query.kms_vault_24_hrs
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.kms_vault_90_days.sql
+      query = query.kms_vault_30_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.kms_vault_365_days.sql
+      query = query.kms_vault_90_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.kms_vault_1_year.sql
+      query = query.kms_vault_365_days
+      width = 2
+      type  = "info"
+    }
+
+    card {
+      query = query.kms_vault_1_year
       width = 2
       type  = "info"
     }
@@ -56,7 +56,7 @@ dashboard "kms_vault_age_report" {
       href = "${dashboard.kms_vault_detail.url_path}?input.kms_vault_id={{.OCID | @uri}}"
     }
 
-    sql = query.kms_vault_age_report.sql
+    query = query.kms_vault_age_report
   }
 
 }

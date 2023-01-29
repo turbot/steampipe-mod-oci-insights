@@ -11,36 +11,36 @@ dashboard "filestorage_filesystem_age_report" {
   container {
 
     card {
-      sql   = query.filestorage_filesystem_count.sql
+      query = query.filestorage_filesystem_count
       width = 2
     }
 
     card {
-      sql   = query.filestorage_filesystem_24_hrs.sql
-      width = 2
-      type  = "info"
-    }
-
-    card {
-      sql   = query.filestorage_filesystem_30_days.sql
+      query = query.filestorage_filesystem_24_hrs
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.filestorage_filesystem_90_days.sql
+      query = query.filestorage_filesystem_30_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.filestorage_filesystem_365_days.sql
+      query = query.filestorage_filesystem_90_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.filestorage_filesystem_1_year.sql
+      query = query.filestorage_filesystem_365_days
+      width = 2
+      type  = "info"
+    }
+
+    card {
+      query = query.filestorage_filesystem_1_year
       width = 2
       type  = "info"
     }
@@ -56,7 +56,7 @@ dashboard "filestorage_filesystem_age_report" {
       href = "${dashboard.filestorage_filesystem_detail.url_path}?input.filesystem_id={{.OCID | @uri}}"
     }
 
-    sql = query.filestorage_filesystem_age_report.sql
+    query = query.filestorage_filesystem_age_report
   }
 
 }

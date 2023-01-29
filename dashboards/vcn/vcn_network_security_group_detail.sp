@@ -9,7 +9,7 @@ dashboard "vcn_network_security_group_detail" {
 
   input "security_group_id" {
     title = "Select a security group:"
-    sql   = query.vcn_network_security_group_input.sql
+    query = query.vcn_network_security_group_input
     width = 4
   }
 

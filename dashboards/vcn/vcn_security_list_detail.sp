@@ -1,6 +1,6 @@
 dashboard "vcn_security_list_detail" {
 
-  title = "OCI VCN Security List Detail"
+  title         = "OCI VCN Security List Detail"
   documentation = file("./dashboards/vcn/docs/vcn_security_list_detail.md")
 
   tags = merge(local.vcn_common_tags, {
@@ -9,7 +9,7 @@ dashboard "vcn_security_list_detail" {
 
   input "security_list_id" {
     title = "Select a security list:"
-    sql   = query.vcn_security_list_input.sql
+    query = query.vcn_security_list_input
     width = 4
   }
 
@@ -19,14 +19,14 @@ dashboard "vcn_security_list_detail" {
       width = 3
 
       query = query.vcn_security_list_ingress_ssh
-      args = [self.input.security_list_id.value]
+      args  = [self.input.security_list_id.value]
     }
 
     card {
       width = 3
 
       query = query.vcn_security_list_ingress_rdp
-      args = [self.input.security_list_id.value]
+      args  = [self.input.security_list_id.value]
     }
 
   }
@@ -97,7 +97,7 @@ dashboard "vcn_security_list_detail" {
         type  = "line"
         width = 6
         query = query.vcn_security_list_overview
-        args = [self.input.security_list_id.value]
+        args  = [self.input.security_list_id.value]
 
       }
 
@@ -105,7 +105,7 @@ dashboard "vcn_security_list_detail" {
         title = "Tags"
         width = 6
         query = query.vcn_security_list_tag
-        args = [self.input.security_list_id.value]
+        args  = [self.input.security_list_id.value]
 
       }
 
@@ -118,13 +118,13 @@ dashboard "vcn_security_list_detail" {
       table {
         title = "Ingress Rules"
         query = query.vcn_network_security_list_ingress_rule
-        args = [self.input.security_list_id.value]
+        args  = [self.input.security_list_id.value]
       }
 
       table {
         title = "Egress Rules"
         query = query.vcn_network_security_list_egress_rule
-        args = [self.input.security_list_id.value]
+        args  = [self.input.security_list_id.value]
       }
 
     }

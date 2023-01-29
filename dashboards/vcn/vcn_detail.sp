@@ -9,7 +9,7 @@ dashboard "vcn_detail" {
 
   input "vcn_id" {
     title = "Select a VCN:"
-    sql   = query.vcn_input.sql
+    query = query.vcn_input
     width = 4
   }
 

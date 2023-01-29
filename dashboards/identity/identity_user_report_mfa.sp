@@ -10,12 +10,12 @@ dashboard "identity_user_mfa_report" {
   container {
 
     card {
-      sql   = query.identity_user_count.sql
+      query = query.identity_user_count
       width = 3
     }
 
     card {
-      sql   = query.identity_user_mfa_disabled_count.sql
+      query = query.identity_user_mfa_disabled_count
       width = 3
     }
 
@@ -32,7 +32,7 @@ dashboard "identity_user_mfa_report" {
         href = "${dashboard.identity_user_detail.url_path}?input.user_id={{.OCID | @uri}}"
       }
 
-      sql = query.identity_user_mfa_report.sql
+      query = query.identity_user_mfa_report
     }
   }
 }

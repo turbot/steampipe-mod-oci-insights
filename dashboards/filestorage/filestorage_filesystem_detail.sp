@@ -152,7 +152,7 @@ dashboard "filestorage_filesystem_detail" {
         }
       }
 
-    edge {
+      edge {
         base = edge.kms_vault_to_kms_key
         args = {
           kms_vault_ids = with.kms_vaults_for_filestorage_file_system.rows[*].vault_id
@@ -198,6 +198,10 @@ dashboard "filestorage_filesystem_detail" {
         title = "Encryption Details"
         query = query.filestorage_filesystem_encryption
         args  = [self.input.filesystem_id.value]
+
+        column "Key Name" {
+          href = "${dashboard.kms_key_detail.url_path}?input.key_id={{.'KMS Key ID' | @uri}}"
+        }
       }
 
       table {
@@ -408,12 +412,15 @@ query "filestorage_filesystem_snapshot_detail" {
 query "filestorage_filesystem_encryption" {
   sql = <<-EOQ
     select
+      k.name as "Key Name",
       case when kms_key_id is not null and kms_key_id <> '' then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
       kms_key_id as "KMS Key ID"
     from
-      oci_file_storage_file_system
+      oci_file_storage_file_system as s
+      left join oci_kms_key as k
+      on s.kms_key_id = k.id
     where
-      id  = $1;
+      s.id  = $1;
   EOQ
 }
 

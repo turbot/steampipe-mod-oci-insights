@@ -11,36 +11,36 @@ dashboard "nosql_table_age_report" {
   container {
 
     card {
-      sql   = query.nosql_table_count.sql
+      query = query.nosql_table_count
       width = 2
     }
 
     card {
-      sql   = query.nosql_table_24_hrs.sql
-      width = 2
-      type  = "info"
-    }
-
-    card {
-      sql   = query.nosql_table_30_days.sql
+      query = query.nosql_table_24_hrs
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.nosql_table_90_days.sql
+      query = query.nosql_table_30_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.nosql_table_365_days.sql
+      query = query.nosql_table_90_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.nosql_table_1_year.sql
+      query = query.nosql_table_365_days
+      width = 2
+      type  = "info"
+    }
+
+    card {
+      query = query.nosql_table_1_year
       width = 2
       type  = "info"
     }
@@ -57,7 +57,7 @@ dashboard "nosql_table_age_report" {
       href = "${dashboard.nosql_table_detail.url_path}?input.table_id={{.OCID | @uri}}"
     }
 
-    sql = query.nosql_table_age_report.sql
+    query = query.nosql_table_age_report
   }
 
 }

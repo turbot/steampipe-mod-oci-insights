@@ -11,17 +11,17 @@ dashboard "blockstorage_boot_volume_encryption_report" {
   container {
 
     card {
-      sql   = query.blockstorage_boot_volume_count.sql
+      query = query.blockstorage_boot_volume_count
       width = 3
     }
 
     card {
-      sql   = query.blockstorage_boot_volume_customer_managed_encryption_count.sql
+      query = query.blockstorage_boot_volume_customer_managed_encryption_count
       width = 3
     }
 
     card {
-      sql   = query.blockstorage_boot_volume_default_encrypted_volumes_count.sql
+      query = query.blockstorage_boot_volume_default_encrypted_volumes_count
       width = 3
     }
   }
@@ -35,7 +35,7 @@ dashboard "blockstorage_boot_volume_encryption_report" {
       href = "${dashboard.blockstorage_boot_volume_detail.url_path}?input.boot_volume_id={{.OCID | @uri}}"
     }
 
-    sql = query.blockstorage_boot_volume_encryption_report.sql
+    query = query.blockstorage_boot_volume_encryption_report
   }
 
 }

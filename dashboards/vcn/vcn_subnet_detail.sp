@@ -9,7 +9,7 @@ dashboard "vcn_subnet_detail" {
 
   input "subnet_id" {
     title = "Select a subnet:"
-    sql   = query.vcn_subnet_input.sql
+    query = query.vcn_subnet_input
     width = 4
   }
 

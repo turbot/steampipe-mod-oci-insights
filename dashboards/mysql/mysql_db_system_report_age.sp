@@ -11,36 +11,36 @@ dashboard "mysql_db_system_age_report" {
   container {
 
     card {
-      sql   = query.mysql_db_system_count.sql
+      query = query.mysql_db_system_count
       width = 2
     }
 
     card {
-      sql   = query.mysql_db_system_24_hrs.sql
-      width = 2
-      type  = "info"
-    }
-
-    card {
-      sql   = query.mysql_db_system_30_days.sql
+      query = query.mysql_db_system_24_hrs
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.mysql_db_system_90_days.sql
+      query = query.mysql_db_system_30_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.mysql_db_system_365_days.sql
+      query = query.mysql_db_system_90_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.mysql_db_system_1_year.sql
+      query = query.mysql_db_system_365_days
+      width = 2
+      type  = "info"
+    }
+
+    card {
+      query = query.mysql_db_system_1_year
       width = 2
       type  = "info"
     }
@@ -55,7 +55,7 @@ dashboard "mysql_db_system_age_report" {
       href = "${dashboard.mysql_db_system_detail.url_path}?input.db_system_id={{.OCID | @uri}}"
     }
 
-    sql = query.mysql_db_system_age_report.sql
+    query = query.mysql_db_system_age_report
   }
 
 }

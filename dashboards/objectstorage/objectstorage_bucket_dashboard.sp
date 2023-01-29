@@ -10,34 +10,34 @@ dashboard "objectstorage_bucket_dashboard" {
   container {
 
     card {
-      sql   = query.objectstorage_bucket_count.sql
+      query = query.objectstorage_bucket_count
       width = 2
     }
 
     card {
-      sql   = query.objectstorage_bucket_read_only_access_count.sql
+      query = query.objectstorage_bucket_read_only_access_count
       width = 2
     }
 
     card {
-      sql   = query.objectstorage_bucket_archived_count.sql
+      query = query.objectstorage_bucket_archived_count
       width = 2
     }
 
     card {
-      sql   = query.objectstorage_bucket_public_access_count.sql
+      query = query.objectstorage_bucket_public_access_count
       width = 2
       href  = dashboard.objectstorage_bucket_public_access_report.url_path
     }
 
     card {
-      sql   = query.objectstorage_bucket_versioning_disabled_count.sql
+      query = query.objectstorage_bucket_versioning_disabled_count
       width = 2
       href  = dashboard.objectstorage_bucket_lifecycle_report.url_path
     }
 
     card {
-      sql   = query.objectstorage_bucket_logging_disabled_count.sql
+      query = query.objectstorage_bucket_logging_disabled_count
       width = 2
       href  = dashboard.objectstorage_bucket_logging_report.url_path
     }
@@ -49,7 +49,7 @@ dashboard "objectstorage_bucket_dashboard" {
 
     chart {
       title = "Public Access"
-      sql   = query.objectstorage_bucket_public_access_status.sql
+      query = query.objectstorage_bucket_public_access_status
       type  = "donut"
       width = 3
 
@@ -65,7 +65,7 @@ dashboard "objectstorage_bucket_dashboard" {
 
     chart {
       title = "Versioning Status"
-      sql   = query.objectstorage_bucket_versioning_status.sql
+      query = query.objectstorage_bucket_versioning_status
       type  = "donut"
       width = 3
 
@@ -81,7 +81,7 @@ dashboard "objectstorage_bucket_dashboard" {
 
     chart {
       title = "Logging Status"
-      sql   = query.objectstorage_bucket_logging_status.sql
+      query = query.objectstorage_bucket_logging_status
       type  = "donut"
       width = 3
 
@@ -102,35 +102,35 @@ dashboard "objectstorage_bucket_dashboard" {
 
     chart {
       title = "Buckets by Tenancy"
-      sql   = query.objectstorage_bucket_by_tenancy.sql
+      query = query.objectstorage_bucket_by_tenancy
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Buckets by Compartment"
-      sql   = query.objectstorage_bucket_by_compartment.sql
+      query = query.objectstorage_bucket_by_compartment
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Buckets by Region"
-      sql   = query.objectstorage_bucket_by_region.sql
+      query = query.objectstorage_bucket_by_region
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Buckets by Age"
-      sql   = query.objectstorage_bucket_by_creation_month.sql
+      query = query.objectstorage_bucket_by_creation_month
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Buckets by Encryption Type"
-      sql   = query.objectstorage_bucket_encryption_status.sql
+      query = query.objectstorage_bucket_encryption_status
       type  = "column"
       width = 4
     }

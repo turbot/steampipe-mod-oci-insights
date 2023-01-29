@@ -10,12 +10,12 @@ dashboard "ons_subscription_dashboard" {
   container {
 
     card {
-      sql   = query.ons_subscription_count.sql
+      query = query.ons_subscription_count
       width = 3
     }
 
     card {
-      sql   = query.ons_subscription_unused_count.sql
+      query = query.ons_subscription_unused_count
       width = 3
     }
 
@@ -26,28 +26,28 @@ dashboard "ons_subscription_dashboard" {
 
     chart {
       title = "Subscriptions by Tenancy"
-      sql   = query.ons_subscription_by_tenancy.sql
+      query = query.ons_subscription_by_tenancy
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Subscriptions by Compartment"
-      sql   = query.ons_subscription_by_compartment.sql
+      query = query.ons_subscription_by_compartment
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Subscriptions by Region"
-      sql   = query.ons_subscription_by_region.sql
+      query = query.ons_subscription_by_region
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Subscriptions by Age"
-      sql   = query.ons_subscription_by_creation_month.sql
+      query = query.ons_subscription_by_creation_month
       type  = "column"
       width = 3
     }

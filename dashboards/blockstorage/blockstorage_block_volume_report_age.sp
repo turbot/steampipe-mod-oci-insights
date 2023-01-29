@@ -11,36 +11,36 @@ dashboard "blockstorage_block_volume_age_report" {
   container {
 
     card {
-      sql   = query.blockstorage_block_volume_count.sql
+      query = query.blockstorage_block_volume_count
       width = 2
     }
 
     card {
-      sql   = query.blockstorage_block_volume_24_hrs.sql
-      width = 2
-      type  = "info"
-    }
-
-    card {
-      sql   = query.blockstorage_block_volume_30_days.sql
+      query = query.blockstorage_block_volume_24_hrs
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.blockstorage_block_volume_90_days.sql
+      query = query.blockstorage_block_volume_30_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.blockstorage_block_volume_365_days.sql
+      query = query.blockstorage_block_volume_90_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.blockstorage_block_volume_1_year.sql
+      query = query.blockstorage_block_volume_365_days
+      width = 2
+      type  = "info"
+    }
+
+    card {
+      query = query.blockstorage_block_volume_1_year
       width = 2
       type  = "info"
     }
@@ -56,7 +56,7 @@ dashboard "blockstorage_block_volume_age_report" {
       href = "${dashboard.blockstorage_block_volume_detail.url_path}?input.block_volume_id={{.OCID | @uri}}"
     }
 
-    sql = query.blockstorage_block_volume_age_report.sql
+    query = query.blockstorage_block_volume_age_report
   }
 
 }

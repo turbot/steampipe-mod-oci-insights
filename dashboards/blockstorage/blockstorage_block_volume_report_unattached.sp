@@ -11,7 +11,7 @@ dashboard "blockstorage_block_volume_unattached_report" {
   container {
 
     card {
-      sql   = query.blockstorage_block_volume_unattached_count.sql
+      query = query.blockstorage_block_volume_unattached_count
       width = 3
     }
   }
@@ -25,7 +25,7 @@ dashboard "blockstorage_block_volume_unattached_report" {
       href = "${dashboard.blockstorage_block_volume_detail.url_path}?input.block_volume_id={{.OCID | @uri}}"
     }
 
-    sql = query.blockstorage_block_volume_unattached_report.sql
+    query = query.blockstorage_block_volume_unattached_report
   }
 
 }

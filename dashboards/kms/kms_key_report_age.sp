@@ -11,36 +11,36 @@ dashboard "kms_key_age_report" {
   container {
 
     card {
-      sql   = query.kms_key_count.sql
+      query = query.kms_key_count
       width = 2
     }
 
     card {
-      sql   = query.kms_key_24_hrs.sql
-      width = 2
-      type  = "info"
-    }
-
-    card {
-      sql   = query.kms_key_30_days.sql
+      query = query.kms_key_24_hrs
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.kms_key_90_days.sql
+      query = query.kms_key_30_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.kms_key_365_days.sql
+      query = query.kms_key_90_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.kms_key_1_year.sql
+      query = query.kms_key_365_days
+      width = 2
+      type  = "info"
+    }
+
+    card {
+      query = query.kms_key_1_year
       width = 2
       type  = "info"
     }
@@ -56,7 +56,7 @@ dashboard "kms_key_age_report" {
       href = "${dashboard.kms_key_detail.url_path}?input.key_id={{.OCID | @uri}}"
     }
 
-    sql = query.kms_key_age_report.sql
+    query = query.kms_key_age_report
   }
 
 }

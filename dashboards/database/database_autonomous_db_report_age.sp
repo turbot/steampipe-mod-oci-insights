@@ -11,36 +11,36 @@ dashboard "database_autonomous_database_age_report" {
   container {
 
     card {
-      sql   = query.database_autonomous_db_count.sql
+      query = query.database_autonomous_db_count
       width = 2
     }
 
     card {
-      sql   = query.database_autonomous_db_24_hrs.sql
-      width = 2
-      type  = "info"
-    }
-
-    card {
-      sql   = query.database_autonomous_db_30_days.sql
+      query = query.database_autonomous_db_24_hrs
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.database_autonomous_db_90_days.sql
+      query = query.database_autonomous_db_30_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.database_autonomous_db_365_days.sql
+      query = query.database_autonomous_db_90_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.database_autonomous_db_1_year.sql
+      query = query.database_autonomous_db_365_days
+      width = 2
+      type  = "info"
+    }
+
+    card {
+      query = query.database_autonomous_db_1_year
       width = 2
       type  = "info"
     }
@@ -56,7 +56,7 @@ dashboard "database_autonomous_database_age_report" {
       href = "${dashboard.database_autonomous_database_detail.url_path}?input.db_id={{.OCID | @uri}}"
     }
 
-    sql = query.database_autonomous_db_age_report.sql
+    query = query.database_autonomous_db_age_report
   }
 
 }

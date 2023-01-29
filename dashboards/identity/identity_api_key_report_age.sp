@@ -11,36 +11,36 @@ dashboard "identity_api_key_age_report" {
   container {
 
     card {
-      sql   = query.identity_api_key_count.sql
+      query = query.identity_api_key_count
       width = 2
     }
 
     card {
-      sql   = query.identity_api_key_24_hrs.sql
-      width = 2
-      type  = "info"
-    }
-
-    card {
-      sql   = query.identity_api_key_30_days.sql
+      query = query.identity_api_key_24_hrs
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.identity_api_key_90_days.sql
+      query = query.identity_api_key_30_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.identity_api_key_365_days.sql
+      query = query.identity_api_key_90_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.identity_api_key_1_year.sql
+      query = query.identity_api_key_365_days
+      width = 2
+      type  = "info"
+    }
+
+    card {
+      query = query.identity_api_key_1_year
       width = 2
       type  = "info"
     }
@@ -52,7 +52,7 @@ dashboard "identity_api_key_age_report" {
       display = "none"
     }
 
-    sql = query.identity_api_key_age_report.sql
+    query = query.identity_api_key_age_report
   }
 
 }

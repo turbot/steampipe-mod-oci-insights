@@ -11,36 +11,36 @@ dashboard "objectstorage_bucket_age_report" {
   container {
 
     card {
-      sql   = query.objectstorage_bucket_count.sql
+      query = query.objectstorage_bucket_count
       width = 2
     }
 
     card {
-      sql   = query.objectstorage_bucket_24_hrs.sql
-      width = 2
-      type  = "info"
-    }
-
-    card {
-      sql   = query.objectstorage_bucket_30_days.sql
+      query = query.objectstorage_bucket_24_hrs
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.objectstorage_bucket_90_days.sql
+      query = query.objectstorage_bucket_30_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.objectstorage_bucket_365_days.sql
+      query = query.objectstorage_bucket_90_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.objectstorage_bucket_1_year.sql
+      query = query.objectstorage_bucket_365_days
+      width = 2
+      type  = "info"
+    }
+
+    card {
+      query = query.objectstorage_bucket_1_year
       width = 2
       type  = "info"
     }
@@ -56,7 +56,7 @@ dashboard "objectstorage_bucket_age_report" {
       href = "${dashboard.objectstorage_bucket_detail.url_path}?input.bucket_id={{.OCID | @uri}}"
     }
 
-    sql = query.objectstorage_bucket_age_report.sql
+    query = query.objectstorage_bucket_age_report
   }
 
 }

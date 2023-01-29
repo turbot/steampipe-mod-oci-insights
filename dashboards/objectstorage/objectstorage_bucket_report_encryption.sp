@@ -11,17 +11,17 @@ dashboard "objectstorage_bucket_encryption_report" {
   container {
 
     card {
-      sql   = query.objectstorage_bucket_count.sql
+      query = query.objectstorage_bucket_count
       width = 3
     }
 
     card {
-      sql   = query.objectstorage_bucket_report_customer_managed_encryption_count.sql
+      query = query.objectstorage_bucket_report_customer_managed_encryption_count
       width = 3
     }
 
     card {
-      sql   = query.objectstorage_bucket_default_encryption_count.sql
+      query = query.objectstorage_bucket_default_encryption_count
       width = 3
     }
 
@@ -36,7 +36,7 @@ dashboard "objectstorage_bucket_encryption_report" {
       href = "${dashboard.objectstorage_bucket_detail.url_path}?input.bucket_id={{.OCID | @uri}}"
     }
 
-    sql = query.objectstorage_bucket_encryption_report.sql
+    query = query.objectstorage_bucket_encryption_report
   }
 
 }

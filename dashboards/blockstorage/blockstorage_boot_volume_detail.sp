@@ -17,13 +17,13 @@ dashboard "blockstorage_boot_volume_detail" {
     card {
       width = 3
       query = query.blockstorage_boot_volume_storage
-      args = [self.input.boot_volume_id.value]
+      args  = [self.input.boot_volume_id.value]
     }
 
     card {
       width = 3
       query = query.blockstorage_boot_volume_vpu
-      args = [self.input.boot_volume_id.value]
+      args  = [self.input.boot_volume_id.value]
     }
 
   }
@@ -197,7 +197,7 @@ dashboard "blockstorage_boot_volume_detail" {
         }
       }
 
-       edge {
+      edge {
         base = edge.blockstorage_boot_volume_to_blockstorage_boot_volume_clone
         args = {
           blockstorage_boot_volume_ids = [self.input.boot_volume_id.value]
@@ -252,7 +252,7 @@ dashboard "blockstorage_boot_volume_detail" {
         type  = "line"
         width = 6
         query = query.blockstorage_boot_volume_overview
-        args = [self.input.boot_volume_id.value]
+        args  = [self.input.boot_volume_id.value]
 
       }
 
@@ -260,7 +260,7 @@ dashboard "blockstorage_boot_volume_detail" {
         title = "Tags"
         width = 6
         query = query.blockstorage_boot_volume_tags
-        args = [self.input.boot_volume_id.value]
+        args  = [self.input.boot_volume_id.value]
 
       }
     }
@@ -271,7 +271,7 @@ dashboard "blockstorage_boot_volume_detail" {
       table {
         title = "Attached To"
         query = query.blockstorage_boot_volume_attached_instances
-        args = [self.input.boot_volume_id.value]
+        args  = [self.input.boot_volume_id.value]
 
         column "Instance ID" {
           display = "none"
@@ -285,25 +285,22 @@ dashboard "blockstorage_boot_volume_detail" {
       table {
         title = "Encryption Details"
         query = query.blockstorage_boot_volume_encryption
-        args = [self.input.boot_volume_id.value]
-      }
-    }
+        args  = [self.input.boot_volume_id.value]
 
-    container{
-
-      table {
-        title = "Backup Policy"
-        query = query.blockstorage_boot_volume_backup_policy
-        args = [self.input.boot_volume_id.value]
-
-        column "Policy ID" {
-          display = "none"
+        column "Key Name" {
+          href = "${dashboard.kms_key_detail.url_path}?input.key_id={{.'KMS Key ID' | @uri}}"
         }
       }
-    }
-    }
 
+      table {
+        title = "Backup Policy Schedules"
+        query = query.blockstorage_boot_volume_backup_policy_schedules
+        args  = [self.input.boot_volume_id.value]
+      }
+    }
   }
+
+}
 
 
 # Input queries
@@ -529,26 +526,50 @@ query "blockstorage_boot_volume_attached_instances" {
 query "blockstorage_boot_volume_encryption" {
   sql = <<EOQ
     select
+      k.name as "Key Name",
       case when kms_key_id is not null and kms_key_id <> '' then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
       kms_key_id as "KMS Key ID"
     from
-      oci_core_boot_volume
+      oci_core_boot_volume as v
+      left join oci_kms_key as k
+      on v.kms_key_id = k.id
     where
-      id  = $1;
+      v.id  = $1;
   EOQ
 }
 
-query "blockstorage_boot_volume_backup_policy" {
+query "blockstorage_boot_volume_backup_policy_schedules" {
   sql = <<EOQ
     select
-      p.id as "Instance ID",
-      p.display_name as "Backup Policy Name",
-      p.region as "Region",
-      p.time_created as "Creation Time",
-      v.volume_backup_policy_assignment_id as "Backup Policy Assignment ID"
+      s ->> 'period' as "Period",
+      s ->> 'timeZone' as "Time Zone",
+      s ->> 'hourOfDay' as "Hour Of Day",
+      s ->> 'backupType' as "Backup Type",
+      s ->> 'dayOfMonth' as "Day Of Month",
+      s ->> 'offsetType' as "Offset Type",
+      s ->> 'offsetSeconds' as "Offset Seconds",
+      s ->> 'retentionSeconds' as "Retention Seconds"
     from
+      oci_core_boot_volume as v,
       oci_core_volume_backup_policy as p,
-      oci_core_boot_volume as v
+      jsonb_array_elements(schedules) as s
+    where
+      p.id = v.volume_backup_policy_id
+      and v.id = $1
+    union
+      select
+      s ->> 'period' as "Period",
+      s ->> 'timeZone' as "Time Zone",
+      s ->> 'hourOfDay' as "Hour Of Day",
+      s ->> 'backupType' as "Backup Type",
+      s ->> 'dayOfMonth' as "Day Of Month",
+      s ->> 'offsetType' as "Offset Type",
+      s ->> 'offsetSeconds' as "Offset Seconds",
+      s ->> 'retentionSeconds' as "Retention Seconds"
+    from
+      oci_core_boot_volume as v,
+      oci_core_volume_default_backup_policy as p,
+      jsonb_array_elements(schedules) as s
     where
       p.id = v.volume_backup_policy_id
       and v.id = $1;

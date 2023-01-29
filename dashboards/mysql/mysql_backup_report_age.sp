@@ -11,36 +11,36 @@ dashboard "mysql_backup_age_report" {
   container {
 
     card {
-      sql   = query.mysql_backup_count.sql
+      query = query.mysql_backup_count
       width = 2
     }
 
     card {
-      sql   = query.mysql_backup_24_hrs.sql
-      width = 2
-      type  = "info"
-    }
-
-    card {
-      sql   = query.mysql_backup_30_days.sql
+      query = query.mysql_backup_24_hrs
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.mysql_backup_90_days.sql
+      query = query.mysql_backup_30_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.mysql_backup_365_days.sql
+      query = query.mysql_backup_90_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.mysql_backup_1_year.sql
+      query = query.mysql_backup_365_days
+      width = 2
+      type  = "info"
+    }
+
+    card {
+      query = query.mysql_backup_1_year
       width = 2
       type  = "info"
     }
@@ -52,7 +52,7 @@ dashboard "mysql_backup_age_report" {
       display = "none"
     }
 
-    sql = query.mysql_backup_age_report.sql
+    query = query.mysql_backup_age_report
   }
 
 }

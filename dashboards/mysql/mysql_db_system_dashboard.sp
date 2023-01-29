@@ -10,27 +10,27 @@ dashboard "mysql_db_system_dashboard" {
   container {
 
     card {
-      sql   = query.mysql_db_system_count.sql
+      query = query.mysql_db_system_count
       width = 2
     }
 
     card {
-      sql   = query.mysql_db_system_storage_total.sql
+      query = query.mysql_db_system_storage_total
       width = 2
     }
 
     card {
-      sql   = query.mysql_db_system_analytics_cluster_attached_count.sql
+      query = query.mysql_db_system_analytics_cluster_attached_count
       width = 2
     }
 
     card {
-      sql   = query.mysql_db_system_heat_wave_cluster_attached_count.sql
+      query = query.mysql_db_system_heat_wave_cluster_attached_count
       width = 2
     }
 
     card {
-      sql   = query.mysql_db_system_backup_disabled_count.sql
+      query = query.mysql_db_system_backup_disabled_count
       width = 2
     }
 
@@ -41,7 +41,7 @@ dashboard "mysql_db_system_dashboard" {
 
     chart {
       title = "Backup Status"
-      sql   = query.mysql_db_system_with_backups.sql
+      query = query.mysql_db_system_with_backups
       type  = "donut"
       width = 3
 
@@ -62,28 +62,28 @@ dashboard "mysql_db_system_dashboard" {
 
     chart {
       title = "DB Systems by Tenancy"
-      sql   = query.mysql_db_system_by_tenancy.sql
+      query = query.mysql_db_system_by_tenancy
       type  = "column"
       width = 3
     }
 
     chart {
       title = "DB Systems by Compartment"
-      sql   = query.mysql_db_system_by_compartment.sql
+      query = query.mysql_db_system_by_compartment
       type  = "column"
       width = 3
     }
 
     chart {
       title = "DB Systems by Region"
-      sql   = query.mysql_db_system_by_region.sql
+      query = query.mysql_db_system_by_region
       type  = "column"
       width = 3
     }
 
     chart {
       title = "DB Systems by Age"
-      sql   = query.mysql_db_system_by_creation_month.sql
+      query = query.mysql_db_system_by_creation_month
       type  = "column"
       width = 3
     }
@@ -93,7 +93,7 @@ dashboard "mysql_db_system_dashboard" {
   container {
     chart {
       title = "Storage by Tenancy (GB)"
-      sql   = query.mysql_db_system_storage_by_tenancy.sql
+      query = query.mysql_db_system_storage_by_tenancy
       type  = "column"
       width = 3
 
@@ -104,7 +104,7 @@ dashboard "mysql_db_system_dashboard" {
 
     chart {
       title = "Storage by Compartment (GB)"
-      sql   = query.mysql_db_system_storage_by_compartment.sql
+      query = query.mysql_db_system_storage_by_compartment
       type  = "column"
       width = 3
 
@@ -115,7 +115,7 @@ dashboard "mysql_db_system_dashboard" {
 
     chart {
       title = "Storage by Region (GB)"
-      sql   = query.mysql_db_system_storage_by_region.sql
+      query = query.mysql_db_system_storage_by_region
       type  = "column"
       width = 3
 
@@ -126,7 +126,7 @@ dashboard "mysql_db_system_dashboard" {
 
     chart {
       title = "Storage by Age (GB)"
-      sql   = query.mysql_db_system_storage_by_creation_month.sql
+      query = query.mysql_db_system_storage_by_creation_month
       type  = "column"
       width = 3
 
@@ -142,14 +142,14 @@ dashboard "mysql_db_system_dashboard" {
 
     chart {
       title = "Top 10 CPU - Last 7 days"
-      sql   = query.mysql_db_system_top10_cpu_past_week.sql
+      query = query.mysql_db_system_top10_cpu_past_week
       type  = "line"
       width = 6
     }
 
     chart {
       title = "Average max daily CPU - Last 30 days"
-      sql   = query.mysql_db_system_by_cpu_utilization_category.sql
+      query = query.mysql_db_system_by_cpu_utilization_category
       type  = "column"
       width = 6
     }

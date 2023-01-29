@@ -10,12 +10,12 @@ dashboard "oci_vcn_dashboard" {
   container {
 
     card {
-      sql   = query.oci_vcn_count.sql
+      query = query.oci_vcn_count
       width = 3
     }
 
     card {
-      sql   = query.oci_vcn_no_subnet_count.sql
+      query = query.oci_vcn_no_subnet_count
       width = 3
     }
 
@@ -27,7 +27,7 @@ dashboard "oci_vcn_dashboard" {
 
     chart {
       title = "Empty VCNs (No Subnets)"
-      sql   = query.oci_vcn_no_subnet.sql
+      query = query.oci_vcn_no_subnet
       type  = "donut"
       width = 3
 
@@ -49,28 +49,28 @@ dashboard "oci_vcn_dashboard" {
 
     chart {
       title = "VCNs by Tenancy"
-      sql   = query.oci_vcn_by_tenancy.sql
+      query = query.oci_vcn_by_tenancy
       type  = "column"
       width = 3
     }
 
     chart {
       title = "VCNs by Compartment"
-      sql   = query.oci_vcn_by_compartment.sql
+      query = query.oci_vcn_by_compartment
       type  = "column"
       width = 3
     }
 
     chart {
       title = "VCNs by Region"
-      sql   = query.oci_vcn_by_region.sql
+      query = query.oci_vcn_by_region
       type  = "column"
       width = 3
     }
 
     chart {
       title = "VCNs by RFC1918 Range"
-      sql   = query.oci_vcn_by_rfc1918_range.sql
+      query = query.oci_vcn_by_rfc1918_range
       type  = "column"
       width = 3
     }

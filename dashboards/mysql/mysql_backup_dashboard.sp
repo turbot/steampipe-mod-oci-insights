@@ -10,22 +10,22 @@ dashboard "mysql_backup_dashboard" {
   container {
 
     card {
-      sql   = query.mysql_backup_count.sql
+      query = query.mysql_backup_count
       width = 3
     }
 
     card {
-      sql   = query.mysql_backup_storage_total.sql
+      query = query.mysql_backup_storage_total
       width = 3
     }
 
     card {
-      sql   = query.mysql_automatic_backup_count.sql
+      query = query.mysql_automatic_backup_count
       width = 3
     }
 
     card {
-      sql   = query.mysql_full_backup_count.sql
+      query = query.mysql_full_backup_count
       width = 3
     }
 
@@ -36,42 +36,42 @@ dashboard "mysql_backup_dashboard" {
 
     chart {
       title = "Backups by Tenancy"
-      sql   = query.mysql_backup_by_tenancy.sql
+      query = query.mysql_backup_by_tenancy
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Backups by Compartment"
-      sql   = query.mysql_backup_by_compartment.sql
+      query = query.mysql_backup_by_compartment
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Backups by Region"
-      sql   = query.mysql_backup_by_region.sql
+      query = query.mysql_backup_by_region
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Backups by Age"
-      sql   = query.mysql_backup_by_creation_month.sql
+      query = query.mysql_backup_by_creation_month
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Backups by Creation Type"
-      sql   = query.mysql_backup_by_creation_type.sql
+      query = query.mysql_backup_by_creation_type
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Backups by Backup Type"
-      sql   = query.mysql_backup_by_backup_type.sql
+      query = query.mysql_backup_by_backup_type
       type  = "column"
       width = 4
     }
@@ -82,7 +82,7 @@ dashboard "mysql_backup_dashboard" {
 
     chart {
       title = "Storage by Tenancy (GB)"
-      sql   = query.mysql_backup_storage_by_tenancy.sql
+      query = query.mysql_backup_storage_by_tenancy
       type  = "column"
       width = 4
 
@@ -93,7 +93,7 @@ dashboard "mysql_backup_dashboard" {
 
     chart {
       title = "Storage by Compartment (GB)"
-      sql   = query.mysql_backup_storage_by_compartment.sql
+      query = query.mysql_backup_storage_by_compartment
       type  = "column"
       width = 4
 
@@ -104,7 +104,7 @@ dashboard "mysql_backup_dashboard" {
 
     chart {
       title = "Storage by Region (GB)"
-      sql   = query.mysql_backup_storage_by_region.sql
+      query = query.mysql_backup_storage_by_region
       type  = "column"
       width = 4
 
@@ -115,7 +115,7 @@ dashboard "mysql_backup_dashboard" {
 
     chart {
       title = "Storage by Age (GB)"
-      sql   = query.mysql_backup_storage_by_creation_month.sql
+      query = query.mysql_backup_storage_by_creation_month
       type  = "column"
       width = 4
 
@@ -126,7 +126,7 @@ dashboard "mysql_backup_dashboard" {
 
     chart {
       title = "Storage by Creation Type"
-      sql   = query.mysql_backup_storage_by_creation_type.sql
+      query = query.mysql_backup_storage_by_creation_type
       type  = "column"
       width = 4
 
@@ -137,7 +137,7 @@ dashboard "mysql_backup_dashboard" {
 
     chart {
       title = "Storage by Backup Type"
-      sql   = query.mysql_backup_storage_by_backup_type.sql
+      query = query.mysql_backup_storage_by_backup_type
       type  = "column"
       width = 2
 

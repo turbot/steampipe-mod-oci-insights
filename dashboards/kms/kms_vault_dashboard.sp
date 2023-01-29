@@ -10,12 +10,12 @@ dashboard "kms_vault_dashboard" {
   container {
 
     card {
-      sql   = query.kms_vault_count.sql
+      query = query.kms_vault_count
       width = 3
     }
 
     card {
-      sql   = query.kms_vault_disabled_count.sql
+      query = query.kms_vault_disabled_count
       width = 3
     }
 
@@ -26,7 +26,7 @@ dashboard "kms_vault_dashboard" {
 
     chart {
       title = "Lifecycle State"
-      sql   = query.kms_vault_lifecycle_state.sql
+      query = query.kms_vault_lifecycle_state
       type  = "donut"
       width = 3
 
@@ -47,21 +47,21 @@ dashboard "kms_vault_dashboard" {
 
     chart {
       title = "Vaults by Type"
-      sql   = query.kms_vault_by_type.sql
+      query = query.kms_vault_by_type
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Vaults by Tenancy"
-      sql   = query.kms_vault_by_tenancy.sql
+      query = query.kms_vault_by_tenancy
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Vaults by Compartment"
-      sql   = query.kms_vault_by_compartment.sql
+      query = query.kms_vault_by_compartment
       type  = "column"
       width = 4
     }
@@ -69,14 +69,14 @@ dashboard "kms_vault_dashboard" {
 
     chart {
       title = "Vaults by Region"
-      sql   = query.kms_vault_by_region.sql
+      query = query.kms_vault_by_region
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Vaults by Age"
-      sql   = query.kms_vault_by_creation_month.sql
+      query = query.kms_vault_by_creation_month
       type  = "column"
       width = 4
     }

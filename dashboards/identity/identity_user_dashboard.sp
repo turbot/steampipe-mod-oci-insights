@@ -10,17 +10,17 @@ dashboard "identity_user_dashboard" {
   container {
 
     card {
-      sql   = query.identity_user_count.sql
+      query = query.identity_user_count
       width = 3
     }
 
     card {
-      sql   = query.identity_user_not_attached_to_group.sql
+      query = query.identity_user_not_attached_to_group
       width = 3
     }
 
     card {
-      sql   = query.identity_user_mfa_disabled_count.sql
+      query = query.identity_user_mfa_disabled_count
       width = 3
       href  = dashboard.identity_user_mfa_report.url_path
     }
@@ -32,7 +32,7 @@ dashboard "identity_user_dashboard" {
 
     chart {
       title = "MFA Status"
-      sql   = query.identity_user_mfa_enabled.sql
+      query = query.identity_user_mfa_enabled
       type  = "donut"
       width = 3
 
@@ -53,35 +53,35 @@ dashboard "identity_user_dashboard" {
 
     chart {
       title = "Users by Tenancy"
-      sql   = query.identity_users_by_tenancy.sql
+      query = query.identity_users_by_tenancy
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Users by Group"
-      sql   = query.identity_user_by_groups.sql
+      query = query.identity_user_by_groups
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Users by Type"
-      sql   = query.identity_user_by_type.sql
+      query = query.identity_user_by_type
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Users by Age"
-      sql   = query.identity_users_by_creation_month.sql
+      query = query.identity_users_by_creation_month
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Users by Email Verification"
-      sql   = query.identity_user_by_verified_email.sql
+      query = query.identity_user_by_verified_email
       type  = "column"
       width = 4
     }

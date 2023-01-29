@@ -11,12 +11,12 @@ dashboard "objectstorage_bucket_lifecycle_report" {
   container {
 
     card {
-      sql   = query.objectstorage_bucket_count.sql
+      query = query.objectstorage_bucket_count
       width = 3
     }
 
     card {
-      sql   = query.objectstorage_bucket_versioning_disabled_count.sql
+      query = query.objectstorage_bucket_versioning_disabled_count
       width = 3
     }
 
@@ -31,7 +31,7 @@ dashboard "objectstorage_bucket_lifecycle_report" {
       href = "${dashboard.objectstorage_bucket_detail.url_path}?input.bucket_id={{.OCID | @uri}}"
     }
 
-    sql = query.objectstorage_bucket_lifecycle_report.sql
+    query = query.objectstorage_bucket_lifecycle_report
   }
 
 }

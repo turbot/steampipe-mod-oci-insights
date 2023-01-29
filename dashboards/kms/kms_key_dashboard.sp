@@ -10,17 +10,17 @@ dashboard "kms_key_dashboard" {
   container {
 
     card {
-      sql   = query.kms_key_count.sql
+      query = query.kms_key_count
       width = 3
     }
 
     card {
-      sql   = query.kms_hsm_key_count.sql
+      query = query.kms_hsm_key_count
       width = 3
     }
 
     card {
-      sql   = query.kms_key_disabled_count.sql
+      query = query.kms_key_disabled_count
       width = 3
     }
 
@@ -31,7 +31,7 @@ dashboard "kms_key_dashboard" {
 
     chart {
       title = "Lifecycle State"
-      sql   = query.kms_key_lifecycle_state.sql
+      query = query.kms_key_lifecycle_state
       type  = "donut"
       width = 3
 
@@ -52,14 +52,14 @@ dashboard "kms_key_dashboard" {
 
     chart {
       title = "Keys by Tenancy"
-      sql   = query.kms_key_by_tenancy.sql
+      query = query.kms_key_by_tenancy
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Keys by Compartment"
-      sql   = query.kms_key_by_compartment.sql
+      query = query.kms_key_by_compartment
       type  = "column"
       width = 4
     }
@@ -67,21 +67,21 @@ dashboard "kms_key_dashboard" {
 
     chart {
       title = "Keys by Region"
-      sql   = query.kms_key_by_region.sql
+      query = query.kms_key_by_region
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Keys by Age"
-      sql   = query.kms_key_by_creation_month.sql
+      query = query.kms_key_by_creation_month
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Keys by Protection Mode"
-      sql   = query.kms_key_by_protection_mode.sql
+      query = query.kms_key_by_protection_mode
       type  = "column"
       width = 4
     }

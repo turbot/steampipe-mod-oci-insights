@@ -11,36 +11,36 @@ dashboard "compute_instance_age_report" {
   container {
 
     card {
-      sql   = query.compute_instance_count.sql
+      query = query.compute_instance_count
       width = 2
     }
 
     card {
-      sql   = query.compute_instance_24_hrs.sql
-      width = 2
-      type  = "info"
-    }
-
-    card {
-      sql   = query.compute_instance_30_days.sql
+      query = query.compute_instance_24_hrs
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.compute_instance_90_days.sql
+      query = query.compute_instance_30_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.compute_instance_365_days.sql
+      query = query.compute_instance_90_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.compute_instance_1_year.sql
+      query = query.compute_instance_365_days
+      width = 2
+      type  = "info"
+    }
+
+    card {
+      query = query.compute_instance_1_year
       width = 2
       type  = "info"
     }
@@ -56,7 +56,7 @@ dashboard "compute_instance_age_report" {
       href = "${dashboard.compute_instance_detail.url_path}?input.instance_id={{.OCID | @uri}}"
     }
 
-    sql = query.compute_instance_age_report.sql
+    query = query.compute_instance_age_report
   }
 
 }

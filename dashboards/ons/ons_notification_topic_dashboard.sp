@@ -10,12 +10,12 @@ dashboard "ons_notification_topic_dashboard" {
   container {
 
     card {
-      sql   = query.ons_notification_topic_count.sql
+      query = query.ons_notification_topic_count
       width = 3
     }
 
     card {
-      sql   = query.ons_notification_topic_unused_count.sql
+      query = query.ons_notification_topic_unused_count
       width = 3
     }
   }
@@ -26,7 +26,7 @@ dashboard "ons_notification_topic_dashboard" {
 
     chart {
       title = "Subscriptions Status"
-      sql   = query.ons_notification_topic_by_subscription.sql
+      query = query.ons_notification_topic_by_subscription
       type  = "donut"
       width = 4
 
@@ -47,28 +47,28 @@ dashboard "ons_notification_topic_dashboard" {
 
     chart {
       title = "Topics by Tenancy"
-      sql   = query.ons_notification_topic_by_tenancy.sql
+      query = query.ons_notification_topic_by_tenancy
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Topics by Compartment"
-      sql   = query.ons_notification_topic_by_compartment.sql
+      query = query.ons_notification_topic_by_compartment
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Topics by Region"
-      sql   = query.ons_notification_topic_by_region.sql
+      query = query.ons_notification_topic_by_region
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Topics by Age"
-      sql   = query.ons_notification_topic_by_creation_month.sql
+      query = query.ons_notification_topic_by_creation_month
       type  = "column"
       width = 3
     }

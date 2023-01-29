@@ -12,19 +12,19 @@ dashboard "oci_vcn_network_security_list_dashboard" {
     card {
       width = 3
 
-      sql = query.oci_vcn_security_list_count.sql
+      query = query.oci_vcn_security_list_count
     }
 
     card {
       width = 3
 
-      sql = query.oci_vcn_security_list_unrestricted_ingress_ssh_count.sql
+      query = query.oci_vcn_security_list_unrestricted_ingress_ssh_count
     }
 
     card {
       width = 3
 
-      sql = query.oci_vcn_security_list_unrestricted_ingress_rdp_count.sql
+      query = query.oci_vcn_security_list_unrestricted_ingress_rdp_count
     }
 
   }
@@ -37,7 +37,7 @@ dashboard "oci_vcn_network_security_list_dashboard" {
       title = "Ingress SSH Status"
       type  = "donut"
       width = 3
-      sql   = query.oci_vcn_security_list_by_ingress_ssh.sql
+      query = query.oci_vcn_security_list_by_ingress_ssh
 
       series "count" {
         point "restricted" {
@@ -53,7 +53,7 @@ dashboard "oci_vcn_network_security_list_dashboard" {
       title = "Ingress RDP Status"
       type  = "donut"
       width = 3
-      sql   = query.oci_vcn_security_list_by_ingress_rdp.sql
+      query = query.oci_vcn_security_list_by_ingress_rdp
 
       series "count" {
         point "restricted" {
@@ -72,28 +72,28 @@ dashboard "oci_vcn_network_security_list_dashboard" {
 
     chart {
       title = "Security Lists by Tenancy"
-      sql   = query.oci_vcn_security_list_by_tenancy.sql
+      query = query.oci_vcn_security_list_by_tenancy
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Security Lists by Compartment"
-      sql   = query.oci_vcn_security_list_by_compartment.sql
+      query = query.oci_vcn_security_list_by_compartment
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Security Lists by Region"
-      sql   = query.oci_vcn_security_list_by_region.sql
+      query = query.oci_vcn_security_list_by_region
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Network Security Lists by VCN"
-      sql   = query.oci_vcn_security_list_by_vcn.sql
+      query = query.oci_vcn_security_list_by_vcn
       type  = "column"
       width = 3
     }

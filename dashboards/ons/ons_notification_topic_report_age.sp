@@ -11,36 +11,36 @@ dashboard "ons_notification_topic_age_report" {
   container {
 
     card {
-      sql   = query.ons_notification_topic_count.sql
+      query = query.ons_notification_topic_count
       width = 2
     }
 
     card {
-      sql   = query.ons_notification_topic_24_hrs.sql
-      width = 2
-      type  = "info"
-    }
-
-    card {
-      sql   = query.ons_notification_topic_30_days.sql
+      query = query.ons_notification_topic_24_hrs
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.ons_notification_topic_90_days.sql
+      query = query.ons_notification_topic_30_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.ons_notification_topic_365_days.sql
+      query = query.ons_notification_topic_90_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.ons_notification_topic_1_year.sql
+      query = query.ons_notification_topic_365_days
+      width = 2
+      type  = "info"
+    }
+
+    card {
+      query = query.ons_notification_topic_1_year
       width = 2
       type  = "info"
     }
@@ -56,7 +56,7 @@ dashboard "ons_notification_topic_age_report" {
       href = "${dashboard.ons_notification_topic_detail.url_path}?input.topic_id={{.OCID | @uri}}"
     }
 
-    sql = query.ons_notification_topic_age_report.sql
+    query = query.ons_notification_topic_age_report
   }
 
 }
