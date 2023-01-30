@@ -1,4 +1,4 @@
-This dashboard answers the following questions:
+This dashboard answers the following questions for each vault:
 
 - How is the vault configured?
 - What tags are applied?
