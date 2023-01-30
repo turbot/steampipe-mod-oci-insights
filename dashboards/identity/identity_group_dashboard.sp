@@ -137,7 +137,7 @@ query "identity_groups_by_tenancy" {
     where
       t.id = g.tenant_id
     group by
-      tenancy
+      t.name
     order by count(g.*) desc;
   EOQ
 }
