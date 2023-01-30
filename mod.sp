@@ -14,9 +14,9 @@ mod "oci_insights" {
   }
 
   require {
-    steampipe = "0.13.1"
+    steampipe = "0.18.0"
     plugin "oci" {
-      version = "0.11.0"
+      version = "0.19.0"
     }
   }
 }
