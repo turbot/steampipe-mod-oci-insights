@@ -58,24 +58,6 @@ edge "filestorage_file_system_to_kms_key" {
   param "filestorage_file_system_ids" {}
 }
 
-edge "filestorage_file_system_to_kms_vault" {
-  title = "vault"
-
-  sql = <<-EOQ
-    select
-      f.id as from_id,
-      k.vault_id as to_id
-    from
-      oci_file_storage_file_system as f
-      left join oci_kms_key as k on k.id = f.kms_key_id
-    where
-      vault_id is not null
-      and f.id = any($1);
-  EOQ
-
-  param "filestorage_file_system_ids" {}
-}
-
 edge "filestorage_mount_target_to_vcn_network_security_group" {
   title = "nsg"
 

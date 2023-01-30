@@ -118,14 +118,14 @@ dashboard "database_autonomous_database_detail" {
       }
 
       edge {
-        base = edge.kms_vault_to_kms_key
+        base = edge.kms_key_to_kms_vault
         args = {
-          kms_vault_ids = with.kms_vaults_for_database_autonomous_database.rows[*].vault_id
+          kms_key_ids = with.kms_keys_for_database_autonomous_database.rows[*].kms_key_id
         }
       }
 
       edge {
-        base = edge.database_autonomous_database_to_kms_vault
+        base = edge.database_autonomous_database_to_kms_key
         args = {
           database_autonomous_database_ids = [self.input.db_id.value]
         }

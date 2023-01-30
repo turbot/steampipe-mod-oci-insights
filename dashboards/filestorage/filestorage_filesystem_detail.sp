@@ -132,7 +132,7 @@ dashboard "filestorage_filesystem_detail" {
       }
 
       edge {
-        base = edge.filestorage_file_system_to_kms_vault
+        base = edge.filestorage_file_system_to_kms_key
         args = {
           filestorage_file_system_ids = [self.input.filesystem_id.value]
         }
@@ -153,9 +153,9 @@ dashboard "filestorage_filesystem_detail" {
       }
 
       edge {
-        base = edge.kms_vault_to_kms_key
+        base = edge.kms_key_to_kms_vault
         args = {
-          kms_vault_ids = with.kms_vaults_for_filestorage_file_system.rows[*].vault_id
+          kms_key_ids = with.kms_keys_for_filestorage_file_system.rows[*].kms_key_id
         }
       }
 
