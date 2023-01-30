@@ -156,13 +156,13 @@ query "nosql_table_input" {
       n.name as label,
       n.id as value,
       json_build_object(
-        'c.name', coalesce(c.title, 'root'),
+        'oci.name', coalesce(oci.title, 'root'),
         'n.region', region,
         't.name', t.name
       ) as tags
     from
       oci_nosql_table as n
-      left join oci_identity_compartment as c on n.compartment_id = c.id
+      left join oci_identity_compartment as oci on n.compartment_id = oci.id
       left join oci_identity_tenancy as t on n.tenant_id = t.id
     where
       n.lifecycle_state <> 'DELETED'

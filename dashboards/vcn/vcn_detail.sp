@@ -498,22 +498,22 @@ dashboard "vcn_detail" {
 query "vcn_input" {
   sql = <<-EOQ
     select
-      b.display_name as label,
-      b.id as value,
+      n.display_name as label,
+      n.id as value,
       json_build_object(
-        'b.id', concat('id: ', right(reverse(split_part(reverse(b.id), '.', 1)), 8)),
-        'b.region', concat('region: ', region),
-        'c.name', concat('compartment: ', coalesce(c.title, 'root')),
-        't.name', concat('tenant: ', t.name)
+        'n.id', right(reverse(split_part(reverse(n.id), '.', 1)), 8),
+        'n.region', region,
+        'oci.name', coalesce(oci.title, 'root'),
+        't.name', t.name
       ) as tags
     from
-      oci_core_vcn as b
-      left join oci_identity_compartment as c on b.compartment_id = c.id
-      left join oci_identity_tenancy as t on b.tenant_id = t.id
+      oci_core_vcn as n
+      left join oci_identity_compartment oci on n.compartment_id = oci.id
+      left join oci_identity_tenancy as t on n.tenant_id = t.id
     where
-      b.lifecycle_state <> 'TERMINATED'
+      n.lifecycle_state <> 'TERMINATED'
     order by
-      b.display_name;
+      n.display_name;
   EOQ
 }
 

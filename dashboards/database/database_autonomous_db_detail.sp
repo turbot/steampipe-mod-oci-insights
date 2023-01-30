@@ -228,22 +228,22 @@ dashboard "database_autonomous_database_detail" {
 query "database_autonomous_database_input" {
   sql = <<-EOQ
     select
-      a.display_name as label,
-      a.id as value,
+      d.display_name as label,
+      d.id as value,
       json_build_object(
-        'a.db_name', concat('db_name: ', db_name),
-        'c.name', concat('compartment: ', coalesce(c.title, 'root')),
-        'a.region', concat('region: ', a.region),
-        't.name', concat('tenant: ', t.name)
+        'd.db_name', right(reverse(split_part(reverse(d.id), '.', 1)), 8),
+        'oic.name', coalesce(oic.title, 'root'),
+        'd.region', d.region,
+        't.name', t.name
       ) as tags
     from
-      oci_database_autonomous_database as a
-      left join oci_identity_compartment as c on a.compartment_id = c.id
-      left join oci_identity_tenancy as t on a.tenant_id = t.id
+      oci_database_autonomous_database as d
+      left join oci_identity_compartment as oic on d.compartment_id = oic.id
+      left join oci_identity_tenancy as t on d.tenant_id = t.id
     where
-      a.lifecycle_state <> 'TERMINATED'
+      d.lifecycle_state <> 'TERMINATED'
     order by
-      a.display_name;
+      d.display_name;
 EOQ
 }
 

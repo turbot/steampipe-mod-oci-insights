@@ -138,22 +138,22 @@ dashboard "vcn_security_list_detail" {
 query "vcn_security_list_input" {
   sql = <<-EOQ
     select
-      b.display_name as label,
-      b.id as value,
+      l.display_name as label,
+      l.id as value,
       json_build_object(
-        'b.id', concat('id: ', right(reverse(split_part(reverse(b.id), '.', 1)), 8)),
-        'b.region', concat('region: ', region),
-        'c.name', concat('compartment: ', coalesce(c.title, 'root')),
-        't.name', concat('tenant: ', t.name)
+        'b.id', right(reverse(split_part(reverse(l.id), '.', 1)), 8),
+        'b.region', region,
+        'oci.name', coalesce(oci.title, 'root'),
+        't.name', t.name
       ) as tags
     from
-      oci_core_security_list as b
-      left join oci_identity_compartment as c on b.compartment_id = c.id
-      left join oci_identity_tenancy as t on b.tenant_id = t.id
+      oci_core_security_list as l
+      left join oci_identity_compartment as oci on l.compartment_id = oci.id
+      left join oci_identity_tenancy as t on l.tenant_id = t.id
     where
-      b.lifecycle_state <> 'TERMINATED'
+      l.lifecycle_state <> 'TERMINATED'
     order by
-      b.display_name;
+      l.display_name;
   EOQ
 }
 

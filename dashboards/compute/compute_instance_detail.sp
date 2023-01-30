@@ -338,22 +338,22 @@ dashboard "compute_instance_detail" {
 query "compute_instance_input" {
   sql = <<-EOQ
     select
-      b.display_name as label,
-      b.id as value,
+      i.display_name as label,
+      i.id as value,
       json_build_object(
-        'b.id', concat('id: ', right(reverse(split_part(reverse(b.id), '.', 1)), 8)),
-        'b.region', concat('region: ', region),
-        'c.name', concat('compartment: ', coalesce(c.title, 'root')),
-        't.name', concat('tenant: ', t.name)
+        'i.id', right(reverse(split_part(reverse(i.id), '.', 1)), 8),
+        'i.region', region,
+        'oic.name', coalesce(oic.title, 'root'),
+        't.name', t.name
       ) as tags
     from
-      oci_core_instance as b
-      left join oci_identity_compartment as c on b.compartment_id = c.id
-      left join oci_identity_tenancy as t on b.tenant_id = t.id
+      oci_core_instance as i
+      left join oci_identity_compartment as oic on i.compartment_id = oic.id
+      left join oci_identity_tenancy as t on i.tenant_id = t.id
     where
-      b.lifecycle_state <> 'TERMINATED'
+      i.lifecycle_state <> 'TERMINATED'
     order by
-      b.display_name;
+      i.display_name;
   EOQ
 }
 

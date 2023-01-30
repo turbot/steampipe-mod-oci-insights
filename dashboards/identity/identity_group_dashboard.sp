@@ -22,6 +22,11 @@ dashboard "identity_group_dashboard" {
       width = 3
     }
 
+    card {
+      query = query.identity_groups_without_policies_count
+      width = 3
+    }
+
   }
 
   container {
@@ -39,6 +44,22 @@ dashboard "identity_group_dashboard" {
           color = "ok"
         }
         point "no users" {
+          color = "alert"
+        }
+      }
+    }
+
+    chart {
+      title = "Groups Without Policies"
+      query = query.identity_groups_with_policy
+      type  = "donut"
+      width = 3
+
+      series "count" {
+        point "with policies" {
+          color = "ok"
+        }
+        point "no policies" {
           color = "alert"
         }
       }
@@ -95,6 +116,33 @@ query "identity_groups_without_users_count" {
   EOQ
 }
 
+
+query "identity_groups_without_policies_count" {
+  sql = <<-EOQ
+    with group_with_policy as (
+      select
+        distinct g.name as group_name,
+        g.id as group_id
+      from
+        oci_identity_policy as p,
+        jsonb_array_elements_text(statements) as s,
+        oci_identity_group as g
+      where
+        s ilike '%' || g.name || '%'
+    )
+    select
+      count(*) as value,
+      'Without policies' as label,
+      case when count(*) = 0 then 'ok' else 'alert' end as type
+    from
+      oci_identity_group
+    where
+      id not in (select distinct group_id from group_with_policy);
+  EOQ
+}
+
+
+
 # Assessment Queries
 
 query "identity_groups_without_users" {
@@ -121,6 +169,38 @@ query "identity_groups_without_users" {
         groups_without_users
       group by
         has_users;
+  EOQ
+}
+
+query "identity_groups_with_policy" {
+  sql = <<-EOQ
+    with group_with_policy as (
+      select
+        distinct g.name as group_name,
+        g.id as group_id
+      from
+        oci_identity_policy as p,
+        jsonb_array_elements_text(statements) as s,
+        oci_identity_group as g
+      where
+        s ilike '%' || g.name || '%'
+    ),group_without_policy as (
+      select
+        id,
+        case
+          when id not in (select distinct group_id from group_with_policy) then 'no policies'
+          else 'with policies'
+        end as has_policies
+      from
+        oci_identity_group
+    )
+      select
+        has_policies,
+        count(*)
+      from
+        group_without_policy
+      group by
+        has_policies;
   EOQ
 }
 

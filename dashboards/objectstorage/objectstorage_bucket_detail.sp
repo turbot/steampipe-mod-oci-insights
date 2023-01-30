@@ -196,7 +196,7 @@ query "objectstorage_bucket_input" {
       b.id as value,
       json_build_object(
         'c.name', coalesce(c.title, 'root'),
-        'b.region', region,
+        'b.region', b.region,
         't.name', t.name
       ) as tags
     from

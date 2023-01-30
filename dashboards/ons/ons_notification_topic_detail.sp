@@ -129,13 +129,13 @@ query "ons_notification_topic_input" {
       n.name as label,
       n.topic_id as value,
       json_build_object(
-        'c.name', coalesce(c.title, 'root'),
+        'oci.name', coalesce(oci.title, 'root'),
         'n.region', region,
         't.name', t.name
       ) as tags
     from
       oci_ons_notification_topic as n
-      left join oci_identity_compartment as c on n.compartment_id = c.id
+      left join oci_identity_compartment as oci on n.compartment_id = oci.id
       left join oci_identity_tenancy as t on n.tenant_id = t.id
     order by
       n.name;

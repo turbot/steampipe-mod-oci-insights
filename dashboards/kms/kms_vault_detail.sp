@@ -128,13 +128,13 @@ query "key_vault_input" {
       k.display_name as label,
       k.id as value,
       json_build_object(
-        'c.name', coalesce(c.title, 'root'),
+        'oci.name', coalesce(oci.title, 'root'),
         'k.region', region,
         't.name', t.name
       ) as tags
     from
       oci_kms_vault as k
-      left join oci_identity_compartment as c on k.compartment_id = c.id
+      left join oci_identity_compartment as oci on k.compartment_id = oci.id
       left join oci_identity_tenancy as t on k.tenant_id = t.id
     where
       k.lifecycle_state <> 'DELETED'
@@ -207,7 +207,7 @@ query "kms_vault_overview" {
       lifecycle_state as "Lifecycle State",
       time_created as "Time Created",
       region as "Region",
-      compartment_id as "Compartment ID",
+      compartment_id as "Compartment ID"
     from
       oci_kms_vault
     where
