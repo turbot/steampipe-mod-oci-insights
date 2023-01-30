@@ -5,3 +5,4 @@ This dashboard answers the following questions for each autonomous database:
 - How is backup configured?
 - How is the private endpoint configured?
 - How is the database access configured?
+- What relationships does the autonomous database have with other resources?

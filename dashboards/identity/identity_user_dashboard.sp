@@ -1,4 +1,4 @@
-dashboard "oci_identity_user_dashboard" {
+dashboard "identity_user_dashboard" {
 
   title         = "OCI Identity User Dashboard"
   documentation = file("./dashboards/identity/docs/identity_user_dashboard.md")
@@ -10,19 +10,19 @@ dashboard "oci_identity_user_dashboard" {
   container {
 
     card {
-      sql   = query.oci_identity_user_count.sql
-      width = 2
+      query = query.identity_user_count
+      width = 3
     }
 
     card {
-      sql   = query.oci_identity_user_not_attached_to_group.sql
-      width = 2
+      query = query.identity_user_not_attached_to_group
+      width = 3
     }
 
     card {
-      sql   = query.oci_identity_user_mfa_disabled_count.sql
-      width = 2
-      href  = dashboard.oci_identity_user_mfa_report.url_path
+      query = query.identity_user_mfa_disabled_count
+      width = 3
+      href  = dashboard.identity_user_mfa_report.url_path
     }
 
   }
@@ -32,7 +32,7 @@ dashboard "oci_identity_user_dashboard" {
 
     chart {
       title = "MFA Status"
-      sql   = query.oci_identity_user_mfa_enabled.sql
+      query = query.identity_user_mfa_enabled
       type  = "donut"
       width = 3
 
@@ -53,35 +53,35 @@ dashboard "oci_identity_user_dashboard" {
 
     chart {
       title = "Users by Tenancy"
-      sql   = query.oci_identity_users_by_tenancy.sql
+      query = query.identity_users_by_tenancy
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Users by Group"
-      sql   = query.oci_identity_user_by_groups.sql
+      query = query.identity_user_by_groups
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Users by Type"
-      sql   = query.oci_identity_user_by_type.sql
+      query = query.identity_user_by_type
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Users by Age"
-      sql   = query.oci_identity_users_by_creation_month.sql
+      query = query.identity_users_by_creation_month
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Users by Email Verification"
-      sql   = query.oci_identity_user_by_verified_email.sql
+      query = query.identity_user_by_verified_email
       type  = "column"
       width = 4
     }
@@ -92,13 +92,13 @@ dashboard "oci_identity_user_dashboard" {
 
 # Card Queries
 
-query "oci_identity_user_count" {
+query "identity_user_count" {
   sql = <<-EOQ
     select count(*) as "Users" from oci_identity_user;
   EOQ
 }
 
-query "oci_identity_user_not_attached_to_group" {
+query "identity_user_not_attached_to_group" {
   sql = <<-EOQ
   select
     count(oci_identity_user.name) as value,
@@ -110,7 +110,7 @@ query "oci_identity_user_not_attached_to_group" {
   EOQ
 }
 
-query "oci_identity_user_mfa_disabled_count" {
+query "identity_user_mfa_disabled_count" {
   sql = <<-EOQ
     select
       count(*) as  value,
@@ -125,7 +125,7 @@ query "oci_identity_user_mfa_disabled_count" {
 
 # Assesment Queries
 
-query "oci_identity_user_mfa_enabled" {
+query "identity_user_mfa_enabled" {
   sql = <<-EOQ
     with mfa_stat as (
       select
@@ -148,7 +148,7 @@ query "oci_identity_user_mfa_enabled" {
 
 # Analysis Queries
 
-query "oci_identity_users_by_tenancy" {
+query "identity_users_by_tenancy" {
   sql = <<-EOQ
     select
       t.name as "tenancy",
@@ -164,7 +164,7 @@ query "oci_identity_users_by_tenancy" {
   EOQ
 }
 
-query "oci_identity_users_by_creation_month" {
+query "identity_users_by_creation_month" {
   sql = <<-EOQ
     with users as (
       select
@@ -209,7 +209,7 @@ query "oci_identity_users_by_creation_month" {
   EOQ
 }
 
-query "oci_identity_user_by_type" {
+query "identity_user_by_type" {
   sql = <<-EOQ
     select
        user_type as "User Type",
@@ -223,7 +223,7 @@ query "oci_identity_user_by_type" {
   EOQ
 }
 
-query "oci_identity_user_by_groups" {
+query "identity_user_by_groups" {
   sql = <<-EOQ
     with users_and_grp as (
       select
@@ -247,7 +247,7 @@ query "oci_identity_user_by_groups" {
   EOQ
 }
 
-query "oci_identity_user_by_verified_email" {
+query "identity_user_by_verified_email" {
   sql = <<-EOQ
     with email_stat as (
       select

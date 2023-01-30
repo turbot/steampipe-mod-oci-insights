@@ -1,4 +1,4 @@
-dashboard "oci_filestorage_filesystem_age_report" {
+dashboard "filestorage_filesystem_age_report" {
 
   title         = "OCI File Storage File System Age Report"
   documentation = file("./dashboards/filestorage/docs/filestorage_filesystem_report_age.md")
@@ -11,36 +11,36 @@ dashboard "oci_filestorage_filesystem_age_report" {
   container {
 
     card {
-      sql   = query.oci_filestorage_filesystem_count.sql
+      query = query.filestorage_filesystem_count
       width = 2
     }
 
     card {
-      sql   = query.oci_filestorage_filesystem_24_hrs.sql
-      width = 2
-      type  = "info"
-    }
-
-    card {
-      sql   = query.oci_filestorage_filesystem_30_days.sql
+      query = query.filestorage_filesystem_24_hrs
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_filestorage_filesystem_90_days.sql
+      query = query.filestorage_filesystem_30_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_filestorage_filesystem_365_days.sql
+      query = query.filestorage_filesystem_90_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_filestorage_filesystem_1_year.sql
+      query = query.filestorage_filesystem_365_days
+      width = 2
+      type  = "info"
+    }
+
+    card {
+      query = query.filestorage_filesystem_1_year
       width = 2
       type  = "info"
     }
@@ -53,15 +53,15 @@ dashboard "oci_filestorage_filesystem_age_report" {
     }
 
     column "Name" {
-      href = "${dashboard.oci_filestorage_filesystem_detail.url_path}?input.filesystem_id={{.OCID | @uri}}"
+      href = "${dashboard.filestorage_filesystem_detail.url_path}?input.filesystem_id={{.OCID | @uri}}"
     }
 
-    sql = query.oci_filestorage_filesystem_age_report.sql
+    query = query.filestorage_filesystem_age_report
   }
 
 }
 
-query "oci_filestorage_filesystem_24_hrs" {
+query "filestorage_filesystem_24_hrs" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -73,7 +73,7 @@ query "oci_filestorage_filesystem_24_hrs" {
   EOQ
 }
 
-query "oci_filestorage_filesystem_30_days" {
+query "filestorage_filesystem_30_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -85,7 +85,7 @@ query "oci_filestorage_filesystem_30_days" {
   EOQ
 }
 
-query "oci_filestorage_filesystem_90_days" {
+query "filestorage_filesystem_90_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -97,7 +97,7 @@ query "oci_filestorage_filesystem_90_days" {
   EOQ
 }
 
-query "oci_filestorage_filesystem_365_days" {
+query "filestorage_filesystem_365_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -109,7 +109,7 @@ query "oci_filestorage_filesystem_365_days" {
   EOQ
 }
 
-query "oci_filestorage_filesystem_1_year" {
+query "filestorage_filesystem_1_year" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -121,7 +121,7 @@ query "oci_filestorage_filesystem_1_year" {
   EOQ
 }
 
-query "oci_filestorage_filesystem_age_report" {
+query "filestorage_filesystem_age_report" {
   sql = <<-EOQ
     select
       f.display_name as "Name",

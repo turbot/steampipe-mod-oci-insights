@@ -10,13 +10,13 @@ dashboard "oci_vcn_subnet_dashboard" {
   container {
 
     card {
-      width = 2
-      sql   = query.oci_vcn_subnet_count.sql
+      width = 3
+      query = query.oci_vcn_subnet_count
     }
 
     card {
-      width = 2
-      sql   = query.oci_vcn_subnet_flow_logs_not_configured_count.sql
+      width = 3
+      query = query.oci_vcn_subnet_flow_logs_not_configured_count
       href  = dashboard.oci_vcn_subnet_flow_logs_report.url_path
     }
 
@@ -30,7 +30,7 @@ dashboard "oci_vcn_subnet_dashboard" {
       title = "Flow Logs Status"
       type  = "donut"
       width = 3
-      sql   = query.oci_vcn_subnet_by_flow_logs.sql
+      query = query.oci_vcn_subnet_by_flow_logs
 
       series "count" {
         point "enabled" {
@@ -49,28 +49,28 @@ dashboard "oci_vcn_subnet_dashboard" {
 
     chart {
       title = "Subnets by Tenancy"
-      sql   = query.oci_vcn_subnet_by_tenancy.sql
+      query = query.oci_vcn_subnet_by_tenancy
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Subnets by Compartment"
-      sql   = query.oci_vcn_subnet_by_compartment.sql
+      query = query.oci_vcn_subnet_by_compartment
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Subnets by Region"
-      sql   = query.oci_vcn_subnet_by_region.sql
+      query = query.oci_vcn_subnet_by_region
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Subnets by VCN"
-      sql   = query.oci_vcn_subnet_by_vcn.sql
+      query = query.oci_vcn_subnet_by_vcn
       type  = "column"
       width = 3
     }
@@ -209,7 +209,9 @@ query "oci_vcn_subnet_by_vcn" {
       left join oci_core_vcn v on s.vcn_id = v.id
     where
       s.lifecycle_state <> 'TERMINATED'
-      group by v.display_name
-      order by v.display_name;
+    group by
+      v.display_name
+    order by
+      v.display_name;
   EOQ
 }

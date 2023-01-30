@@ -1,4 +1,4 @@
-dashboard "oci_mysql_backup_dashboard" {
+dashboard "mysql_backup_dashboard" {
 
   title         = "OCI MySQL Backup Dashboard"
   documentation = file("./dashboards/mysql/docs/mysql_backup_dashboard.md")
@@ -10,23 +10,23 @@ dashboard "oci_mysql_backup_dashboard" {
   container {
 
     card {
-      sql   = query.oci_mysql_backup_count.sql
-      width = 2
+      query = query.mysql_backup_count
+      width = 3
     }
 
     card {
-      sql   = query.oci_mysql_backup_storage_total.sql
-      width = 2
+      query = query.mysql_backup_storage_total
+      width = 3
     }
 
     card {
-      sql   = query.oci_mysql_automatic_backup_count.sql
-      width = 2
+      query = query.mysql_automatic_backup_count
+      width = 3
     }
 
     card {
-      sql   = query.oci_mysql_full_backup_count.sql
-      width = 2
+      query = query.mysql_full_backup_count
+      width = 3
     }
 
   }
@@ -36,42 +36,42 @@ dashboard "oci_mysql_backup_dashboard" {
 
     chart {
       title = "Backups by Tenancy"
-      sql   = query.oci_mysql_backup_by_tenancy.sql
+      query = query.mysql_backup_by_tenancy
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Backups by Compartment"
-      sql   = query.oci_mysql_backup_by_compartment.sql
+      query = query.mysql_backup_by_compartment
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Backups by Region"
-      sql   = query.oci_mysql_backup_by_region.sql
+      query = query.mysql_backup_by_region
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Backups by Age"
-      sql   = query.oci_mysql_backup_by_creation_month.sql
+      query = query.mysql_backup_by_creation_month
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Backups by Creation Type"
-      sql   = query.oci_mysql_backup_by_creation_type.sql
+      query = query.mysql_backup_by_creation_type
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Backups by Backup Type"
-      sql   = query.oci_mysql_backup_by_backup_type.sql
+      query = query.mysql_backup_by_backup_type
       type  = "column"
       width = 4
     }
@@ -82,7 +82,7 @@ dashboard "oci_mysql_backup_dashboard" {
 
     chart {
       title = "Storage by Tenancy (GB)"
-      sql   = query.oci_mysql_backup_storage_by_tenancy.sql
+      query = query.mysql_backup_storage_by_tenancy
       type  = "column"
       width = 4
 
@@ -93,7 +93,7 @@ dashboard "oci_mysql_backup_dashboard" {
 
     chart {
       title = "Storage by Compartment (GB)"
-      sql   = query.oci_mysql_backup_storage_by_compartment.sql
+      query = query.mysql_backup_storage_by_compartment
       type  = "column"
       width = 4
 
@@ -104,7 +104,7 @@ dashboard "oci_mysql_backup_dashboard" {
 
     chart {
       title = "Storage by Region (GB)"
-      sql   = query.oci_mysql_backup_storage_by_region.sql
+      query = query.mysql_backup_storage_by_region
       type  = "column"
       width = 4
 
@@ -115,7 +115,7 @@ dashboard "oci_mysql_backup_dashboard" {
 
     chart {
       title = "Storage by Age (GB)"
-      sql   = query.oci_mysql_backup_storage_by_creation_month.sql
+      query = query.mysql_backup_storage_by_creation_month
       type  = "column"
       width = 4
 
@@ -126,7 +126,7 @@ dashboard "oci_mysql_backup_dashboard" {
 
     chart {
       title = "Storage by Creation Type"
-      sql   = query.oci_mysql_backup_storage_by_creation_type.sql
+      query = query.mysql_backup_storage_by_creation_type
       type  = "column"
       width = 4
 
@@ -137,7 +137,7 @@ dashboard "oci_mysql_backup_dashboard" {
 
     chart {
       title = "Storage by Backup Type"
-      sql   = query.oci_mysql_backup_storage_by_backup_type.sql
+      query = query.mysql_backup_storage_by_backup_type
       type  = "column"
       width = 2
 
@@ -152,7 +152,7 @@ dashboard "oci_mysql_backup_dashboard" {
 
 # Card Queries
 
-query "oci_mysql_backup_count" {
+query "mysql_backup_count" {
   sql = <<-EOQ
   select
     count(*) as "Backups"
@@ -163,7 +163,7 @@ query "oci_mysql_backup_count" {
   EOQ
 }
 
-query "oci_mysql_automatic_backup_count" {
+query "mysql_automatic_backup_count" {
   sql = <<-EOQ
    select
       count(*) as "Automatic Backups"
@@ -174,7 +174,7 @@ query "oci_mysql_automatic_backup_count" {
   EOQ
 }
 
-query "oci_mysql_backup_storage_total" {
+query "mysql_backup_storage_total" {
   sql = <<-EOQ
     select
       sum(backup_size_in_gbs) as "Total Storage (GB)"
@@ -185,7 +185,7 @@ query "oci_mysql_backup_storage_total" {
   EOQ
 }
 
-query "oci_mysql_full_backup_count" {
+query "mysql_full_backup_count" {
   sql = <<-EOQ
    select
       count(*) as "Full Backups"
@@ -198,7 +198,7 @@ query "oci_mysql_full_backup_count" {
 
 # Analysis Queries
 
-query "oci_mysql_backup_by_tenancy" {
+query "mysql_backup_by_tenancy" {
   sql = <<-EOQ
     select
       c.title as "Tenancy",
@@ -215,7 +215,7 @@ query "oci_mysql_backup_by_tenancy" {
   EOQ
 }
 
-query "oci_mysql_backup_by_compartment" {
+query "mysql_backup_by_compartment" {
   sql = <<-EOQ
     with compartments as (
       select
@@ -249,7 +249,7 @@ query "oci_mysql_backup_by_compartment" {
   EOQ
 }
 
-query "oci_mysql_backup_by_region" {
+query "mysql_backup_by_region" {
   sql = <<-EOQ
     select
       region as "Region",
@@ -265,7 +265,7 @@ query "oci_mysql_backup_by_region" {
   EOQ
 }
 
-query "oci_mysql_backup_by_creation_month" {
+query "mysql_backup_by_creation_month" {
   sql = <<-EOQ
     with backups as (
       select
@@ -312,7 +312,7 @@ query "oci_mysql_backup_by_creation_month" {
   EOQ
 }
 
-query "oci_mysql_backup_by_creation_type" {
+query "mysql_backup_by_creation_type" {
   sql = <<-EOQ
    select
       creation_type,
@@ -328,7 +328,7 @@ query "oci_mysql_backup_by_creation_type" {
   EOQ
 }
 
-query "oci_mysql_backup_by_backup_type" {
+query "mysql_backup_by_backup_type" {
   sql = <<-EOQ
     select
       backup_type,
@@ -344,7 +344,7 @@ query "oci_mysql_backup_by_backup_type" {
   EOQ
 }
 
-query "oci_mysql_backup_storage_by_tenancy" {
+query "mysql_backup_storage_by_tenancy" {
   sql = <<-EOQ
     select
       t.title as "Tenancy",
@@ -361,7 +361,7 @@ query "oci_mysql_backup_storage_by_tenancy" {
   EOQ
 }
 
-query "oci_mysql_backup_storage_by_compartment" {
+query "mysql_backup_storage_by_compartment" {
   sql = <<-EOQ
     with compartments as (
       select
@@ -395,7 +395,7 @@ query "oci_mysql_backup_storage_by_compartment" {
   EOQ
 }
 
-query "oci_mysql_backup_storage_by_region" {
+query "mysql_backup_storage_by_region" {
   sql = <<-EOQ
     select
       region as "Region",
@@ -411,7 +411,7 @@ query "oci_mysql_backup_storage_by_region" {
   EOQ
 }
 
-query "oci_mysql_backup_storage_by_creation_month" {
+query "mysql_backup_storage_by_creation_month" {
   sql = <<-EOQ
     with backups as (
       select
@@ -459,7 +459,7 @@ query "oci_mysql_backup_storage_by_creation_month" {
   EOQ
 }
 
-query "oci_mysql_backup_storage_by_creation_type" {
+query "mysql_backup_storage_by_creation_type" {
   sql = <<-EOQ
    select
       creation_type,
@@ -475,7 +475,7 @@ query "oci_mysql_backup_storage_by_creation_type" {
   EOQ
 }
 
-query "oci_mysql_backup_storage_by_backup_type" {
+query "mysql_backup_storage_by_backup_type" {
   sql = <<-EOQ
     select
       backup_type,

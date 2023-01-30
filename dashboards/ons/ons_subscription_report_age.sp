@@ -1,4 +1,4 @@
-dashboard "oci_ons_subscription_age_report" {
+dashboard "ons_subscription_age_report" {
 
   title         = "OCI ONS Subscription Age Report"
   documentation = file("./dashboards/ons/docs/ons_subscription_report_age.md")
@@ -11,36 +11,36 @@ dashboard "oci_ons_subscription_age_report" {
   container {
 
     card {
-      sql   = query.oci_ons_subscription_count.sql
+      query = query.ons_subscription_count
       width = 2
     }
 
     card {
-      sql   = query.oci_ons_subscription_24_hrs.sql
-      width = 2
-      type  = "info"
-    }
-
-    card {
-      sql   = query.oci_ons_subscription_30_days.sql
+      query = query.ons_subscription_24_hrs
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_ons_subscription_90_days.sql
+      query = query.ons_subscription_30_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_ons_subscription_365_days.sql
+      query = query.ons_subscription_90_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_ons_subscription_1_year.sql
+      query = query.ons_subscription_365_days
+      width = 2
+      type  = "info"
+    }
+
+    card {
+      query = query.ons_subscription_1_year
       width = 2
       type  = "info"
     }
@@ -53,12 +53,12 @@ dashboard "oci_ons_subscription_age_report" {
       display = "none"
     }
 
-    sql = query.oci_ons_subscription_age_report.sql
+    query = query.ons_subscription_age_report
   }
 
 }
 
-query "oci_ons_subscription_24_hrs" {
+query "ons_subscription_24_hrs" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -70,7 +70,7 @@ query "oci_ons_subscription_24_hrs" {
   EOQ
 }
 
-query "oci_ons_subscription_30_days" {
+query "ons_subscription_30_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -82,7 +82,7 @@ query "oci_ons_subscription_30_days" {
   EOQ
 }
 
-query "oci_ons_subscription_90_days" {
+query "ons_subscription_90_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -94,7 +94,7 @@ query "oci_ons_subscription_90_days" {
   EOQ
 }
 
-query "oci_ons_subscription_365_days" {
+query "ons_subscription_365_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -106,7 +106,7 @@ query "oci_ons_subscription_365_days" {
   EOQ
 }
 
-query "oci_ons_subscription_1_year" {
+query "ons_subscription_1_year" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -118,7 +118,7 @@ query "oci_ons_subscription_1_year" {
   EOQ
 }
 
-query "oci_ons_subscription_age_report" {
+query "ons_subscription_age_report" {
   sql = <<-EOQ
     select
       s.endpoint as "Endpoint",

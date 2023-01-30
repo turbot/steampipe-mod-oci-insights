@@ -1,4 +1,4 @@
-dashboard "oci_kms_key_dashboard" {
+dashboard "kms_key_dashboard" {
 
   title         = "OCI KMS Key Dashboard"
   documentation = file("./dashboards/kms/docs/kms_key_dashboard.md")
@@ -10,18 +10,18 @@ dashboard "oci_kms_key_dashboard" {
   container {
 
     card {
-      sql   = query.oci_kms_key_count.sql
-      width = 2
+      query = query.kms_key_count
+      width = 3
     }
 
     card {
-      sql   = query.oci_kms_hsm_key_count.sql
-      width = 2
+      query = query.kms_hsm_key_count
+      width = 3
     }
 
     card {
-      sql   = query.oci_kms_key_disabled_count.sql
-      width = 2
+      query = query.kms_key_disabled_count
+      width = 3
     }
 
   }
@@ -31,7 +31,7 @@ dashboard "oci_kms_key_dashboard" {
 
     chart {
       title = "Lifecycle State"
-      sql   = query.oci_kms_key_lifecycle_state.sql
+      query = query.kms_key_lifecycle_state
       type  = "donut"
       width = 3
 
@@ -52,14 +52,14 @@ dashboard "oci_kms_key_dashboard" {
 
     chart {
       title = "Keys by Tenancy"
-      sql   = query.oci_kms_key_by_tenancy.sql
+      query = query.kms_key_by_tenancy
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Keys by Compartment"
-      sql   = query.oci_kms_key_by_compartment.sql
+      query = query.kms_key_by_compartment
       type  = "column"
       width = 4
     }
@@ -67,21 +67,21 @@ dashboard "oci_kms_key_dashboard" {
 
     chart {
       title = "Keys by Region"
-      sql   = query.oci_kms_key_by_region.sql
+      query = query.kms_key_by_region
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Keys by Age"
-      sql   = query.oci_kms_key_by_creation_month.sql
+      query = query.kms_key_by_creation_month
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Keys by Protection Mode"
-      sql   = query.oci_kms_key_by_protection_mode.sql
+      query = query.kms_key_by_protection_mode
       type  = "column"
       width = 4
     }
@@ -92,13 +92,13 @@ dashboard "oci_kms_key_dashboard" {
 
 # Card Queries
 
-query "oci_kms_key_count" {
+query "kms_key_count" {
   sql = <<-EOQ
     select count(*) as "Keys" from oci_kms_key;
   EOQ
 }
 
-query "oci_kms_key_disabled_count" {
+query "kms_key_disabled_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -112,7 +112,7 @@ query "oci_kms_key_disabled_count" {
 }
 
 # Key count by protection_mode i.e. HSM or Software
-query "oci_kms_hsm_key_count" {
+query "kms_hsm_key_count" {
   sql = <<-EOQ
     select count(*) as "HSM Based Keys" from oci_kms_key where protection_mode = 'HSM' and lifecycle_state <> 'DELETED';
   EOQ
@@ -120,7 +120,7 @@ query "oci_kms_hsm_key_count" {
 
 # Assessment Queries
 
-query "oci_kms_key_lifecycle_state" {
+query "kms_key_lifecycle_state" {
   sql = <<-EOQ
     select
       case when lifecycle_state = 'DISABLED' then 'disabled' else 'ok' end as status,
@@ -136,7 +136,7 @@ query "oci_kms_key_lifecycle_state" {
 
 # Analysis Queries
 
-query "oci_kms_key_by_tenancy" {
+query "kms_key_by_tenancy" {
   sql = <<-EOQ
     select
        t.name as "Tenancy",
@@ -153,7 +153,7 @@ query "oci_kms_key_by_tenancy" {
   EOQ
 }
 
-query "oci_kms_key_by_compartment" {
+query "kms_key_by_compartment" {
   sql = <<-EOQ
     with compartments as (
       select
@@ -187,7 +187,7 @@ query "oci_kms_key_by_compartment" {
   EOQ
 }
 
-query "oci_kms_key_by_region" {
+query "kms_key_by_region" {
   sql = <<-EOQ
     select
       region,
@@ -199,7 +199,7 @@ query "oci_kms_key_by_region" {
   EOQ
 }
 
-query "oci_kms_key_by_creation_month" {
+query "kms_key_by_creation_month" {
   sql = <<-EOQ
     with keys as (
       select
@@ -244,7 +244,7 @@ query "oci_kms_key_by_creation_month" {
   EOQ
 }
 
-query "oci_kms_key_by_protection_mode" {
+query "kms_key_by_protection_mode" {
   sql = <<-EOQ
     select
       protection_mode,

@@ -1,4 +1,4 @@
-dashboard "oci_objectstorage_bucket_public_access_report" {
+dashboard "objectstorage_bucket_public_access_report" {
 
   title         = "OCI Object Storage Bucket Public Access Report"
   documentation = file("./dashboards/objectstorage/docs/objectstorage_bucket_report_public_access.md")
@@ -11,18 +11,18 @@ dashboard "oci_objectstorage_bucket_public_access_report" {
   container {
 
     card {
-      sql   = query.oci_objectstorage_bucket_count.sql
-      width = 2
+      query = query.objectstorage_bucket_count
+      width = 3
     }
 
     card {
-      sql   = query.oci_objectstorage_bucket_public_access_count.sql
-      width = 2
+      query = query.objectstorage_bucket_public_access_count
+      width = 3
     }
 
     card {
-      sql   = query.oci_objectstorage_bucket_read_only_access_count.sql
-      width = 2
+      query = query.objectstorage_bucket_read_only_access_count
+      width = 3
     }
 
   }
@@ -33,15 +33,15 @@ dashboard "oci_objectstorage_bucket_public_access_report" {
     }
 
     column "Name" {
-      href = "${dashboard.oci_objectstorage_bucket_detail.url_path}?input.bucket_id={{.OCID | @uri}}"
+      href = "${dashboard.objectstorage_bucket_detail.url_path}?input.bucket_id={{.OCID | @uri}}"
     }
 
-    sql = query.oci_objectstorage_bucket_public_access_report.sql
+    query = query.objectstorage_bucket_public_access_report
   }
 
 }
 
-query "oci_objectstorage_bucket_public_access_report" {
+query "objectstorage_bucket_public_access_report" {
   sql = <<-EOQ
       select
         b.name as "Name",

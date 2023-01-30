@@ -3,3 +3,9 @@ locals {
     service = "OCI"
   }
 }
+
+category "availability_domain" {
+  title = "Availability Domain"
+  color = local.networking_color
+  icon  = "apartment"
+}

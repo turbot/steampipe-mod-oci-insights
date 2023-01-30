@@ -5,3 +5,4 @@ This dashboard answers the following questions for each bucket:
 - Is versioning enabled?
 - How is the object lifecycle policy configured?
 - How is encryption configured?
+- What relationships does the bucket have with other resources?

@@ -1,4 +1,4 @@
-dashboard "oci_nosql_table_detail" {
+dashboard "nosql_table_detail" {
 
   title = "OCI NoSQL Table Detail"
 
@@ -8,31 +8,79 @@ dashboard "oci_nosql_table_detail" {
 
   input "table_id" {
     title = "Select a table:"
-    query = query.oci_nosql_table_input
+    query = query.nosql_table_input
     width = 4
   }
 
   container {
 
     card {
-      width = 2
+      width = 3
 
-      query = query.oci_nosql_table_state
-      args = {
-        id = self.input.table_id.value
-      }
+      query = query.nosql_table_state
+      args = [self.input.table_id.value]
     }
 
     card {
-      width = 2
+      width = 3
 
-      query = query.oci_nosql_table_auto_reclaimable
-      args = {
-        id = self.input.table_id.value
+      query = query.nosql_table_auto_reclaimable
+      args = [self.input.table_id.value]
+    }
+  }
+
+  with "nosql_table_children_for_nosql_table" {
+    query = query.nosql_table_children_for_nosql_table
+    args  = [self.input.table_id.value]
+  }
+
+  with "nosql_table_parents_for_nosql_table" {
+    query = query.nosql_table_parents_for_nosql_table
+    args  = [self.input.table_id.value]
+  }
+
+  container {
+
+    graph {
+      title     = "Relationships"
+      type      = "graph"
+      direction = "TD"
+
+      node {
+        base = node.nosql_table
+        args = {
+          nosql_table_ids = [self.input.table_id.value]
+        }
+      }
+
+      node {
+        base = node.nosql_table
+        args = {
+          nosql_table_ids = with.nosql_table_parents_for_nosql_table.rows[*].parent_table_id
+        }
+      }
+
+      node {
+        base = node.nosql_table
+        args = {
+          nosql_table_ids = with.nosql_table_children_for_nosql_table.rows[*].child_table_id
+        }
+      }
+
+      edge {
+        base = edge.nosql_table_parent_to_nosql_table
+        args = {
+          nosql_table_ids = with.nosql_table_children_for_nosql_table.rows[*].child_table_id
+        }
+      }
+
+      edge {
+        base = edge.nosql_table_parent_to_nosql_table
+        args = {
+          nosql_table_ids = with.nosql_table_parents_for_nosql_table.rows[*].parent_table_id
+        }
       }
     }
-
-
   }
 
   container {
@@ -44,20 +92,16 @@ dashboard "oci_nosql_table_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-        query = query.oci_nosql_table_overview
-        args = {
-          id = self.input.table_id.value
-        }
+        query = query.nosql_table_overview
+        args = [self.input.table_id.value]
 
       }
 
       table {
         title = "Tags"
         width = 6
-        query = query.oci_nosql_table_tag
-        args = {
-          id = self.input.table_id.value
-        }
+        query = query.nosql_table_tag
+        args = [self.input.table_id.value]
 
       }
     }
@@ -67,18 +111,14 @@ dashboard "oci_nosql_table_detail" {
 
       table {
         title = "Table Limits"
-        query = query.oci_nosql_table_limits
-        args = {
-          id = self.input.table_id.value
-        }
+        query = query.nosql_table_limits
+        args = [self.input.table_id.value]
       }
 
       table {
         title = "Column Details"
-        query = query.oci_nosql_table_column
-        args = {
-          id = self.input.table_id.value
-        }
+        query = query.nosql_table_column
+        args = [self.input.table_id.value]
       }
 
     }
@@ -91,20 +131,16 @@ dashboard "oci_nosql_table_detail" {
         title = "Read Throttle Count Daily - Last 7 Days"
         type  = "line"
         width = 6
-        query = query.oci_nosql_table_read_throttle
-        args = {
-          id = self.input.table_id.value
-        }
+        query = query.nosql_table_read_throttle
+        args = [self.input.table_id.value]
       }
 
       chart {
         title = "Write Throttle Count Daily - Last 7 Days"
         type  = "line"
         width = 6
-        query = query.oci_nosql_table_write_throttle
-        args = {
-          id = self.input.table_id.value
-        }
+        query = query.nosql_table_write_throttle
+        args = [self.input.table_id.value]
       }
 
     }
@@ -112,28 +148,93 @@ dashboard "oci_nosql_table_detail" {
   }
 }
 
-query "oci_nosql_table_input" {
-  sql = <<EOQ
+# Input queries
+
+query "nosql_table_input" {
+  sql = <<-EOQ
     select
       n.name as label,
       n.id as value,
       json_build_object(
-        'c.name', coalesce(c.title, 'root'),
+        'oci.name', coalesce(oci.title, 'root'),
         'n.region', region,
         't.name', t.name
       ) as tags
     from
       oci_nosql_table as n
-      left join oci_identity_compartment as c on n.compartment_id = c.id
+      left join oci_identity_compartment as oci on n.compartment_id = oci.id
       left join oci_identity_tenancy as t on n.tenant_id = t.id
     where
       n.lifecycle_state <> 'DELETED'
     order by
       n.name;
-EOQ
+  EOQ
 }
 
-query "oci_nosql_table_state" {
+# With queries
+
+query "nosql_table_children_for_nosql_table" {
+  sql = <<-EOQ
+    with recursive child_tables as (
+      select
+        name,
+        id
+      from
+        oci_nosql_table
+      where
+        id = $1
+      union
+        select
+          t.name,
+          t.id
+        from
+          oci_nosql_table t
+        inner join child_tables s ON t.name like s.name|| '.' || '%'
+    ) select
+        id as child_table_id
+      from
+        child_tables
+  EOQ
+}
+
+query "nosql_table_parents_for_nosql_table" {
+  sql = <<-EOQ
+    with parent_name as (
+      select
+        split_part(c_name, '.', (array_length(string_to_array(c_name, '.'),1)-1)) as parent_table_name,
+        c_name,
+        id as child_id
+      from (
+        select
+          name as c_name,
+          id
+        from
+          oci_nosql_table
+        ) as a
+      where
+        (array_length(string_to_array(c_name, '.'),1)-1) > 0
+    ),
+    all_parent_name as (
+      select
+        split_part(p.c_name, p.parent_table_name, 1) || parent_table_name as parent_name,
+        child_id
+      from
+        parent_name as p
+    )
+    select
+      t.id as parent_table_id
+    from
+      oci_nosql_table as t,
+      all_parent_name as p
+    where
+      t.name = p.parent_name
+      and p.child_id = $1;
+  EOQ
+}
+
+# Card queries
+
+query "nosql_table_state" {
   sql = <<-EOQ
     select
       initcap(lifecycle_state) as "State"
@@ -142,11 +243,9 @@ query "oci_nosql_table_state" {
     where
       id = $1;
   EOQ
-
-  param "id" {}
 }
 
-query "oci_nosql_table_auto_reclaimable" {
+query "nosql_table_auto_reclaimable" {
   sql = <<-EOQ
     select
       case when is_auto_reclaimable then 'Enabled' else 'Disabled' end as "Auto Reclaimable"
@@ -155,11 +254,11 @@ query "oci_nosql_table_auto_reclaimable" {
     where
       id = $1;
   EOQ
-
-  param "id" {}
 }
 
-query "oci_nosql_table_overview" {
+# Other detail page queries
+
+query "nosql_table_overview" {
   sql = <<-EOQ
     select
       name as "Name",
@@ -173,11 +272,9 @@ query "oci_nosql_table_overview" {
     where
       id = $1;
   EOQ
-
-  param "id" {}
 }
 
-query "oci_nosql_table_tag" {
+query "nosql_table_tag" {
   sql = <<-EOQ
     with jsondata as (
     select
@@ -194,11 +291,9 @@ query "oci_nosql_table_tag" {
       jsondata,
       json_each_text(tags);
   EOQ
-
-  param "id" {}
 }
 
-query "oci_nosql_table_limits" {
+query "nosql_table_limits" {
   sql = <<-EOQ
     select
       table_limits ->> 'maxReadUnits' as "Max Read Units",
@@ -209,11 +304,9 @@ query "oci_nosql_table_limits" {
     where
       id  = $1;
   EOQ
-
-  param "id" {}
 }
 
-query "oci_nosql_table_column" {
+query "nosql_table_column" {
   sql = <<-EOQ
     select
       c ->> 'name' as "Name",
@@ -226,11 +319,9 @@ query "oci_nosql_table_column" {
     where
       id = $1;
   EOQ
-
-  param "id" {}
 }
 
-query "oci_nosql_table_read_throttle" {
+query "nosql_table_read_throttle" {
   sql = <<-EOQ
     select
       d.timestamp,
@@ -242,11 +333,9 @@ query "oci_nosql_table_read_throttle" {
       d.timestamp >= current_date - interval '7 day' and t.id = $1
     order by d.timestamp;
   EOQ
-
-  param "id" {}
 }
 
-query "oci_nosql_table_write_throttle" {
+query "nosql_table_write_throttle" {
   sql = <<-EOQ
    select
       d.timestamp,
@@ -258,6 +347,4 @@ query "oci_nosql_table_write_throttle" {
       d.timestamp >= current_date - interval '7 day' and t.id = $1
     order by d.timestamp;
   EOQ
-
-  param "id" {}
 }

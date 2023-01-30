@@ -1,4 +1,4 @@
-dashboard "oci_mysql_backup_age_report" {
+dashboard "mysql_backup_age_report" {
 
   title         = "OCI MySQL Backup Age Report"
   documentation = file("./dashboards/mysql/docs/mysql_backup_report_age.md")
@@ -11,36 +11,36 @@ dashboard "oci_mysql_backup_age_report" {
   container {
 
     card {
-      sql   = query.oci_mysql_backup_count.sql
+      query = query.mysql_backup_count
       width = 2
     }
 
     card {
-      sql   = query.oci_mysql_backup_24_hrs.sql
-      width = 2
-      type  = "info"
-    }
-
-    card {
-      sql   = query.oci_mysql_backup_30_days.sql
+      query = query.mysql_backup_24_hrs
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_mysql_backup_90_days.sql
+      query = query.mysql_backup_30_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_mysql_backup_365_days.sql
+      query = query.mysql_backup_90_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_mysql_backup_1_year.sql
+      query = query.mysql_backup_365_days
+      width = 2
+      type  = "info"
+    }
+
+    card {
+      query = query.mysql_backup_1_year
       width = 2
       type  = "info"
     }
@@ -52,12 +52,12 @@ dashboard "oci_mysql_backup_age_report" {
       display = "none"
     }
 
-    sql = query.oci_mysql_backup_age_report.sql
+    query = query.mysql_backup_age_report
   }
 
 }
 
-query "oci_mysql_backup_24_hrs" {
+query "mysql_backup_24_hrs" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -69,7 +69,7 @@ query "oci_mysql_backup_24_hrs" {
   EOQ
 }
 
-query "oci_mysql_backup_30_days" {
+query "mysql_backup_30_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -81,7 +81,7 @@ query "oci_mysql_backup_30_days" {
   EOQ
 }
 
-query "oci_mysql_backup_90_days" {
+query "mysql_backup_90_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -93,7 +93,7 @@ query "oci_mysql_backup_90_days" {
   EOQ
 }
 
-query "oci_mysql_backup_365_days" {
+query "mysql_backup_365_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -105,7 +105,7 @@ query "oci_mysql_backup_365_days" {
   EOQ
 }
 
-query "oci_mysql_backup_1_year" {
+query "mysql_backup_1_year" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -117,7 +117,7 @@ query "oci_mysql_backup_1_year" {
   EOQ
 }
 
-query "oci_mysql_backup_age_report" {
+query "mysql_backup_age_report" {
   sql = <<-EOQ
     select
       b.display_name as "Name",

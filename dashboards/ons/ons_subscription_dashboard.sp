@@ -1,4 +1,4 @@
-dashboard "oci_ons_subscription_dashboard" {
+dashboard "ons_subscription_dashboard" {
 
   title         = "OCI ONS Subscription Dashboard"
   documentation = file("./dashboards/ons/docs/ons_subscription_dashboard.md")
@@ -10,13 +10,13 @@ dashboard "oci_ons_subscription_dashboard" {
   container {
 
     card {
-      sql   = query.oci_ons_subscription_count.sql
-      width = 2
+      query = query.ons_subscription_count
+      width = 3
     }
 
     card {
-      sql   = query.oci_ons_subscription_unused_count.sql
-      width = 2
+      query = query.ons_subscription_unused_count
+      width = 3
     }
 
   }
@@ -26,28 +26,28 @@ dashboard "oci_ons_subscription_dashboard" {
 
     chart {
       title = "Subscriptions by Tenancy"
-      sql   = query.oci_ons_subscription_by_tenancy.sql
+      query = query.ons_subscription_by_tenancy
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Subscriptions by Compartment"
-      sql   = query.oci_ons_subscription_by_compartment.sql
+      query = query.ons_subscription_by_compartment
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Subscriptions by Region"
-      sql   = query.oci_ons_subscription_by_region.sql
+      query = query.ons_subscription_by_region
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Subscriptions by Age"
-      sql   = query.oci_ons_subscription_by_creation_month.sql
+      query = query.ons_subscription_by_creation_month
       type  = "column"
       width = 3
     }
@@ -58,13 +58,13 @@ dashboard "oci_ons_subscription_dashboard" {
 
 # Card Queries
 
-query "oci_ons_subscription_count" {
+query "ons_subscription_count" {
   sql = <<-EOQ
     select count(*) as "Subscriptions" from oci_ons_subscription;
   EOQ
 }
 
-query "oci_ons_subscription_unused_count" {
+query "ons_subscription_unused_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -78,7 +78,7 @@ query "oci_ons_subscription_unused_count" {
 
 # Assessment Queries
 
-query "oci_ons_subscription_by_lifecycle_state" {
+query "ons_subscription_by_lifecycle_state" {
   sql = <<-EOQ
     select
       case when lifecycle_state = 'PENDING' then 'unused' else 'in_use' end as status,
@@ -94,7 +94,7 @@ query "oci_ons_subscription_by_lifecycle_state" {
 
 # Analysis Queries
 
-query "oci_ons_subscription_by_tenancy" {
+query "ons_subscription_by_tenancy" {
   sql = <<-EOQ
     select
        t.name as "Tenancy",
@@ -111,7 +111,7 @@ query "oci_ons_subscription_by_tenancy" {
   EOQ
 }
 
-query "oci_ons_subscription_by_compartment" {
+query "ons_subscription_by_compartment" {
   sql = <<-EOQ
     with compartments as (
       select
@@ -145,7 +145,7 @@ query "oci_ons_subscription_by_compartment" {
   EOQ
 }
 
-query "oci_ons_subscription_by_region" {
+query "ons_subscription_by_region" {
   sql = <<-EOQ
     select
     region as "Region",
@@ -159,7 +159,7 @@ query "oci_ons_subscription_by_region" {
   EOQ
 }
 
-query "oci_ons_subscription_by_creation_month" {
+query "ons_subscription_by_creation_month" {
   sql = <<-EOQ
     with subscriptions as (
       select

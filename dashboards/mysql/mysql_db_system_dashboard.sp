@@ -1,4 +1,4 @@
-dashboard "oci_mysql_db_system_dashboard" {
+dashboard "mysql_db_system_dashboard" {
 
   title         = "OCI MySQL DB System Dashboard"
   documentation = file("./dashboards/mysql/docs/mysql_db_system_dashboard.md")
@@ -10,27 +10,27 @@ dashboard "oci_mysql_db_system_dashboard" {
   container {
 
     card {
-      sql   = query.oci_mysql_db_system_count.sql
+      query = query.mysql_db_system_count
       width = 2
     }
 
     card {
-      sql   = query.oci_mysql_db_system_storage_total.sql
+      query = query.mysql_db_system_storage_total
       width = 2
     }
 
     card {
-      sql   = query.oci_mysql_db_system_analytics_cluster_attached_count.sql
+      query = query.mysql_db_system_analytics_cluster_attached_count
       width = 2
     }
 
     card {
-      sql   = query.oci_mysql_db_system_heat_wave_cluster_attached_count.sql
+      query = query.mysql_db_system_heat_wave_cluster_attached_count
       width = 2
     }
 
     card {
-      sql   = query.oci_mysql_db_system_backup_disabled_count.sql
+      query = query.mysql_db_system_backup_disabled_count
       width = 2
     }
 
@@ -41,7 +41,7 @@ dashboard "oci_mysql_db_system_dashboard" {
 
     chart {
       title = "Backup Status"
-      sql   = query.oci_mysql_db_system_with_backups.sql
+      query = query.mysql_db_system_with_backups
       type  = "donut"
       width = 3
 
@@ -62,28 +62,28 @@ dashboard "oci_mysql_db_system_dashboard" {
 
     chart {
       title = "DB Systems by Tenancy"
-      sql   = query.oci_mysql_db_system_by_tenancy.sql
+      query = query.mysql_db_system_by_tenancy
       type  = "column"
       width = 3
     }
 
     chart {
       title = "DB Systems by Compartment"
-      sql   = query.oci_mysql_db_system_by_compartment.sql
+      query = query.mysql_db_system_by_compartment
       type  = "column"
       width = 3
     }
 
     chart {
       title = "DB Systems by Region"
-      sql   = query.oci_mysql_db_system_by_region.sql
+      query = query.mysql_db_system_by_region
       type  = "column"
       width = 3
     }
 
     chart {
       title = "DB Systems by Age"
-      sql   = query.oci_mysql_db_system_by_creation_month.sql
+      query = query.mysql_db_system_by_creation_month
       type  = "column"
       width = 3
     }
@@ -93,7 +93,7 @@ dashboard "oci_mysql_db_system_dashboard" {
   container {
     chart {
       title = "Storage by Tenancy (GB)"
-      sql   = query.oci_mysql_db_system_storage_by_tenancy.sql
+      query = query.mysql_db_system_storage_by_tenancy
       type  = "column"
       width = 3
 
@@ -104,7 +104,7 @@ dashboard "oci_mysql_db_system_dashboard" {
 
     chart {
       title = "Storage by Compartment (GB)"
-      sql   = query.oci_mysql_db_system_storage_by_compartment.sql
+      query = query.mysql_db_system_storage_by_compartment
       type  = "column"
       width = 3
 
@@ -115,7 +115,7 @@ dashboard "oci_mysql_db_system_dashboard" {
 
     chart {
       title = "Storage by Region (GB)"
-      sql   = query.oci_mysql_db_system_storage_by_region.sql
+      query = query.mysql_db_system_storage_by_region
       type  = "column"
       width = 3
 
@@ -126,7 +126,7 @@ dashboard "oci_mysql_db_system_dashboard" {
 
     chart {
       title = "Storage by Age (GB)"
-      sql   = query.oci_mysql_db_system_storage_by_creation_month.sql
+      query = query.mysql_db_system_storage_by_creation_month
       type  = "column"
       width = 3
 
@@ -142,14 +142,14 @@ dashboard "oci_mysql_db_system_dashboard" {
 
     chart {
       title = "Top 10 CPU - Last 7 days"
-      sql   = query.oci_mysql_db_system_top10_cpu_past_week.sql
+      query = query.mysql_db_system_top10_cpu_past_week
       type  = "line"
       width = 6
     }
 
     chart {
       title = "Average max daily CPU - Last 30 days"
-      sql   = query.oci_mysql_db_system_by_cpu_utilization_category.sql
+      query = query.mysql_db_system_by_cpu_utilization_category
       type  = "column"
       width = 6
     }
@@ -160,7 +160,7 @@ dashboard "oci_mysql_db_system_dashboard" {
 
 # Card Queries
 
-query "oci_mysql_db_system_count" {
+query "mysql_db_system_count" {
   sql = <<-EOQ
   select
     count(*) as "DB Systems"
@@ -171,7 +171,7 @@ query "oci_mysql_db_system_count" {
   EOQ
 }
 
-query "oci_mysql_db_system_storage_total" {
+query "mysql_db_system_storage_total" {
   sql = <<-EOQ
     select
       sum(data_storage_size_in_gbs) as "Total Storage (GB)"
@@ -182,7 +182,7 @@ query "oci_mysql_db_system_storage_total" {
   EOQ
 }
 
-query "oci_mysql_db_system_analytics_cluster_attached_count" {
+query "mysql_db_system_analytics_cluster_attached_count" {
   sql = <<-EOQ
    select
       count(*) as "Analytics Cluster Attached"
@@ -193,7 +193,7 @@ query "oci_mysql_db_system_analytics_cluster_attached_count" {
   EOQ
 }
 
-query "oci_mysql_db_system_heat_wave_cluster_attached_count" {
+query "mysql_db_system_heat_wave_cluster_attached_count" {
   sql = <<-EOQ
    select
       count(*) as "HeatWave Cluster Attached"
@@ -204,7 +204,7 @@ query "oci_mysql_db_system_heat_wave_cluster_attached_count" {
   EOQ
 }
 
-query "oci_mysql_db_system_backup_disabled_count" {
+query "mysql_db_system_backup_disabled_count" {
   sql = <<-EOQ
    select
       count(s.*) as value,
@@ -220,7 +220,7 @@ query "oci_mysql_db_system_backup_disabled_count" {
 
 # Assessment Queries
 
-query "oci_mysql_db_system_with_backups" {
+query "mysql_db_system_with_backups" {
   sql = <<-EOQ
     select
       case when b.id is null then 'disabled' else 'enabled' end as status,
@@ -237,7 +237,7 @@ query "oci_mysql_db_system_with_backups" {
 
 # Analysis Queries
 
-query "oci_mysql_db_system_by_tenancy" {
+query "mysql_db_system_by_tenancy" {
   sql = <<-EOQ
     select
       t.title as "Tenancy",
@@ -254,7 +254,7 @@ query "oci_mysql_db_system_by_tenancy" {
   EOQ
 }
 
-query "oci_mysql_db_system_by_compartment" {
+query "mysql_db_system_by_compartment" {
   sql = <<-EOQ
     with compartments as (
       select
@@ -288,7 +288,7 @@ query "oci_mysql_db_system_by_compartment" {
   EOQ
 }
 
-query "oci_mysql_db_system_by_region" {
+query "mysql_db_system_by_region" {
   sql = <<-EOQ
     select
       region as "Region",
@@ -304,7 +304,7 @@ query "oci_mysql_db_system_by_region" {
   EOQ
 }
 
-query "oci_mysql_db_system_by_creation_month" {
+query "mysql_db_system_by_creation_month" {
   sql = <<-EOQ
     with mysql_dbSystems as (
       select
@@ -351,7 +351,7 @@ query "oci_mysql_db_system_by_creation_month" {
   EOQ
 }
 
-query "oci_mysql_db_system_storage_by_tenancy" {
+query "mysql_db_system_storage_by_tenancy" {
   sql = <<-EOQ
     select
       t.title as "Tenancy",
@@ -368,7 +368,7 @@ query "oci_mysql_db_system_storage_by_tenancy" {
   EOQ
 }
 
-query "oci_mysql_db_system_storage_by_compartment" {
+query "mysql_db_system_storage_by_compartment" {
   sql = <<-EOQ
     with compartments as (
       select
@@ -402,7 +402,7 @@ query "oci_mysql_db_system_storage_by_compartment" {
   EOQ
 }
 
-query "oci_mysql_db_system_storage_by_region" {
+query "mysql_db_system_storage_by_region" {
   sql = <<-EOQ
     select
       region as "Region",
@@ -418,7 +418,7 @@ query "oci_mysql_db_system_storage_by_region" {
   EOQ
 }
 
-query "oci_mysql_db_system_storage_by_creation_month" {
+query "mysql_db_system_storage_by_creation_month" {
   sql = <<-EOQ
     with mysql_dbSystems as (
       select
@@ -468,7 +468,7 @@ query "oci_mysql_db_system_storage_by_creation_month" {
 
 # Performance & Utilization Queries
 
-query "oci_mysql_db_system_top10_cpu_past_week" {
+query "mysql_db_system_top10_cpu_past_week" {
   sql = <<-EOQ
      with top_n as (
       select
@@ -500,7 +500,7 @@ query "oci_mysql_db_system_top10_cpu_past_week" {
 
 # Underused if avg CPU < 10% every day for last month
 
-query "oci_mysql_db_system_by_cpu_utilization_category" {
+query "mysql_db_system_by_cpu_utilization_category" {
   sql = <<-EOQ
     with cpu_buckets as (
       select

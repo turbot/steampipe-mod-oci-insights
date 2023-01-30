@@ -1,4 +1,4 @@
-dashboard "oci_objectstorage_bucket_dashboard" {
+dashboard "objectstorage_bucket_dashboard" {
 
   title         = "OCI Object Storage Bucket Dashboard"
   documentation = file("./dashboards/objectstorage/docs/objectstorage_bucket_dashboard.md")
@@ -10,36 +10,36 @@ dashboard "oci_objectstorage_bucket_dashboard" {
   container {
 
     card {
-      sql   = query.oci_objectstorage_bucket_count.sql
+      query = query.objectstorage_bucket_count
       width = 2
     }
 
     card {
-      sql   = query.oci_objectstorage_bucket_read_only_access_count.sql
+      query = query.objectstorage_bucket_read_only_access_count
       width = 2
     }
 
     card {
-      sql   = query.oci_objectstorage_bucket_archived_count.sql
+      query = query.objectstorage_bucket_archived_count
       width = 2
     }
 
     card {
-      sql   = query.oci_objectstorage_bucket_public_access_count.sql
+      query = query.objectstorage_bucket_public_access_count
       width = 2
-      href  = dashboard.oci_objectstorage_bucket_public_access_report.url_path
+      href  = dashboard.objectstorage_bucket_public_access_report.url_path
     }
 
     card {
-      sql   = query.oci_objectstorage_bucket_versioning_disabled_count.sql
+      query = query.objectstorage_bucket_versioning_disabled_count
       width = 2
-      href  = dashboard.oci_objectstorage_bucket_lifecycle_report.url_path
+      href  = dashboard.objectstorage_bucket_lifecycle_report.url_path
     }
 
     card {
-      sql   = query.oci_objectstorage_bucket_logging_disabled_count.sql
+      query = query.objectstorage_bucket_logging_disabled_count
       width = 2
-      href  = dashboard.oci_objectstorage_bucket_logging_report.url_path
+      href  = dashboard.objectstorage_bucket_logging_report.url_path
     }
 
   }
@@ -49,7 +49,7 @@ dashboard "oci_objectstorage_bucket_dashboard" {
 
     chart {
       title = "Public Access"
-      sql   = query.oci_objectstorage_bucket_public_access_status.sql
+      query = query.objectstorage_bucket_public_access_status
       type  = "donut"
       width = 3
 
@@ -65,7 +65,7 @@ dashboard "oci_objectstorage_bucket_dashboard" {
 
     chart {
       title = "Versioning Status"
-      sql   = query.oci_objectstorage_bucket_versioning_status.sql
+      query = query.objectstorage_bucket_versioning_status
       type  = "donut"
       width = 3
 
@@ -81,7 +81,7 @@ dashboard "oci_objectstorage_bucket_dashboard" {
 
     chart {
       title = "Logging Status"
-      sql   = query.oci_objectstorage_bucket_logging_status.sql
+      query = query.objectstorage_bucket_logging_status
       type  = "donut"
       width = 3
 
@@ -102,35 +102,35 @@ dashboard "oci_objectstorage_bucket_dashboard" {
 
     chart {
       title = "Buckets by Tenancy"
-      sql   = query.oci_objectstorage_bucket_by_tenancy.sql
+      query = query.objectstorage_bucket_by_tenancy
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Buckets by Compartment"
-      sql   = query.oci_objectstorage_bucket_by_compartment.sql
+      query = query.objectstorage_bucket_by_compartment
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Buckets by Region"
-      sql   = query.oci_objectstorage_bucket_by_region.sql
+      query = query.objectstorage_bucket_by_region
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Buckets by Age"
-      sql   = query.oci_objectstorage_bucket_by_creation_month.sql
+      query = query.objectstorage_bucket_by_creation_month
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Buckets by Encryption Type"
-      sql   = query.oci_objectstorage_bucket_encryption_status.sql
+      query = query.objectstorage_bucket_encryption_status
       type  = "column"
       width = 4
     }
@@ -140,13 +140,13 @@ dashboard "oci_objectstorage_bucket_dashboard" {
 
 # Card Queries
 
-query "oci_objectstorage_bucket_count" {
+query "objectstorage_bucket_count" {
   sql = <<-EOQ
     select count(*) as "Buckets" from oci_objectstorage_bucket;
   EOQ
 }
 
-query "oci_objectstorage_bucket_read_only_access_count" {
+query "objectstorage_bucket_read_only_access_count" {
   sql = <<-EOQ
     select
       count(*) as "Read-Only Access"
@@ -157,7 +157,7 @@ query "oci_objectstorage_bucket_read_only_access_count" {
   EOQ
 }
 
-query "oci_objectstorage_bucket_default_encryption_count" {
+query "objectstorage_bucket_default_encryption_count" {
   sql = <<-EOQ
     select count(*) as "Oracle-Managed Encryption"
     from
@@ -167,7 +167,7 @@ query "oci_objectstorage_bucket_default_encryption_count" {
   EOQ
 }
 
-query "oci_objectstorage_bucket_archived_count" {
+query "objectstorage_bucket_archived_count" {
   sql = <<-EOQ
     select count(*) as "Archived"
     from
@@ -177,7 +177,7 @@ query "oci_objectstorage_bucket_archived_count" {
   EOQ
 }
 
-query "oci_objectstorage_bucket_public_access_count" {
+query "objectstorage_bucket_public_access_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -190,7 +190,7 @@ query "oci_objectstorage_bucket_public_access_count" {
   EOQ
 }
 
-query "oci_objectstorage_bucket_versioning_disabled_count" {
+query "objectstorage_bucket_versioning_disabled_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -203,7 +203,7 @@ query "oci_objectstorage_bucket_versioning_disabled_count" {
   EOQ
 }
 
-query "oci_objectstorage_bucket_logging_disabled_count" {
+query "objectstorage_bucket_logging_disabled_count" {
   sql = <<-EOQ
     with name_with_region as (
       select
@@ -228,7 +228,7 @@ query "oci_objectstorage_bucket_logging_disabled_count" {
 
 # Assessment Queries
 
-query "oci_objectstorage_bucket_public_access_status" {
+query "objectstorage_bucket_public_access_status" {
   sql = <<-EOQ
     with public_access_stat as (
       select
@@ -249,7 +249,7 @@ query "oci_objectstorage_bucket_public_access_status" {
   EOQ
 }
 
-query "oci_objectstorage_bucket_versioning_status" {
+query "objectstorage_bucket_versioning_status" {
   sql = <<-EOQ
     with versioning_stat as (
       select
@@ -266,11 +266,11 @@ query "oci_objectstorage_bucket_versioning_status" {
     from
       versioning_stat
     group by
-      versioning_stat
+      versioning_stat;
   EOQ
 }
 
-query "oci_objectstorage_bucket_logging_status" {
+query "objectstorage_bucket_logging_status" {
   sql = <<-EOQ
     with name_with_region as (
       select
@@ -297,13 +297,13 @@ query "oci_objectstorage_bucket_logging_status" {
     from
       logging_stat
     group by
-      logging_stat
+      logging_stat;
   EOQ
 }
 
 # Analysis Queries
 
-query "oci_objectstorage_bucket_by_tenancy" {
+query "objectstorage_bucket_by_tenancy" {
   sql = <<-EOQ
    select
       t.title as "Tenancy",
@@ -320,7 +320,7 @@ query "oci_objectstorage_bucket_by_tenancy" {
   EOQ
 }
 
-query "oci_objectstorage_bucket_by_compartment" {
+query "objectstorage_bucket_by_compartment" {
   sql = <<-EOQ
     with compartments as (
       select
@@ -354,9 +354,10 @@ query "oci_objectstorage_bucket_by_compartment" {
   EOQ
 }
 
-query "oci_objectstorage_bucket_by_region" {
+query "objectstorage_bucket_by_region" {
   sql = <<-EOQ
-    select region as "Region", count(*) as "Buckets"
+    select
+      region as "Region", count(*) as "Buckets"
     from
       oci_objectstorage_bucket
     group by
@@ -366,7 +367,7 @@ query "oci_objectstorage_bucket_by_region" {
   EOQ
 }
 
-query "oci_objectstorage_bucket_by_creation_month" {
+query "objectstorage_bucket_by_creation_month" {
   sql = <<-EOQ
     with buckets as (
       select
@@ -411,7 +412,7 @@ query "oci_objectstorage_bucket_by_creation_month" {
   EOQ
 }
 
-query "oci_objectstorage_bucket_encryption_status" {
+query "objectstorage_bucket_encryption_status" {
   sql = <<-EOQ
     select
       encryption_status,
