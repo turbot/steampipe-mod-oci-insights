@@ -1,3 +1,20 @@
+## v0.5 [2023-01-30]
+
+_Dependencies_
+
+- Steampipe `v0.18.0` or higher is now required ([#69](https://github.com/turbot/steampipe-mod-oci-insights/pull/69))
+- OCI plugin `v0.19.0` or higher is now required. ([#69](https://github.com/turbot/steampipe-mod-oci-insights/pull/69))
+
+_What's new?_
+
+- Added resource relationship graphs across all the detail dashboards to highlight the relationship the resource shares with other resources. ([#68](https://github.com/turbot/steampipe-mod-oci-insights/pull/68))
+- New dashboards added: ([#68](https://github.com/turbot/steampipe-mod-oci-insights/pull/68))
+  - [OCI Identity Group Dashboard](https://hub.steampipe.io/mods/turbot/oci_insights/dashboards/dashboard.identity_group_dashboard)
+  - [OCI Identity Group Detail](https://hub.steampipe.io/mods/turbot/oci_insights/dashboards/dashboard.identity_group_detail)
+  - [OCI KMS Vault Age Report](https://hub.steampipe.io/mods/turbot/oci_insights/dashboards/dashboard.kms_vault_age_report)
+  - [OCI KMS Vault Dashboard](https://hub.steampipe.io/mods/turbot/oci_insights/dashboards/dashboard.kms_vault_dashboard)
+  - [OCI KMS Vault Detail](https://hub.steampipe.io/mods/turbot/oci_insights/dashboards/dashboard.kms_vault_detail)
+
 ## v0.4 [2022-05-09]
 
 _Enhancements_
