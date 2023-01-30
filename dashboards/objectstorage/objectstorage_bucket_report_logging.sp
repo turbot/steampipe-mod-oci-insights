@@ -1,4 +1,4 @@
-dashboard "oci_objectstorage_bucket_logging_report" {
+dashboard "objectstorage_bucket_logging_report" {
 
   title         = "OCI Object Storage Bucket Logging Report"
   documentation = file("./dashboards/objectstorage/docs/objectstorage_bucket_report_logging.md")
@@ -11,13 +11,13 @@ dashboard "oci_objectstorage_bucket_logging_report" {
   container {
 
     card {
-      sql   = query.oci_objectstorage_bucket_count.sql
-      width = 2
+      query = query.objectstorage_bucket_count
+      width = 3
     }
 
     card {
-      sql   = query.oci_objectstorage_bucket_logging_disabled_count.sql
-      width = 2
+      query = query.objectstorage_bucket_logging_disabled_count
+      width = 3
     }
   }
 
@@ -27,15 +27,15 @@ dashboard "oci_objectstorage_bucket_logging_report" {
     }
 
     column "Name" {
-      href = "${dashboard.oci_objectstorage_bucket_detail.url_path}?input.bucket_id={{.OCID | @uri}}"
+      href = "${dashboard.objectstorage_bucket_detail.url_path}?input.bucket_id={{.OCID | @uri}}"
     }
 
-    sql = query.oci_objectstorage_bucket_logging_report.sql
+    query = query.objectstorage_bucket_logging_report
   }
 
 }
 
-query "oci_objectstorage_bucket_logging_report" {
+query "objectstorage_bucket_logging_report" {
   sql = <<-EOQ
     with name_with_region as (
       select

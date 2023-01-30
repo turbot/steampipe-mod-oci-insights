@@ -1,4 +1,4 @@
-dashboard "oci_kms_key_detail" {
+dashboard "kms_key_detail" {
 
   title = "OCI KMS Key Detail"
 
@@ -8,30 +8,181 @@ dashboard "oci_kms_key_detail" {
 
   input "key_id" {
     title = "Select a key:"
-    query = query.oci_kms_key_input
+    query = query.kms_key_input
     width = 4
   }
 
   container {
 
     card {
-      width = 2
+      width = 3
 
-      query = query.oci_kms_key_disabled
+      query = query.kms_key_disabled
       args = {
         id = self.input.key_id.value
       }
     }
 
     card {
-      query = query.oci_kms_key_protection_mode
-      width = 2
+      query = query.kms_key_protection_mode
+      width = 3
 
       args = {
         id = self.input.key_id.value
       }
     }
 
+  }
+
+  with "blockstorage_block_volumes_for_kms_key" {
+    query = query.blockstorage_block_volumes_for_kms_key
+    args  = [self.input.key_id.value]
+  }
+
+  with "blockstorage_boot_volumes_for_kms_key" {
+    query = query.blockstorage_boot_volumes_for_kms_key
+    args  = [self.input.key_id.value]
+  }
+
+  with "database_autonomous_databases_for_kms_key" {
+    query = query.database_autonomous_databases_for_kms_key
+    args  = [self.input.key_id.value]
+  }
+
+  with "file_storage_file_systems_for_kms_key" {
+    query = query.file_storage_file_systems_for_kms_key
+    args  = [self.input.key_id.value]
+  }
+
+  with "kms_key_versions_for_kms_key" {
+    query = query.kms_key_versions_for_kms_key
+    args  = [self.input.key_id.value]
+  }
+
+  with "kms_vaults_for_kms_key" {
+    query = query.kms_vaults_for_kms_key
+    args  = [self.input.key_id.value]
+  }
+
+  with "objectstorage_buckets_for_kms_key" {
+    query = query.objectstorage_buckets_for_kms_key
+    args  = [self.input.key_id.value]
+  }
+
+  container {
+
+    graph {
+      title     = "Relationships"
+      type      = "graph"
+      direction = "TD"
+
+      node {
+        base = node.blockstorage_block_volume
+        args = {
+          blockstorage_block_volume_ids = with.blockstorage_block_volumes_for_kms_key.rows[*].block_volume_id
+        }
+      }
+
+      node {
+        base = node.blockstorage_boot_volume
+        args = {
+          blockstorage_boot_volume_ids = with.blockstorage_boot_volumes_for_kms_key.rows[*].boot_volume_id
+        }
+      }
+
+      node {
+        base = node.database_autonomous_database
+        args = {
+          database_autonomous_database_ids = with.database_autonomous_databases_for_kms_key.rows[*].autonomous_database_id
+        }
+      }
+
+      node {
+        base = node.filestorage_file_system
+        args = {
+          filestorage_file_system_ids = with.file_storage_file_systems_for_kms_key.rows[*].file_system_id
+        }
+      }
+
+      node {
+        base = node.kms_key
+        args = {
+          kms_key_ids = [self.input.key_id.value]
+        }
+      }
+
+      node {
+        base = node.kms_key_version
+        args = {
+          kms_key_version_ids =  with.kms_key_versions_for_kms_key.rows[*].kms_key_version_id
+        }
+      }
+
+      node {
+        base = node.kms_vault
+        args = {
+          kms_vault_ids = with.kms_vaults_for_kms_key.rows[*].vault_id
+        }
+      }
+
+      node {
+        base = node.objectstorage_bucket
+        args = {
+          objectstorage_bucket_ids = with.objectstorage_buckets_for_kms_key.rows[*].bucket_id
+        }
+      }
+
+      edge {
+        base = edge.blockstorage_block_volume_to_kms_key_version
+        args = {
+          blockstorage_block_volume_ids = with.blockstorage_block_volumes_for_kms_key.rows[*].block_volume_id
+        }
+      }
+
+      edge {
+        base = edge.blockstorage_boot_volume_to_kms_key_version
+        args = {
+          blockstorage_boot_volume_ids = with.blockstorage_boot_volumes_for_kms_key.rows[*].boot_volume_id
+        }
+      }
+
+      edge {
+        base = edge.database_autonomous_database_to_kms_key
+        args = {
+          database_autonomous_database_ids = with.database_autonomous_databases_for_kms_key.rows[*].autonomous_database_id
+        }
+      }
+
+      edge {
+        base = edge.filestorage_file_system_to_kms_key
+        args = {
+          filestorage_file_system_ids = with.file_storage_file_systems_for_kms_key.rows[*].file_system_id
+        }
+      }
+
+
+      edge {
+        base = edge.kms_key_version_to_kms_key
+        args = {
+          kms_key_version_ids =  with.kms_key_versions_for_kms_key.rows[*].kms_key_version_id
+        }
+      }
+
+      edge {
+        base = edge.kms_key_to_kms_vault
+        args = {
+          kms_key_ids = [self.input.key_id.value]
+        }
+      }
+
+      edge {
+        base = edge.objectstorage_bucket_to_kms_key
+        args = {
+          objectstorage_bucket_ids = with.objectstorage_buckets_for_kms_key.rows[*].bucket_id
+        }
+      }
+
+    }
   }
 
   container {
@@ -43,7 +194,7 @@ dashboard "oci_kms_key_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-        query = query.oci_kms_key_overview
+        query = query.kms_key_overview
         args = {
           id = self.input.key_id.value
         }
@@ -53,7 +204,7 @@ dashboard "oci_kms_key_detail" {
       table {
         title = "Tags"
         width = 6
-        query = query.oci_kms_key_tag
+        query = query.kms_key_tag
         args = {
           id = self.input.key_id.value
         }
@@ -66,7 +217,7 @@ dashboard "oci_kms_key_detail" {
 
       table {
         title = "Key Details"
-        query = query.oci_kms_key_detail
+        query = query.kms_key_detail
         args = {
           id = self.input.key_id.value
         }
@@ -76,28 +227,118 @@ dashboard "oci_kms_key_detail" {
   }
 }
 
-query "oci_kms_key_input" {
-  sql = <<EOQ
+# Input queries
+
+query "kms_key_input" {
+  sql = <<-EOQ
     select
       k.name as label,
       k.id as value,
       json_build_object(
-        'c.name', coalesce(c.title, 'root'),
-        'k.region', region,
+        'kv.id', right(reverse(split_part(reverse(kv.id), '.', 1)), 8),
+        'kv.region', kv.region,
+        'oci.name', coalesce(oci.title, 'root'),
         't.name', t.name
       ) as tags
-    from
-      oci_kms_key as k
-      left join oci_identity_compartment as c on k.compartment_id = c.id
-      left join oci_identity_tenancy as t on k.tenant_id = t.id
-    where
-      k.lifecycle_state <> 'DELETED'
-    order by
-      k.name;
-EOQ
+      from
+        oci_kms_key as k
+        left join oci_identity_compartment as oci on k.compartment_id = oci.id
+        left join oci_kms_key_version as kv on kv.key_id = k.id
+        left join oci_identity_tenancy as t on k.tenant_id = t.id
+      where
+        k.lifecycle_state <> 'DELETED'
+        and kv.management_endpoint = k.management_endpoint
+        and kv.region = k.region
+      order by
+        k.title ;
+  EOQ
 }
 
-query "oci_kms_key_disabled" {
+# With queries
+
+query "blockstorage_block_volumes_for_kms_key" {
+  sql = <<-EOQ
+    select
+      id as block_volume_id
+    from
+      oci_core_volume
+    where
+      kms_key_id = $1;
+  EOQ
+}
+
+query "file_storage_file_systems_for_kms_key" {
+  sql = <<-EOQ
+    select
+      id as file_system_id
+    from
+      oci_file_storage_file_system
+    where
+      kms_key_id = $1;
+  EOQ
+}
+
+query "blockstorage_boot_volumes_for_kms_key" {
+  sql = <<-EOQ
+    select
+      id as boot_volume_id
+    from
+      oci_core_boot_volume
+    where
+      kms_key_id = $1;
+  EOQ
+}
+
+query "database_autonomous_databases_for_kms_key" {
+  sql = <<-EOQ
+    select
+      id as autonomous_database_id
+    from
+      oci_database_autonomous_database
+    where
+      kms_key_id = $1;
+  EOQ
+}
+
+query "kms_key_versions_for_kms_key" {
+  sql = <<-EOQ
+    select
+      v.id as kms_key_version_id
+    from
+      oci_kms_key_version as v
+      left join oci_kms_key as k on k.id = v.key_id
+    where
+      v.management_endpoint = k.management_endpoint
+      and v.region = k.region
+      and k.id = $1;
+  EOQ
+}
+
+query "kms_vaults_for_kms_key" {
+  sql = <<-EOQ
+    select
+      vault_id
+    from
+      oci_kms_key
+    where
+      id = $1;
+  EOQ
+}
+
+query "objectstorage_buckets_for_kms_key" {
+  sql = <<-EOQ
+    select
+      id as bucket_id
+    from
+      oci_objectstorage_bucket
+    where
+      kms_key_id = $1;
+  EOQ
+}
+
+# Card queries
+
+query "kms_key_disabled" {
   sql = <<-EOQ
     select
       initcap(lifecycle_state) as value,
@@ -112,7 +353,7 @@ query "oci_kms_key_disabled" {
   param "id" {}
 }
 
-query "oci_kms_key_protection_mode" {
+query "kms_key_protection_mode" {
   sql = <<-EOQ
     select
       case when protection_mode = 'HSM' then 'HSM' else initcap(protection_mode) end as "Protection Mode"
@@ -125,7 +366,9 @@ query "oci_kms_key_protection_mode" {
   param "id" {}
 }
 
-query "oci_kms_key_overview" {
+# Other detail page queries
+
+query "kms_key_overview" {
   sql = <<-EOQ
     select
       name as "Name",
@@ -143,7 +386,7 @@ query "oci_kms_key_overview" {
   param "id" {}
 }
 
-query "oci_kms_key_tag" {
+query "kms_key_tag" {
   sql = <<-EOQ
     with jsondata as (
     select
@@ -164,7 +407,7 @@ query "oci_kms_key_tag" {
   param "id" {}
 }
 
-query "oci_kms_key_detail" {
+query "kms_key_detail" {
   sql = <<-EOQ
     select
       algorithm as "Algorithm",

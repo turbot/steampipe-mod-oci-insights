@@ -1,4 +1,4 @@
-dashboard "oci_identity_customer_secret_key_age_report" {
+dashboard "identity_customer_secret_key_age_report" {
 
   title         = "OCI Identity Customer Secret Key Age Report"
   documentation = file("./dashboards/identity/docs/identity_customer_secret_key_report_age.md")
@@ -11,36 +11,36 @@ dashboard "oci_identity_customer_secret_key_age_report" {
   container {
 
     card {
-      sql   = query.oci_identity_customer_secret_key_count.sql
+      query = query.identity_customer_secret_key_count
       width = 2
     }
 
     card {
-      sql   = query.oci_identity_customer_secret_key_24_hrs.sql
-      width = 2
-      type  = "info"
-    }
-
-    card {
-      sql   = query.oci_identity_customer_secret_key_30_days.sql
+      query = query.identity_customer_secret_key_24_hrs
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_identity_customer_secret_key_90_days.sql
+      query = query.identity_customer_secret_key_30_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_identity_customer_secret_key_365_days.sql
+      query = query.identity_customer_secret_key_90_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_identity_customer_secret_key_1_year.sql
+      query = query.identity_customer_secret_key_365_days
+      width = 2
+      type  = "info"
+    }
+
+    card {
+      query = query.identity_customer_secret_key_1_year
       width = 2
       type  = "info"
     }
@@ -52,18 +52,18 @@ dashboard "oci_identity_customer_secret_key_age_report" {
       display = "none"
     }
 
-    sql = query.oci_identity_customer_secret_key_age_report.sql
+    query = query.identity_customer_secret_key_age_report
   }
 
 }
 
-query "oci_identity_customer_secret_key_count" {
+query "identity_customer_secret_key_count" {
   sql = <<-EOQ
     select count(*) as "Customer Keys" from oci_identity_customer_secret_key;
   EOQ
 }
 
-query "oci_identity_customer_secret_key_24_hrs" {
+query "identity_customer_secret_key_24_hrs" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -75,7 +75,7 @@ query "oci_identity_customer_secret_key_24_hrs" {
   EOQ
 }
 
-query "oci_identity_customer_secret_key_30_days" {
+query "identity_customer_secret_key_30_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -87,7 +87,7 @@ query "oci_identity_customer_secret_key_30_days" {
   EOQ
 }
 
-query "oci_identity_customer_secret_key_90_days" {
+query "identity_customer_secret_key_90_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -99,7 +99,7 @@ query "oci_identity_customer_secret_key_90_days" {
   EOQ
 }
 
-query "oci_identity_customer_secret_key_365_days" {
+query "identity_customer_secret_key_365_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -111,7 +111,7 @@ query "oci_identity_customer_secret_key_365_days" {
   EOQ
 }
 
-query "oci_identity_customer_secret_key_1_year" {
+query "identity_customer_secret_key_1_year" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -123,7 +123,7 @@ query "oci_identity_customer_secret_key_1_year" {
   EOQ
 }
 
-query "oci_identity_customer_secret_key_age_report" {
+query "identity_customer_secret_key_age_report" {
   sql = <<-EOQ
     select
       k.display_name as "Customer Secret Key",

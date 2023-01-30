@@ -1,4 +1,4 @@
-dashboard "oci_objectstorage_bucket_age_report" {
+dashboard "objectstorage_bucket_age_report" {
 
   title         = "OCI Object Storage Bucket Age Report"
   documentation = file("./dashboards/objectstorage/docs/objectstorage_bucket_report_age.md")
@@ -11,36 +11,36 @@ dashboard "oci_objectstorage_bucket_age_report" {
   container {
 
     card {
-      sql   = query.oci_objectstorage_bucket_count.sql
+      query = query.objectstorage_bucket_count
       width = 2
     }
 
     card {
-      sql   = query.oci_objectstorage_bucket_24_hrs.sql
-      width = 2
-      type  = "info"
-    }
-
-    card {
-      sql   = query.oci_objectstorage_bucket_30_days.sql
+      query = query.objectstorage_bucket_24_hrs
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_objectstorage_bucket_90_days.sql
+      query = query.objectstorage_bucket_30_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_objectstorage_bucket_365_days.sql
+      query = query.objectstorage_bucket_90_days
       width = 2
       type  = "info"
     }
 
     card {
-      sql   = query.oci_objectstorage_bucket_1_year.sql
+      query = query.objectstorage_bucket_365_days
+      width = 2
+      type  = "info"
+    }
+
+    card {
+      query = query.objectstorage_bucket_1_year
       width = 2
       type  = "info"
     }
@@ -53,15 +53,15 @@ dashboard "oci_objectstorage_bucket_age_report" {
     }
 
     column "Name" {
-      href = "${dashboard.oci_objectstorage_bucket_detail.url_path}?input.bucket_id={{.OCID | @uri}}"
+      href = "${dashboard.objectstorage_bucket_detail.url_path}?input.bucket_id={{.OCID | @uri}}"
     }
 
-    sql = query.oci_objectstorage_bucket_age_report.sql
+    query = query.objectstorage_bucket_age_report
   }
 
 }
 
-query "oci_objectstorage_bucket_24_hrs" {
+query "objectstorage_bucket_24_hrs" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -73,7 +73,7 @@ query "oci_objectstorage_bucket_24_hrs" {
   EOQ
 }
 
-query "oci_objectstorage_bucket_30_days" {
+query "objectstorage_bucket_30_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -85,7 +85,7 @@ query "oci_objectstorage_bucket_30_days" {
   EOQ
 }
 
-query "oci_objectstorage_bucket_90_days" {
+query "objectstorage_bucket_90_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -97,7 +97,7 @@ query "oci_objectstorage_bucket_90_days" {
   EOQ
 }
 
-query "oci_objectstorage_bucket_365_days" {
+query "objectstorage_bucket_365_days" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -109,7 +109,7 @@ query "oci_objectstorage_bucket_365_days" {
   EOQ
 }
 
-query "oci_objectstorage_bucket_1_year" {
+query "objectstorage_bucket_1_year" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -121,7 +121,7 @@ query "oci_objectstorage_bucket_1_year" {
   EOQ
 }
 
-query "oci_objectstorage_bucket_age_report" {
+query "objectstorage_bucket_age_report" {
   sql = <<-EOQ
     select
       b.name as "Name",

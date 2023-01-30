@@ -1,4 +1,4 @@
-dashboard "oci_filestorage_filesystem_dashboard" {
+dashboard "filestorage_filesystem_dashboard" {
 
   title         = "OCI File Storage File System Dashboard"
   documentation = file("./dashboards/filestorage/docs/filestorage_filesystem_dashboard.md")
@@ -10,18 +10,18 @@ dashboard "oci_filestorage_filesystem_dashboard" {
   container {
 
     card {
-      sql   = query.oci_filestorage_filesystem_count.sql
-      width = 2
+      query = query.filestorage_filesystem_count
+      width = 3
     }
 
     card {
-      sql   = query.oci_filestorage_filesystem_cloned_count.sql
-      width = 2
+      query = query.filestorage_filesystem_cloned_count
+      width = 3
     }
 
     card {
-      sql   = query.oci_filestorage_filesystem_snapshot_count.sql
-      width = 2
+      query = query.filestorage_filesystem_snapshot_count
+      width = 3
     }
 
   }
@@ -31,28 +31,28 @@ dashboard "oci_filestorage_filesystem_dashboard" {
 
     chart {
       title = "File Systems by Tenancy"
-      sql   = query.oci_filestorage_filesystem_by_tenancy.sql
+      query = query.filestorage_filesystem_by_tenancy
       type  = "column"
       width = 3
     }
 
     chart {
       title = "File Systems by Compartment"
-      sql   = query.oci_filestorage_filesystem_by_compartment.sql
+      query = query.filestorage_filesystem_by_compartment
       type  = "column"
       width = 3
     }
 
     chart {
       title = "File Systems by Region"
-      sql   = query.oci_filestorage_filesystem_by_region.sql
+      query = query.filestorage_filesystem_by_region
       type  = "column"
       width = 3
     }
 
     chart {
       title = "File Systems Age"
-      sql   = query.oci_filestorage_filesystem_by_creation_month.sql
+      query = query.filestorage_filesystem_by_creation_month
       type  = "column"
       width = 3
     }
@@ -63,19 +63,19 @@ dashboard "oci_filestorage_filesystem_dashboard" {
 
 # Card Queries
 
-query "oci_filestorage_filesystem_count" {
+query "filestorage_filesystem_count" {
   sql = <<-EOQ
     select count(*) as "File Systems" from oci_file_storage_file_system where lifecycle_state <> 'DELETED';
   EOQ
 }
 
-query "oci_filestorage_filesystem_snapshot_count" {
+query "filestorage_filesystem_snapshot_count" {
   sql = <<-EOQ
     select count(*) as "Snapshots" from oci_file_storage_snapshot where lifecycle_state <> 'DELETED';
   EOQ
 }
 
-query "oci_filestorage_filesystem_cloned_count" {
+query "filestorage_filesystem_cloned_count" {
   sql = <<-EOQ
     select
       count(*) as "Cloned File Systems"
@@ -88,7 +88,7 @@ query "oci_filestorage_filesystem_cloned_count" {
 
 # Analysis Queries
 
-query "oci_filestorage_filesystem_by_tenancy" {
+query "filestorage_filesystem_by_tenancy" {
   sql = <<-EOQ
     select
        t.name as "Tenancy",
@@ -105,7 +105,7 @@ query "oci_filestorage_filesystem_by_tenancy" {
   EOQ
 }
 
-query "oci_filestorage_filesystem_by_compartment" {
+query "filestorage_filesystem_by_compartment" {
   sql = <<-EOQ
     with compartments as (
       select
@@ -139,7 +139,7 @@ query "oci_filestorage_filesystem_by_compartment" {
   EOQ
 }
 
-query "oci_filestorage_filesystem_by_region" {
+query "filestorage_filesystem_by_region" {
   sql = <<-EOQ
     select region as "Region", count(*) as "FileSystems"
     from
@@ -153,7 +153,7 @@ query "oci_filestorage_filesystem_by_region" {
   EOQ
 }
 
-query "oci_filestorage_filesystem_by_creation_month" {
+query "filestorage_filesystem_by_creation_month" {
   sql = <<-EOQ
     with filesystems as (
       select

@@ -1,4 +1,4 @@
-dashboard "oci_database_autonomous_db_dashboard" {
+dashboard "database_autonomous_db_dashboard" {
 
   title         = "OCI Database Autonomous DB Dashboard"
   documentation = file("./dashboards/database/docs/database_autonomous_db_dashboard.md")
@@ -10,27 +10,27 @@ dashboard "oci_database_autonomous_db_dashboard" {
   container {
 
     card {
-      sql   = query.oci_database_autonomous_db_count.sql
+      query = query.database_autonomous_db_count
       width = 2
     }
 
     card {
-      sql   = query.oci_database_autonomous_db_total_cores.sql
+      query = query.database_autonomous_db_total_cores
       width = 2
     }
 
     card {
-      sql   = query.oci_database_autonomous_db_total_size.sql
+      query = query.database_autonomous_db_total_size
       width = 2
     }
 
     card {
-      sql   = query.oci_database_autonomous_db_with_data_guard_count.sql
+      query = query.database_autonomous_db_with_data_guard_count
       width = 2
     }
 
     card {
-      sql   = query.oci_database_autonomous_db_by_operations_insights_count.sql
+      query = query.database_autonomous_db_by_operations_insights_count
       width = 2
     }
   }
@@ -41,7 +41,7 @@ dashboard "oci_database_autonomous_db_dashboard" {
 
     chart {
       title = "Data Guard Status"
-      sql   = query.oci_database_autonomous_db_data_guard_status.sql
+      query = query.database_autonomous_db_data_guard_status
       type  = "donut"
       width = 3
 
@@ -57,7 +57,7 @@ dashboard "oci_database_autonomous_db_dashboard" {
 
     chart {
       title = "Operations Insights Status"
-      sql   = query.oci_database_autonomous_db_by_operations_insights_status.sql
+      query = query.database_autonomous_db_by_operations_insights_status
       type  = "donut"
       width = 3
 
@@ -77,35 +77,35 @@ dashboard "oci_database_autonomous_db_dashboard" {
 
     chart {
       title = "Autonomous DBs by Tenancy"
-      sql   = query.oci_database_autonomous_db_by_tenancy.sql
+      query = query.database_autonomous_db_by_tenancy
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Autonomous DBs by Compartment"
-      sql   = query.oci_database_autonomous_db_by_compartment.sql
+      query = query.database_autonomous_db_by_compartment
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Autonomous DBs by Region"
-      sql   = query.oci_database_autonomous_db_by_region.sql
+      query = query.database_autonomous_db_by_region
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Autonomous DBs by Age"
-      sql   = query.oci_database_autonomous_db_by_creation_month.sql
+      query = query.database_autonomous_db_by_creation_month
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Autonomous DBs by Workload Type"
-      sql   = query.oci_database_autonomous_db_by_workload_type.sql
+      query = query.database_autonomous_db_by_workload_type
       type  = "column"
       width = 4
     }
@@ -119,14 +119,14 @@ dashboard "oci_database_autonomous_db_dashboard" {
       title = "Top 10 Average CPU - Last 7 days"
       type  = "line"
       width = 6
-      sql   = query.oci_database_autonomous_db_by_cpu_utilization.sql
+      query = query.database_autonomous_db_by_cpu_utilization
     }
 
     chart {
       title = "Top 10 Average Storage - Last 7 days"
       type  = "line"
       width = 6
-      sql   = query.oci_database_autonomous_db_by_storage_utilization.sql
+      query = query.database_autonomous_db_by_storage_utilization
     }
   }
 
@@ -134,13 +134,13 @@ dashboard "oci_database_autonomous_db_dashboard" {
 
 # Card Queries
 
-query "oci_database_autonomous_db_count" {
+query "database_autonomous_db_count" {
   sql = <<-EOQ
     select count(*) as "Autonomous DBs" from oci_database_autonomous_database where lifecycle_state <> 'TERMINATED';
   EOQ
 }
 
-query "oci_database_autonomous_db_total_cores" {
+query "database_autonomous_db_total_cores" {
   sql = <<-EOQ
     select
       sum(cpu_core_count) as "Total OCPUs"
@@ -149,7 +149,7 @@ query "oci_database_autonomous_db_total_cores" {
   EOQ
 }
 
-query "oci_database_autonomous_db_total_size" {
+query "database_autonomous_db_total_size" {
   sql = <<-EOQ
     select
       sum(data_storage_size_in_gbs) as "Total Size (GB)"
@@ -158,7 +158,7 @@ query "oci_database_autonomous_db_total_size" {
   EOQ
 }
 
-query "oci_database_autonomous_db_with_data_guard_count" {
+query "database_autonomous_db_with_data_guard_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -171,7 +171,7 @@ query "oci_database_autonomous_db_with_data_guard_count" {
   EOQ
 }
 
-query "oci_database_autonomous_db_by_operations_insights_count" {
+query "database_autonomous_db_by_operations_insights_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -186,7 +186,7 @@ query "oci_database_autonomous_db_by_operations_insights_count" {
 
 # Assessment Queries
 
-query "oci_database_autonomous_db_data_guard_status" {
+query "database_autonomous_db_data_guard_status" {
   sql = <<-EOQ
     with dataguard_stat as (
       select
@@ -206,7 +206,7 @@ query "oci_database_autonomous_db_data_guard_status" {
   EOQ
 }
 
-query "oci_database_autonomous_db_by_operations_insights_status" {
+query "database_autonomous_db_by_operations_insights_status" {
   sql = <<-EOQ
     select
       insight_status,
@@ -229,7 +229,7 @@ query "oci_database_autonomous_db_by_operations_insights_status" {
 
 # Analysis Queries
 
-query "oci_database_autonomous_db_by_tenancy" {
+query "database_autonomous_db_by_tenancy" {
   sql = <<-EOQ
     select
        t.name as "Tenancy",
@@ -246,7 +246,7 @@ query "oci_database_autonomous_db_by_tenancy" {
   EOQ
 }
 
-query "oci_database_autonomous_db_by_compartment" {
+query "database_autonomous_db_by_compartment" {
   sql = <<-EOQ
     with compartments as (
       select
@@ -280,7 +280,7 @@ query "oci_database_autonomous_db_by_compartment" {
   EOQ
 }
 
-query "oci_database_autonomous_db_by_region" {
+query "database_autonomous_db_by_region" {
   sql = <<-EOQ
     select
       region,
@@ -292,7 +292,7 @@ query "oci_database_autonomous_db_by_region" {
   EOQ
 }
 
-query "oci_database_autonomous_db_by_creation_month" {
+query "database_autonomous_db_by_creation_month" {
   sql = <<-EOQ
     with databases as (
       select
@@ -337,7 +337,7 @@ query "oci_database_autonomous_db_by_creation_month" {
   EOQ
 }
 
-query "oci_database_autonomous_db_by_workload_type" {
+query "database_autonomous_db_by_workload_type" {
   sql = <<-EOQ
     select
       db_workload as "Workload Type",
@@ -350,7 +350,7 @@ query "oci_database_autonomous_db_by_workload_type" {
 
 # Performance & Utilization Queries
 
-query "oci_database_autonomous_db_by_cpu_utilization" {
+query "database_autonomous_db_by_cpu_utilization" {
   sql = <<-EOQ
     with top_n as (
       select
@@ -378,7 +378,7 @@ query "oci_database_autonomous_db_by_cpu_utilization" {
   EOQ
 }
 
-query "oci_database_autonomous_db_by_storage_utilization" {
+query "database_autonomous_db_by_storage_utilization" {
   sql = <<-EOQ
     with top_n as (
       select

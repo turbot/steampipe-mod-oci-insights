@@ -1,6 +1,6 @@
-dashboard "oci_vcn_security_list_detail" {
+dashboard "vcn_security_list_detail" {
 
-  title = "OCI VCN Security List Detail"
+  title         = "OCI VCN Security List Detail"
   documentation = file("./dashboards/vcn/docs/vcn_security_list_detail.md")
 
   tags = merge(local.vcn_common_tags, {
@@ -9,30 +9,81 @@ dashboard "oci_vcn_security_list_detail" {
 
   input "security_list_id" {
     title = "Select a security list:"
-    sql   = query.oci_vcn_security_list_input.sql
+    query = query.vcn_security_list_input
     width = 4
   }
 
   container {
 
     card {
-      width = 2
+      width = 3
 
-      query = query.oci_vcn_security_list_ingress_ssh
-      args = {
-        id = self.input.security_list_id.value
-      }
+      query = query.vcn_security_list_ingress_ssh
+      args  = [self.input.security_list_id.value]
     }
 
     card {
-      width = 2
+      width = 3
 
-      query = query.oci_vcn_security_list_ingress_rdp
-      args = {
-        id = self.input.security_list_id.value
-      }
+      query = query.vcn_security_list_ingress_rdp
+      args  = [self.input.security_list_id.value]
     }
 
+  }
+
+  with "vcn_subnets_for_vcn_security_list" {
+    query = query.vcn_subnets_for_vcn_security_list
+    args  = [self.input.security_list_id.value]
+  }
+
+  with "vcn_vcns_for_vcn_security_list" {
+    query = query.vcn_vcns_for_vcn_security_list
+    args  = [self.input.security_list_id.value]
+  }
+
+  container {
+
+    graph {
+      title     = "Relationships"
+      type      = "graph"
+      direction = "TD"
+
+      node {
+        base = node.vcn_security_list
+        args = {
+          vcn_security_list_ids = [self.input.security_list_id.value]
+        }
+      }
+
+      node {
+        base = node.vcn_subnet
+        args = {
+          vcn_subnet_ids = with.vcn_subnets_for_vcn_security_list.rows[*].subnet_id
+        }
+      }
+
+      node {
+        base = node.vcn_vcn
+        args = {
+          vcn_vcn_ids = with.vcn_vcns_for_vcn_security_list.rows[*].vcn_id
+        }
+      }
+
+      edge {
+        base = edge.vcn_subnet_to_vcn_security_list
+        args = {
+          vcn_subnet_ids = with.vcn_subnets_for_vcn_security_list.rows[*].subnet_id
+        }
+      }
+
+      edge {
+        base = edge.vcn_vcn_to_vcn_security_list
+        args = {
+          vcn_vcn_ids = with.vcn_vcns_for_vcn_security_list.rows[*].vcn_id
+        }
+      }
+
+    }
   }
 
   container {
@@ -45,20 +96,16 @@ dashboard "oci_vcn_security_list_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-        query = query.oci_vcn_security_list_overview
-        args = {
-          id = self.input.security_list_id.value
-        }
+        query = query.vcn_security_list_overview
+        args  = [self.input.security_list_id.value]
 
       }
 
       table {
         title = "Tags"
         width = 6
-        query = query.oci_vcn_security_list_tag
-        args = {
-          id = self.input.security_list_id.value
-        }
+        query = query.vcn_security_list_tag
+        args  = [self.input.security_list_id.value]
 
       }
 
@@ -70,18 +117,14 @@ dashboard "oci_vcn_security_list_detail" {
 
       table {
         title = "Ingress Rules"
-        query = query.oci_vcn_network_security_list_ingress_rule
-        args = {
-          id = self.input.security_list_id.value
-        }
+        query = query.vcn_network_security_list_ingress_rule
+        args  = [self.input.security_list_id.value]
       }
 
       table {
         title = "Egress Rules"
-        query = query.oci_vcn_network_security_list_egress_rule
-        args = {
-          id = self.input.security_list_id.value
-        }
+        query = query.vcn_network_security_list_egress_rule
+        args  = [self.input.security_list_id.value]
       }
 
     }
@@ -90,28 +133,58 @@ dashboard "oci_vcn_security_list_detail" {
 
 }
 
-query "oci_vcn_security_list_input" {
-  sql = <<EOQ
+# Input queries
+
+query "vcn_security_list_input" {
+  sql = <<-EOQ
     select
       l.display_name as label,
       l.id as value,
       json_build_object(
-        'c.name', coalesce(c.title, 'root'),
-        'l.region', region,
+        'b.id', right(reverse(split_part(reverse(l.id), '.', 1)), 8),
+        'b.region', region,
+        'oci.name', coalesce(oci.title, 'root'),
         't.name', t.name
       ) as tags
     from
       oci_core_security_list as l
-      left join oci_identity_compartment as c on l.compartment_id = c.id
+      left join oci_identity_compartment as oci on l.compartment_id = oci.id
       left join oci_identity_tenancy as t on l.tenant_id = t.id
     where
       l.lifecycle_state <> 'TERMINATED'
     order by
       l.display_name;
-EOQ
+  EOQ
 }
 
-query "oci_vcn_security_list_ingress_ssh" {
+# With queries
+
+query "vcn_subnets_for_vcn_security_list" {
+  sql = <<-EOQ
+    select
+      id as subnet_id
+    from
+      oci_core_subnet,
+      jsonb_array_elements_text(security_list_ids) as sid
+    where
+      sid = $1;
+  EOQ
+}
+
+query "vcn_vcns_for_vcn_security_list" {
+  sql = <<-EOQ
+    select
+      vcn_id
+    from
+      oci_core_security_list
+    where
+      id = $1;
+  EOQ
+}
+
+# Card queries
+
+query "vcn_security_list_ingress_ssh" {
   sql = <<-EOQ
     with non_compliant_rules as (
       select
@@ -142,13 +215,12 @@ query "oci_vcn_security_list_ingress_ssh" {
         oci_core_security_list as sl
         left join non_compliant_rules on non_compliant_rules.id = sl.id
       where
-        sl.id = $1 and sl.lifecycle_state <> 'TERMINATED';
+        sl.id = $1
+        and sl.lifecycle_state <> 'TERMINATED';
   EOQ
-
-  param "id" {}
 }
 
-query "oci_vcn_security_list_ingress_rdp" {
+query "vcn_security_list_ingress_rdp" {
   sql = <<-EOQ
     with non_compliant_rules as (
       select
@@ -181,11 +253,11 @@ query "oci_vcn_security_list_ingress_rdp" {
       where
         sl.id = $1 and sl.lifecycle_state <> 'TERMINATED';
   EOQ
-
-  param "id" {}
 }
 
-query "oci_vcn_security_list_overview" {
+# Other detail page queries
+
+query "vcn_security_list_overview" {
   sql = <<-EOQ
     select
       display_name as "Name",
@@ -196,13 +268,12 @@ query "oci_vcn_security_list_overview" {
     from
       oci_core_security_list
     where
-      id = $1 and lifecycle_state <> 'TERMINATED';
+      id = $1
+      and lifecycle_state <> 'TERMINATED';
   EOQ
-
-  param "id" {}
 }
 
-query "oci_vcn_security_list_tag" {
+query "vcn_security_list_tag" {
   sql = <<-EOQ
     with jsondata as (
       select
@@ -221,11 +292,9 @@ query "oci_vcn_security_list_tag" {
     order by
       key;
   EOQ
-
-  param "id" {}
 }
 
-query "oci_vcn_network_security_list_ingress_rule" {
+query "vcn_network_security_list_ingress_rule" {
   sql = <<-EOQ
     select
       r ->> 'protocol' as "Protocol",
@@ -235,13 +304,12 @@ query "oci_vcn_network_security_list_ingress_rule" {
       oci_core_security_list,
       jsonb_array_elements(ingress_security_rules) as r
     where
-      id  = $1 and lifecycle_state <> 'TERMINATED';
+      id  = $1
+      and lifecycle_state <> 'TERMINATED';
   EOQ
-
-  param "id" {}
 }
 
-query "oci_vcn_network_security_list_egress_rule" {
+query "vcn_network_security_list_egress_rule" {
   sql = <<-EOQ
     select
       r ->> 'protocol' as "Protocol",
@@ -251,8 +319,7 @@ query "oci_vcn_network_security_list_egress_rule" {
       oci_core_security_list,
       jsonb_array_elements(egress_security_rules) as r
     where
-      id  = $1 and lifecycle_state <> 'TERMINATED';
+      id  = $1
+      and lifecycle_state <> 'TERMINATED';
   EOQ
-
-  param "id" {}
 }

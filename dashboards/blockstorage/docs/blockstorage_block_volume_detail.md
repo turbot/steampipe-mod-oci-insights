@@ -4,3 +4,4 @@ This dashboard answers the following questions for each block volume:
 - What tags are applied?
 - What instances is it attached to?
 - How is encryption configured?
+- What relationships does the block volume have with other resources?

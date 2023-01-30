@@ -10,13 +10,13 @@ dashboard "oci_vcn_dashboard" {
   container {
 
     card {
-      sql   = query.oci_vcn_count.sql
-      width = 2
+      query = query.oci_vcn_count
+      width = 3
     }
 
     card {
-      sql   = query.oci_vcn_no_subnet_count.sql
-      width = 2
+      query = query.oci_vcn_no_subnet_count
+      width = 3
     }
 
   }
@@ -26,16 +26,16 @@ dashboard "oci_vcn_dashboard" {
     title = "Assessments"
 
     chart {
-      title = "Subnets Status"
-      sql   = query.oci_vcn_no_subnet.sql
+      title = "Empty VCNs (No Subnets)"
+      query = query.oci_vcn_no_subnet
       type  = "donut"
       width = 3
 
       series "count" {
-        point "with subnets" {
+        point "non-empty" {
           color = "ok"
         }
-        point "no subnets" {
+        point "empty" {
           color = "alert"
         }
       }
@@ -49,28 +49,28 @@ dashboard "oci_vcn_dashboard" {
 
     chart {
       title = "VCNs by Tenancy"
-      sql   = query.oci_vcn_by_tenancy.sql
+      query = query.oci_vcn_by_tenancy
       type  = "column"
       width = 3
     }
 
     chart {
       title = "VCNs by Compartment"
-      sql   = query.oci_vcn_by_compartment.sql
+      query = query.oci_vcn_by_compartment
       type  = "column"
       width = 3
     }
 
     chart {
       title = "VCNs by Region"
-      sql   = query.oci_vcn_by_region.sql
+      query = query.oci_vcn_by_region
       type  = "column"
       width = 3
     }
 
     chart {
       title = "VCNs by RFC1918 Range"
-      sql   = query.oci_vcn_by_rfc1918_range.sql
+      query = query.oci_vcn_by_rfc1918_range
       type  = "column"
       width = 3
     }
@@ -91,7 +91,7 @@ query "oci_vcn_no_subnet_count" {
   sql = <<-EOQ
     select
       count(*) as value,
-      'No Subnets' as label,
+      'VCNs Without Subnets' as label,
       case when count(*) = 0 then 'ok' else 'alert' end as type
     from
       oci_core_vcn as vcn
@@ -105,10 +105,10 @@ query "oci_vcn_no_subnet_count" {
 query "oci_vcn_no_subnet" {
   sql = <<-EOQ
     select
-      case when s.id is null then 'no subnets' else 'with subnets' end as status,
+      case when s.id is null then 'empty' else 'non-empty' end as status,
       count(distinct v.id)
     from
-       oci_core_vcn v
+      oci_core_vcn v
       left join oci_core_subnet s on s.vcn_id = v.id
     where
       v.lifecycle_state <> 'TERMINATED'

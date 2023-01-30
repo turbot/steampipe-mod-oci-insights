@@ -1,4 +1,4 @@
-dashboard "oci_objectstorage_bucket_encryption_report" {
+dashboard "objectstorage_bucket_encryption_report" {
 
   title         = "OCI Object Storage Bucket Encryption Report"
   documentation = file("./dashboards/objectstorage/docs/objectstorage_bucket_report_encryption.md")
@@ -11,18 +11,18 @@ dashboard "oci_objectstorage_bucket_encryption_report" {
   container {
 
     card {
-      sql   = query.oci_objectstorage_bucket_count.sql
-      width = 2
+      query = query.objectstorage_bucket_count
+      width = 3
     }
 
     card {
-      sql   = query.oci_objectstorage_bucket_report_customer_managed_encryption_count.sql
-      width = 2
+      query = query.objectstorage_bucket_report_customer_managed_encryption_count
+      width = 3
     }
 
     card {
-      sql   = query.oci_objectstorage_bucket_default_encryption_count.sql
-      width = 2
+      query = query.objectstorage_bucket_default_encryption_count
+      width = 3
     }
 
   }
@@ -33,15 +33,15 @@ dashboard "oci_objectstorage_bucket_encryption_report" {
     }
 
     column "Name" {
-      href = "${dashboard.oci_objectstorage_bucket_detail.url_path}?input.bucket_id={{.OCID | @uri}}"
+      href = "${dashboard.objectstorage_bucket_detail.url_path}?input.bucket_id={{.OCID | @uri}}"
     }
 
-    sql = query.oci_objectstorage_bucket_encryption_report.sql
+    query = query.objectstorage_bucket_encryption_report
   }
 
 }
 
-query "oci_objectstorage_bucket_report_customer_managed_encryption_count" {
+query "objectstorage_bucket_report_customer_managed_encryption_count" {
   sql = <<-EOQ
     select count(*) as "Customer-Managed Encryption"
       from
@@ -51,7 +51,7 @@ query "oci_objectstorage_bucket_report_customer_managed_encryption_count" {
   EOQ
 }
 
-query "oci_objectstorage_bucket_encryption_report" {
+query "objectstorage_bucket_encryption_report" {
   sql = <<-EOQ
       select
         b.name as "Name",
