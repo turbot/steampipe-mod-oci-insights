@@ -308,6 +308,16 @@ dashboard "compute_instance_detail" {
         args = [self.input.instance_id.value]
       }
 
+      table {
+        title = "Security Groups"
+        query = query.compute_instance_security_groups
+        args = [self.input.instance_id.value]
+
+        column "Group Name" {
+          href  = "/oci_insights.dashboard.vcn_network_security_group_detail?input.security_group_id={{.'Group ID' | @uri}}"
+        }
+      }
+
     }
 
     container {
@@ -328,21 +338,22 @@ dashboard "compute_instance_detail" {
 query "compute_instance_input" {
   sql = <<EOQ
     select
-      i.display_name as label,
-      i.id as value,
+      b.display_name as label,
+      b.id as value,
       json_build_object(
-        'c.name', coalesce(c.title, 'root'),
-        'i.region', region,
-        't.name', t.name
+        'b.id', concat('id: ', right(reverse(split_part(reverse(b.id), '.', 1)), 8)),
+        'b.region', concat('region: ', region),
+        'c.name', concat('compartment: ', coalesce(c.title, 'root')),
+        't.name', concat('tenant: ', t.name)
       ) as tags
     from
-      oci_core_instance as i
-      left join oci_identity_compartment as c on i.compartment_id = c.id
-      left join oci_identity_tenancy as t on i.tenant_id = t.id
+      oci_core_instance as b
+      left join oci_identity_compartment as c on b.compartment_id = c.id
+      left join oci_identity_tenancy as t on b.tenant_id = t.id
     where
-      i.lifecycle_state <> 'TERMINATED'
+      b.lifecycle_state <> 'TERMINATED'
     order by
-      i.display_name;
+      b.display_name;
   EOQ
 }
 
@@ -615,6 +626,21 @@ query "compute_instance_launch_options" {
       oci_core_instance
     where
       id  = $1;
+  EOQ
+}
+
+query "compute_instance_security_groups" {
+  sql = <<-EOQ
+    select
+      sg.display_name as "Group Name",
+      nid as "Group ID",
+      jsonb_array_length(sg.rules) as "Rules"
+    from
+      oci_core_vnic_attachment,
+      jsonb_array_elements_text(nsg_ids) as nid
+      left join oci_core_network_security_group as sg on sg.id = nid
+    where
+      instance_id = $1;
   EOQ
 }
 

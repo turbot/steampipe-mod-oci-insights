@@ -297,21 +297,22 @@ dashboard "blockstorage_block_volume_detail" {
 query "blockstorage_block_volume_input" {
   sql = <<EOQ
     select
-      v.display_name as label,
-      v.id as value,
+      b.display_name as label,
+      b.id as value,
       json_build_object(
-        'c.name', coalesce(c.title, 'root'),
-        'v.region', region,
-        't.name', t.name
+        'b.id', concat('id: ', right(reverse(split_part(reverse(b.id), '.', 1)), 8)),
+        'b.region', concat('region: ', region),
+        'c.name', concat('compartment: ', coalesce(c.title, 'root')),
+        't.name', concat('tenant: ', t.name)
       ) as tags
     from
-      oci_core_volume as v
-      left join oci_identity_compartment as c on v.compartment_id = c.id
-      left join oci_identity_tenancy as t on v.compartment_id = t.id
+      oci_core_volume as b
+      left join oci_identity_compartment as c on b.compartment_id = c.id
+      left join oci_identity_tenancy as t on b.compartment_id = t.id
     where
-      v.lifecycle_state <> 'TERMINATED'
+      b.lifecycle_state <> 'TERMINATED'
     order by
-      v.display_name;
+      b.display_name;
   EOQ
 }
 

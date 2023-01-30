@@ -70,15 +70,24 @@ edge "compute_instance_to_vcn_subnet" {
   title = "subnet"
 
   sql = <<-EOQ
+    with nsgids as (
+      select
+        nid as nsg_id
+      from
+        oci_core_vnic_attachment,
+        jsonb_array_elements_text(nsg_ids) as nid
+      where
+        instance_id = any($1)
+    )
     select
       coalesce(
-        nid,
+        rtrim(ltrim(nid::text, '('), ')'),
         vnic_id
       ) as from_id,
       subnet_id as to_id
     from
-      oci_core_vnic_attachment,
-      jsonb_array_elements_text(nsg_ids) as nid
+      oci_core_vnic_attachment
+      left join nsgids as nid on true
     where
       instance_id = any($1);
   EOQ

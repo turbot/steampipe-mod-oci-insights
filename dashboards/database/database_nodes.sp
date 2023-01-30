@@ -1,5 +1,5 @@
 node "database_autonomous_database" {
-  category = category.filestorage_file_system
+  category = category.database_autonomous_database
 
   sql = <<-EOQ
     select

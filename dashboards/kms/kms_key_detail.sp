@@ -232,25 +232,25 @@ dashboard "kms_key_detail" {
 query "kms_key_input" {
   sql = <<EOQ
     select
-     right(reverse(split_part(reverse(v.title), '.', 1)), 8) as label,
-      k.id as value,
+      a.name as label,
+      a.id as value,
       json_build_object(
-        'Key Name', k.name,
-        'c.name', coalesce(c.title, 'root'),
-        'k.region', v.region,
-        't.name', t.name
+        'v.id', concat('version_id: ', right(reverse(split_part(reverse(v.id), '.', 1)), 8)),
+        'a.region', concat('region: ', a.region),
+        'c.name', concat('compartment: ', coalesce(c.title, 'root')),
+        't.name', concat('tenant: ', t.name)
       ) as tags
       from
-        oci_kms_key as k
-        left join oci_identity_compartment as c on k.compartment_id = c.id
-        left join oci_kms_key_version as v on v.key_id = k.id
-        left join oci_identity_tenancy as t on k.tenant_id = t.id
+        oci_kms_key as a
+        left join oci_identity_compartment as c on a.compartment_id = c.id
+        left join oci_kms_key_version as v on v.key_id = a.id
+        left join oci_identity_tenancy as t on a.tenant_id = t.id
       where
-        k.lifecycle_state <> 'DELETED'
-        and v.management_endpoint = k.management_endpoint
-        and v.region = k.region
+        a.lifecycle_state <> 'DELETED'
+        and v.management_endpoint = a.management_endpoint
+        and v.region = a.region
       order by
-        v.title ;
+        a.title ;
   EOQ
 }
 

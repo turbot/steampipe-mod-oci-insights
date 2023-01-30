@@ -246,21 +246,22 @@ dashboard "vcn_network_security_group_detail" {
 query "vcn_network_security_group_input" {
   sql = <<-EOQ
     select
-      g.display_name as label,
-      g.id as value,
+      b.display_name as label,
+      b.id as value,
       json_build_object(
-        'c.name', coalesce(c.title, 'root'),
-        'g.region', region,
-        't.name', t.name
+        'b.id', concat('id: ', right(reverse(split_part(reverse(b.id), '.', 1)), 8)),
+        'b.region', concat('region: ', region),
+        'c.name', concat('compartment: ', coalesce(c.title, 'root')),
+        't.name', concat('tenant: ', t.name)
       ) as tags
     from
-      oci_core_network_security_group as g
-      left join oci_identity_compartment as c on g.compartment_id = c.id
-      left join oci_identity_tenancy as t on g.tenant_id = t.id
+      oci_core_network_security_group as b
+      left join oci_identity_compartment as c on b.compartment_id = c.id
+      left join oci_identity_tenancy as t on b.tenant_id = t.id
     where
-      g.lifecycle_state <> 'TERMINATED'
+      b.lifecycle_state <> 'TERMINATED'
     order by
-      g.display_name;
+      b.display_name;
   EOQ
 }
 

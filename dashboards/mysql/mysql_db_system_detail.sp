@@ -203,21 +203,22 @@ dashboard "mysql_db_system_detail" {
 query "mysql_db_system_input" {
   sql = <<EOQ
     select
-      s.display_name as label,
-      s.id as value,
+      b.display_name as label,
+      b.id as value,
       json_build_object(
-        'c.name', coalesce(c.title, 'root'),
-        's.region', region,
-        't.name', t.name
+        'b.id', concat('id: ', right(reverse(split_part(reverse(b.id), '.', 1)), 8)),
+        'b.region', concat('region: ', region),
+        'c.name', concat('compartment: ', coalesce(c.title, 'root')),
+        't.name', concat('tenant: ', t.name)
       ) as tags
     from
-      oci_mysql_db_system as s
-      left join oci_identity_compartment as c on s.compartment_id = c.id
-      left join oci_identity_tenancy as t on s.tenant_id = t.id
+      oci_mysql_db_system as b
+      left join oci_identity_compartment as c on b.compartment_id = c.id
+      left join oci_identity_tenancy as t on b.tenant_id = t.id
     where
-      s.lifecycle_state <> 'DELETED'
+      b.lifecycle_state <> 'DELETED'
     order by
-      s.display_name;
+      b.display_name;
   EOQ
 }
 
