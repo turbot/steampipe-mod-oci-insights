@@ -226,7 +226,7 @@ dashboard "database_autonomous_database_detail" {
 }
 
 query "database_autonomous_database_input" {
-  sql = <<EOQ
+  sql = <<-EOQ
     select
       a.display_name as label,
       a.id as value,
@@ -391,7 +391,7 @@ query "database_autonomous_database_access_detail" {
   param "id" {}
 }
 
-#with queries
+# With queries
 
 query "kms_vaults_for_database_autonomous_database" {
   sql = <<-EOQ

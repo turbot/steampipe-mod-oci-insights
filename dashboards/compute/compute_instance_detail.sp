@@ -336,7 +336,7 @@ dashboard "compute_instance_detail" {
 # Input queries
 
 query "compute_instance_input" {
-  sql = <<EOQ
+  sql = <<-EOQ
     select
       b.display_name as label,
       b.id as value,

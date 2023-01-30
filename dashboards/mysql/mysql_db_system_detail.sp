@@ -201,7 +201,7 @@ dashboard "mysql_db_system_detail" {
 # Input queries
 
 query "mysql_db_system_input" {
-  sql = <<EOQ
+  sql = <<-EOQ
     select
       b.display_name as label,
       b.id as value,

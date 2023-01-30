@@ -390,7 +390,9 @@ query "oci_vcn_security_list_by_vcn" {
       left join oci_core_vcn v on sg.vcn_id = v.id
     where
       sg.lifecycle_state <> 'TERMINATED'
-      group by v.display_name
-      order by v.display_name;
+    group by
+      v.display_name
+    order by
+      v.display_name;
   EOQ
 }

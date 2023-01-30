@@ -206,14 +206,13 @@ query "kms_vault_overview" {
       display_name as "Display Name",
       lifecycle_state as "Lifecycle State",
       time_created as "Time Created",
+      region as "Region",
       compartment_id as "Compartment ID",
-      region as "Region"
     from
       oci_kms_vault
     where
-      id = $1
+      id = $1;
   EOQ
-
 }
 
 query "kms_vault_tags" {

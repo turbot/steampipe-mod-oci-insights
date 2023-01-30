@@ -190,7 +190,7 @@ dashboard "objectstorage_bucket_detail" {
 # Input queries
 
 query "objectstorage_bucket_input" {
-  sql = <<EOQ
+  sql = <<-EOQ
     select
       b.name as label,
       b.id as value,
@@ -207,8 +207,6 @@ query "objectstorage_bucket_input" {
       b.name;
   EOQ
 }
-
-# With queries
 
 # card queries
 
@@ -328,8 +326,7 @@ query "objectstorage_bucket_object_lifecycle_policy" {
   EOQ
 }
 
-#with queries
-
+# With queries
 
 query "identity_users_for_objectstorage_bucket" {
   sql = <<-EOQ

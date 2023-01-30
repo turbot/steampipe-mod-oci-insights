@@ -217,7 +217,7 @@ dashboard "filestorage_filesystem_detail" {
 # Input queries
 
 query "filestorage_filesystem_input" {
-  sql = <<EOQ
+  sql = <<-EOQ
     select
       b.display_name as label,
       b.id as value,

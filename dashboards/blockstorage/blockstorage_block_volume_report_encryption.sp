@@ -22,7 +22,7 @@ dashboard "blockstorage_block_volume_encryption_report" {
 
     card {
       query = query.blockstorage_block_volume_customer_managed_encryption_count
-      width = 23
+      width = 3
     }
 
   }

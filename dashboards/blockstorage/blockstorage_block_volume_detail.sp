@@ -295,7 +295,7 @@ dashboard "blockstorage_block_volume_detail" {
 # Input queries
 
 query "blockstorage_block_volume_input" {
-  sql = <<EOQ
+  sql = <<-EOQ
     select
       b.display_name as label,
       b.id as value,
@@ -319,7 +319,7 @@ query "blockstorage_block_volume_input" {
 # With queries
 
 query "blockstorage_block_volume_backup_policies_for_blockstorage_block_volume" {
-  sql = <<EOQ
+  sql = <<-EOQ
     select
       p.id as backup_policy_id
     from
@@ -332,7 +332,7 @@ query "blockstorage_block_volume_backup_policies_for_blockstorage_block_volume" 
 }
 
 query "blockstorage_block_volume_backups_for_blockstorage_block_volume" {
-  sql = <<EOQ
+  sql = <<-EOQ
     select
       id as backup_id
     from
@@ -343,7 +343,7 @@ query "blockstorage_block_volume_backups_for_blockstorage_block_volume" {
 }
 
 query "blockstorage_block_volume_default_backup_policies_for_blockstorage_block_volume" {
-  sql = <<EOQ
+  sql = <<-EOQ
     select
       p.id as backup_policy_id
     from
@@ -356,7 +356,7 @@ query "blockstorage_block_volume_default_backup_policies_for_blockstorage_block_
 }
 
 query "blockstorage_block_volume_replicas_for_blockstorage_block_volume" {
-  sql = <<EOQ
+  sql = <<-EOQ
     select
       id as replica_volume_id
     from
@@ -367,7 +367,7 @@ query "blockstorage_block_volume_replicas_for_blockstorage_block_volume" {
 }
 
 query "compute_instances_for_blockstorage_block_volume" {
-  sql = <<EOQ
+  sql = <<-EOQ
     select
       instance_id
     from
@@ -379,7 +379,7 @@ query "compute_instances_for_blockstorage_block_volume" {
 }
 
 query "kms_keys_for_blockstorage_block_volume" {
-  sql = <<EOQ
+  sql = <<-EOQ
     select
       kms_key_id
     from
@@ -391,7 +391,7 @@ query "kms_keys_for_blockstorage_block_volume" {
 }
 
 query "kms_vaults_for_blockstorage_block_volume" {
-  sql = <<EOQ
+  sql = <<-EOQ
     select
       k.vault_id as key_vault_id
     from
@@ -404,7 +404,7 @@ query "kms_vaults_for_blockstorage_block_volume" {
 }
 
 query "source_blockstorage_block_volume_clones_for_blockstorage_block_volume" {
-  sql = <<EOQ
+  sql = <<-EOQ
     select
       source_details ->> 'id' as volume_id
     from
@@ -416,7 +416,7 @@ query "source_blockstorage_block_volume_clones_for_blockstorage_block_volume" {
 }
 
 query "target_blockstorage_block_volume_clones_for_blockstorage_block_volume" {
-  sql = <<EOQ
+  sql = <<-EOQ
     select
       id as volume_id
     from
@@ -453,7 +453,7 @@ query "blockstorage_block_volume_vpu" {
 # Other detail page queries
 
 query "blockstorage_block_volume_overview" {
-  sql = <<EOQ
+  sql = <<-EOQ
     select
       display_name as "Name",
       time_created as "Time Created",
@@ -470,7 +470,7 @@ query "blockstorage_block_volume_overview" {
 }
 
 query "blockstorage_block_volume_tags" {
-  sql = <<EOQ
+  sql = <<-EOQ
     with jsondata as (
       select
         tags::json as tags
@@ -489,7 +489,7 @@ query "blockstorage_block_volume_tags" {
 }
 
 query "blockstorage_block_volume_attached_instances" {
-  sql = <<EOQ
+  sql = <<-EOQ
     select
       i.id as "Instance ID",
       i.display_name as "Instance Name",
@@ -504,7 +504,7 @@ query "blockstorage_block_volume_attached_instances" {
 }
 
 query "blockstorage_block_volume_encryption" {
-  sql = <<EOQ
+  sql = <<-EOQ
     select
       k.name as "Key Name",
       case when kms_key_id is not null and kms_key_id <> '' then 'Customer Managed' else 'Oracle Managed' end as "Encryption Status",
@@ -519,7 +519,7 @@ query "blockstorage_block_volume_encryption" {
 }
 
 query "blockstorage_block_volume_backup_policy_schedules" {
-  sql = <<EOQ
+  sql = <<-EOQ
     select
       s ->> 'period' as "Period",
       s ->> 'timeZone' as "Time Zone",

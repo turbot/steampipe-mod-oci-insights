@@ -124,7 +124,7 @@ dashboard "ons_notification_topic_detail" {
 }
 
 query "ons_notification_topic_input" {
-  sql = <<EOQ
+  sql = <<-EOQ
     select
       n.name as label,
       n.topic_id as value,
@@ -209,7 +209,7 @@ query "ons_notification_topic_subscription" {
   param "id" {}
 }
 
-#with queries
+# With queries
 
 query "ons_subscriptions_for_ons_notification_topic" {
   sql = <<-EOQ

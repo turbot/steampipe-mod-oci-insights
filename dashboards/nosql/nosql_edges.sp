@@ -1,7 +1,7 @@
 edge "nosql_table_parent_to_nosql_table" {
   title = "child table"
 
-  sql = <<EOQ
+  sql = <<-EOQ
     with parent_name as (
       select
         split_part(c_name, '.', (array_length(string_to_array(c_name, '.'),1)-1)) as parent_table_name,

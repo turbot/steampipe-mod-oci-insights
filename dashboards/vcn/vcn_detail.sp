@@ -716,7 +716,7 @@ query "vcn_ipv4_count" {
     select
       sum(num_ips) as "IPv4 Addresses"
     from
-      cidrs
+      cidrs;
   EOQ
 }
 

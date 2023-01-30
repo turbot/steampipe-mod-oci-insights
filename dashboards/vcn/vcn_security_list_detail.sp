@@ -136,7 +136,7 @@ dashboard "vcn_security_list_detail" {
 # Input queries
 
 query "vcn_security_list_input" {
-  sql = <<EOQ
+  sql = <<-EOQ
     select
       b.display_name as label,
       b.id as value,
@@ -178,7 +178,7 @@ query "vcn_vcns_for_vcn_security_list" {
     from
       oci_core_security_list
     where
-      id = $1
+      id = $1;
   EOQ
 }
 
@@ -215,7 +215,8 @@ query "vcn_security_list_ingress_ssh" {
         oci_core_security_list as sl
         left join non_compliant_rules on non_compliant_rules.id = sl.id
       where
-        sl.id = $1 and sl.lifecycle_state <> 'TERMINATED';
+        sl.id = $1
+        and sl.lifecycle_state <> 'TERMINATED';
   EOQ
 }
 
@@ -267,7 +268,8 @@ query "vcn_security_list_overview" {
     from
       oci_core_security_list
     where
-      id = $1 and lifecycle_state <> 'TERMINATED';
+      id = $1
+      and lifecycle_state <> 'TERMINATED';
   EOQ
 }
 
@@ -302,7 +304,8 @@ query "vcn_network_security_list_ingress_rule" {
       oci_core_security_list,
       jsonb_array_elements(ingress_security_rules) as r
     where
-      id  = $1 and lifecycle_state <> 'TERMINATED';
+      id  = $1
+      and lifecycle_state <> 'TERMINATED';
   EOQ
 }
 
@@ -316,6 +319,7 @@ query "vcn_network_security_list_egress_rule" {
       oci_core_security_list,
       jsonb_array_elements(egress_security_rules) as r
     where
-      id  = $1 and lifecycle_state <> 'TERMINATED';
+      id  = $1
+      and lifecycle_state <> 'TERMINATED';
   EOQ
 }

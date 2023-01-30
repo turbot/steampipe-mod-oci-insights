@@ -266,7 +266,7 @@ query "objectstorage_bucket_versioning_status" {
     from
       versioning_stat
     group by
-      versioning_stat
+      versioning_stat;
   EOQ
 }
 
@@ -297,7 +297,7 @@ query "objectstorage_bucket_logging_status" {
     from
       logging_stat
     group by
-      logging_stat
+      logging_stat;
   EOQ
 }
 
@@ -356,7 +356,8 @@ query "objectstorage_bucket_by_compartment" {
 
 query "objectstorage_bucket_by_region" {
   sql = <<-EOQ
-    select region as "Region", count(*) as "Buckets"
+    select
+      region as "Region", count(*) as "Buckets"
     from
       oci_objectstorage_bucket
     group by

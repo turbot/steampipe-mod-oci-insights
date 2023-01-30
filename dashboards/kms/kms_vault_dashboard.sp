@@ -111,7 +111,7 @@ query "kms_vault_disabled_count" {
 query "kms_vault_lifecycle_state" {
   sql = <<-EOQ
     select
-      case when lifecycle_state = 'DISABLED' then 'disabled' else 'ok' end as status,
+      case when lifecycle_state = 'DISABLED' then 'disabled' else 'enabled' end as status,
       count(*)
     from
       oci_kms_vault

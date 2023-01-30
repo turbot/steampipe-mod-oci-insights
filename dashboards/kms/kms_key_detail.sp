@@ -230,7 +230,7 @@ dashboard "kms_key_detail" {
 # Input queries
 
 query "kms_key_input" {
-  sql = <<EOQ
+  sql = <<-EOQ
     select
       a.name as label,
       a.id as value,

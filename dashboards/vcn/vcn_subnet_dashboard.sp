@@ -209,7 +209,9 @@ query "oci_vcn_subnet_by_vcn" {
       left join oci_core_vcn v on s.vcn_id = v.id
     where
       s.lifecycle_state <> 'TERMINATED'
-      group by v.display_name
-      order by v.display_name;
+    group by
+      v.display_name
+    order by
+      v.display_name;
   EOQ
 }

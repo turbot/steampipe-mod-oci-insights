@@ -151,7 +151,7 @@ dashboard "nosql_table_detail" {
 # Input queries
 
 query "nosql_table_input" {
-  sql = <<EOQ
+  sql = <<-EOQ
     select
       n.name as label,
       n.id as value,
@@ -174,7 +174,7 @@ query "nosql_table_input" {
 # With queries
 
 query "nosql_table_children_for_nosql_table" {
-  sql = <<EOQ
+  sql = <<-EOQ
     with recursive child_tables as (
       select
         name,
@@ -198,7 +198,7 @@ query "nosql_table_children_for_nosql_table" {
 }
 
 query "nosql_table_parents_for_nosql_table" {
-  sql = <<EOQ
+  sql = <<-EOQ
     with parent_name as (
       select
         split_part(c_name, '.', (array_length(string_to_array(c_name, '.'),1)-1)) as parent_table_name,
