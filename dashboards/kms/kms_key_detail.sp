@@ -146,12 +146,12 @@ dashboard "kms_key_detail" {
         }
       }
 
-      # edge {
-      #   base = edge.database_autonomous_database_to_kms_key
-      #   args = {
-      #     database_autonomous_database_ids = with.database_autonomous_databases_for_kms_key.rows[*].autonomous_database_id
-      #   }
-      # }
+      edge {
+        base = edge.database_autonomous_database_to_kms_key
+        args = {
+          database_autonomous_database_ids = with.database_autonomous_databases_for_kms_key.rows[*].autonomous_database_id
+        }
+      }
 
       edge {
         base = edge.filestorage_file_system_to_kms_key

@@ -118,9 +118,9 @@ dashboard "database_autonomous_database_detail" {
       }
 
       edge {
-        base = edge.database_autonomous_database_to_kms_key
+        base = edge.kms_vault_to_kms_key
         args = {
-          database_autonomous_database_ids = [self.input.db_id.value]
+          kms_vault_ids = with.kms_vaults_for_database_autonomous_database.rows[*].vault_id
         }
       }
 
@@ -400,7 +400,8 @@ query "kms_vaults_for_database_autonomous_database" {
     from
       oci_database_autonomous_database
     where
-      id = $1;
+      vault_id is not null
+      and id = $1;
   EOQ
 }
 
@@ -411,7 +412,8 @@ query "kms_keys_for_database_autonomous_database" {
     from
       oci_database_autonomous_database
     where
-      id = $1;
+      kms_key_id is not null
+      and id = $1;
   EOQ
 }
 
