@@ -125,13 +125,13 @@ query "blockstorage_boot_volume_age_report" {
   sql = <<-EOQ
     select
       v.display_name as "Name",
+      v.id as "OCID",
       now()::date - v.time_created::date as "Age in Days",
       v.time_created as "Create Time",
       v.lifecycle_state as "Lifecycle State",
       t.title as "Tenancy",
       coalesce(c.title, 'root') as "Compartment",
-      v.region as "Region",
-      v.id as "OCID"
+      v.region as "Region"
     from
       oci_core_boot_volume as v
       left join oci_identity_compartment as c on v.compartment_id = c.id
@@ -139,6 +139,7 @@ query "blockstorage_boot_volume_age_report" {
     where
       v.lifecycle_state <> 'TERMINATED'
     order by
+      v.time_created,
       v.display_name;
   EOQ
 }

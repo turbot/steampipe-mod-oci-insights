@@ -122,18 +122,19 @@ query "ons_subscription_age_report" {
   sql = <<-EOQ
     select
       s.endpoint as "Endpoint",
+      s.id as "OCID",
       now()::date - s.created_time::date as "Age in Days",
       s.created_time as "Create Time",
       s.lifecycle_state as "Lifecycle State",
       t.title as "Tenancy",
       coalesce(c.title, 'root') as "Compartment",
-      s.region as "Region",
-      s.id as "OCID"
+      s.region as "Region"
     from
       oci_ons_subscription as s
       left join oci_identity_compartment as c on s.compartment_id = c.id
       left join oci_identity_tenancy as t on s.tenant_id = t.id
     order by
+      s.created_time,
       s.endpoint;
   EOQ
 }

@@ -125,13 +125,13 @@ query "filestorage_filesystem_age_report" {
   sql = <<-EOQ
     select
       f.display_name as "Name",
+      f.id as "OCID",
       now()::date - f.time_created::date as "Age in Days",
       f.time_created as "Create Time",
       f.lifecycle_state as "Lifecycle State",
       t.title as "Tenancy",
       coalesce(c.title, 'root') as "Compartment",
-      f.region as "Region",
-      f.id as "OCID"
+      f.region as "Region"
     from
       oci_file_storage_file_system as f
       left join oci_identity_compartment as c on f.compartment_id = c.id
@@ -139,6 +139,7 @@ query "filestorage_filesystem_age_report" {
     where
       f.lifecycle_state <> 'DELETED'
     order by
+      f.time_created,
       f.display_name;
   EOQ
 }

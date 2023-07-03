@@ -127,18 +127,19 @@ query "identity_api_key_age_report" {
   sql = <<-EOQ
     select
       k.user_name as "User Name",
-      k.fingerprint as "Fingerprint",
+      k.key_id as "OCID",
       now()::date - k.time_created::date as "Age in Days",
       k.time_created as "Create Time",
+      k.fingerprint as "Fingerprint",
       k.lifecycle_state as "Lifecycle State",
-      t.name as "Tenancy",
-      k.key_id as "OCID"
+      t.name as "Tenancy"
     from
       oci_identity_api_key as k,
       oci_identity_tenancy as t
     where
       t.id = k.tenant_id
     order by
+      k.time_created,
       k.user_name;
   EOQ
 }

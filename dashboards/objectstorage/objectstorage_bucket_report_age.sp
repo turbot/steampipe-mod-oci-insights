@@ -125,17 +125,18 @@ query "objectstorage_bucket_age_report" {
   sql = <<-EOQ
     select
       b.name as "Name",
+      b.id as "OCID",
       now()::date - b.time_created::date as "Age in Days",
       b.time_created as "Create Time",
       t.title as "Tenancy",
       coalesce(c.title, 'root') as "Compartment",
-      b.region as "Region",
-      b.id as "OCID"
+      b.region as "Region"
     from
       oci_objectstorage_bucket as b
       left join oci_identity_compartment as c on b.compartment_id = c.id
       left join oci_identity_tenancy as t on b.tenant_id = t.id
     order by
+      b.time_created,
       b.name;
   EOQ
 }
