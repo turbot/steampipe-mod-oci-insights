@@ -127,19 +127,20 @@ query "identity_customer_secret_key_age_report" {
   sql = <<-EOQ
     select
       k.display_name as "Customer Secret Key",
-      k.user_name as "User Name",
+      k.id as "OCID",
       now()::date - k.time_created::date as "Age in Days",
       k.time_created as "Create Time",
       k.time_expires as "Expiration Time",
+      k.user_name as "User Name",
       k.lifecycle_state as "Lifecycle State",
-      t.name as "Tenancy",
-      k.id as "OCID"
+      t.name as "Tenancy"
     from
       oci_identity_customer_secret_key as k,
       oci_identity_tenancy as t
     where
       t.id = k.tenant_id
     order by
+      k.time_created,
       k.display_name;
   EOQ
 }

@@ -125,14 +125,14 @@ query "kms_key_age_report" {
   sql = <<-EOQ
     select
       k.name as "Name",
-      k.vault_name as "Vault Name",
+      k.id as "OCID",
       now()::date - k.time_created::date as "Age in Days",
       k.time_created as "Create Time",
+      k.vault_name as "Vault Name",
       k.lifecycle_state as "Lifecycle State",
       t.title as "Tenancy",
       coalesce(c.title, 'root') as "Compartment",
-      k.region as "Region",
-      k.id as "OCID"
+      k.region as "Region"
     from
       oci_kms_key as k
       left join oci_identity_compartment as c on k.compartment_id = c.id
@@ -140,6 +140,7 @@ query "kms_key_age_report" {
     where
       k.lifecycle_state <> 'DELETED'
     order by
+      k.time_created,
       k.name;
   EOQ
 }

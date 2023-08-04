@@ -121,13 +121,13 @@ query "mysql_backup_age_report" {
   sql = <<-EOQ
     select
       b.display_name as "Name",
+      b.id as "OCID",
       now()::date - b.time_created::date as "Age in Days",
       b.time_created as "Create Time",
       b.lifecycle_state as "Lifecycle State",
       t.title as "Tenancy",
       coalesce(c.title, 'root') as "Compartment",
-      b.region as "Region",
-      b.id as "OCID"
+      b.region as "Region"
     from
       oci_mysql_backup as b
       left join oci_identity_compartment as c on b.compartment_id = c.id
@@ -135,6 +135,7 @@ query "mysql_backup_age_report" {
     where
       b.lifecycle_state <> 'DELETED'
     order by
+      b.time_created,
       b.display_name;
   EOQ
 }

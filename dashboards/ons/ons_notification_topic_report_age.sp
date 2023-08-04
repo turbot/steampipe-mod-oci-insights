@@ -125,18 +125,19 @@ query "ons_notification_topic_age_report" {
   sql = <<-EOQ
     select
       n.name as "Name",
+      n.topic_id as "OCID",
       now()::date - n.time_created::date as "Age in Days",
       n.time_created as "Create Time",
       n.lifecycle_state as "Lifecycle State",
       t.title as "Tenancy",
       coalesce(c.title, 'root') as "Compartment",
-      n.region as "Region",
-      n.topic_id as "OCID"
+      n.region as "Region"
     from
       oci_ons_notification_topic as n
       left join oci_identity_compartment as c on n.compartment_id = c.id
       left join oci_identity_tenancy as t on n.tenant_id = t.id
     order by
+      n.time_created,
       n.name;
   EOQ
 }

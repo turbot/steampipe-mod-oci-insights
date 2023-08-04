@@ -126,14 +126,14 @@ query "nosql_table_age_report" {
   sql = <<-EOQ
     select
       n.name as "Name",
+      n.id as "OCID",
       now()::date - n.time_created::date as "Age in Days",
       n.time_created as "Create Time",
       n.time_of_expiration as "Expiry Time",
       n.lifecycle_state as "Lifecycle State",
       t.title as "Tenancy",
       coalesce(c.title, 'root') as "Compartment",
-      n.region as "Region",
-      n.id as "OCID"
+      n.region as "Region"
     from
       oci_nosql_table as n
       left join oci_identity_compartment as c on n.compartment_id = c.id
@@ -141,6 +141,7 @@ query "nosql_table_age_report" {
     where
       n.lifecycle_state <> 'DELETED'
     order by
+      n.time_created,
       n.name;
   EOQ
 }
