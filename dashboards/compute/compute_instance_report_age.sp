@@ -125,13 +125,13 @@ query "compute_instance_age_report" {
   sql = <<-EOQ
     select
       i.display_name as "Name",
+      i.id as "OCID",
       now()::date - i.time_created::date as "Age in Days",
       i.time_created as "Create Time",
       i.lifecycle_state as "Lifecycle State",
       t.title as "Tenancy",
       coalesce(c.title, 'root') as "Compartment",
-      i.region as "Region",
-      i.id as "OCID"
+      i.region as "Region"
     from
       oci_core_instance as i
       left join oci_identity_compartment as c on i.compartment_id = c.id
@@ -139,6 +139,7 @@ query "compute_instance_age_report" {
     where
       i.lifecycle_state <> 'TERMINATED'
     order by
+      i.time_created,
       i.display_name;
   EOQ
 }

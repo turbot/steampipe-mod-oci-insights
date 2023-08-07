@@ -125,13 +125,13 @@ query "database_autonomous_db_age_report" {
   sql = <<-EOQ
     select
       d.display_name as "Name",
+      d.id as "OCID",
       now()::date - d.time_created::date as "Age in Days",
       d.time_created as "Create Time",
       d.lifecycle_state as "Lifecycle State",
       t.title as "Tenancy",
       coalesce(c.title, 'root') as "Compartment",
-      d.region as "Region",
-      d.id as "OCID"
+      d.region as "Region"
     from
       oci_database_autonomous_database as d
       left join oci_identity_compartment as c on d.compartment_id = c.id
@@ -139,6 +139,7 @@ query "database_autonomous_db_age_report" {
     where
       d.lifecycle_state <> 'TERMINATED'
     order by
+      d.time_created,
       d.display_name;
   EOQ
 }
