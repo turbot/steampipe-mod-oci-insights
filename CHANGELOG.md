@@ -1,6 +1,6 @@
 ## v0.6 [2023-08-07]
 
-_Enhancements_
+_Bug fixes_
 
 - Updated the Age Report dashboards to order by the creation time of the resource. ([#73](https://github.com/turbot/steampipe-mod-oci-insights/pull/73))
 - Fixed dashboard localhost URLs in README and index doc. ([#72](https://github.com/turbot/steampipe-mod-oci-insights/pull/72))
