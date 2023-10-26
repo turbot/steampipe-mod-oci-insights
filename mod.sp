@@ -8,15 +8,17 @@ mod "oci_insights" {
   categories    = ["oci", "dashboard", "public cloud"]
 
   opengraph {
-    title        = "Steampipe Mod for OCI Insights"
-    description  = "Create dashboards and reports for your Oracle Cloud Infrastructure resources using Steampipe."
-    image        = "/images/mods/turbot/oci-insights-social-graphic.png"
+    title       = "Steampipe Mod for OCI Insights"
+    description = "Create dashboards and reports for your Oracle Cloud Infrastructure resources using Steampipe."
+    image       = "/images/mods/turbot/oci-insights-social-graphic.png"
   }
 
   require {
-    steampipe = "0.18.0"
+    steampipe {
+      min_version = "0.18.0"
+    }
     plugin "oci" {
-      version = "0.19.0"
+      min_version = "0.19.0"
     }
   }
 }
