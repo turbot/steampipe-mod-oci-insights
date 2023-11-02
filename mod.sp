@@ -14,9 +14,6 @@ mod "oci_insights" {
   }
 
   require {
-    steampipe {
-      min_version = "0.18.0"
-    }
     plugin "oci" {
       min_version = "0.19.0"
     }
