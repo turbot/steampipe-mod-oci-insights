@@ -1,3 +1,9 @@
+## v0.7 [2023-11-03]
+
+_Breaking changes_
+
+- Updated the plugin dependency section of the mod to use `min_version` instead of `version`. ([#79](https://github.com/turbot/steampipe-mod-oci-insights/pull/79))
+
 ## v0.6 [2023-08-07]
 
 _Bug fixes_
