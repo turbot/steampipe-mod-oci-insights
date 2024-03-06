@@ -9,7 +9,6 @@ Create dashboards and reports for your OCI resources using Steampipe.
 <img src="https://raw.githubusercontent.com/turbot/steampipe-mod-oci-insights/main/docs/images/oci_identity_api_key_age.png" width="50%" type="thumbnail"/>
 <img src="https://raw.githubusercontent.com/turbot/steampipe-mod-oci-insights/main/docs/images/oci_insight_vcn_detail.png" width="50%" type="thumbnail"/>
 
-
 ## Overview
 
 Dashboards can help answer questions like:
@@ -22,7 +21,11 @@ Dashboards can help answer questions like:
 
 Dashboards are available for 10+ services, including Block Storage, Compute, Identity, Object Storage, VCN, and more!
 
-## Getting started
+## Documentation
+
+- **[Dashboards →](https://hub.powerpipe.io/mods/turbot/oci_insights/dashboards)**
+
+## Getting Started
 
 ### Installation
 
@@ -39,7 +42,7 @@ brew install turbot/tap/steampipe
 steampipe plugin install oci
 ```
 
-Steampipe will automatically use your default OCI credentials. Optionally, you can [setup multiple accounts](https://hub.steampipe.io/plugins/turbot/oci#multi-account-connections) or [customize OCI credentials](https://hub.steampipe.io/plugins/turbot/oci#configuring-oci-credentials).
+Steampipe will automatically use your default OCI credentials. Optionally, you can [setup multiple tenant](https://hub.steampipe.io/plugins/turbot/oci#multi-tenant-connections).
 
 Finally, install the mod:
 
@@ -47,7 +50,7 @@ Finally, install the mod:
 mkdir dashboards
 cd dashboards
 powerpipe mod init
-powerpipe mod install github.com/turbot/powerpipe-mod-oci-insights
+powerpipe mod install github.com/turbot/steampipe-mod-oci-insights
 ```
 
 ### Browsing Dashboards

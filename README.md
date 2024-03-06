@@ -1,6 +1,6 @@
 # Oracle Cloud Insights Mod for Powerpipe
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > [Powerpipe](https://powerpipe.io) is now the preferred way to run this mod! [Migrating from Steampipe →](https://powerpipe.io/blog/migrating-from-steampipe)
 >
 > All v0.x versions of this mod will work in both Steampipe and Powerpipe, but v1.0.0 onwards will be in Powerpipe format only.
@@ -21,7 +21,11 @@ Dashboards can help answer questions like:
 
 Dashboards are available for 10+ services, including Block Storage, Compute, Identity, Object Storage, VCN, and more!
 
-## Getting started
+## Documentation
+
+- **[Dashboards →](https://hub.powerpipe.io/mods/turbot/oci_insights/dashboards)**
+
+## Getting Started
 
 ### Installation
 
@@ -38,7 +42,7 @@ brew install turbot/tap/steampipe
 steampipe plugin install oci
 ```
 
-Steampipe will automatically use your default OCI credentials. Optionally, you can [setup multiple accounts](https://hub.steampipe.io/plugins/turbot/oci#multi-account-connections) or [customize OCI credentials](https://hub.steampipe.io/plugins/turbot/oci#configuring-oci-credentials).
+Steampipe will automatically use your default OCI credentials. Optionally, you can [setup multiple tenant](https://hub.steampipe.io/plugins/turbot/oci#multi-tenant-connections).
 
 Finally, install the mod:
 
@@ -46,7 +50,7 @@ Finally, install the mod:
 mkdir dashboards
 cd dashboards
 powerpipe mod init
-powerpipe mod install github.com/turbot/powerpipe-mod-oci-insights
+powerpipe mod install github.com/turbot/steampipe-mod-oci-insights
 ```
 
 ### Browsing Dashboards
