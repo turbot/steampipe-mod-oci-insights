@@ -1,4 +1,4 @@
-# OCI Insights Mod for Powerpipe
+# OCI Insights Mod
 
 Create dashboards and reports for your OCI resources using Steampipe.
 
