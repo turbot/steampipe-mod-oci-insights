@@ -7,8 +7,7 @@ edge "vcn_internet_gateway_to_vcn_vcn" {
       vcn_id as to_id
     from
       oci_core_internet_gateway
-    where
-      id = any($1);
+      join unnest($1::text[]) as u on id = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_internet_gateway_ids" {}
@@ -23,11 +22,11 @@ edge "vcn_load_balancer_to_compute_instance" {
       a.instance_id as to_id
     from
       oci_core_vnic_attachment as a,
-      oci_core_load_balancer as lb,
+      oci_core_load_balancer as lb
+      join unnest($1::text[]) as u on lb.id = split_part(u, '/', 1) and lb.tenant_id = split_part(u, '/', 2),
       jsonb_array_elements_text(subnet_ids) as sid
     where
-      a.subnet_id = sid
-      and lb.id = any($1);
+      a.subnet_id = sid;
   EOQ
 
   param "vcn_load_balancer_ids" {}
@@ -42,8 +41,7 @@ edge "vcn_local_peering_gateway_to_vcn_vcn" {
       vcn_id as to_id
     from
       oci_core_local_peering_gateway
-    where
-      id = any($1);
+      join unnest($1::text[]) as u on id = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_local_peering_gateway_ids" {}
@@ -58,9 +56,9 @@ edge "vcn_nat_gateway_to_vcn_public_ip" {
       id as to_id
     from
       oci_core_public_ip
+      join unnest($1::text[]) as u on assigned_entity_id = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2)
     where
-      assigned_entity_type = 'NAT_GATEWAY'
-      and assigned_entity_id = any($1);
+      assigned_entity_type = 'NAT_GATEWAY';
   EOQ
 
   param "vcn_nat_gateway_ids" {}
@@ -75,8 +73,7 @@ edge "vcn_nat_gateway_to_vcn_vcn" {
       vcn_id as to_id
     from
       oci_core_nat_gateway
-    where
-      id = any($1);
+      join unnest($1::text[]) as u on id = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_nat_gateway_ids" {}
@@ -92,9 +89,9 @@ edge "vcn_network_load_balancer_to_compute_instance" {
     from
       oci_core_vnic_attachment as a,
       oci_core_network_load_balancer as n
+      join unnest($1::text[]) as u on n.id = split_part(u, '/', 1) and n.tenant_id = split_part(u, '/', 2)
     where
-      n.subnet_id = a.subnet_id
-      and n.id = any($1);
+      n.subnet_id = a.subnet_id;
   EOQ
 
   param "vcn_network_load_balancer_ids" {}
@@ -110,8 +107,7 @@ edge "vcn_network_security_group_to_compute_instance" {
     from
       oci_core_vnic_attachment,
       jsonb_array_elements_text(nsg_ids) as nid
-    where
-      nid = any($1);
+      join unnest($1::text[]) as u on nid = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_network_security_group_ids" {}
@@ -127,8 +123,7 @@ edge "vcn_network_security_group_to_filestorage_mount_target" {
     from
       oci_file_storage_mount_target,
       jsonb_array_elements_text(nsg_ids) as nid
-    where
-      nid = any($1);
+      join unnest($1::text[]) as u on nid = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_network_security_group_ids" {}
@@ -144,8 +139,7 @@ edge "vcn_network_security_group_to_vcn_load_balancer" {
     from
       oci_core_load_balancer,
       jsonb_array_elements_text(network_security_group_ids) as nid
-    where
-      nid = any($1);
+      join unnest($1::text[]) as u on nid = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_network_security_group_ids" {}
@@ -161,8 +155,7 @@ edge "vcn_network_security_group_to_vcn_network_load_balancer" {
     from
       oci_core_network_load_balancer,
       jsonb_array_elements_text(network_security_group_ids) as nid
-    where
-      nid = any($1);
+      join unnest($1::text[]) as u on nid = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_network_security_group_ids" {}
@@ -178,8 +171,7 @@ edge "vcn_network_security_group_to_vcn_vnic" {
     from
       oci_core_vnic_attachment,
       jsonb_array_elements_text(nsg_ids) as nid
-    where
-      nid = any($1);
+      join unnest($1::text[]) as u on nid = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_network_security_group_ids" {}
@@ -194,8 +186,7 @@ edge "vcn_service_gateway_to_vcn_vcn" {
       vcn_id as to_id
     from
       oci_core_service_gateway
-    where
-      id = any($1);
+      join unnest($1::text[]) as u on id = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_service_gateway_ids" {}
@@ -210,8 +201,7 @@ edge "vcn_subnet_to_compute_instance" {
       instance_id as to_id
     from
       oci_core_vnic_attachment
-    where
-      subnet_id = any($1);
+      join unnest($1::text[]) as u on subnet_id = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_subnet_ids" {}
@@ -226,8 +216,7 @@ edge "vcn_subnet_to_vcn_dhcp_option" {
       dhcp_options_id as to_id
     from
       oci_core_subnet
-    where
-      id = any($1);
+      join unnest($1::text[]) as u on id = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_subnet_ids" {}
@@ -242,8 +231,7 @@ edge "vcn_subnet_to_vcn_flow_log" {
       id as to_id
     from
       oci_logging_log
-    where
-      configuration -> 'source' ->> 'resource' = any($1);
+      join unnest($1::text[]) as u on configuration -> 'source' ->> 'resource' = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_subnet_ids" {}
@@ -259,8 +247,7 @@ edge "vcn_subnet_to_vcn_load_balancer" {
     from
       oci_core_load_balancer,
       jsonb_array_elements_text(subnet_ids) as sid
-    where
-      sid = any($1);
+      join unnest($1::text[]) as u on sid = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_subnet_ids" {}
@@ -275,8 +262,7 @@ edge "vcn_subnet_to_vcn_network_load_balancer" {
       id as to_id
     from
       oci_core_network_load_balancer
-    where
-      subnet_id = any($1);
+      join unnest($1::text[]) as u on subnet_id = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_subnet_ids" {}
@@ -291,9 +277,8 @@ edge "vcn_subnet_to_vcn_route_table" {
       r.id as to_id
     from
       oci_core_route_table as r
-      left join oci_core_subnet as s on r.id = s.route_table_id
-    where
-      r.id = any($1);
+      join unnest($1::text[]) as u on r.id = split_part(u, '/', 1) and r.tenant_id = split_part(u, '/', 2)
+      left join oci_core_subnet as s on r.id = s.route_table_id;
   EOQ
 
   param "vcn_route_table_ids" {}
@@ -307,10 +292,9 @@ edge "vcn_subnet_to_vcn_security_list" {
       id as from_id,
       sid as to_id
     from
-      oci_core_subnet,
-      jsonb_array_elements_text(security_list_ids) as sid
-    where
-      id = any($1)
+      oci_core_subnet
+      join unnest($1::text[]) as u on id = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2),
+      jsonb_array_elements_text(security_list_ids) as sid;
   EOQ
 
   param "vcn_subnet_ids" {}
@@ -326,9 +310,7 @@ edge "vcn_vcn_to_identity_availability_domain" {
     from
       oci_identity_availability_domain as a,
       oci_core_vcn as v
-    where
-      a.region = v.region
-      and v.id = any($1);
+      join unnest($1::text[]) as u on v.id = split_part(u, '/', 1) and v.tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_vcn_ids" {}
@@ -343,8 +325,7 @@ edge "vcn_vcn_to_vcn_dhcp_option" {
       id as to_id
     from
       oci_core_dhcp_options
-    where
-      vcn_id = any($1);
+      join unnest($1::text[]) as u on vcn_id = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_vcn_ids" {}
@@ -359,8 +340,7 @@ edge "vcn_vcn_to_vcn_network_security_group" {
       id as to_id
     from
       oci_core_network_security_group
-    where
-      vcn_id = any($1);
+      join unnest($1::text[]) as u on vcn_id = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_vcn_ids" {}
@@ -375,8 +355,7 @@ edge "vcn_vcn_to_vcn_security_list" {
       id as to_id
     from
       oci_core_security_list
-    where
-      vcn_id = any($1);
+      join unnest($1::text[]) as u on vcn_id = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_vcn_ids" {}
@@ -391,8 +370,7 @@ edge "vcn_subnet_to_vcn_vcn" {
       vcn_id as to_id
     from
       oci_core_subnet
-    where
-      id = any($1);
+      join unnest($1::text[]) as u on id = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_subnet_ids" {}

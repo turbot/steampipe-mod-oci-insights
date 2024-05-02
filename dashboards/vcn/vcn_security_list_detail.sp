@@ -139,7 +139,7 @@ query "vcn_security_list_input" {
   sql = <<-EOQ
     select
       l.display_name as label,
-      l.id as value,
+      l.id || '/' || l.tenant_id as value,
       json_build_object(
         'b.id', right(reverse(split_part(reverse(l.id), '.', 1)), 8),
         'b.region', region,
@@ -162,23 +162,25 @@ query "vcn_security_list_input" {
 query "vcn_subnets_for_vcn_security_list" {
   sql = <<-EOQ
     select
-      id as subnet_id
+      id || '/' || tenant_id as subnet_id
     from
       oci_core_subnet,
       jsonb_array_elements_text(security_list_ids) as sid
     where
-      sid = $1;
+      sid = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
 query "vcn_vcns_for_vcn_security_list" {
   sql = <<-EOQ
     select
-      vcn_id
+      vcn_id || '/' || tenant_id as vcn_id
     from
       oci_core_security_list
     where
-      id = $1;
+      id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
@@ -215,7 +217,8 @@ query "vcn_security_list_ingress_ssh" {
         oci_core_security_list as sl
         left join non_compliant_rules on non_compliant_rules.id = sl.id
       where
-        sl.id = $1
+        sl.id = split_part($1, '/', 1)
+        and sl.tenant_id = split_part($1, '/', 2)
         and sl.lifecycle_state <> 'TERMINATED';
   EOQ
 }
@@ -251,7 +254,7 @@ query "vcn_security_list_ingress_rdp" {
         oci_core_security_list as sl
         left join non_compliant_rules on non_compliant_rules.id = sl.id
       where
-        sl.id = $1 and sl.lifecycle_state <> 'TERMINATED';
+        sl.id = split_part($1, '/', 1) and sl.tenant_id = split_part($1, '/', 2) and sl.lifecycle_state <> 'TERMINATED';
   EOQ
 }
 
@@ -268,7 +271,8 @@ query "vcn_security_list_overview" {
     from
       oci_core_security_list
     where
-      id = $1
+      id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2)
       and lifecycle_state <> 'TERMINATED';
   EOQ
 }
@@ -281,7 +285,7 @@ query "vcn_security_list_tag" {
       from
         oci_core_security_list
       where
-        id = $1 and lifecycle_state <> 'TERMINATED'
+        id = split_part($1, '/', 1) and tenant_id = split_part($1, '/', 2) and lifecycle_state <> 'TERMINATED'
     )
     select
       key as "Key",
@@ -304,7 +308,7 @@ query "vcn_network_security_list_ingress_rule" {
       oci_core_security_list,
       jsonb_array_elements(ingress_security_rules) as r
     where
-      id  = $1
+      id  = split_part($1, '/', 1) and tenant_id = split_part($1, '/', 2)
       and lifecycle_state <> 'TERMINATED';
   EOQ
 }
@@ -319,7 +323,7 @@ query "vcn_network_security_list_egress_rule" {
       oci_core_security_list,
       jsonb_array_elements(egress_security_rules) as r
     where
-      id  = $1
+      id  = split_part($1, '/', 1) and tenant_id = split_part($1, '/', 2)
       and lifecycle_state <> 'TERMINATED';
   EOQ
 }

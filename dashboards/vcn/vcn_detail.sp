@@ -499,7 +499,7 @@ query "vcn_input" {
   sql = <<-EOQ
     select
       n.display_name as label,
-      n.id as value,
+      n.id || '/' || n.tenant_id as value,
       json_build_object(
         'n.id', right(reverse(split_part(reverse(n.id), '.', 1)), 8),
         'n.region', region,
@@ -522,90 +522,97 @@ query "vcn_input" {
 query "compute_instances_for_vcn_vcn" {
   sql = <<-EOQ
     select
-      a.instance_id as compute_instance_id
+      a.instance_id || '/' || a.tenant_id as compute_instance_id
     from
       oci_core_vnic_attachment as a,
       oci_core_subnet as s
     where
       a.subnet_id = s.id
-      and s.vcn_id = $1;
+      and s.vcn_id = split_part($1, '/', 1)
+      and s.tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
 query "identity_availability_domains_for_vcn_vcn" {
   sql = <<-EOQ
     select
-      a.id as availability_domain_id
+      a.id || '/' || s.tenant_id as availability_domain_id
     from
       oci_identity_availability_domain as a,
       oci_core_subnet as s
     where
       s.availability_domain = a.name
-      and s.vcn_id = $1;
+      and s.vcn_id = split_part($1, '/', 1)
+      and s.tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
 query "regional_identity_availability_domains_for_vcn_vcn" {
   sql = <<-EOQ
     select
-      a.id as availability_domain_id
+      a.id || '/' || s.tenant_id as availability_domain_id
     from
       oci_identity_availability_domain as a,
       oci_core_subnet as s
     where
       s.region = a.region
       and s.availability_domain is null
-      and s.vcn_id = $1;
+      and s.vcn_id = split_part($1, '/', 1)
+      and s.tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
 query "vcn_dhcp_options_for_vcn_vcn" {
   sql = <<-EOQ
     select
-      id as dhcp_option_id
+      id || '/' || tenant_id as dhcp_option_id
     from
       oci_core_dhcp_options
     where
-      vcn_id = $1;
+      vcn_id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
 query "vcn_flow_logs_for_vcn_vcn" {
   sql = <<-EOQ
     select
-      l.id as flow_log_id
+      l.id || '/' || l.tenant_id as flow_log_id
     from
       oci_logging_log as l,
       oci_core_subnet as s
     where
       configuration -> 'source' ->> 'service' = 'flowlogs'
       and configuration -> 'source' ->> 'resource' = s.id
-      and s.vcn_id = $1;
+      and s.vcn_id = split_part($1, '/', 1)
+      and s.tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
 query "vcn_internet_gateways_for_vcn_vcn" {
   sql = <<-EOQ
     select
-      id as internet_gateway_id
+      id || '/' || tenant_id as internet_gateway_id
     from
       oci_core_internet_gateway
     where
-      vcn_id = $1;
+      vcn_id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
 query "vcn_load_balancers_for_vcn_vcn" {
   sql = <<-EOQ
     select
-      lb.id as load_balancer_id
+      lb.id || '/' || s.tenant_id as load_balancer_id
     from
       oci_core_load_balancer as lb,
       jsonb_array_elements_text(subnet_ids) as sid,
       oci_core_subnet as s
     where
       sid = s.id
-      and s.vcn_id = $1;
+      and s.vcn_id = split_part($1, '/', 1)
+      and s.tenant_id = split_part($1, '/', 2);
 
   EOQ
 }
@@ -613,90 +620,98 @@ query "vcn_load_balancers_for_vcn_vcn" {
 query "vcn_local_peering_gateways_for_vcn_vcn" {
   sql = <<-EOQ
     select
-      id as local_peering_gateway_id
+      id || '/' || tenant_id as local_peering_gateway_id
     from
       oci_core_local_peering_gateway
     where
-      vcn_id = $1;
+      vcn_id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
 query "vcn_nat_gateways_for_vcn_vcn" {
   sql = <<-EOQ
     select
-      id as nat_gateway_id
+      id || '/' || tenant_id as nat_gateway_id
     from
       oci_core_nat_gateway
     where
-      vcn_id = $1;
+      vcn_id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
 query "vcn_network_load_balancers_for_vcn_vcn" {
   sql = <<-EOQ
     select
-      n.id as network_load_balancer_id
+      n.id || '/' || n.tenant_id as network_load_balancer_id
     from
       oci_core_network_load_balancer as n,
       oci_core_subnet as s
     where
       s.id = n.subnet_id
-      and s.vcn_id = $1;
+      and s.vcn_id = split_part($1, '/', 1)
+      and s.tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
 query "vcn_network_security_groups_for_vcn_vcn" {
   sql = <<-EOQ
     select
-      id as network_security_group_id
+      id || '/' || tenant_id as network_security_group_id
     from
       oci_core_network_security_group
     where
-      vcn_id = $1;
+      vcn_id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
 query "vcn_route_tables_for_vcn_vcn" {
   sql = <<-EOQ
     select
-      id as route_table_id
+      id || '/' || tenant_id as route_table_id
     from
       oci_core_route_table
     where
-      vcn_id = $1;
+      vcn_id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
 query "vcn_security_lists_for_vcn_vcn" {
   sql = <<-EOQ
     select
-      id as security_list_id
+      id || '/' || tenant_id as security_list_id
     from
       oci_core_security_list
     where
-      vcn_id = $1;
+      vcn_id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
 query "vcn_service_gateways_for_vcn_vcn" {
   sql = <<-EOQ
     select
-      id as service_gateway_id
+      id || '/' || tenant_id as service_gateway_id
     from
       oci_core_service_gateway
     where
-      vcn_id = $1;
+      vcn_id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
 query "vcn_subnets_for_vcn_vcn" {
   sql = <<-EOQ
     select
-      id as subnet_id
+      id || '/' || tenant_id as subnet_id
     from
       oci_core_subnet
     where
-      vcn_id = $1;
+      vcn_id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
@@ -711,7 +726,8 @@ query "vcn_ipv4_count" {
         oci_core_vcn,
         jsonb_array_elements_text(cidr_blocks) as b
       where
-        id = $1
+        id = split_part($1, '/', 1)
+        and tenant_id = split_part($1, '/', 2)
     )
     select
       sum(num_ips) as "IPv4 Addresses"
@@ -728,7 +744,8 @@ query "vcn_ipv6_count" {
         oci_core_vcn
         left join jsonb_array_elements_text(ipv6_cidr_blocks) as b on ipv6_cidr_blocks is not null
       where
-        id = $1;
+        id = split_part($1, '/', 1)
+        and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
@@ -740,7 +757,8 @@ query "vcn_attached_subnet_count" {
     from
       oci_core_subnet
     where
-      vcn_id = $1;
+      vcn_id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
@@ -752,7 +770,8 @@ query "vcn_attached_nsg_count" {
     from
       oci_core_network_security_group
     where
-      vcn_id = $1;
+      vcn_id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
@@ -764,7 +783,8 @@ query "vcn_attached_sl_count" {
     from
       oci_core_security_list
     where
-      vcn_id = $1;
+      vcn_id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
@@ -781,7 +801,8 @@ query "vcn_overview" {
     from
       oci_core_vcn
     where
-      id = $1;
+      id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
@@ -793,7 +814,8 @@ query "vcn_tag" {
       from
         oci_core_vcn
       where
-        id = $1
+        id = split_part($1, '/', 1)
+        and tenant_id = split_part($1, '/', 2)
     )
     select
       key as "Key",
@@ -815,7 +837,8 @@ query "vcn_cidr_blocks" {
       oci_core_vcn,
       jsonb_array_elements_text(cidr_blocks) as b
     where
-      id = $1
+      id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2)
     union all
     select
       b as cidr_block,
@@ -824,7 +847,8 @@ query "vcn_cidr_blocks" {
       oci_core_vcn,
       jsonb_array_elements_text(ipv6_cidr_blocks) as b
     where
-      id = $1;
+      id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
@@ -841,7 +865,8 @@ query "vcn_dhcp_options" {
       oci_core_dhcp_options,
       jsonb_array_elements(options) as op
     where
-      vcn_id = $1
+      vcn_id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2)
     order by
       display_name;
   EOQ
@@ -860,7 +885,8 @@ query "vcn_subnet" {
     from
       oci_core_subnet
     where
-      vcn_id = $1
+      vcn_id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2)
     order by
       display_name;
   EOQ
@@ -880,7 +906,8 @@ query "vcn_gateway_sankey" {
         left join oci_core_route_table as r on s.route_table_id = r.id,
         jsonb_array_elements(route_rules) as rule
       where
-        s.vcn_id = $1
+        s.vcn_id = split_part($1, '/', 1)
+        and s.tenant_id = split_part($1, '/', 2)
     ),
     gateway as (
       select
@@ -942,7 +969,8 @@ query "vcn_route_table" {
       oci_core_route_table,
       jsonb_array_elements(route_rules) as r
     where
-      vcn_id = $1
+      vcn_id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2)
     order by
       display_name;
   EOQ
@@ -957,7 +985,8 @@ query "vcn_gateways_table" {
     from
       oci_core_internet_gateway
     where
-      vcn_id = $1
+      vcn_id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2)
     union all
     select
       name as "Name",
@@ -966,7 +995,8 @@ query "vcn_gateways_table" {
     from
       oci_core_local_peering_gateway
     where
-      vcn_id = $1
+      vcn_id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2)
     union all
     select
       display_name as "Name",
@@ -975,7 +1005,8 @@ query "vcn_gateways_table" {
     from
       oci_core_nat_gateway
     where
-      vcn_id = $1
+      vcn_id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2)
     union all
     select
       display_name as "Name",
@@ -984,7 +1015,8 @@ query "vcn_gateways_table" {
     from
       oci_core_service_gateway
     where
-      vcn_id = $1;
+      vcn_id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
@@ -998,7 +1030,8 @@ query "vcn_security_list" {
     from
       oci_core_security_list
     where
-      vcn_id = $1
+      vcn_id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2)
     order by
       display_name;
   EOQ
@@ -1014,7 +1047,8 @@ query "vcn_security_group" {
     from
       oci_core_network_security_group
     where
-      vcn_id = $1
+      vcn_id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2)
     order by
       display_name;
   EOQ
@@ -1022,8 +1056,8 @@ query "vcn_security_group" {
 
 query "vcn_nsl_ingress_rule_sankey" {
 
-  sql = <<-EOQ
-   with subnets as (
+sql = <<-EOQ
+  with subnets as (
       select
         display_name as subnet_name,
         id as subnet_id,
@@ -1032,7 +1066,8 @@ query "vcn_nsl_ingress_rule_sankey" {
         oci_core_subnet as s,
         jsonb_array_elements_text(security_list_ids) as sl
       where
-        vcn_id = $1
+        vcn_id = split_part($1, '/', 1)
+        and tenant_id = split_part($1, '/', 2)
     ),
     securityList as (
       select
@@ -1045,7 +1080,8 @@ query "vcn_nsl_ingress_rule_sankey" {
         oci_core_security_list as l
         left join subnets as s on s.sl_id = l.id
       where
-        vcn_id = $1
+        vcn_id = split_part($1, '/', 1)
+        and tenant_id = split_part($1, '/', 2)
     ),
     rule as (
       select
@@ -1172,7 +1208,8 @@ query "vcn_nsl_egress_rule_sankey" {
         oci_core_subnet as s,
         jsonb_array_elements_text(security_list_ids) as sl
       where
-        vcn_id = $1
+        vcn_id = split_part($1, '/', 1)
+        and tenant_id = split_part($1, '/', 2)
     ),
     securityList as (
       select
@@ -1185,7 +1222,8 @@ query "vcn_nsl_egress_rule_sankey" {
         oci_core_security_list as l
         left join subnets as s on s.sl_id = l.id
       where
-        vcn_id = $1
+        vcn_id = split_part($1, '/', 1)
+        and tenant_id = split_part($1, '/', 2)
     ),
     rule as (
       select

@@ -15,8 +15,7 @@ node "vcn_dhcp_option" {
       ) as properties
     from
       oci_core_dhcp_options
-    where
-      id = any($1);
+      join unnest($1::text[]) as u on id = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_dhcp_option_ids" {}
@@ -40,9 +39,9 @@ node "vcn_flow_log" {
       ) as properties
     from
       oci_logging_log
+      join unnest($1::text[]) as u on id = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2)
     where
-      configuration -> 'source' ->> 'service' = 'flowlogs'
-      and id = any($1);
+      configuration -> 'source' ->> 'service' = 'flowlogs';
   EOQ
 
   param "vcn_flow_log_ids" {}
@@ -67,8 +66,7 @@ node "vcn_internet_gateway" {
       ) as properties
     from
       oci_core_internet_gateway
-    where
-      id = any($1 ::text[]);
+      join unnest($1::text[]) as u on id = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_internet_gateway_ids" {}
@@ -92,8 +90,7 @@ node "vcn_load_balancer" {
       ) as properties
     from
       oci_core_load_balancer
-    where
-      id = any($1);
+      join unnest($1::text[]) as u on id = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_load_balancer_ids" {}
@@ -116,8 +113,7 @@ node "vcn_local_peering_gateway" {
       ) as properties
     from
       oci_core_local_peering_gateway
-    where
-      id = any($1);
+      join unnest($1::text[]) as u on id = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_local_peering_gateway_ids" {}
@@ -140,8 +136,7 @@ node "vcn_nat_gateway" {
       ) as properties
     from
       oci_core_nat_gateway
-    where
-      id = any($1);
+      join unnest($1::text[]) as u on id = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_nat_gateway_ids" {}
@@ -164,7 +159,7 @@ node "vcn_network_load_balancer" {
       ) as properties
     from
       oci_core_network_load_balancer
-    where
+      join unnest($1::text[]) as u on id = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
       id = any($1);
   EOQ
 
@@ -188,8 +183,7 @@ node "vcn_network_security_group" {
       ) as properties
     from
       oci_core_network_security_group
-    where
-      id = any($1);
+      join unnest($1::text[]) as u on id = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_network_security_group_ids" {}
@@ -212,8 +206,7 @@ node "vcn_public_ip" {
       ) as properties
     from
       oci_core_public_ip
-    where
-      id = any($1);
+      join unnest($1::text[]) as u on id = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_public_ip_ids" {}
@@ -236,8 +229,7 @@ node "vcn_route_table" {
       ) as properties
     from
       oci_core_route_table
-    where
-      id = any($1);
+      join unnest($1::text[]) as u on id = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_route_table_ids" {}
@@ -260,8 +252,7 @@ node "vcn_security_list" {
       ) as properties
     from
       oci_core_security_list
-    where
-      id = any($1);
+      join unnest($1::text[]) as u on id = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_security_list_ids" {}
@@ -284,8 +275,7 @@ node "vcn_service_gateway" {
       ) as properties
     from
       oci_core_service_gateway
-    where
-      id = any($1);
+      join unnest($1::text[]) as u on id = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_service_gateway_ids" {}
@@ -310,8 +300,7 @@ node "vcn_subnet" {
       ) as properties
     from
       oci_core_subnet
-    where
-      id = any($1 ::text[]);
+      join unnest($1::text[]) as u on id = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_subnet_ids" {}
@@ -335,8 +324,7 @@ node "vcn_vcn" {
       ) as properties
     from
       oci_core_vcn
-    where
-      id = any($1);
+      join unnest($1::text[]) as u on id = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_vcn_ids" {}
@@ -359,8 +347,7 @@ node "vcn_vnic" {
       ) as properties
     from
       oci_core_vnic_attachment
-    where
-      vnic_id = any($1);
+      join unnest($1::text[]) as u on vnic_id = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
   param "vcn_vnic_ids" {}

@@ -273,7 +273,7 @@ query "vcn_subnet_input" {
   sql = <<-EOQ
     select
       n.display_name as label,
-      n.id as value,
+      n.id || '/' || n.tenant_id as value,
       json_build_object(
         'n.id', right(reverse(split_part(reverse(n.id), '.', 1)), 8),
         'n.region', region,
@@ -297,118 +297,128 @@ query "vcn_subnet_input" {
 query "compute_instances_for_vcn_subnet" {
   sql = <<-EOQ
     select
-      instance_id as compute_instance_id
+      instance_id || '/' || tenant_id as compute_instance_id
     from
       oci_core_vnic_attachment
     where
-      subnet_id = $1;
+      subnet_id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
 query "identity_availability_domains_for_vcn_subnet" {
   sql = <<-EOQ
     select
-      a.id as availability_domain_id
+      a.id || '/' || a.tenant_id as availability_domain_id
     from
       oci_identity_availability_domain as a,
       oci_core_subnet as s
     where
       s.availability_domain = a.name
-      and s.id = $1;
+      and s.id = split_part($1, '/', 1)
+      and s.tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
 query "regional_identity_availability_domains_for_vcn_subnet" {
   sql = <<-EOQ
     select
-      a.id as availability_domain_id
+      a.id || '/' || a.tenant_id as availability_domain_id
     from
       oci_identity_availability_domain as a,
       oci_core_subnet as s
     where
       s.region = a.region
       and s.availability_domain is null
-      and s.id = $1;
+      and s.id = split_part($1, '/', 1)
+      and s.tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
 query "vcn_dhcp_options_for_vcn_subnet" {
   sql = <<-EOQ
     select
-      dhcp_options_id
+      dhcp_options_id || '/' || tenant_id as dhcp_options_id
     from
       oci_core_subnet
     where
-      id  = $1;
+      id  = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
 query "vcn_flow_logs_for_vcn_subnet" {
   sql = <<-EOQ
     select
-      id as flow_log_id
+      id || '/' || tenant_id as flow_log_id
     from
       oci_logging_log
     where
       configuration -> 'source' ->> 'service' = 'flowlogs'
-      and configuration -> 'source' ->> 'resource' = $1;
+      and configuration -> 'source' ->> 'resource' = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
 query "vcn_load_balancers_for_vcn_subnet" {
   sql = <<-EOQ
     select
-      id as load_balancer_id
+      id || '/' || tenant_id as load_balancer_id
     from
       oci_core_load_balancer,
       jsonb_array_elements_text(subnet_ids) as sid
     where
-      sid = $1;
+      sid = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
 query "vcn_network_load_balancers_for_vcn_subnet" {
   sql = <<-EOQ
     select
-      id as network_load_balancer_id
+      id || '/' || tenant_id as network_load_balancer_id
     from
       oci_core_network_load_balancer
     where
-      subnet_id = $1;
+      subnet_id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
 query "vcn_route_tables_for_vcn_subnet" {
   sql = <<-EOQ
     select
-      route_table_id
+      route_table_id || '/' || tenant_id as route_table_id
     from
       oci_core_subnet
     where
-      id  = $1;
+      id  = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
 query "vcn_security_lists_for_vcn_subnet" {
   sql = <<-EOQ
     select
-      sid as security_list_id
+      sid || '/' || tenant_id as security_list_id
     from
       oci_core_subnet,
       jsonb_array_elements_text(security_list_ids) as sid
     where
-      id = $1
+      id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
 query "vcn_vcns_for_vcn_subnet" {
   sql = <<-EOQ
     select
-      vcn_id
+      vcn_id || '/' || tenant_id as vcn_id
     from
       oci_core_subnet
     where
-      id  = $1;
+      id  = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
@@ -425,7 +435,7 @@ query "vcn_subnet_flow_logs" {
       left join oci_logging_log as l
       on s.id = l.configuration -> 'source' ->> 'resource'
     where
-      s.id = $1 and s.lifecycle_state <> 'TERMINATED';
+      s.id = split_part($1, '/', 1) and s.tenant_id = split_part($1, '/', 2) and s.lifecycle_state <> 'TERMINATED';
   EOQ
 }
 
@@ -443,7 +453,7 @@ query "vcn_subnet_overview" {
     from
       oci_core_subnet
     where
-      id = $1 and lifecycle_state <> 'TERMINATED';
+      id = split_part($1, '/', 1) and tenant_id = split_part($1, '/', 2) and lifecycle_state <> 'TERMINATED';
   EOQ
 }
 
@@ -455,7 +465,7 @@ query "vcn_subnet_tag" {
       from
         oci_core_subnet
       where
-        id = $1 and lifecycle_state <> 'TERMINATED'
+        id = split_part($1, '/', 1) and tenant_id = split_part($1, '/', 2) and lifecycle_state <> 'TERMINATED'
     )
     select
       key as "Key",
@@ -476,6 +486,6 @@ query "vcn_subnet_cidr_block" {
     from
       oci_core_subnet
     where
-      id  = $1 and lifecycle_state <> 'TERMINATED';
+      id  = split_part($1, '/', 1) and tenant_id = split_part($1, '/', 2) and lifecycle_state <> 'TERMINATED';
   EOQ
 }

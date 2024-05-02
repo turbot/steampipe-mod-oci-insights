@@ -247,7 +247,7 @@ query "vcn_network_security_group_input" {
   sql = <<-EOQ
     select
       g.display_name as label,
-      g.id as value,
+      g.id || '/' || g.tenant_id as value,
       json_build_object(
         'b.id', right(reverse(split_part(reverse(g.id), '.', 1)), 8),
         'g.region', region,
@@ -270,71 +270,77 @@ query "vcn_network_security_group_input" {
 query "compute_instances_for_vcn_network_security_group" {
   sql = <<-EOQ
     select
-      instance_id as compute_instance_id
+      instance_id || '/' || tenant_id as compute_instance_id
     from
       oci_core_vnic_attachment,
       jsonb_array_elements_text(nsg_ids) as nid
     where
-      nid = $1
+      nid = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
 query "filestorage_mount_targets_for_vcn_network_security_group" {
   sql = <<-EOQ
     select
-      id as mount_target_id
+      id || '/' || tenant_id as mount_target_id
     from
       oci_file_storage_mount_target,
       jsonb_array_elements_text(nsg_ids) as nid
     where
-      nid = $1;
+      nid = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
 query "vcn_load_balancers_for_vcn_network_security_group" {
   sql = <<-EOQ
     select
-      id as load_balancer_id
+      id || '/' || tenant_id as load_balancer_id
     from
       oci_core_load_balancer,
       jsonb_array_elements_text(network_security_group_ids) as nid
     where
-      nid = $1;
+      nid = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
 query "vcn_network_load_balancers_for_vcn_network_security_group" {
   sql = <<-EOQ
     select
-      id as network_load_balancer_id
+      id || '/' || tenant_id as network_load_balancer_id
     from
       oci_core_network_load_balancer,
       jsonb_array_elements_text(network_security_group_ids) as nid
     where
-      nid = $1;
+      nid = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
 query "vcn_vcns_for_vcn_network_security_group" {
   sql = <<-EOQ
     select
-      vcn_id
+      vcn_id || '/' || tenant_id as vcn_id
     from
       oci_core_network_security_group
     where
-      id = $1;
+      id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
 query "vcn_vnics_for_vcn_network_security_group" {
   sql = <<-EOQ
     select
-      vnic_id
+      vnic_id || '/' || tenant_id as vnic_id
     from
       oci_core_vnic_attachment,
       jsonb_array_elements_text(nsg_ids) as nid
     where
-      nid = $1;
+      nid = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 }
 
@@ -350,7 +356,8 @@ query "vcn_network_security_group_ingress_rules_count" {
       jsonb_array_elements(rules) as r
     where
       r ->> 'direction' = 'INGRESS'
-      and id = $1;
+      and id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 
 }
@@ -365,7 +372,8 @@ query "vcn_network_security_group_egress_rules_count" {
       jsonb_array_elements(rules) as r
     where
       r ->> 'direction' = 'EGRESS'
-      and id = $1;
+      and id = split_part($1, '/', 1)
+      and tenant_id = split_part($1, '/', 2);
   EOQ
 
 }
@@ -401,7 +409,7 @@ query "vcn_network_security_group_ingress_ssh" {
         oci_core_network_security_group as nsg
         left join non_compliant_rules on non_compliant_rules.id = nsg.id
       where
-        nsg.id = $1 and nsg.lifecycle_state <> 'TERMINATED';
+        nsg.id = split_part($1, '/', 1) and nsg.tenant_id = split_part($1, '/', 2) and nsg.lifecycle_state <> 'TERMINATED';
   EOQ
 
 }
@@ -437,7 +445,7 @@ query "vcn_network_security_group_ingress_rdp" {
         oci_core_network_security_group as nsg
         left join non_compliant_rules on non_compliant_rules.id = nsg.id
       where
-        nsg.id = $1 and nsg.lifecycle_state <> 'TERMINATED';
+        nsg.id = split_part($1, '/', 1) and nsg.tenant_id = split_part($1, '/', 2) nsg.lifecycle_state <> 'TERMINATED';
   EOQ
 
 }
@@ -455,7 +463,7 @@ query "vcn_network_security_group_overview" {
     from
       oci_core_network_security_group
     where
-      id = $1 and lifecycle_state <> 'TERMINATED';
+      id = split_part($1, '/', 1) and tenant_id = split_part($1, '/', 2) and lifecycle_state <> 'TERMINATED';
   EOQ
 }
 
@@ -467,7 +475,7 @@ query "vcn_network_security_group_tag" {
       from
         oci_core_network_security_group
       where
-        id = $1 and lifecycle_state <> 'TERMINATED'
+        id = split_part($1, '/', 1) and tenant_id = split_part($1, '/', 2) and lifecycle_state <> 'TERMINATED'
     )
     select
       key as "Key",
@@ -502,7 +510,7 @@ query "vcn_network_security_group_assoc" {
     left join oci_core_network_security_group as nsg on g.n_id = nsg.id
     left join oci_core_instance as i on i.id = g.instance_id
   where
-    nsg.id = $1
+    nsg.id = split_part($1, '/', 1) and tenant_id = split_part($1, '/', 2)
 
     -- File Storage Mount Target
     union all
@@ -515,7 +523,7 @@ query "vcn_network_security_group_assoc" {
       oci_file_storage_mount_target,
       jsonb_array_elements_text(nsg_ids) as sg
     where
-      sg = $1
+      sg = split_part($1, '/', 1) and tenant_id = split_part($1, '/', 2)
 
     -- Load Balancer
     union all
@@ -528,7 +536,7 @@ query "vcn_network_security_group_assoc" {
       oci_core_load_balancer,
       jsonb_array_elements_text(network_security_group_ids) as sg
     where
-      sg = $1
+      sg = split_part($1, '/', 1) and tenant_id = split_part($1, '/', 2)
 
     -- Network Load Balancer
     union all
@@ -541,7 +549,7 @@ query "vcn_network_security_group_assoc" {
       oci_core_network_load_balancer,
       jsonb_array_elements_text(network_security_group_ids) as sg
     where
-      sg = $1
+      sg = split_part($1, '/', 1) and tenant_id = split_part($1, '/', 2)
 
   EOQ
 
@@ -559,7 +567,7 @@ query "vcn_network_security_group_ingress_rule" {
       jsonb_array_elements(rules) as r
     where
     r ->> 'direction' = 'INGRESS' and
-      id  = $1 and lifecycle_state <> 'TERMINATED';
+      id  = split_part($1, '/', 1) and tenant_id = split_part($1, '/', 2) and lifecycle_state <> 'TERMINATED';
   EOQ
 }
 
@@ -575,6 +583,6 @@ query "vcn_network_security_group_egress_rule" {
       jsonb_array_elements(rules) as r
     where
       r ->> 'direction' = 'EGRESS' and
-      id  = $1 and lifecycle_state <> 'TERMINATED';
+      id  = split_part($1, '/', 1) and tenant_id = split_part($1, '/', 2) and lifecycle_state <> 'TERMINATED';
   EOQ
 }
