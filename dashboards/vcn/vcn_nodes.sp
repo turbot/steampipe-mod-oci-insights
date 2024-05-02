@@ -160,7 +160,6 @@ node "vcn_network_load_balancer" {
     from
       oci_core_network_load_balancer
       join unnest($1::text[]) as u on id = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
-      id = any($1);
   EOQ
 
   param "vcn_network_load_balancer_ids" {}

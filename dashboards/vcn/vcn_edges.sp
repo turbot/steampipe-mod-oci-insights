@@ -137,8 +137,8 @@ edge "vcn_network_security_group_to_vcn_load_balancer" {
       nid as from_id,
       id as to_id
     from
-      oci_core_load_balancer,
-      jsonb_array_elements_text(network_security_group_ids) as nid
+      oci_core_load_balancer
+      cross join lateral jsonb_array_elements_text(network_security_group_ids) as nid
       join unnest($1::text[]) as u on nid = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
@@ -153,8 +153,8 @@ edge "vcn_network_security_group_to_vcn_network_load_balancer" {
       nid as from_id,
       id as to_id
     from
-      oci_core_network_load_balancer,
-      jsonb_array_elements_text(network_security_group_ids) as nid
+      oci_core_network_load_balancer
+      cross join lateral jsonb_array_elements_text(network_security_group_ids) as nid
       join unnest($1::text[]) as u on nid = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
@@ -169,8 +169,8 @@ edge "vcn_network_security_group_to_vcn_vnic" {
       nid as from_id,
       vnic_id as to_id
     from
-      oci_core_vnic_attachment,
-      jsonb_array_elements_text(nsg_ids) as nid
+      oci_core_vnic_attachment
+      cross join lateral jsonb_array_elements_text(nsg_ids) as nid
       join unnest($1::text[]) as u on nid = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
@@ -245,8 +245,8 @@ edge "vcn_subnet_to_vcn_load_balancer" {
       sid as from_id,
       id as to_id
     from
-      oci_core_load_balancer,
-      jsonb_array_elements_text(subnet_ids) as sid
+      oci_core_load_balancer
+      cross join lateral jsonb_array_elements_text(subnet_ids) as sid
       join unnest($1::text[]) as u on sid = split_part(u, '/', 1) and tenant_id = split_part(u, '/', 2);
   EOQ
 
